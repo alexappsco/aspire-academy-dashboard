@@ -1,0 +1,11 @@
+{
+  "Sidebar": {
+    "home": "Home",
+    "my_orders": "My Orders",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "support": "Support",
+    "invoices": "Invoices",
+    "quotation_requests": "Quotation Requests"
+  }
+}

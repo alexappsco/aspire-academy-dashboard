@@ -1,0 +1,11 @@
+{
+  "Sidebar": {
+    "home": "الرئيسية",
+    "my_orders": "الطلبات التي قدمتها",
+    "profile": "الملف الشخصي",
+    "notifications": "الإشعارات",
+    "support": "الدعم الفني",
+    "invoices": "الفواتير",
+    "quotation_requests": "طلبات عروض الأسعار"
+  }
+}

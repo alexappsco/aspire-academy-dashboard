@@ -1,0 +1,37 @@
+name: Deploy Docker App
+
+on:
+  push:
+    branches:
+      - main  # adjust branch if needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            set -e
+            echo "Whoami: $(whoami)"
+            echo "Starting dir: $(pwd)"
+
+            echo "Navigating to project directory..."
+            cd /var/www/uni-dashboard
+            echo "Now in: $(pwd)"
+            ls -la
+
+            echo "Pulling latest changes..."
+            git pull origin main
+
+            echo "Building and restarting Docker containers..."
+            docker compose down
+            docker compose up -d --build
+
+            echo "✅ Deployment complete."
