@@ -236,7 +236,7 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
       </Card>
 
       {/* Form Buttons */}
-      <Stack direction="row" spacing={2} justifyContent="flex-start">
+      <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-start' }}>
         <Button
           variant="contained"
           onClick={handleSend}

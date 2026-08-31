@@ -42,7 +42,15 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
       }}
     >
       {/* Header with Title and Close Button */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5 }}>
+      <Stack
+        direction="row"
+        sx={{
+          px: 2,
+          py: 1.5,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#1C252E' }}>
           {title}
         </Typography>
