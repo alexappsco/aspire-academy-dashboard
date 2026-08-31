@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -70,7 +70,7 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
       >
         <Grid container spacing={4}>
           {/* English Form Column (placed on left or right based on direction; here we order English/Arabic side by side) */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
@@ -120,7 +120,7 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
           </Grid>
 
           {/* Arabic Form Column */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
@@ -184,7 +184,7 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
       >
         <Grid container spacing={3}>
           {/* Merchants Selection */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
               {t('merchants_label')}
             </Typography>
@@ -209,7 +209,7 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
           </Grid>
 
           {/* Students Selection */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid item xs={12} md={6}>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
               {t('students_label')}
             </Typography>
