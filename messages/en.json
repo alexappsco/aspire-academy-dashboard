@@ -9,5 +9,56 @@
     "support": "Technical Support",
     "settings": "Settings",
     "logout": "Logout"
+  },
+  "Courses": {
+    "title": "Training Courses",
+    "subtitle": "Manage all training courses and educational content",
+    "add_course": "Add Course",
+    "search_placeholder": "Search in courses..",
+    "filter_category": "Category",
+    "filter_price": "Price",
+    "filter_status": "Status",
+    "columns": {
+      "course_name": "Course Name",
+      "lecturer": "Lecturer",
+      "specialty": "Specialty",
+      "students": "Students",
+      "rating": "Rating",
+      "price": "Price",
+      "status": "Status",
+      "last_update": "Last Update"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "categories": {
+      "all": "Category",
+      "cardiology": "Cardiology",
+      "neurology": "Neurology"
+    },
+    "prices": {
+      "all": "Price",
+      "under_200": "Under 200",
+      "above_200": "200 and more"
+    },
+    "statuses": {
+      "all": "Status",
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "Global": {
+    "Sections": {
+      "Table": {
+        "rows_per_page": "Rows per page:",
+        "of": "of",
+        "more_than": "more than"
+      }
+    }
   }
 }
