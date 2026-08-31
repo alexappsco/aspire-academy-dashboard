@@ -60,5 +60,55 @@
         "more_than": "more than"
       }
     }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "send_notification": "Send Notification",
+    "search_placeholder": "Search...",
+    "filter_user": "User",
+    "filter_date": "Date",
+    "columns": {
+      "message_ar": "Notification in Arabic",
+      "message_en": "Notification in English",
+      "user_type": "User Type",
+      "date": "Date"
+    },
+    "user_types": {
+      "all": "User",
+      "student": "Student",
+      "lecturer": "Lecturer",
+      "merchant": "Merchant"
+    },
+    "dates": {
+      "all": "Date",
+      "today": "Today",
+      "this_week": "This Week"
+    },
+    "actions": {
+      "view": "View Details",
+      "delete": "Delete"
+    },
+    "details": {
+      "title": "Request to modify course content",
+      "content_ar": "Content in Arabic",
+      "content_en": "Content in English",
+      "user_type_label": "User Type",
+      "user_label": "User"
+    },
+    "send_form": {
+      "title": "Send Notification",
+      "title_ar_label": "Notification Title in Arabic",
+      "title_ar_placeholder": "Title",
+      "title_en_label": "Notification Title in English",
+      "title_en_placeholder": "Title Notification",
+      "content_ar_label": "Notification Content in Arabic",
+      "content_ar_placeholder": "Content in Arabic",
+      "content_en_label": "Notification Content in English",
+      "content_en_placeholder": "Notification Content English",
+      "students_label": "Students",
+      "merchants_label": "Merchants",
+      "send_btn": "Send",
+      "cancel_btn": "Cancel"
+    }
   }
 }

@@ -60,5 +60,55 @@
         "more_than": "أكثر من"
       }
     }
+  },
+  "Notifications": {
+    "title": "الاشعارات",
+    "send_notification": "ارسال اشعار",
+    "search_placeholder": "بحث...",
+    "filter_user": "المستخدم",
+    "filter_date": "التاريخ",
+    "columns": {
+      "message_ar": "الاشعار بالعربي",
+      "message_en": "الاشعار بالإنجليزي",
+      "user_type": "نوع المستخدم",
+      "date": "التاريخ"
+    },
+    "user_types": {
+      "all": "المستخدم",
+      "student": "طالب",
+      "lecturer": "محاضر",
+      "merchant": "تاجر"
+    },
+    "dates": {
+      "all": "التاريخ",
+      "today": "اليوم",
+      "this_week": "هذا الأسبوع"
+    },
+    "actions": {
+      "view": "عرض التفاصيل",
+      "delete": "حذف"
+    },
+    "details": {
+      "title": "طلب تعديل الدورة",
+      "content_ar": "المحتوى بالعربية",
+      "content_en": "المحتوى بالانجليزية",
+      "user_type_label": "نوع المستخدم",
+      "user_label": "المستخدم"
+    },
+    "send_form": {
+      "title": "ارسال اشعار",
+      "title_ar_label": "عنوان الاشعار بالعربية",
+      "title_ar_placeholder": "العنوان",
+      "title_en_label": "عنوان الاشعار بالانجليزية",
+      "title_en_placeholder": "Title Notification",
+      "content_ar_label": "محتوى الاشعار بالعربية",
+      "content_ar_placeholder": "المحتوى بالعربية",
+      "content_en_label": "محتوى الاشعار بالانجليزية",
+      "content_en_placeholder": "Notification Content English",
+      "students_label": "الطلاب",
+      "merchants_label": "التجار",
+      "send_btn": "ارسال",
+      "cancel_btn": "الغاء"
+    }
   }
 }
