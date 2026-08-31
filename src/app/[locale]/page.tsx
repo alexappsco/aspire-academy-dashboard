@@ -1,5 +1,5 @@
-import CoursesView from 'src/sections/courses/CoursesView';
+import EmptyPage from '@/components/EmptyPage';
 
 export default function Home() {
-  return <CoursesView />;
+  return <EmptyPage tKey="home" />;
 }

@@ -1,12 +1,14 @@
 {
   "Sidebar": {
-    "home": "الدورات التدريبية",
-    "my_orders": "الطلبات التي قدمتها",
-    "profile": "الملف الشخصي",
-    "notifications": "الإشعارات",
+    "home": "الرئيسية",
+    "course_management": "إدارة الدورات التدريبية",
+    "curriculum_management": "إدارة المناهج التعليمية",
+    "booking_management": "إدارة الحجوزات",
+    "finance_payments": "المالية والمدفوعات",
+    "reports_analytics": "التقارير والتحليلات",
     "support": "الدعم الفني",
-    "invoices": "الفواتير",
-    "quotation_requests": "طلبات عروض الأسعار"
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
   },
   "Courses": {
     "title": "الدورات التدريبية",

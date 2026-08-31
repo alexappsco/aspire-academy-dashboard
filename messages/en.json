@@ -1,12 +1,14 @@
 {
   "Sidebar": {
-    "home": "Training Courses",
-    "my_orders": "My Orders",
-    "profile": "Profile",
-    "notifications": "Notifications",
-    "support": "Support",
-    "invoices": "Invoices",
-    "quotation_requests": "Quotation Requests"
+    "home": "Home",
+    "course_management": "Course Management",
+    "curriculum_management": "Curriculum Management",
+    "booking_management": "Booking Management",
+    "finance_payments": "Finance & Payments",
+    "reports_analytics": "Reports & Analytics",
+    "support": "Technical Support",
+    "settings": "Settings",
+    "logout": "Logout"
   },
   "Courses": {
     "title": "Training Courses",
