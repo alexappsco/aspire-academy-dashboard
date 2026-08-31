@@ -1,5 +1,5 @@
-import EmptyPage from "@/components/EmptyPage";
+import NotificationsView from 'src/sections/notifications/NotificationsView';
 
 export default function NotificationsPage() {
-  return <EmptyPage tKey="notifications" />;
+  return <NotificationsView />;
 }
