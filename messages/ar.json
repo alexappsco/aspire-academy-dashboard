@@ -1,11 +1,62 @@
 {
   "Sidebar": {
-    "home": "الرئيسية",
+    "home": "الدورات التدريبية",
     "my_orders": "الطلبات التي قدمتها",
     "profile": "الملف الشخصي",
     "notifications": "الإشعارات",
     "support": "الدعم الفني",
     "invoices": "الفواتير",
     "quotation_requests": "طلبات عروض الأسعار"
+  },
+  "Courses": {
+    "title": "الدورات التدريبية",
+    "subtitle": "إدارة جميع الدورات التدريبية والمحتوى التعليمي",
+    "add_course": "إضافة دورة",
+    "search_placeholder": "البحث في الدورات..",
+    "filter_category": "التصنيف",
+    "filter_price": "السعر",
+    "filter_status": "الحالة",
+    "columns": {
+      "course_name": "اسم الدورة",
+      "lecturer": "المحاضر",
+      "specialty": "التخصص",
+      "students": "الطلاب",
+      "rating": "التقييم",
+      "price": "السعر",
+      "status": "الحالة",
+      "last_update": "آخر تحديث"
+    },
+    "status": {
+      "active": "نشط",
+      "paused": "متوقف"
+    },
+    "categories": {
+      "all": "التصنيف",
+      "cardiology": "أمراض القلب",
+      "neurology": "طب الأعصاب"
+    },
+    "prices": {
+      "all": "السعر",
+      "under_200": "أقل من 200",
+      "above_200": "200 وأكثر"
+    },
+    "statuses": {
+      "all": "الحالة",
+      "active": "نشط",
+      "paused": "متوقف"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    }
+  },
+  "Global": {
+    "Sections": {
+      "Table": {
+        "rows_per_page": "عدد الصفوف في الصفحة:",
+        "of": "من",
+        "more_than": "أكثر من"
+      }
+    }
   }
 }
