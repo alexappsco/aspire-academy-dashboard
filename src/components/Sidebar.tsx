@@ -68,9 +68,24 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
+    key: "notifications",
+    icon: "/icons/mingcute--notification-line.svg",
+    path: "/notifications",
+  },
+  {
     key: "support",
     icon: "/icons/suport.svg",
     path: "/support",
+  },
+  {
+    key: "banners",
+    icon: "/icons/package.svg",
+    path: "/banners",
+  },
+  {
+    key: "common_questions",
+    icon: "/icons/faq.svg",
+    path: "/common-questions",
   },
 ];
 

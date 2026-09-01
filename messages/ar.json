@@ -7,6 +7,9 @@
     "finance_payments": "المالية والمدفوعات",
     "reports_analytics": "التقارير والتحليلات",
     "support": "الدعم الفني",
+    "notifications": "الإشعارات",
+    "banners": "البانرات",
+    "common_questions": "الأسئلة الشائعة",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
@@ -52,7 +55,92 @@
       "delete": "حذف"
     }
   },
+  "Banners": {
+    "title": "البانرات",
+    "add_banner": "إضافة بانر",
+    "search_placeholder": "البحث في البانرات..",
+    "start_date": "تاريخ البداية",
+    "end_date": "تاريخ النهاية",
+    "filter_status": "الحالة",
+    "rows_per_page": "عدد الصفوف في الصفحة:",
+    "columns": {
+      "image": "صورة البانر",
+      "start_date": "تاريخ البداية",
+      "end_date": "تاريخ النهاية",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة بانر",
+      "edit_title": "تعديل بانر",
+      "subtitle": "إرفاق الصورة",
+      "select_image": "اختر الصورة",
+      "drag_drop": "اسحب وأفلت الملفات هنا أو",
+      "browse": "تصفح البيانات",
+      "banner_status": "حالة البانر",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا البانر؟",
+      "delete": "حذف"
+    }
+  },
+  "CommonQuestions": {
+    "title": "الأسئلة الشائعة",
+    "subtitle": "إدارة جميع الأسئلة الشائعة",
+    "add_question": "إضافة سؤال",
+    "search_placeholder": "البحث في الأسئلة..",
+    "columns": {
+      "question": "السؤال",
+      "answer": "الإجابة",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة سؤال شائع",
+      "edit_title": "تعديل سؤال شائع",
+      "question_ar": "السؤال بالعربية",
+      "question_ar_placeholder": "السؤال بالعربية..",
+      "question_en": "السؤال بالإنجليزية",
+      "question_en_placeholder": "السؤال بالإنجليزية..",
+      "answer_ar": "الإجابة بالعربية",
+      "answer_ar_placeholder": "الإجابة بالعربية..",
+      "answer_en": "الإجابة بالإنجليزية",
+      "answer_en_placeholder": "الإجابة بالإنجليزية..",
+      "status": "الحالة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
+      "delete": "حذف"
+    }
+  },
   "Global": {
+    "Label": {
+      "no_data": "لا توجد بيانات"
+    },
     "Sections": {
       "Table": {
         "rows_per_page": "عدد الصفوف في الصفحة:",
@@ -101,5 +189,55 @@
     "details_status": "حالة التذكرة",
     "details_reply": "الرد",
     "close": "إغلاق"
+  },
+  "Notifications": {
+    "title": "الاشعارات",
+    "send_notification": "ارسال اشعار",
+    "search_placeholder": "بحث...",
+    "filter_user": "المستخدم",
+    "filter_date": "التاريخ",
+    "columns": {
+      "message_ar": "الاشعار بالعربي",
+      "message_en": "الاشعار بالإنجليزي",
+      "user_type": "نوع المستخدم",
+      "date": "التاريخ"
+    },
+    "user_types": {
+      "all": "المستخدم",
+      "student": "طالب",
+      "lecturer": "محاضر",
+      "merchant": "تاجر"
+    },
+    "dates": {
+      "all": "التاريخ",
+      "today": "اليوم",
+      "this_week": "هذا الأسبوع"
+    },
+    "actions": {
+      "view": "عرض التفاصيل",
+      "delete": "حذف"
+    },
+    "details": {
+      "title": "طلب تعديل الدورة",
+      "content_ar": "المحتوى بالعربية",
+      "content_en": "المحتوى بالانجليزية",
+      "user_type_label": "نوع المستخدم",
+      "user_label": "المستخدم"
+    },
+    "send_form": {
+      "title": "ارسال اشعار",
+      "title_ar_label": "عنوان الاشعار بالعربية",
+      "title_ar_placeholder": "العنوان",
+      "title_en_label": "عنوان الاشعار بالانجليزية",
+      "title_en_placeholder": "Title Notification",
+      "content_ar_label": "محتوى الاشعار بالعربية",
+      "content_ar_placeholder": "المحتوى بالعربية",
+      "content_en_label": "محتوى الاشعار بالانجليزية",
+      "content_en_placeholder": "Notification Content English",
+      "students_label": "الطلاب",
+      "merchants_label": "التجار",
+      "send_btn": "ارسال",
+      "cancel_btn": "الغاء"
+    }
   }
 }

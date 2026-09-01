@@ -7,6 +7,9 @@
     "finance_payments": "Finance & Payments",
     "reports_analytics": "Reports & Analytics",
     "support": "Technical Support",
+    "notifications": "Notifications",
+    "banners": "Banners",
+    "common_questions": "Common Questions",
     "settings": "Settings",
     "logout": "Logout"
   },
@@ -52,7 +55,92 @@
       "delete": "Delete"
     }
   },
+  "Banners": {
+    "title": "Banners",
+    "add_banner": "Add Banner",
+    "search_placeholder": "Search in banners..",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "filter_status": "Status",
+    "rows_per_page": "Rows per page:",
+    "columns": {
+      "image": "Banner Image",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Banner",
+      "edit_title": "Edit Banner",
+      "subtitle": "Attach the image",
+      "select_image": "Select Image",
+      "drag_drop": "Drag and drop files here or",
+      "browse": "browse",
+      "banner_status": "Banner Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this banner?",
+      "delete": "Delete"
+    }
+  },
+  "CommonQuestions": {
+    "title": "Common Questions",
+    "subtitle": "Manage all frequently asked questions",
+    "add_question": "Add Question",
+    "search_placeholder": "Search in questions..",
+    "columns": {
+      "question": "Question",
+      "answer": "Answer",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Common Question",
+      "edit_title": "Edit Common Question",
+      "question_ar": "Question (Arabic)",
+      "question_ar_placeholder": "Question in Arabic..",
+      "question_en": "Question (English)",
+      "question_en_placeholder": "Question in English..",
+      "answer_ar": "Answer (Arabic)",
+      "answer_ar_placeholder": "Answer in Arabic..",
+      "answer_en": "Answer (English)",
+      "answer_en_placeholder": "Answer in English..",
+      "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete?",
+      "delete": "Delete"
+    }
+  },
   "Global": {
+    "Label": {
+      "no_data": "No data found"
+    },
     "Sections": {
       "Table": {
         "rows_per_page": "Rows per page:",
@@ -101,5 +189,55 @@
     "details_status": "Ticket Status",
     "details_reply": "Reply",
     "close": "Close"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "send_notification": "Send Notification",
+    "search_placeholder": "Search...",
+    "filter_user": "User",
+    "filter_date": "Date",
+    "columns": {
+      "message_ar": "Notification in Arabic",
+      "message_en": "Notification in English",
+      "user_type": "User Type",
+      "date": "Date"
+    },
+    "user_types": {
+      "all": "User",
+      "student": "Student",
+      "lecturer": "Lecturer",
+      "merchant": "Merchant"
+    },
+    "dates": {
+      "all": "Date",
+      "today": "Today",
+      "this_week": "This Week"
+    },
+    "actions": {
+      "view": "View Details",
+      "delete": "Delete"
+    },
+    "details": {
+      "title": "Request to modify course content",
+      "content_ar": "Content in Arabic",
+      "content_en": "Content in English",
+      "user_type_label": "User Type",
+      "user_label": "User"
+    },
+    "send_form": {
+      "title": "Send Notification",
+      "title_ar_label": "Notification Title in Arabic",
+      "title_ar_placeholder": "Title",
+      "title_en_label": "Notification Title in English",
+      "title_en_placeholder": "Title Notification",
+      "content_ar_label": "Notification Content in Arabic",
+      "content_ar_placeholder": "Content in Arabic",
+      "content_en_label": "Notification Content in English",
+      "content_en_placeholder": "Notification Content English",
+      "students_label": "Students",
+      "merchants_label": "Merchants",
+      "send_btn": "Send",
+      "cancel_btn": "Cancel"
+    }
   }
 }
