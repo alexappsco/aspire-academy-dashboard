@@ -77,6 +77,16 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/suport.svg",
     path: "/support",
   },
+  {
+    key: "banners",
+    icon: "/icons/package.svg",
+    path: "/banners",
+  },
+  {
+    key: "common_questions",
+    icon: "/icons/faq.svg",
+    path: "/common-questions",
+  },
 ];
 
 const bottomItems: SidebarItem[] = [
