@@ -285,22 +285,35 @@
       "delete": "حذف"
     },
     "dialog": {
-      "add_title": "إضافة مجال",
-      "edit_title": "تعديل مجال",
-      "subtitle": "إرفاق الصورة",
-      "select_image": "اختر الصورة",
-      "drag_drop": "اسحب وأفلت الملفات هنا أو",
-      "browse": "تصفح البيانات",
-      "name_ar": "الاسم بالعربية",
-      "name_ar_placeholder": "الاسم بالعربية..",
-      "name_en": "الاسم بالإنجليزية",
-      "name_en_placeholder": "الاسم بالإنجليزية..",
-      "order": "الترتيب",
+      "add_title": "إضافة كود خصم",
+      "edit_title": "تعديل كود خصم",
+      "code": "الكود",
+      "code_placeholder": "أدخل الكود...",
+      "type": "نوع الكود",
+      "value": "القيمة",
+      "value_placeholder": "أدخل القيمة...",
+      "maxUsage": "الحد الأقصى للاستخدام",
+      "maxUsage_placeholder": "أدخل الحد الأقصى...",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
       "status": "الحالة",
       "save": "حفظ",
       "cancel": "إلغاء",
-      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا المجال؟",
-      "delete": "حذف"
+      "add_btn": "إضافة",
+      "save_btn": "حفظ",
+      "cancel_btn": "إلغاء"
+    },
+    "delete_dialog": {
+      "title": "حذف كود خصم",
+      "message": "هل أنت متأكد أنك تريد حذف كود الخصم هذا؟ هذا الإجراء لا يمكن التراجع عنه.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
+    },
+    "messages": {
+      "add_success": "تمت إضافة كود الخصم بنجاح",
+      "edit_success": "تم تعديل كود الخصم بنجاح",
+      "delete_success": "تم حذف كود الخصم بنجاح",
+      "status_updated": "تم تحديث حالة كود الخصم بنجاح"
     }
   },
   "Universities": {

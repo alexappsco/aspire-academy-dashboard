@@ -285,22 +285,35 @@
       "delete": "Delete"
     },
     "dialog": {
-      "add_title": "Add Category",
-      "edit_title": "Edit Category",
-      "subtitle": "Attach the image",
-      "select_image": "Select Image",
-      "drag_drop": "Drag and drop files here or",
-      "browse": "browse",
-      "name_ar": "Name (Arabic)",
-      "name_ar_placeholder": "Name in Arabic..",
-      "name_en": "Name (English)",
-      "name_en_placeholder": "Name in English..",
-      "order": "Order",
+      "add_title": "Add Discount Code",
+      "edit_title": "Edit Discount Code",
+      "code": "Code",
+      "code_placeholder": "Enter code...",
+      "type": "Code Type",
+      "value": "Value",
+      "value_placeholder": "Enter value...",
+      "maxUsage": "Max Usage",
+      "maxUsage_placeholder": "Enter max usage...",
+      "startDate": "Start Date",
+      "endDate": "End Date",
       "status": "Status",
       "save": "Save",
       "cancel": "Cancel",
-      "delete_confirm": "Are you sure you want to delete this category?",
-      "delete": "Delete"
+      "add_btn": "Add",
+      "save_btn": "Save",
+      "cancel_btn": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete Discount Code",
+      "message": "Are you sure you want to delete this discount code? This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
+    },
+    "messages": {
+      "add_success": "Discount code added successfully",
+      "edit_success": "Discount code updated successfully",
+      "delete_success": "Discount code deleted successfully",
+      "status_updated": "Discount code status updated successfully"
     }
   },
   "Universities": {
