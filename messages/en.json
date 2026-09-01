@@ -16,6 +16,7 @@
     "academic_hierarchy": "Academic Structure",
     "subjects": "Subjects",
     "countries": "Countries",
+    "discount_codes": "Discount Codes",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
     "settings": "Settings",
@@ -61,6 +62,67 @@
     "actions": {
       "edit": "Edit",
       "delete": "Delete"
+    }
+  },
+  "CreateCourse": {
+    "title": "Add New Course",
+    "subtitle": "Create a new educational course by adding its basic information.",
+    "breadcrumb_courses": "Training Courses",
+    "breadcrumb_add": "Add New Course",
+    "stepper": {
+      "basic_info": "Basic Information",
+      "add_chapters": "Add Chapters"
+    },
+    "basic_info": {
+      "card_title": "Course Information",
+      "name_label": "Course Name",
+      "name_placeholder": "Enter course title",
+      "price_label": "Course Price",
+      "price_placeholder": "Enter course price",
+      "lecturer_label": "Lecturer",
+      "lecturer_placeholder": "Select lecturer...",
+      "college_label": "College",
+      "college_placeholder": "Select college",
+      "subject_label": "Subject",
+      "subject_placeholder": "Select subject...",
+      "specialty_label": "Specialization",
+      "specialty_placeholder": "Select specialization...",
+      "category_label": "Category",
+      "category_placeholder": "Select category...",
+      "field_label": "Field",
+      "field_placeholder": "Select field...",
+      "description_label": "Course Description",
+      "description_placeholder": "Write a detailed description for the course..."
+    },
+    "media": {
+      "card_title": "Course Media",
+      "thumbnail_label": "Course Thumbnail",
+      "thumbnail_recommended": "Recommended size: 300 × 200 px",
+      "cover_label": "Course Cover",
+      "cover_recommended": "Recommended size: 1200 × 600 px",
+      "drag_drop_browse": "Drag and drop image here or browse"
+    },
+    "chapters": {
+      "card_title": "Course Information",
+      "add_chapter_box_title": "Add New Chapter",
+      "chapter_title_placeholder": "Chapter title (e.g. Chapter 1 - Introduction)",
+      "add_chapter_btn": "Add Chapter",
+      "lesson_title_placeholder": "Lesson title",
+      "add_lesson_btn": "Add Lesson",
+      "lessons_count": "{count} lessons",
+      "video_uploaded": "Video uploaded",
+      "upload_video": "Upload Video"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "save_draft": "Save as Draft",
+      "continue": "Continue",
+      "create_course": "Create Course"
+    },
+    "messages": {
+      "draft_saved": "Course saved as draft successfully",
+      "course_created": "Course created successfully",
+      "validation_required": "Please fill in the required fields"
     }
   },
   "Banners": {
@@ -163,6 +225,32 @@
     },
     "statuses": {
       "all": "All",
+  "DiscountCodes": {
+    "title": "Discount Codes",
+    "add_code": "Add New Code",
+    "search_placeholder": "Search...",
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "filters": {
+      "status_all": "Status",
+      "type_all": "Discount Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed Amount"
+    },
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maxUsage": "Max Usage",
+      "usedCount": "Times Used",
+      "status": "Status"
+    },
+    "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -333,6 +421,33 @@
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete this subject?",
       "delete": "Delete"
+      "add_title": "Add Discount Code",
+      "edit_title": "Edit Discount Code",
+      "code": "Code",
+      "code_placeholder": "Enter code...",
+      "type": "Code Type",
+      "value": "Value",
+      "value_placeholder": "Enter value...",
+      "maxUsage": "Max Usage",
+      "maxUsage_placeholder": "Enter max usage...",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "add_btn": "Add",
+      "save_btn": "Save",
+      "cancel_btn": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Are you sure you want to delete?",
+      "message": "This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
+    },
+    "messages": {
+      "add_success": "Discount code added successfully",
+      "edit_success": "Discount code updated successfully",
+      "delete_success": "Discount code deleted successfully",
+      "status_updated": "Discount code status updated successfully"
     }
   },
   "Global": {

@@ -16,6 +16,7 @@
     "academic_hierarchy": "الهيكل الأكاديمي",
     "subjects": "المواد",
     "countries": "الدول",
+    "discount_codes": "أكواد الخصم",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
     "settings": "الإعدادات",
@@ -61,6 +62,67 @@
     "actions": {
       "edit": "تعديل",
       "delete": "حذف"
+    }
+  },
+  "CreateCourse": {
+    "title": "إضافة كورس جديد",
+    "subtitle": "قم بإنشاء كورس تعليمي جديد عن طريق إضافة معلوماته الأساسية.",
+    "breadcrumb_courses": "الدورات التدريبية",
+    "breadcrumb_add": "إضافة كورس جديد",
+    "stepper": {
+      "basic_info": "المعلومات الأساسية",
+      "add_chapters": "إضافة الفصول"
+    },
+    "basic_info": {
+      "card_title": "معلومات الكورس",
+      "name_label": "اسم الكورس",
+      "name_placeholder": "أدخل عنوان الكورس",
+      "price_label": "سعر الكورس",
+      "price_placeholder": "أدخل سعر الكورس",
+      "lecturer_label": "المحاضر",
+      "lecturer_placeholder": "اختر المحاضر...",
+      "college_label": "الكلية",
+      "college_placeholder": "اختر الكلية",
+      "subject_label": "المادة الدراسية",
+      "subject_placeholder": "اختر المادة الدراسية...",
+      "specialty_label": "التخصص",
+      "specialty_placeholder": "اختر التخصص...",
+      "category_label": "التصنيف",
+      "category_placeholder": "اختر التصنيف...",
+      "field_label": "المجال",
+      "field_placeholder": "اختر المجال...",
+      "description_label": "وصف الكورس",
+      "description_placeholder": "اكتب وصفاً تفصيلياً للكورس..."
+    },
+    "media": {
+      "card_title": "وسائط الكورس",
+      "thumbnail_label": "صورة مصغرة للكورس",
+      "thumbnail_recommended": "المقاس الموصى به: 300 × 200 بكسل",
+      "cover_label": "غلاف الكورس",
+      "cover_recommended": "المقاس الموصى به: 1200 × 600 بكسل",
+      "drag_drop_browse": "اسحب وأفلت الصورة هنا أوتصفح"
+    },
+    "chapters": {
+      "card_title": "معلومات الكورس",
+      "add_chapter_box_title": "إضافة فصل جديد",
+      "chapter_title_placeholder": "عنوان الفصل (مثال : الفصل الأول - مقدمة)",
+      "add_chapter_btn": "إضافة فصل",
+      "lesson_title_placeholder": "عنوان الدرس",
+      "add_lesson_btn": "إضافة درس",
+      "lessons_count": "{count} دروس",
+      "video_uploaded": "تم رفع الفيديو",
+      "upload_video": "رفع فيديو"
+    },
+    "actions": {
+      "cancel": "إلغاء",
+      "save_draft": "حفظ كمسودة",
+      "continue": "متابعة",
+      "create_course": "انشاء كورس"
+    },
+    "messages": {
+      "draft_saved": "تم حفظ الكورس كمسودة بنجاح",
+      "course_created": "تم إنشاء الكورس بنجاح",
+      "validation_required": "يرجى تعبئة الحقول المطلوبة"
     }
   },
   "Banners": {
@@ -163,6 +225,32 @@
     },
     "statuses": {
       "all": "الكل",
+  "DiscountCodes": {
+    "title": "أكواد الخصم",
+    "add_code": "إضافة كود جديد",
+    "search_placeholder": "بحث...",
+    "tabs": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "filters": {
+      "status_all": "الحالة",
+      "type_all": "نوع الخصم",
+      "percentage": "نسبة مئوية",
+      "fixed": "مبلغ ثابت"
+    },
+    "columns": {
+      "code": "الكود",
+      "type": "النوع",
+      "value": "القيمة",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ الانتهاء",
+      "maxUsage": "الحد الأقصى للاستخدام",
+      "usedCount": "عدد مرات الاستخدام",
+      "status": "الحالة"
+    },
+    "status": {
       "active": "مفعل",
       "inactive": "غير مفعل"
     },
@@ -333,13 +421,39 @@
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا الموضوع؟",
       "delete": "حذف"
+      "add_title": "إضافة كود خصم",
+      "edit_title": "تعديل كود خصم",
+      "code": "الكود",
+      "code_placeholder": "أدخل الكود...",
+      "type": "نوع الكود",
+      "value": "القيمة",
+      "value_placeholder": "أدخل القيمة...",
+      "maxUsage": "الحد الأقصى للاستخدام",
+      "maxUsage_placeholder": "أدخل الحد الأقصى...",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "status": "الحالة",
+      "add_btn": "إضافة",
+      "save_btn": "حفظ",
+      "cancel_btn": "إلغاء"
+    },
+    "delete_dialog": {
+      "title": "هل أنت متأكد أنك تريد الحذف؟",
+      "message": "هذا الإجراء لا يمكن التراجع عنه.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
+    },
+    "messages": {
+      "add_success": "تمت إضافة كود الخصم بنجاح",
+      "edit_success": "تم تعديل كود الخصم بنجاح",
+      "delete_success": "تم حذف كود الخصم بنجاح",
+      "status_updated": "تم تحديث حالة كود الخصم بنجاح"
     }
   },
   "Global": {
     "Label": {
       "no_data": "لا توجد بيانات"
-    },
-    "Sections": {
+    },    "Sections": {
       "Table": {
         "rows_per_page": "عدد الصفوف في الصفحة:",
         "of": "من",

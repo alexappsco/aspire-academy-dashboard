@@ -33,6 +33,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const currentLocaleSetting = localesSettings[locale as LocaleType];
 
   const [langAnchorEl, setLangAnchorEl] = useState<HTMLElement | null>(null);
+  const [avatarAnchorEl, setAvatarAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleLangOpen = (e: React.MouseEvent<HTMLElement>) => {
     setLangAnchorEl(e.currentTarget);
@@ -40,6 +41,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   const handleLangClose = () => {
     setLangAnchorEl(null);
+  };
+
+  const handleAvatarOpen = (e: React.MouseEvent<HTMLElement>) => {
+    setAvatarAnchorEl(e.currentTarget);
+  };
+
+  const handleAvatarClose = () => {
+    setAvatarAnchorEl(null);
+  };
+
+  const handleLogin = () => {
+    handleAvatarClose();
+    router.push("/auth/login");
   };
 
   const changeLanguage = (newLocale: string) => {
@@ -115,7 +129,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
             sx={{ bgcolor: "rgba(0,0,0,0.12)", my: 0.75 }}
           />
 
-          <Avatar sx={{ width: 36, height: 36, bgcolor: "#1B8354" }}>
+          <Avatar
+            sx={{ width: 36, height: 36, bgcolor: "#1B8354", cursor: "pointer" }}
+            onClick={handleAvatarOpen}
+          >
             <PersonIcon />
           </Avatar>
         </Box>
@@ -150,6 +167,31 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <ListItemText>{loc.label}</ListItemText>
           </MenuItem>
         ))}
+      </Menu>
+
+      <Menu
+        anchorEl={avatarAnchorEl}
+        open={Boolean(avatarAnchorEl)}
+        onClose={handleAvatarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+        slotProps={{
+          paper: {
+            sx: {
+              mt: 1,
+              minWidth: 160,
+              borderRadius: "12px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={handleLogin}>
+          <ListItemIcon sx={{ minWidth: 36 }}>
+            <Iconify icon="solar:login-2-outline" width={20} />
+          </ListItemIcon>
+          <ListItemText>تسجيل الدخول</ListItemText>
+        </MenuItem>
       </Menu>
     </AppBar>
   );
