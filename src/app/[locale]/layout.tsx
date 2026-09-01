@@ -5,7 +5,6 @@ import ThemeProvider from "src/theme";
 import { SettingsProvider } from "src/components/settings";
 import { ToastProvider } from "src/components/toast";
 import { getMessages } from "next-intl/server";
-import DashboardLayout from "src/layouts/DashboardLayout";
 import { localesSettings } from "src/i18n/config-locale";
 import type { LocaleType } from "src/i18n/config-locale";
 import { notFound } from "next/navigation";
@@ -65,7 +64,7 @@ export default async function LocaleLayout({
             <ToastProvider>
               <NextIntlClientProvider messages={messages}>
                 <AuthProvider>
-                  <DashboardLayout>{children}</DashboardLayout>
+                  {children}
                 </AuthProvider>
               </NextIntlClientProvider>
             </ToastProvider>

@@ -60,5 +60,46 @@
         "more_than": "more than"
       }
     }
+  },
+  "Login": {
+    "title": "Sign In",
+    "password_placeholder": "Password",
+    "forgot_password": "Forgot your password?",
+    "invalid_credentials": "Incorrect username or password",
+    "missing_token": "Token not found in response",
+    "login_success": "Signed in successfully",
+    "generic_error": "Something went wrong",
+    "processing": "Processing...",
+    "login": "Sign In",
+    "or": "or",
+    "create_account": "Create New Account",
+    "transition_success": "Signed in successfully"
+  },
+  "Support": {
+    "title": "Technical Support",
+    "send_ticket": "Send Ticket",
+    "search_placeholder": "Search tickets..",
+    "all": "All",
+    "replied": "Replied",
+    "pending": "Pending",
+    "view": "View",
+    "create_title": "Create New Ticket",
+    "create_complaint_title": "Complaint Title",
+    "create_complaint_placeholder": "Enter ticket title",
+    "create_description": "Issue Description",
+    "create_description_placeholder": "Describe the issue in detail...",
+    "send": "Send",
+    "sending": "Sending...",
+    "create_success": "Ticket sent successfully",
+    "error_create": "An error occurred while creating the ticket",
+    "error_fetch": "An error occurred while loading the ticket",
+    "error_unexpected": "An unexpected error occurred",
+    "details_title": "Ticket Details",
+    "details_ticket_number": "Ticket Number",
+    "details_complaint_title": "Complaint Title",
+    "details_description": "Issue Description",
+    "details_status": "Ticket Status",
+    "details_reply": "Reply",
+    "close": "Close"
   }
 }

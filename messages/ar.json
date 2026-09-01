@@ -60,5 +60,46 @@
         "more_than": "أكثر من"
       }
     }
+  },
+  "Login": {
+    "title": "تسجيل الدخول",
+    "password_placeholder": "كلمة المرور",
+    "forgot_password": "نسيت كلمة المرور؟",
+    "invalid_credentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
+    "missing_token": "توكن غير موجود في الاستجابة",
+    "login_success": "تم تسجيل الدخول بنجاح",
+    "generic_error": "حدث خطأ",
+    "processing": "جاري المعالجة...",
+    "login": "تسجيل الدخول",
+    "or": "أو",
+    "create_account": "إنشاء حساب جديد",
+    "transition_success": "تم تسجيل الدخول بنجاح"
+  },
+  "Support": {
+    "title": "الدعم الفني",
+    "send_ticket": "إرسال تذكرة",
+    "search_placeholder": "البحث في التذاكر..",
+    "all": "الكل",
+    "replied": "تم الرد",
+    "pending": "قيد المراجعة",
+    "view": "عرض",
+    "create_title": "إنشاء تذكرة جديدة",
+    "create_complaint_title": "عنوان الشكوى",
+    "create_complaint_placeholder": "أدخل عنوان التذكرة",
+    "create_description": "وصف المشكلة",
+    "create_description_placeholder": "اشرح المشكلة بالتفصيل...",
+    "send": "إرسال",
+    "sending": "جاري الإرسال...",
+    "create_success": "تم إرسال التذكرة بنجاح",
+    "error_create": "حدث خطأ أثناء إنشاء التذكرة",
+    "error_fetch": "حدث خطأ أثناء تحميل التذكرة",
+    "error_unexpected": "حدث خطأ غير متوقع",
+    "details_title": "تفاصيل التذكرة",
+    "details_ticket_number": "رقم التذكرة",
+    "details_complaint_title": "عنوان الشكوى",
+    "details_description": "وصف المشكلة",
+    "details_status": "حالة التذكرة",
+    "details_reply": "الرد",
+    "close": "إغلاق"
   }
 }
