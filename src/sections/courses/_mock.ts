@@ -196,3 +196,68 @@ export const MOCK_COURSES: Course[] = [
     lastUpdate_en: '10 August 2026',
   },
 ];
+
+export const MOCK_LECTURERS = [
+  { value: 'ahmed_mahmoud', label_ar: 'د. أحمد محمود', label_en: 'Dr. Ahmed Mahmoud' },
+  { value: 'sara_khalil', label_ar: 'د. سارة خليل', label_en: 'Dr. Sara Khalil' },
+  { value: 'khaled_otaibi', label_ar: 'د. خالد العتيبي', label_en: 'Dr. Khaled Al-Otaibi' },
+  { value: 'mohamed_ali', label_ar: 'د. محمد علي', label_en: 'Dr. Mohamed Ali' },
+  { value: 'fatima_zahra', label_ar: 'د. فاطمة الزهراء', label_en: 'Dr. Fatima Zahra' },
+];
+
+export const MOCK_COLLEGES = [
+  { value: 'medicine', label_ar: 'كلية الطب البشري', label_en: 'Faculty of Medicine' },
+  { value: 'pharmacy', label_ar: 'كلية الصيدلة', label_en: 'Faculty of Pharmacy' },
+  { value: 'dentistry', label_ar: 'كلية طب الأسنان', label_en: 'Faculty of Dentistry' },
+  { value: 'nursing', label_ar: 'كلية التمريض', label_en: 'Faculty of Nursing' },
+];
+
+export const MOCK_SUBJECTS = [
+  { value: 'anatomy', label_ar: 'علم التشريح', label_en: 'Anatomy' },
+  { value: 'physiology', label_ar: 'علم وظائف الأعضاء', label_en: 'Physiology' },
+  { value: 'pathology', label_ar: 'علم الأمراض', label_en: 'Pathology' },
+  { value: 'pharmacology', label_ar: 'علم الأدوية', label_en: 'Pharmacology' },
+];
+
+export const MOCK_SPECIALTIES = [
+  { value: 'cardiology', label_ar: 'أمراض القلب', label_en: 'Cardiology' },
+  { value: 'neurology', label_ar: 'طب الأعصاب', label_en: 'Neurology' },
+  { value: 'surgery', label_ar: 'الجراحة العامة', label_en: 'General Surgery' },
+  { value: 'pediatrics', label_ar: 'طب الأطفال', label_en: 'Pediatrics' },
+];
+
+export const MOCK_CATEGORIES = [
+  { value: 'clinical', label_ar: 'علوم سريرية', label_en: 'Clinical Sciences' },
+  { value: 'basic', label_ar: 'علوم أساسية', label_en: 'Basic Sciences' },
+  { value: 'practical', label_ar: 'تدريب عملي', label_en: 'Practical Training' },
+];
+
+export const MOCK_FIELDS = [
+  { value: 'medical', label_ar: 'المجال الطبي', label_en: 'Medical Field' },
+  { value: 'health', label_ar: 'الرعاية الصحية', label_en: 'Healthcare' },
+  { value: 'research', label_ar: 'الأبحاث الطبية', label_en: 'Medical Research' },
+];
+
+export const INITIAL_CHAPTERS = [
+  {
+    id: 'ch-1',
+    title: 'الفصل الأول - مقدمة',
+    isExpanded: true,
+    lessons: [
+      { id: 'les-1', title: 'الدرس الأول', hasVideo: true, videoName: 'intro_part1.mp4' },
+      { id: 'les-2', title: 'الدرس الثاني', hasVideo: true, videoName: 'intro_part2.mp4' },
+      { id: 'les-3', title: 'الدرس الثالث', hasVideo: false },
+    ],
+  },
+  {
+    id: 'ch-2',
+    title: 'الفصل الأول - أساسيات',
+    isExpanded: false,
+    lessons: [
+      { id: 'les-4', title: 'الدرس الأول', hasVideo: true, videoName: 'basics_1.mp4' },
+      { id: 'les-5', title: 'الدرس الثاني', hasVideo: true, videoName: 'basics_2.mp4' },
+      { id: 'les-6', title: 'الدرس الثالث', hasVideo: true, videoName: 'basics_3.mp4' },
+    ],
+  },
+];
+
