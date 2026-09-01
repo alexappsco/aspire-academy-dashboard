@@ -2,9 +2,8 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
@@ -68,7 +67,7 @@ export default function RichTextEditor({
     }
   };
 
-  const handleFontChange = (e: any) => {
+  const handleFontChange = (e: SelectChangeEvent<string>) => {
     const font = e.target.value;
     setFontFamily(font);
     if (font !== 'Font') {
@@ -76,7 +75,7 @@ export default function RichTextEditor({
     }
   };
 
-  const handleFontSizeChange = (e: any) => {
+  const handleFontSizeChange = (e: SelectChangeEvent<string>) => {
     const size = e.target.value;
     setFontSize(size);
     // HTML font sizes map 1-7
@@ -92,7 +91,7 @@ export default function RichTextEditor({
     executeCommand('fontSize', sizeMap[size] || '3');
   };
 
-  const handleFormatBlockChange = (e: any) => {
+  const handleFormatBlockChange = (e: SelectChangeEvent<string>) => {
     const format = e.target.value;
     setFormatBlock(format);
     if (format === 'Normal') {
