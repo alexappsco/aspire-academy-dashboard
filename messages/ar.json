@@ -208,6 +208,13 @@
     "english_text": "النص بالانجليزي",
     "save_success": "تم حفظ التغييرات بنجاح"
   },
+  "TermsConditions": {
+    "title": "الشروط والأحكام",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
+  },
   "AboutUs": {
     "title": "من نحن",
     "save_changes": "حفظ التغييرات",

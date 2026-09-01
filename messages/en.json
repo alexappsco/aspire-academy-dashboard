@@ -208,6 +208,13 @@
     "english_text": "English Text",
     "save_success": "Changes saved successfully"
   },
+  "TermsConditions": {
+    "title": "Terms & Conditions",
+    "save_changes": "Save Changes",
+    "arabic_text": "Arabic Text",
+    "english_text": "English Text",
+    "save_success": "Changes saved successfully"
+  },
   "AboutUs": {
     "title": "About Us",
     "save_changes": "Save Changes",

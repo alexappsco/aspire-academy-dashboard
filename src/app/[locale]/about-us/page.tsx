@@ -1,11 +1,5 @@
-import ContentEditorView from 'src/sections/content-pages/content-editor-view';
-import { MOCK_ABOUT_CONTENT } from 'src/sections/content-pages/_mock';
+import ContentPageView from '@/sections/ContentPages/ContentPageView';
 
 export default function AboutUsPage() {
-  return (
-    <ContentEditorView
-      translationNamespace="AboutUs"
-      initialData={MOCK_ABOUT_CONTENT}
-    />
-  );
+  return <ContentPageView namespace="AboutUs" />;
 }
