@@ -9,6 +9,10 @@ export const MOCK_TICKETS: SupportTicket[] = [
     description: 'لا أستطيع تسجيل الدخول إلى حسابي رغم إدخال البيانات الصحيحة، وتظهر لي رسالة خطأ غير واضحة.',
     status: 'pending',
     reply: null,
+    senderName: 'على محمود',
+    senderType: 'طالب',
+    senderPhone: '+96513325599',
+    senderEmail: 'Ali@gmail.com',
   },
   {
     id: '2',

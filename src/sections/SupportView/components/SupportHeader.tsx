@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 type SupportHeaderProps = {
-  onCreateClick: () => void;
+  onCreateClick?: () => void;
   canAdd?: boolean;
 };
 

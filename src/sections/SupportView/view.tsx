@@ -1,32 +1,26 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Box, Card, Chip } from '@mui/material';
+import { Box, Card, Chip, IconButton } from '@mui/material';
 import { useTranslations, useLocale } from 'next-intl';
-import { useToast } from 'src/components/toast';
+import { useRouter } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
 import SimpleTable from 'src/components/SimpleTable';
-import CreateTicketDialog from './components/CreateTicketDialog';
 import SupportHeader from './components/SupportHeader';
 import SupportSearchBar from './components/SupportSearchBar';
 import SupportStatusTabs from './components/SupportStatusTabs';
-import TicketDetailsDialog from './components/TicketDetailsDialog';
 import { STATUS_STYLES, TABLE_HEAD, DEFAULT_PAGE_SIZE } from './constants';
 import { MOCK_TICKETS } from './_mock';
 import type { StatusFilter, SupportTicket } from './types';
 
 export default function SupportView() {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations("Support");
-  const { success } = useToast();
 
-  const [tickets, setTickets] = useState<SupportTicket[]>(MOCK_TICKETS);
+  const [tickets] = useState<SupportTicket[]>(MOCK_TICKETS);
   const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [complaintTitle, setComplaintTitle] = useState('');
-  const [complaintDescription, setComplaintDescription] = useState('');
 
   const filteredTickets = useMemo(() => {
     const query = searchInput.trim().toLowerCase();
@@ -87,48 +81,6 @@ export default function SupportView() {
     setSearchInput(value);
   };
 
-  const handleOpenViewDialog = (ticket: SupportTicket) => {
-    setSelectedTicket(ticket);
-  };
-
-  const handleCloseViewDialog = () => {
-    setSelectedTicket(null);
-  };
-
-  const handleCloseCreateDialog = () => {
-    setOpenCreateDialog(false);
-    setComplaintTitle('');
-    setComplaintDescription('');
-  };
-
-  const handleSubmitTicket = () => {
-    if (!complaintTitle.trim() || !complaintDescription.trim()) {
-      return;
-    }
-
-    const newTicket: SupportTicket = {
-      id: String(Date.now()),
-      ticketNumber: String(1000 + tickets.length + 1),
-      requestDate: new Date().toISOString().split('T')[0],
-      title: complaintTitle.trim(),
-      description: complaintDescription.trim(),
-      status: 'pending',
-      reply: null,
-    };
-
-    setTickets((prev) => [newTicket, ...prev]);
-    handleCloseCreateDialog();
-    success(t("create_success"));
-  };
-
-  const actions = [
-    {
-      label: t("view"),
-      icon: <Iconify icon="solar:eye-bold" />,
-      onClick: (row: SupportTicket) => handleOpenViewDialog(row),
-    },
-  ];
-
   const customRender = {
     status: (row: SupportTicket) => {
       const status = STATUS_STYLES[row.status];
@@ -149,9 +101,41 @@ export default function SupportView() {
     },
   };
 
+  const tableHead = useMemo(
+    () => [
+      ...TABLE_HEAD,
+      {
+        id: 'view',
+        label: '',
+        // align: 'center',
+        width: 80,
+        renderCell: (row: SupportTicket) => (
+          <IconButton
+            aria-label={t("view")}
+            onClick={() => router.push(`/support/${row.id}`)}
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: '10px',
+              color: '#475569',
+              align: 'start',
+              '&:hover': {
+                bgcolor: '#F1F5F9',
+                color: '#1E293B',
+              },
+            }}
+          >
+            <Iconify icon="solar:eye-outline" width={22} />
+          </IconButton>
+        ),
+      },
+    ],
+    [router, t]
+  );
+
   return (
     <Box sx={{ textAlign: locale === 'ar' ? 'right' : 'left' }}>
-      <SupportHeader onCreateClick={() => setOpenCreateDialog(true)} />
+      <SupportHeader canAdd={false} />
 
       <Card
         sx={{
@@ -172,30 +156,11 @@ export default function SupportView() {
 
         <SimpleTable<SupportTicket>
           data={filteredTickets}
-          headCells={TABLE_HEAD}
-          actions={actions}
-          actionsHeaderLabel=""
+          headCells={tableHead}
           customRender={customRender}
           hidePagination={filteredTickets.length <= DEFAULT_PAGE_SIZE}
         />
       </Card>
-
-      <TicketDetailsDialog
-        open={Boolean(selectedTicket)}
-        ticket={selectedTicket}
-        onClose={handleCloseViewDialog}
-      />
-
-      <CreateTicketDialog
-        open={openCreateDialog}
-        title={complaintTitle}
-        description={complaintDescription}
-        submitting={false}
-        onTitleChange={setComplaintTitle}
-        onDescriptionChange={setComplaintDescription}
-        onClose={handleCloseCreateDialog}
-        onSubmit={handleSubmitTicket}
-      />
     </Box>
   );
 }

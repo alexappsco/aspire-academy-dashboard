@@ -21,6 +21,10 @@ export type SupportTicket = {
   description: string;
   status: SupportTicketStatus;
   reply: string | null;
+  senderName?: string;
+  senderType?: string;
+  senderPhone?: string;
+  senderEmail?: string;
 };
 
 export type SupportTicketFilters = {
