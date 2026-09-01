@@ -11,6 +11,7 @@
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
     "countries": "الدول",
+    "discount_codes": "أكواد الخصم",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
     "settings": "الإعدادات",
@@ -140,11 +141,73 @@
       "delete": "حذف"
     }
   },
+  "DiscountCodes": {
+    "title": "أكواد الخصم",
+    "add_code": "إضافة كود جديد",
+    "search_placeholder": "بحث...",
+    "tabs": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "filters": {
+      "status_all": "الحالة",
+      "type_all": "نوع الخصم",
+      "percentage": "نسبة مئوية",
+      "fixed": "مبلغ ثابت"
+    },
+    "columns": {
+      "code": "الكود",
+      "type": "النوع",
+      "value": "القيمة",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ الانتهاء",
+      "maxUsage": "الحد الأقصى للاستخدام",
+      "usedCount": "عدد مرات الاستخدام",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة كود خصم",
+      "edit_title": "تعديل كود خصم",
+      "code": "الكود",
+      "code_placeholder": "أدخل الكود...",
+      "type": "نوع الكود",
+      "value": "القيمة",
+      "value_placeholder": "أدخل القيمة...",
+      "maxUsage": "الحد الأقصى للاستخدام",
+      "maxUsage_placeholder": "أدخل الحد الأقصى...",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية",
+      "status": "الحالة",
+      "add_btn": "إضافة",
+      "save_btn": "حفظ",
+      "cancel_btn": "إلغاء"
+    },
+    "delete_dialog": {
+      "title": "هل أنت متأكد أنك تريد الحذف؟",
+      "message": "هذا الإجراء لا يمكن التراجع عنه.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
+    },
+    "messages": {
+      "add_success": "تمت إضافة كود الخصم بنجاح",
+      "edit_success": "تم تعديل كود الخصم بنجاح",
+      "delete_success": "تم حذف كود الخصم بنجاح",
+      "status_updated": "تم تحديث حالة كود الخصم بنجاح"
+    }
+  },
   "Global": {
     "Label": {
       "no_data": "لا توجد بيانات"
-    },
-    "Sections": {
+    },    "Sections": {
       "Table": {
         "rows_per_page": "عدد الصفوف في الصفحة:",
         "of": "من",

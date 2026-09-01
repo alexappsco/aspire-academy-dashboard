@@ -93,6 +93,11 @@ const sidebarItems: SidebarItem[] = [
     path: "/countries",
   },
   {
+    key: "discount_codes",
+    icon: "/icons/package.svg",
+    path: "/discount-codes",
+  },
+  {
     key: "terms_and_conditions",
     icon: "/icons/invoice.svg",
     path: "/terms",

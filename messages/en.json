@@ -11,6 +11,7 @@
     "banners": "Banners",
     "common_questions": "Common Questions",
     "countries": "Countries",
+    "discount_codes": "Discount Codes",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
     "settings": "Settings",
@@ -138,6 +139,69 @@
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete?",
       "delete": "Delete"
+    }
+  },
+  "DiscountCodes": {
+    "title": "Discount Codes",
+    "add_code": "Add New Code",
+    "search_placeholder": "Search...",
+    "tabs": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "filters": {
+      "status_all": "Status",
+      "type_all": "Discount Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed Amount"
+    },
+    "columns": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maxUsage": "Max Usage",
+      "usedCount": "Times Used",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Discount Code",
+      "edit_title": "Edit Discount Code",
+      "code": "Code",
+      "code_placeholder": "Enter code...",
+      "type": "Code Type",
+      "value": "Value",
+      "value_placeholder": "Enter value...",
+      "maxUsage": "Max Usage",
+      "maxUsage_placeholder": "Enter max usage...",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "add_btn": "Add",
+      "save_btn": "Save",
+      "cancel_btn": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Are you sure you want to delete?",
+      "message": "This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
+    },
+    "messages": {
+      "add_success": "Discount code added successfully",
+      "edit_success": "Discount code updated successfully",
+      "delete_success": "Discount code deleted successfully",
+      "status_updated": "Discount code status updated successfully"
     }
   },
   "Global": {
