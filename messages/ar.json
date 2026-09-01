@@ -58,6 +58,67 @@
       "delete": "حذف"
     }
   },
+  "CreateCourse": {
+    "title": "إضافة كورس جديد",
+    "subtitle": "قم بإنشاء كورس تعليمي جديد عن طريق إضافة معلوماته الأساسية.",
+    "breadcrumb_courses": "الدورات التدريبية",
+    "breadcrumb_add": "إضافة كورس جديد",
+    "stepper": {
+      "basic_info": "المعلومات الأساسية",
+      "add_chapters": "إضافة الفصول"
+    },
+    "basic_info": {
+      "card_title": "معلومات الكورس",
+      "name_label": "اسم الكورس",
+      "name_placeholder": "أدخل عنوان الكورس",
+      "price_label": "سعر الكورس",
+      "price_placeholder": "أدخل سعر الكورس",
+      "lecturer_label": "المحاضر",
+      "lecturer_placeholder": "اختر المحاضر...",
+      "college_label": "الكلية",
+      "college_placeholder": "اختر الكلية",
+      "subject_label": "المادة الدراسية",
+      "subject_placeholder": "اختر المادة الدراسية...",
+      "specialty_label": "التخصص",
+      "specialty_placeholder": "اختر التخصص...",
+      "category_label": "التصنيف",
+      "category_placeholder": "اختر التصنيف...",
+      "field_label": "المجال",
+      "field_placeholder": "اختر المجال...",
+      "description_label": "وصف الكورس",
+      "description_placeholder": "اكتب وصفاً تفصيلياً للكورس..."
+    },
+    "media": {
+      "card_title": "وسائط الكورس",
+      "thumbnail_label": "صورة مصغرة للكورس",
+      "thumbnail_recommended": "المقاس الموصى به: 300 × 200 بكسل",
+      "cover_label": "غلاف الكورس",
+      "cover_recommended": "المقاس الموصى به: 1200 × 600 بكسل",
+      "drag_drop_browse": "اسحب وأفلت الصورة هنا أوتصفح"
+    },
+    "chapters": {
+      "card_title": "معلومات الكورس",
+      "add_chapter_box_title": "إضافة فصل جديد",
+      "chapter_title_placeholder": "عنوان الفصل (مثال : الفصل الأول - مقدمة)",
+      "add_chapter_btn": "إضافة فصل",
+      "lesson_title_placeholder": "عنوان الدرس",
+      "add_lesson_btn": "إضافة درس",
+      "lessons_count": "{count} دروس",
+      "video_uploaded": "تم رفع الفيديو",
+      "upload_video": "رفع فيديو"
+    },
+    "actions": {
+      "cancel": "إلغاء",
+      "save_draft": "حفظ كمسودة",
+      "continue": "متابعة",
+      "create_course": "انشاء كورس"
+    },
+    "messages": {
+      "draft_saved": "تم حفظ الكورس كمسودة بنجاح",
+      "course_created": "تم إنشاء الكورس بنجاح",
+      "validation_required": "يرجى تعبئة الحقول المطلوبة"
+    }
+  },
   "Banners": {
     "title": "البانرات",
     "add_banner": "إضافة بانر",

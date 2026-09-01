@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'src/i18n/routing';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -34,6 +35,7 @@ export default function CoursesView() {
   const t = useTranslations('Courses');
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -169,6 +171,7 @@ export default function CoursesView() {
 
         <Button
           variant="contained"
+          onClick={() => router.push('/courses/new')}
           startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
@@ -178,6 +181,7 @@ export default function CoursesView() {
             py: 1,
             fontWeight: 700,
             boxShadow: 'none',
+            gap: 1,
             '&:hover': {
               bgcolor: '#2C353E',
             },
