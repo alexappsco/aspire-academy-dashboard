@@ -354,6 +354,7 @@ export default function CountriesView() {
 
       {/* Add / Edit Dialog */}
       <CountryFormDialog
+        key={editingCountry?.id ?? 'new'}
         open={formDialogOpen}
         onClose={() => setFormDialogOpen(false)}
         initialData={editingCountry}

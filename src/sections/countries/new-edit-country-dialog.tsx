@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -31,24 +31,10 @@ export default function CountryFormDialog({
   const t = useTranslations('Countries');
   const isEdit = !!initialData;
 
-  const [nameAr, setNameAr] = useState('');
-  const [nameEn, setNameEn] = useState('');
-  const [order, setOrder] = useState<number | string>('');
-  const [active, setActive] = useState(true);
-
-  useEffect(() => {
-    if (initialData) {
-      setNameAr(initialData.name_ar ?? '');
-      setNameEn(initialData.name_en ?? '');
-      setOrder(initialData.order ?? '');
-      setActive(initialData.active ?? true);
-    } else {
-      setNameAr('');
-      setNameEn('');
-      setOrder('');
-      setActive(true);
-    }
-  }, [initialData, open]);
+  const [nameAr, setNameAr] = useState(initialData?.name_ar ?? '');
+  const [nameEn, setNameEn] = useState(initialData?.name_en ?? '');
+  const [order, setOrder] = useState<number | string>(initialData?.order ?? '');
+  const [active, setActive] = useState(initialData?.active ?? true);
 
   const handleSubmit = () => {
     if (!nameAr.trim() || !nameEn.trim()) {
