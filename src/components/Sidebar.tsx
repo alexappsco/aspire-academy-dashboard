@@ -88,6 +88,11 @@ const sidebarItems: SidebarItem[] = [
     path: "/common-questions",
   },
   {
+    key: "countries",
+    icon: "/icons/package.svg",
+    path: "/countries",
+  },
+  {
     key: "terms_and_conditions",
     icon: "/icons/invoice.svg",
     path: "/terms",
