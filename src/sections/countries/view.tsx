@@ -26,11 +26,13 @@ import DeleteConfirmDialog from './delete-confirm-dialog';
 
 interface FormattedCountryRow {
   id: string;
+  checkbox?: string;
   order: number;
   name_ar: string;
   name_en: string;
-  active: boolean;
-  raw: CountryItem;
+  status: boolean;
+  actions?: string;
+  raw?: CountryItem;
 }
 
 export default function CountriesView() {
@@ -171,7 +173,7 @@ export default function CountriesView() {
     order: c.order,
     name_ar: c.name_ar,
     name_en: c.name_en,
-    active: c.active,
+    status: c.active,
     raw: c,
   }));
 
@@ -186,7 +188,7 @@ export default function CountriesView() {
     status: (row: FormattedCountryRow) => (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
         <Switch
-          checked={row.active}
+          checked={row.status}
           onChange={() => handleToggleStatus(row.id)}
           size="small"
           sx={{
@@ -203,10 +205,10 @@ export default function CountriesView() {
           sx={{
             fontWeight: 600,
             fontSize: 13,
-            color: row.active ? '#00A76F' : '#64748B',
+            color: row.status ? '#00A76F' : '#64748B',
           }}
         >
-          {row.active ? t('status.active') : t('status.inactive')}
+          {row.status ? t('status.active') : t('status.inactive')}
         </Typography>
       </Box>
     ),
@@ -221,7 +223,7 @@ export default function CountriesView() {
         </IconButton>
         <IconButton
           size="small"
-          onClick={() => handleOpenEdit(row.raw)}
+          onClick={() => row.raw && handleOpenEdit(row.raw)}
           sx={{ color: '#637381' }}
         >
           <Iconify icon="solar:pen-bold" width={18} />
@@ -340,12 +342,14 @@ export default function CountriesView() {
         </Stack>
 
         {/* Table Content */}
-        <SharedTable
-          tableHead={tableHead}
-          tableData={tableData}
-          customRender={customRender}
-          emptyMessage={t('search_placeholder')}
-        />
+        <Box sx={{ px: 1 }}>
+          <SharedTable<FormattedCountryRow>
+            tableHead={tableHead}
+            data={tableData}
+            count={filteredCountries.length}
+            customRender={customRender}
+          />
+        </Box>
       </Card>
 
       {/* Add / Edit Dialog */}
