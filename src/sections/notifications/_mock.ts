@@ -1,0 +1,133 @@
+export interface NotificationItem {
+  id: string;
+  title_ar: string;
+  title_en: string;
+  content_ar: string;
+  content_en: string;
+  userType: 'student' | 'lecturer';
+  userName: string;
+  date: string;
+}
+
+export const MOCK_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: '1',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'أحمد علي',
+    date: '31/8/2026',
+  },
+  {
+    id: '2',
+    title_ar: 'طلب تعديل الدورة',
+    title_en: 'Request to modify course content',
+    content_ar: 'مرحبا دكتور محمد، يرجى تحديث محتوى الدرس الثالث وإعادة إرسال',
+    content_en: 'Hello Dr. Mohamed, please update the content of the third lesson and resend it.',
+    userType: 'lecturer',
+    userName: 'محمد احمد',
+    date: '31/8/2026',
+  },
+  {
+    id: '3',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'خالد عمر',
+    date: '31/8/2026',
+  },
+  {
+    id: '4',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'سارة يوسف',
+    date: '31/8/2026',
+  },
+  {
+    id: '5',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'ليلى كريم',
+    date: '31/8/2026',
+  },
+  {
+    id: '6',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'محمود جابر',
+    date: '31/8/2026',
+  },
+  {
+    id: '7',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'منى محمود',
+    date: '31/8/2026',
+  },
+  {
+    id: '8',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'ياسين أحمد',
+    date: '31/8/2026',
+  },
+  {
+    id: '9',
+    title_ar: 'نشر دورة جديدة',
+    title_en: 'New Course Published',
+    content_ar: 'تم نشر دورة "أساسيات أمراض القلب والأوعية الدموية" بنجاح للمستخدمين.',
+    content_en: 'The "Fundamentals of Cardiovascular Diseases" course has been successfully published for users.',
+    userType: 'student',
+    userName: 'رنا يوسف',
+    date: '31/8/2026',
+  },
+  {
+    id: '10',
+    title_ar: 'طلب تعديل المنهج',
+    title_en: 'Request to modify curriculum',
+    content_ar: 'يرجى مراجعة وتعديل محتوى منهج طب الأطفال.',
+    content_en: 'Please review and modify the pediatric curriculum content.',
+    userType: 'lecturer',
+    userName: 'د. هند سعيد',
+    date: '30/8/2026',
+  },
+  {
+    id: '11',
+    title_ar: 'تحديث مالي',
+    title_en: 'Financial Update',
+    content_ar: 'يرجى الاطلاع على تقارير المالية والمدفوعات الخاصة بالأسبوع الماضي.',
+    content_en: 'Please check the financial and payment reports for the last week.',
+    userType: 'lecturer',
+    userName: 'د. عادل إبراهيم',
+    date: '28/8/2026',
+  },
+  {
+    id: '12',
+    title_ar: 'أعطال في النظام',
+    title_en: 'System Maintenance',
+    content_ar: 'سيكون هناك صيانة مجدولة للنظام يوم غد الساعة 12 صباحاً.',
+    content_en: 'There will be a scheduled system maintenance tomorrow at 12 AM.',
+    userType: 'student',
+    userName: 'أسامة فوزي',
+    date: '27/8/2026',
+  },
+];
