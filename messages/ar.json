@@ -7,12 +7,11 @@
     "finance_payments": "المالية والمدفوعات",
     "reports_analytics": "التقارير والتحليلات",
     "support": "الدعم الفني",
-<<<<<<< HEAD
     "notifications": "الإشعارات",
-=======
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
->>>>>>> 932ddf180c451bda6574bc398887b458a4d0eaeb
+    "terms_and_conditions": "الشروط والأحكام",
+    "about_us": "من نحن",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
@@ -201,5 +200,19 @@
       "send_btn": "ارسال",
       "cancel_btn": "الغاء"
     }
+  },
+  "TermsAndConditions": {
+    "title": "الشروط والأحكام",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
+  },
+  "AboutUs": {
+    "title": "من نحن",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
   }
 }
