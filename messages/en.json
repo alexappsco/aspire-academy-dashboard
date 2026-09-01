@@ -58,6 +58,67 @@
       "delete": "Delete"
     }
   },
+  "CreateCourse": {
+    "title": "Add New Course",
+    "subtitle": "Create a new educational course by adding its basic information.",
+    "breadcrumb_courses": "Training Courses",
+    "breadcrumb_add": "Add New Course",
+    "stepper": {
+      "basic_info": "Basic Information",
+      "add_chapters": "Add Chapters"
+    },
+    "basic_info": {
+      "card_title": "Course Information",
+      "name_label": "Course Name",
+      "name_placeholder": "Enter course title",
+      "price_label": "Course Price",
+      "price_placeholder": "Enter course price",
+      "lecturer_label": "Lecturer",
+      "lecturer_placeholder": "Select lecturer...",
+      "college_label": "College",
+      "college_placeholder": "Select college",
+      "subject_label": "Subject",
+      "subject_placeholder": "Select subject...",
+      "specialty_label": "Specialization",
+      "specialty_placeholder": "Select specialization...",
+      "category_label": "Category",
+      "category_placeholder": "Select category...",
+      "field_label": "Field",
+      "field_placeholder": "Select field...",
+      "description_label": "Course Description",
+      "description_placeholder": "Write a detailed description for the course..."
+    },
+    "media": {
+      "card_title": "Course Media",
+      "thumbnail_label": "Course Thumbnail",
+      "thumbnail_recommended": "Recommended size: 300 × 200 px",
+      "cover_label": "Course Cover",
+      "cover_recommended": "Recommended size: 1200 × 600 px",
+      "drag_drop_browse": "Drag and drop image here or browse"
+    },
+    "chapters": {
+      "card_title": "Course Information",
+      "add_chapter_box_title": "Add New Chapter",
+      "chapter_title_placeholder": "Chapter title (e.g. Chapter 1 - Introduction)",
+      "add_chapter_btn": "Add Chapter",
+      "lesson_title_placeholder": "Lesson title",
+      "add_lesson_btn": "Add Lesson",
+      "lessons_count": "{count} lessons",
+      "video_uploaded": "Video uploaded",
+      "upload_video": "Upload Video"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "save_draft": "Save as Draft",
+      "continue": "Continue",
+      "create_course": "Create Course"
+    },
+    "messages": {
+      "draft_saved": "Course saved as draft successfully",
+      "course_created": "Course created successfully",
+      "validation_required": "Please fill in the required fields"
+    }
+  },
   "Banners": {
     "title": "Banners",
     "add_banner": "Add Banner",
