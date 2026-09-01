@@ -10,6 +10,7 @@
     "notifications": "Notifications",
     "banners": "Banners",
     "common_questions": "Common Questions",
+    "countries": "Countries",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
     "settings": "Settings",
@@ -221,5 +222,49 @@
     "arabic_text": "Arabic Text",
     "english_text": "English Text",
     "save_success": "Changes saved successfully"
+  },
+  "Countries": {
+    "title": "Countries",
+    "add_country": "Add Country",
+    "search_placeholder": "Search",
+    "filter_status": "Status",
+    "status": {
+      "all": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "id": "Country Code",
+      "name_ar": "Arabic Name",
+      "name_en": "English Name",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "dialog": {
+      "add_title": "Add Country",
+      "edit_title": "Edit Country",
+      "name_ar": "Arabic Country Name",
+      "name_ar_placeholder": "Name...",
+      "name_en": "English Country Name",
+      "name_en_placeholder": "Name...",
+      "order": "Display Order",
+      "order_placeholder": "2",
+      "status": "Status",
+      "add_btn": "Add",
+      "save_btn": "Save",
+      "cancel_btn": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete Country",
+      "message": "Are you sure you want to delete this country? This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
+    },
+    "messages": {
+      "add_success": "Country added successfully",
+      "edit_success": "Country updated successfully",
+      "delete_success": "Country deleted successfully",
+      "status_updated": "Country status updated successfully"
+    }
   }
 }
