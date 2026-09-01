@@ -14,7 +14,7 @@
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.4.0",
     "@iconify/react": "^6.0.2",
-    "@mui/icons-material": "^9.0.1",
+    "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.0.1",
     "@mui/system": "^9.0.1",
     "@mui/utils": "^9.0.1",

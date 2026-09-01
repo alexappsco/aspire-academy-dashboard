@@ -10,6 +10,11 @@
     "notifications": "الإشعارات",
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
+    "categories": "ادارة المجالات",
+    "universities": "الجامعات",
+    "college": "الكليات",
+    "academic_hierarchy": "الهيكل الأكاديمي",
+    "subjects": "المواد",
     "countries": "الدول",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
@@ -137,6 +142,196 @@
       "save": "حفظ",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
+      "delete": "حذف"
+    }
+  },
+  "Categories": {
+    "title": "ادارة المجالات",
+    "subtitle": "إدارة جميع المجالات",
+    "add_category": "إضافة مجال",
+    "search_placeholder": "البحث في المجالات..",
+    "columns": {
+      "image": "الصورة",
+      "name": "الاسم",
+      "created_date": "تاريخ الإضافة",
+      "order": "الترتيب",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة مجال",
+      "edit_title": "تعديل مجال",
+      "subtitle": "إرفاق الصورة",
+      "select_image": "اختر الصورة",
+      "drag_drop": "اسحب وأفلت الملفات هنا أو",
+      "browse": "تصفح البيانات",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا المجال؟",
+      "delete": "حذف"
+    }
+  },
+  "Universities": {
+    "title": "الجامعات",
+    "subtitle": "إدارة جميع الجامعات",
+    "add_university": "إضافة جامعة",
+    "search_placeholder": "البحث في الكليات..",
+    "columns": {
+      "logo": "الشعار",
+      "name": "الاسم",
+      "country": "الدولة",
+      "order": "الترتيب",
+      "created_date": "تاريخ الإضافة",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة جامعة",
+      "edit_title": "تعديل جامعة",
+      "subtitle": "إرفاق الشعار",
+      "select_image": "اختر الصورة",
+      "drag_drop": "اسحب وأفلت الملفات هنا أو",
+      "browse": "تصفح البيانات",
+      "country_ar": "الدولة (بالعربية)",
+      "country_ar_placeholder": "الدولة بالعربية..",
+      "country_en": "الدولة (بالإنجليزية)",
+      "country_en_placeholder": "الدولة بالإنجليزية..",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذه الجامعة؟",
+      "delete": "حذف"
+    }
+  },
+  "Colleges": {
+    "title": "الكليات",
+    "subtitle": "إدارة جميع الكليات",
+    "add_college": "إضافة كلية",
+    "search_placeholder": "البحث في الكليات..",
+    "columns": {
+      "image": "الصورة",
+      "name": "الاسم",
+      "university": "الجامعة",
+      "order": "الترتيب",
+      "created_date": "تاريخ الإضافة",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة كلية",
+      "edit_title": "تعديل كلية",
+      "subtitle": " بيانات الكلية",
+      "select_image": "اختر الصورة",
+      "drag_drop": "اسحب وأفلت الملفات هنا أو",
+      "browse": "تصفح البيانات",
+      "university": "الجامعة",
+      "university_placeholder": "اختر الجامعة",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذه الكلية؟",
+      "delete": "حذف"
+    }
+  },
+  "Subjects": {
+    "title": "المواد",
+    "subtitle": "إدارة جميع المواد",
+    "add_subject": "إضافة موضوع",
+    "search_placeholder": "البحث في المواد..",
+    "columns": {
+      "image": "الصورة",
+      "name": "الاسم",
+      "university": "الجامعة",
+      "college": "الكلية",
+      "order": "الترتيب",
+      "created_date": "تاريخ الإضافة",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة موضوع",
+      "edit_title": "تعديل موضوع",
+      "subtitle": "بيانات الموضوع",
+      "select_image": "اختر الصورة",
+      "drag_drop": "اسحب وأفلت الملفات هنا أو",
+      "browse": "تصفح البيانات",
+      "university": "الجامعة",
+      "university_placeholder": "اختر الجامعة",
+      "college": "الكلية",
+      "college_placeholder": "اختر الكلية",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "order": "الترتيب",
+      "status": "الحالة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا الموضوع؟",
       "delete": "حذف"
     }
   },
