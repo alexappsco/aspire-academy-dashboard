@@ -12,6 +12,7 @@
     "common_questions": "الأسئلة الشائعة",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
+    "countries": "الدول",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
@@ -221,5 +222,49 @@
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
     "save_success": "تم حفظ التغييرات بنجاح"
+  },
+  "Countries": {
+    "title": "الدول",
+    "add_country": "اضافة دولة",
+    "search_placeholder": "بحث",
+    "filter_status": "الحالة",
+    "status": {
+      "all": "الحالة",
+      "active": "مفعل",
+      "inactive": "معطل"
+    },
+    "columns": {
+      "id": "رقم الدولة",
+      "name_ar": "الاسم عربي",
+      "name_en": "الاسم انجليزي",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "dialog": {
+      "add_title": "اضافة دولة",
+      "edit_title": "تعديل دولة",
+      "name_ar": "اسم الدولة عربي",
+      "name_ar_placeholder": "الاسم...",
+      "name_en": "اسم الدولة انجليزي",
+      "name_en_placeholder": "الاسم...",
+      "order": "رقم الظهور",
+      "order_placeholder": "2",
+      "status": "الحالة",
+      "add_btn": "اضافة",
+      "save_btn": "حفظ",
+      "cancel_btn": "الغاء"
+    },
+    "delete_dialog": {
+      "title": "حذف دولة",
+      "message": "هل أنت متأكد من رغبتك في حذف هذه الدولة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
+    },
+    "messages": {
+      "add_success": "تمت إضافة الدولة بنجاح",
+      "edit_success": "تم تعديل الدولة بنجاح",
+      "delete_success": "تم حذف الدولة بنجاح",
+      "status_updated": "تم تحديث حالة الدولة بنجاح"
+    }
   }
 }
