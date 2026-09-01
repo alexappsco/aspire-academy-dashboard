@@ -10,6 +10,11 @@
     "notifications": "Notifications",
     "banners": "Banners",
     "common_questions": "Common Questions",
+    "categories": "Fields Management",
+    "universities": "Universities",
+    "college": "College",
+    "academic_hierarchy": "Academic Structure",
+    "subjects": "Subjects",
     "countries": "Countries",
     "discount_codes": "Discount Codes",
     "terms_and_conditions": "Terms & Conditions",
@@ -202,6 +207,50 @@
       "delete": "Delete"
     }
   },
+  "Categories": {
+    "title": "Fields Management",
+    "subtitle": "Manage all categories",
+    "add_category": "Add Category",
+    "search_placeholder": "Search in categories..",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "created_date": "Created Date",
+      "order": "Order",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Category",
+      "edit_title": "Edit Category",
+      "subtitle": "Attach the image",
+      "select_image": "Select Image",
+      "drag_drop": "Drag and drop files here or",
+      "browse": "browse",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "order": "Order",
+      "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this category?",
+      "delete": "Delete"
+    }
+  },
   "DiscountCodes": {
     "title": "Discount Codes",
     "add_code": "Add New Code",
@@ -248,13 +297,15 @@
       "startDate": "Start Date",
       "endDate": "End Date",
       "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
       "add_btn": "Add",
       "save_btn": "Save",
       "cancel_btn": "Cancel"
     },
     "delete_dialog": {
-      "title": "Are you sure you want to delete?",
-      "message": "This action cannot be undone.",
+      "title": "Delete Discount Code",
+      "message": "Are you sure you want to delete this discount code? This action cannot be undone.",
       "confirm_btn": "Delete",
       "cancel_btn": "Cancel"
     },
@@ -263,6 +314,152 @@
       "edit_success": "Discount code updated successfully",
       "delete_success": "Discount code deleted successfully",
       "status_updated": "Discount code status updated successfully"
+    }
+  },
+  "Universities": {
+    "title": "Universities",
+    "subtitle": "Manage all universities",
+    "add_university": "Add University",
+    "search_placeholder": "Search in colleges..",
+    "columns": {
+      "logo": "Logo",
+      "name": "Name",
+      "country": "Country",
+      "order": "Order",
+      "created_date": "Created Date",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add University",
+      "edit_title": "Edit University",
+      "subtitle": "Attach the logo",
+      "select_image": "Select Image",
+      "drag_drop": "Drag and drop files here or",
+      "browse": "browse",
+      "country_ar": "Country (Arabic)",
+      "country_ar_placeholder": "Country in Arabic..",
+      "country_en": "Country (English)",
+      "country_en_placeholder": "Country in English..",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "order": "Order",
+      "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this university?",
+      "delete": "Delete"
+    }
+  },
+  "Colleges": {
+    "title": "Colleges",
+    "subtitle": "Manage all colleges",
+    "add_college": "Add College",
+    "search_placeholder": "Search in colleges..",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "university": "University",
+      "order": "Order",
+      "created_date": "Created Date",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add College",
+      "edit_title": "Edit College",
+      "subtitle": "Fill in college details",
+      "select_image": "Select Image",
+      "drag_drop": "Drag and drop files here or",
+      "browse": "browse",
+      "university": "University",
+      "university_placeholder": "Select University",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "order": "Order",
+      "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this college?",
+      "delete": "Delete"
+    }
+  },
+  "Subjects": {
+    "title": "Subjects",
+    "subtitle": "Manage all subjects",
+    "add_subject": "Add Subject",
+    "search_placeholder": "Search in subjects..",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "university": "University",
+      "college": "College",
+      "order": "Order",
+      "created_date": "Created Date",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Subject",
+      "edit_title": "Edit Subject",
+      "subtitle": "Fill in subject details",
+      "select_image": "Select Image",
+      "drag_drop": "Drag and drop files here or",
+      "browse": "browse",
+      "university": "University",
+      "university_placeholder": "Select University",
+      "college": "College",
+      "college_placeholder": "Select College",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "order": "Order",
+      "status": "Status",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this subject?",
+      "delete": "Delete"
     }
   },
   "Global": {

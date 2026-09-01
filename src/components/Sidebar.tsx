@@ -68,6 +68,32 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
+    key: "academic_hierarchy",
+    icon: "/icons/curriculum.svg",
+    children: [
+      {
+        key: "universities",
+        icon: "/icons/curriculum.svg",
+        path: "/university",
+      },
+      {
+        key: "college",
+        icon: "/icons/course.svg",
+        path: "/college",
+      },
+      {
+        key: "subjects",
+        icon: "/icons/course.svg",
+        path: "/subjects",
+      },
+      {
+        key: "countries",
+        icon: "/icons/package.svg",
+        path: "/countries",
+      },
+    ],
+  },
+  {
     key: "notifications",
     icon: "/icons/mingcute--notification-line.svg",
     path: "/notifications",
@@ -88,9 +114,9 @@ const sidebarItems: SidebarItem[] = [
     path: "/common-questions",
   },
   {
-    key: "countries",
-    icon: "/icons/package.svg",
-    path: "/countries",
+    key: "categories",
+    icon: "/icons/course.svg",
+    path: "/category",
   },
   {
     key: "discount_codes",
