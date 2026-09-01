@@ -87,6 +87,16 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/faq.svg",
     path: "/common-questions",
   },
+  {
+    key: "terms_and_conditions",
+    icon: "/icons/invoice.svg",
+    path: "/terms",
+  },
+  {
+    key: "about_us",
+    icon: "/icons/profile.svg",
+    path: "/about-us",
+  },
 ];
 
 const bottomItems: SidebarItem[] = [
