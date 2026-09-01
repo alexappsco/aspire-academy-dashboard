@@ -65,7 +65,7 @@ export default function CountryFormDialog({
         },
       }}
     >
-      {/* Header with Close and Title */}
+      {/* Header with Title and Close Button */}
       <Box
         sx={{
           display: 'flex',
@@ -76,16 +76,16 @@ export default function CountryFormDialog({
           pb: 1.5,
         }}
       >
-        <IconButton onClick={onClose} size="small" sx={{ color: '#919EAB' }}>
-          <Iconify icon="mingcute:close-line" width={20} />
-        </IconButton>
-
         <Typography
           variant="h6"
           sx={{ fontWeight: 700, color: '#1E293B', fontSize: 20 }}
         >
           {isEdit ? t('dialog.edit_title') : t('dialog.add_title')}
         </Typography>
+
+        <IconButton onClick={onClose} size="small" sx={{ color: '#919EAB' }}>
+          <Iconify icon="mingcute:close-line" width={20} />
+        </IconButton>
       </Box>
 
       <DialogContent sx={{ px: 2, pt: 1, pb: 2 }}>

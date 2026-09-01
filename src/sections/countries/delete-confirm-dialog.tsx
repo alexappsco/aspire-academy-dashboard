@@ -40,7 +40,7 @@ export default function DeleteConfirmDialog({
         },
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 0.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', p: 0.5 }}>
         <IconButton onClick={onClose} size="small">
           <Iconify icon="mingcute:close-line" width={20} />
         </IconButton>
