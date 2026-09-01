@@ -94,7 +94,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     key: "discount_codes",
-    icon: "/icons/package.svg",
+    icon: "/icons/bxs--discount.svg",
     path: "/discount-codes",
   },
   {
