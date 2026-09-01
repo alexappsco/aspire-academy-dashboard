@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -14,6 +12,37 @@ import Switch from '@mui/material/Switch';
 
 import Iconify from 'src/components/iconify';
 import { CountryItem } from './_mock';
+
+const getTextFieldStyles = (isRtl: boolean) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2,
+    fontSize: '0.9375rem',
+    '& fieldset': { borderColor: '#E5E7EB' },
+    '&:hover fieldset': { borderColor: '#B0B8C1' },
+    '&.Mui-focused fieldset': { borderColor: '#1B8354' },
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '0.875rem',
+    ...(isRtl && {
+      right: 24,
+      left: 'auto',
+      transformOrigin: 'right',
+    }),
+  },
+  ...(isRtl && {
+    '& .MuiInputLabel-shrink': {
+      transform: 'translate(0, -6px) scale(0.75)',
+      right: 24,
+      left: 'auto',
+    },
+    '& .MuiOutlinedInput-notchedOutline legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-input': {
+      textAlign: 'right',
+    },
+  }),
+});
 
 interface CountryFormDialogProps {
   open: boolean;
@@ -29,6 +58,8 @@ export default function CountryFormDialog({
   onSave,
 }: CountryFormDialogProps) {
   const t = useTranslations('Countries');
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
   const isEdit = !!initialData;
 
   const [nameAr, setNameAr] = useState(initialData?.name_ar ?? '');
@@ -100,14 +131,7 @@ export default function CountryFormDialog({
             slotProps={{
               inputLabel: { shrink: true },
             }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                '& fieldset': { borderColor: '#E5E7EB' },
-                '&:hover fieldset': { borderColor: '#B0B8C1' },
-                '&.Mui-focused fieldset': { borderColor: '#1B8354' },
-              },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* English Name */}
@@ -120,14 +144,7 @@ export default function CountryFormDialog({
             slotProps={{
               inputLabel: { shrink: true },
             }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                '& fieldset': { borderColor: '#E5E7EB' },
-                '&:hover fieldset': { borderColor: '#B0B8C1' },
-                '&.Mui-focused fieldset': { borderColor: '#1B8354' },
-              },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* Display Order */}
@@ -141,14 +158,7 @@ export default function CountryFormDialog({
             slotProps={{
               inputLabel: { shrink: true },
             }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                '& fieldset': { borderColor: '#E5E7EB' },
-                '&:hover fieldset': { borderColor: '#B0B8C1' },
-                '&.Mui-focused fieldset': { borderColor: '#1B8354' },
-              },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* Status Row */}
