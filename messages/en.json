@@ -10,6 +10,8 @@
     "notifications": "Notifications",
     "banners": "Banners",
     "common_questions": "Common Questions",
+    "terms_and_conditions": "Terms & Conditions",
+    "about_us": "About Us",
     "settings": "Settings",
     "logout": "Logout"
   },
@@ -239,5 +241,26 @@
       "send_btn": "Send",
       "cancel_btn": "Cancel"
     }
+  },
+  "TermsAndConditions": {
+    "title": "Terms & Conditions",
+    "save_changes": "Save Changes",
+    "arabic_text": "Arabic Text",
+    "english_text": "English Text",
+    "save_success": "Changes saved successfully"
+  },
+  "TermsConditions": {
+    "title": "Terms & Conditions",
+    "save_changes": "Save Changes",
+    "arabic_text": "Arabic Text",
+    "english_text": "English Text",
+    "save_success": "Changes saved successfully"
+  },
+  "AboutUs": {
+    "title": "About Us",
+    "save_changes": "Save Changes",
+    "arabic_text": "Arabic Text",
+    "english_text": "English Text",
+    "save_success": "Changes saved successfully"
   }
 }

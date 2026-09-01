@@ -10,6 +10,8 @@
     "notifications": "الإشعارات",
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
+    "terms_and_conditions": "الشروط والأحكام",
+    "about_us": "من نحن",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
@@ -239,5 +241,26 @@
       "send_btn": "ارسال",
       "cancel_btn": "الغاء"
     }
+  },
+  "TermsAndConditions": {
+    "title": "الشروط والأحكام",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
+  },
+  "TermsConditions": {
+    "title": "الشروط والأحكام",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
+  },
+  "AboutUs": {
+    "title": "من نحن",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح"
   }
 }
