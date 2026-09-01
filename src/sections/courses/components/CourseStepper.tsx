@@ -29,11 +29,9 @@ export default function CourseStepper({ activeStep, onStepClick }: CourseStepper
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          maxWidth: 600,
-          mx: 'auto',
+          justifyContent: 'space-between',
+          width: '100%',
           position: 'relative',
-          px: { xs: 2, sm: 4 },
         }}
       >
         {/* Step 1: Basic Info */}
@@ -45,7 +43,7 @@ export default function CourseStepper({ activeStep, onStepClick }: CourseStepper
             alignItems: 'center',
             cursor: 'pointer',
             zIndex: 2,
-            minWidth: 100,
+            minWidth: 80,
           }}
         >
           <Box
@@ -84,13 +82,28 @@ export default function CourseStepper({ activeStep, onStepClick }: CourseStepper
           sx={{
             flex: 1,
             height: 3,
-            bgcolor: activeStep >= 2 ? '#1C252E' : '#E2E8F0',
-            mx: 2,
+            bgcolor: activeStep >= 2 ? '#1C252E' : '#E8F1FC',
+            mx: { xs: 1.5, sm: 3 },
             mb: 3, // Aligns line with the center of the step circles
             borderRadius: 2,
-            transition: 'background-color 0.3s ease',
+            position: 'relative',
+            transition: 'all 0.3s ease',
           }}
-        />
+        >
+          {activeStep === 1 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: '30%',
+                height: '100%',
+                bgcolor: '#1C252E',
+                borderRadius: 2,
+              }}
+            />
+          )}
+        </Box>
 
         {/* Step 2: Add Chapters */}
         <Box
@@ -101,7 +114,7 @@ export default function CourseStepper({ activeStep, onStepClick }: CourseStepper
             alignItems: 'center',
             cursor: 'pointer',
             zIndex: 2,
-            minWidth: 100,
+            minWidth: 80,
           }}
         >
           <Box
@@ -109,7 +122,7 @@ export default function CourseStepper({ activeStep, onStepClick }: CourseStepper
               width: 36,
               height: 36,
               borderRadius: '50%',
-              bgcolor: activeStep >= 2 ? '#1C252E' : '#E2E8F0',
+              bgcolor: activeStep >= 2 ? '#1C252E' : '#EEF2F6',
               color: activeStep >= 2 ? '#FFFFFF' : '#94A3B8',
               display: 'flex',
               alignItems: 'center',
