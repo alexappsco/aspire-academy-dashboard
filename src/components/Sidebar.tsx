@@ -97,6 +97,11 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/profile.svg",
     path: "/about-us",
   },
+  {
+    key: "countries",
+    icon: "/icons/package.svg",
+    path: "/countries",
+  },
 ];
 
 const bottomItems: SidebarItem[] = [
