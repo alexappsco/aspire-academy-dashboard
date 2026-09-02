@@ -19,6 +19,7 @@
     "discount_codes": "Discount Codes",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
+    "minutes_management": "Minutes Management",
     "settings": "Settings",
     "logout": "Logout"
   },
@@ -709,6 +710,85 @@
       "edit_success": "Country updated successfully",
       "delete_success": "Country deleted successfully",
       "status_updated": "Country status updated successfully"
+    }
+  },
+  "MinutesManagement": {
+    "title": "Lecturers Management",
+    "subtitle": "Manage all lecturers and educational sessions",
+    "add_minutes": "Add Lecturer",
+    "search_placeholder": "Search...",
+    "columns": {
+      "name": "Name",
+      "joined_date": "Joined Date",
+      "specialty": "Specialty",
+      "subject": "Subject",
+      "courses": "Courses",
+      "students": "Students",
+      "rating": "Rating",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": {
+      "rows_per_page": "Rows per page:"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "breadcrumb_dashboard": "Dashboard",
+    "breadcrumb_lecturers": "Lecturers",
+    "breadcrumb_add_lecturer": "Add Lecturer",
+    "page_title": "Add Lecturer",
+    "page_subtitle": "Create a new lecturer account and add them to the Aspire Academy platform.",
+    "section_personal_info": "Personal Information",
+    "section_login_credentials": "Login Credentials",
+    "login_credentials_subtitle": "The lecturer will use the username and password to login to the lecturer dashboard.",
+    "field_full_name": "Full Name",
+    "field_title": "Title",
+    "field_country": "Country",
+    "field_university": "University",
+    "field_qualification": "Qualification",
+    "field_start_date": "Start Date",
+    "field_bio": "Bio about the Lecturer",
+    "field_email": "Email",
+    "field_password": "Password",
+    "field_confirm_password": "Confirm Password",
+    "upload_photo": "Upload Photo",
+    "photo_hint": "(JPG, PNG Max 2MB)",
+    "password_strength_weak": "Weak",
+    "btn_create_lecturer": "Create Lecturer Account",
+    "btn_cancel": "Cancel",
+    "dialog": {
+      "add_title": "Add New Lecturer",
+      "edit_title": "Edit Lecturer",
+      "subtitle": "Enter lecturer details",
+      "name_ar": "Name (Arabic)",
+      "name_en": "Name (English)",
+      "email": "Email",
+      "specialty": "Specialty",
+      "subject": "Subject",
+      "status": "Status",
+      "status_active": "Active",
+      "status_inactive": "Inactive",
+      "save": "Save",
+      "save_edit": "Save Changes",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this lecturer?",
+      "delete": "Delete"
+    },
+    "toast": {
+      "create_success": "Lecturer added successfully",
+      "edit_success": "Lecturer updated successfully",
+      "delete_success": "Lecturer deleted successfully",
+      "status_updated": "Lecturer status updated successfully"
     }
   }
 }
