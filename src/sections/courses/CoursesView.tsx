@@ -93,8 +93,8 @@ export default function CoursesView() {
   // Actions for three-dots menu
   const actions = [
     {
-      label: t('actions.edit'),
-      icon: <Iconify icon="solar:pen-bold" />,
+      label: t('actions.view'),
+      icon: <Iconify icon="solar:eye-bold" />,
       onClick: (row: FormattedCourse) => router.push(`/courses/${row.id}`),
     },
     {

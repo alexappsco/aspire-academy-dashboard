@@ -32,11 +32,38 @@ export default function CourseHeroCard({ course }: CourseHeroCardProps) {
       }}
     >
       <Stack
-        direction={{ xs: 'column-reverse', md: 'row' }}
+        direction={{ xs: 'column', md: 'row' }}
         spacing={3}
-        sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+        sx={{ alignItems: 'center', justifyContent: 'flex-start' }}
       >
-        {/* Left Side (in RTL): Stats & Published Date */}
+        {/* Right Side in RTL / Left in LTR: Course Cover Image */}
+        <Box
+          sx={{
+            width: { xs: '100%', sm: 220, md: 240 },
+            height: 130,
+            borderRadius: 2.5,
+            overflow: 'hidden',
+            bgcolor: '#0F172A',
+            border: '1px solid #E2E8F0',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            backgroundImage:
+              'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.3)), radial-gradient(circle at center, #1E293B 0%, #0F172A 100%)',
+          }}
+        >
+          {/* Medical / Cardiology stylized visual placeholder */}
+          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+            <Iconify icon="solar:heart-pulse-bold" width={44} sx={{ color: '#38BDF8' }} />
+            <Typography sx={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>
+              CARDIOVASCULAR
+            </Typography>
+          </Stack>
+        </Box>
+
+        {/* Left Side in RTL / Right in LTR: Stats & Published Date */}
         <Box sx={{ flex: 1, width: '100%' }}>
           {/* Stats Row */}
           <Stack
@@ -132,33 +159,6 @@ export default function CourseHeroCard({ course }: CourseHeroCardProps) {
               date: isRtl ? course.publishDate_ar : course.publishDate_en,
             })}
           </Typography>
-        </Box>
-
-        {/* Right Side (in RTL): Course Cover Image */}
-        <Box
-          sx={{
-            width: { xs: '100%', sm: 220, md: 240 },
-            height: 130,
-            borderRadius: 2.5,
-            overflow: 'hidden',
-            bgcolor: '#0F172A',
-            border: '1px solid #E2E8F0',
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            backgroundImage:
-              'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.3)), radial-gradient(circle at center, #1E293B 0%, #0F172A 100%)',
-          }}
-        >
-          {/* Medical / Cardiology stylized visual placeholder */}
-          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
-            <Iconify icon="solar:heart-pulse-bold" width={44} sx={{ color: '#38BDF8' }} />
-            <Typography sx={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>
-              CARDIOVASCULAR
-            </Typography>
-          </Stack>
         </Box>
       </Stack>
     </Card>

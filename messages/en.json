@@ -60,7 +60,7 @@
       "paused": "Paused"
     },
     "actions": {
-      "edit": "Edit",
+      "view": "View",
       "delete": "Delete"
     }
   },
