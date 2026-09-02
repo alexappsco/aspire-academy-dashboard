@@ -140,6 +140,72 @@
       "validation_required": "Please fill in the required fields"
     }
   },
+  "CourseDetails": {
+    "breadcrumbs": {
+      "courses": "Courses",
+      "current": "Cardiovascular Basics"
+    },
+    "header": {
+      "specialty_prefix": "Specialty:",
+      "lecturer_prefix": "Lecturer:",
+      "published": "Published",
+      "unpublish": "Unpublish",
+      "publish": "Publish Course",
+      "edit_course": "Edit Course"
+    },
+    "hero": {
+      "rating": "Rating",
+      "reviews_count": "({count} reviews)",
+      "students": "Students",
+      "duration": "Duration",
+      "price": "Price",
+      "published_on": "Published on {date}"
+    },
+    "kpis": {
+      "total_students": "Total Students",
+      "completion_rate": "Completion Rate",
+      "avg_rating": "Average Rating",
+      "total_revenue": "Total Revenue"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "content": "Content",
+      "students": "Students",
+      "reviews": "Reviews",
+      "analytics": "Analytics"
+    },
+    "course_info": {
+      "title": "Course Information",
+      "paragraph_1": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions.",
+      "paragraph_2": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions."
+    },
+    "content_summary": {
+      "title": "Content Summary",
+      "chapters": "Chapters",
+      "video_lessons": "Video Lessons",
+      "quizzes": "Quizzes",
+      "resources": "Resources",
+      "manage_content": "Manage Content"
+    },
+    "recent_reviews": {
+      "title": "Recent Reviews",
+      "view_all": "View All Reviews"
+    },
+    "recent_enrollments": {
+      "title": "Recent Enrollments",
+      "view_all": "View All",
+      "columns": {
+        "name": "Name",
+        "join_date": "Join Date",
+        "progress": "Progress",
+        "status": "Status"
+      },
+      "statuses": {
+        "in_progress": "In Progress",
+        "completed": "Completed"
+      }
+    }
+  },
   "Banners": {
     "title": "Banners",
     "add_banner": "Add Banner",
