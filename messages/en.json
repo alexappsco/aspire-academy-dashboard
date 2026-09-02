@@ -60,7 +60,7 @@
       "paused": "Paused"
     },
     "actions": {
-      "edit": "Edit",
+      "view": "View",
       "delete": "Delete"
     }
   },
@@ -77,8 +77,12 @@
       "card_title": "Course Information",
       "name_label": "Course Name",
       "name_placeholder": "Enter course title",
-      "price_label": "Course Price",
-      "price_placeholder": "Enter course price",
+      "field_label": "Field",
+      "field_placeholder": "Select field...",
+      "current_price_label": "Current Price",
+      "current_price_placeholder": "Enter course price",
+      "old_price_label": "Price Before Discount",
+      "old_price_placeholder": "Enter course price",
       "lecturer_label": "Lecturer",
       "lecturer_placeholder": "Select lecturer...",
       "college_label": "College",
@@ -87,12 +91,23 @@
       "subject_placeholder": "Select subject...",
       "specialty_label": "Specialization",
       "specialty_placeholder": "Select specialization...",
-      "category_label": "Category",
-      "category_placeholder": "Select category...",
-      "field_label": "Field",
-      "field_placeholder": "Select field...",
+      "duration_label": "Course Duration",
+      "duration_placeholder": "Course duration...",
+      "type_label": "Course Type",
+      "type_placeholder": "Course type...",
       "description_label": "Course Description",
       "description_placeholder": "Write a detailed description for the course..."
+    },
+    "learning_objectives": {
+      "card_title": "Learning Objectives",
+      "add_objective_btn": "Add New Objective",
+      "dialog_add_title": "Add New Learning Objective",
+      "dialog_edit_title": "Edit Learning Objective",
+      "objective_placeholder": "Enter learning objective here...",
+      "save_btn": "Save",
+      "add_btn": "Add",
+      "cancel_btn": "Cancel",
+      "delete_confirm": "Are you sure you want to delete this objective?"
     },
     "media": {
       "card_title": "Course Media",
@@ -123,6 +138,72 @@
       "draft_saved": "Course saved as draft successfully",
       "course_created": "Course created successfully",
       "validation_required": "Please fill in the required fields"
+    }
+  },
+  "CourseDetails": {
+    "breadcrumbs": {
+      "courses": "Courses",
+      "current": "Cardiovascular Basics"
+    },
+    "header": {
+      "specialty_prefix": "Specialty:",
+      "lecturer_prefix": "Lecturer:",
+      "published": "Published",
+      "unpublish": "Unpublish",
+      "publish": "Publish Course",
+      "edit_course": "Edit Course"
+    },
+    "hero": {
+      "rating": "Rating",
+      "reviews_count": "({count} reviews)",
+      "students": "Students",
+      "duration": "Duration",
+      "price": "Price",
+      "published_on": "Published on {date}"
+    },
+    "kpis": {
+      "total_students": "Total Students",
+      "completion_rate": "Completion Rate",
+      "avg_rating": "Average Rating",
+      "total_revenue": "Total Revenue"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "content": "Content",
+      "students": "Students",
+      "reviews": "Reviews",
+      "analytics": "Analytics"
+    },
+    "course_info": {
+      "title": "Course Information",
+      "paragraph_1": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions.",
+      "paragraph_2": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions."
+    },
+    "content_summary": {
+      "title": "Content Summary",
+      "chapters": "Chapters",
+      "video_lessons": "Video Lessons",
+      "quizzes": "Quizzes",
+      "resources": "Resources",
+      "manage_content": "Manage Content"
+    },
+    "recent_reviews": {
+      "title": "Recent Reviews",
+      "view_all": "View All Reviews"
+    },
+    "recent_enrollments": {
+      "title": "Recent Enrollments",
+      "view_all": "View All",
+      "columns": {
+        "name": "Name",
+        "join_date": "Join Date",
+        "progress": "Progress",
+        "status": "Status"
+      },
+      "statuses": {
+        "in_progress": "In Progress",
+        "completed": "Completed"
+      }
     }
   },
   "Banners": {

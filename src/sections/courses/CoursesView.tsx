@@ -93,9 +93,9 @@ export default function CoursesView() {
   // Actions for three-dots menu
   const actions = [
     {
-      label: t('actions.edit'),
-      icon: <Iconify icon="solar:pen-bold" />,
-      onClick: (row: FormattedCourse) => console.log('Edit course:', row.id),
+      label: t('actions.view'),
+      icon: <Iconify icon="solar:eye-bold" />,
+      onClick: (row: FormattedCourse) => router.push(`/courses/${row.id}`),
     },
     {
       label: t('actions.delete'),
@@ -107,6 +107,20 @@ export default function CoursesView() {
 
   // Custom renders for table cells
   const customRender = {
+    title: (row: FormattedCourse) => (
+      <Typography
+        variant="subtitle2"
+        onClick={() => router.push(`/courses/${row.id}`)}
+        sx={{
+          cursor: 'pointer',
+          fontWeight: 700,
+          color: '#1C252E',
+          '&:hover': { color: '#0284C7', textDecoration: 'underline' },
+        }}
+      >
+        {row.title}
+      </Typography>
+    ),
     rating: (row: FormattedCourse) => (
       <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
         <Iconify icon="eva:star-fill" sx={{ color: '#FFB400', width: 16, height: 16 }} />
