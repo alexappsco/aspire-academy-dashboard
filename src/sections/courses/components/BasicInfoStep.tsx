@@ -14,14 +14,15 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Iconify from 'src/components/iconify';
 import SelectField from 'src/components/SelectField/SelectField';
 import MediaUploadBox from './MediaUploadBox';
+import LearningObjectivesCard from './LearningObjectivesCard';
 import { CourseFormValues } from '../types';
 import {
   MOCK_LECTURERS,
   MOCK_COLLEGES,
   MOCK_SUBJECTS,
   MOCK_SPECIALTIES,
-  MOCK_CATEGORIES,
   MOCK_FIELDS,
+  MOCK_COURSE_TYPES,
 } from '../_mock';
 
 interface BasicInfoStepProps {
@@ -86,72 +87,138 @@ export default function BasicInfoStep({
 
         <Divider sx={{ mb: 3.5, borderColor: '#F1F5F9' }} />
 
-        {/* Form Fields */}
+        {/* Form Fields Grid */}
         <Stack spacing={3}>
-          {/* Course Name */}
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#1E293B',
-                mb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-            >
-              {t('basic_info.name_label')}
-              <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
-            </Typography>
-            <TextField
-              fullWidth
-              placeholder={t('basic_info.name_placeholder')}
-              value={values.name}
-              onChange={(e) => onChange('name', e.target.value)}
-              error={!!errors.name}
-              sx={inputRootSx}
-            />
-            {errors.name && (
-              <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
-                {errors.name}
-              </FormHelperText>
-            )}
-          </Box>
+          {/* Row 1: Course Name & Field */}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
+            {/* Course Name */}
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#1E293B',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                {t('basic_info.name_label')}
+                <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder={t('basic_info.name_placeholder')}
+                value={values.name}
+                onChange={(e) => onChange('name', e.target.value)}
+                error={!!errors.name}
+                sx={inputRootSx}
+              />
+              {errors.name && (
+                <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
+                  {errors.name}
+                </FormHelperText>
+              )}
+            </Box>
 
-          {/* Course Price */}
-          <Box>
-            <Typography
-              sx={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#1E293B',
-                mb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-            >
-              {t('basic_info.price_label')}
-              <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
-            </Typography>
-            <TextField
-              fullWidth
-              type="number"
-              placeholder={t('basic_info.price_placeholder')}
-              value={values.price}
-              onChange={(e) => onChange('price', e.target.value)}
-              error={!!errors.price}
-              sx={inputRootSx}
-            />
-            {errors.price && (
-              <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
-                {errors.price}
-              </FormHelperText>
-            )}
-          </Box>
+            {/* Field */}
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#1E293B',
+                  mb: 1,
+                }}
+              >
+                {t('basic_info.field_label')}
+              </Typography>
+              <SelectField
+                fullWidth
+                value={values.field}
+                onChange={(e) => onChange('field', e.target.value)}
+                slotProps={{ select: { displayEmpty: true } }}
+                sx={inputRootSx}
+              >
+                <MenuItem value="" disabled sx={{ color: '#94A3B8' }}>
+                  {t('basic_info.field_placeholder')}
+                </MenuItem>
+                {MOCK_FIELDS.map((item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {isRtl ? item.label_ar : item.label_en}
+                  </MenuItem>
+                ))}
+              </SelectField>
+            </Box>
+          </Stack>
 
-          {/* Row 1: Lecturer & College */}
+          {/* Row 2: Current Price & Price Before Discount */}
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
+            {/* Current Price */}
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#1E293B',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                {t('basic_info.current_price_label')}
+                <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder={t('basic_info.current_price_placeholder')}
+                value={values.currentPrice}
+                onChange={(e) => onChange('currentPrice', e.target.value)}
+                error={!!errors.currentPrice}
+                sx={inputRootSx}
+              />
+              {errors.currentPrice && (
+                <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
+                  {errors.currentPrice}
+                </FormHelperText>
+              )}
+            </Box>
+
+            {/* Price Before Discount */}
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#1E293B',
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                {t('basic_info.old_price_label')}
+                <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+              </Typography>
+              <TextField
+                fullWidth
+                placeholder={t('basic_info.old_price_placeholder')}
+                value={values.oldPrice}
+                onChange={(e) => onChange('oldPrice', e.target.value)}
+                error={!!errors.oldPrice}
+                sx={inputRootSx}
+              />
+              {errors.oldPrice && (
+                <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
+                  {errors.oldPrice}
+                </FormHelperText>
+              )}
+            </Box>
+          </Stack>
+
+          {/* Row 3: Lecturer & College */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
             {/* Lecturer */}
             <Box sx={{ flex: 1 }}>
@@ -224,7 +291,7 @@ export default function BasicInfoStep({
             </Box>
           </Stack>
 
-          {/* Row 2: Subject & Specialty */}
+          {/* Row 4: Subject & Specialty */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
             {/* Subject */}
             <Box sx={{ flex: 1 }}>
@@ -292,9 +359,9 @@ export default function BasicInfoStep({
             </Box>
           </Stack>
 
-          {/* Row 3: Category & Field */}
+          {/* Row 5: Course Duration & Course Type */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
-            {/* Category */}
+            {/* Course Duration */}
             <Box sx={{ flex: 1 }}>
               <Typography
                 sx={{
@@ -307,29 +374,25 @@ export default function BasicInfoStep({
                   gap: 0.5,
                 }}
               >
-                {t('basic_info.category_label')}
+                {t('basic_info.duration_label')}
                 <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
               </Typography>
-              <SelectField
+              <TextField
                 fullWidth
-                value={values.category}
-                onChange={(e) => onChange('category', e.target.value)}
-                error={!!errors.category}
-                slotProps={{ select: { displayEmpty: true } }}
+                placeholder={t('basic_info.duration_placeholder')}
+                value={values.duration}
+                onChange={(e) => onChange('duration', e.target.value)}
+                error={!!errors.duration}
                 sx={inputRootSx}
-              >
-                <MenuItem value="" disabled sx={{ color: '#94A3B8' }}>
-                  {t('basic_info.category_placeholder')}
-                </MenuItem>
-                {MOCK_CATEGORIES.map((item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {isRtl ? item.label_ar : item.label_en}
-                  </MenuItem>
-                ))}
-              </SelectField>
+              />
+              {errors.duration && (
+                <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>
+                  {errors.duration}
+                </FormHelperText>
+              )}
             </Box>
 
-            {/* Field */}
+            {/* Course Type */}
             <Box sx={{ flex: 1 }}>
               <Typography
                 sx={{
@@ -339,19 +402,19 @@ export default function BasicInfoStep({
                   mb: 1,
                 }}
               >
-                {t('basic_info.field_label')}
+                {t('basic_info.type_label')}
               </Typography>
               <SelectField
                 fullWidth
-                value={values.field}
-                onChange={(e) => onChange('field', e.target.value)}
+                value={values.courseType}
+                onChange={(e) => onChange('courseType', e.target.value)}
                 slotProps={{ select: { displayEmpty: true } }}
                 sx={inputRootSx}
               >
                 <MenuItem value="" disabled sx={{ color: '#94A3B8' }}>
-                  {t('basic_info.field_placeholder')}
+                  {t('basic_info.type_placeholder')}
                 </MenuItem>
-                {MOCK_FIELDS.map((item) => (
+                {MOCK_COURSE_TYPES.map((item) => (
                   <MenuItem key={item.value} value={item.value}>
                     {isRtl ? item.label_ar : item.label_en}
                   </MenuItem>
@@ -360,7 +423,7 @@ export default function BasicInfoStep({
             </Box>
           </Stack>
 
-          {/* Course Description */}
+          {/* Row 6: Course Description */}
           <Box>
             <Typography
               sx={{
@@ -395,7 +458,13 @@ export default function BasicInfoStep({
         </Stack>
       </Card>
 
-      {/* 2. Course Media Card */}
+      {/* 2. Learning Objectives Card */}
+      <LearningObjectivesCard
+        objectives={values.learningObjectives}
+        onChange={(objs) => onChange('learningObjectives', objs)}
+      />
+
+      {/* 3. Course Media Card */}
       <Card
         sx={{
           borderRadius: 2.5,

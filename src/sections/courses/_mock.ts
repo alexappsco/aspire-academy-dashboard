@@ -261,3 +261,14 @@ export const INITIAL_CHAPTERS = [
   },
 ];
 
+export const MOCK_COURSE_TYPES = [
+  { value: 'recorded', label_ar: 'مسجل (أونلاين)', label_en: 'Recorded (Online)' },
+  { value: 'live', label_ar: 'مباشر (لايف)', label_en: 'Live Stream' },
+  { value: 'hybrid', label_ar: 'مدمج (حضوري وعن بعد)', label_en: 'Hybrid' },
+];
+
+export const INITIAL_OBJECTIVES = [
+  { id: 'obj-1', title: 'فهم المبادئ الأساسية في أمراض القلب' },
+  { id: 'obj-2', title: 'تطبيق الممارسات السريرية الحديثة' },
+  { id: 'obj-3', title: 'تطوير مهارات التشخيص والعلاج' },
+];

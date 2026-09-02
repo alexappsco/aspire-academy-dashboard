@@ -13,16 +13,24 @@ export interface Chapter {
   isExpanded: boolean;
 }
 
+export interface LearningObjective {
+  id: string;
+  title: string;
+}
+
 export interface CourseFormValues {
   name: string;
-  price: string;
+  field: string;
+  currentPrice: string;
+  oldPrice: string;
   lecturer: string;
   college: string;
   subject: string;
   specialty: string;
-  category: string;
-  field: string;
+  duration: string;
+  courseType: string;
   description: string;
+  learningObjectives: LearningObjective[];
   thumbnail: File | string | null;
   cover: File | string | null;
   chapters: Chapter[];

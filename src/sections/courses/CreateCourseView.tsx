@@ -17,18 +17,21 @@ import CourseStepper from './components/CourseStepper';
 import BasicInfoStep from './components/BasicInfoStep';
 import ChaptersStep from './components/ChaptersStep';
 import { CourseFormValues, Chapter } from './types';
-import { INITIAL_CHAPTERS } from './_mock';
+import { INITIAL_CHAPTERS, INITIAL_OBJECTIVES } from './_mock';
 
 const initialValues: CourseFormValues = {
   name: '',
-  price: '',
+  field: '',
+  currentPrice: '',
+  oldPrice: '',
   lecturer: '',
   college: '',
   subject: '',
   specialty: '',
-  category: '',
-  field: '',
+  duration: '',
+  courseType: '',
   description: '',
+  learningObjectives: INITIAL_OBJECTIVES,
   thumbnail: null,
   cover: null,
   chapters: INITIAL_CHAPTERS,
@@ -62,11 +65,12 @@ export default function CreateCourseView() {
   const validateBasicInfo = (): boolean => {
     const newErrors: Partial<Record<keyof CourseFormValues, string>> = {};
     if (!formValues.name.trim()) newErrors.name = t('messages.validation_required');
-    if (!formValues.price) newErrors.price = t('messages.validation_required');
+    if (!formValues.currentPrice.trim()) newErrors.currentPrice = t('messages.validation_required');
+    if (!formValues.oldPrice.trim()) newErrors.oldPrice = t('messages.validation_required');
     if (!formValues.lecturer) newErrors.lecturer = t('messages.validation_required');
     if (!formValues.college) newErrors.college = t('messages.validation_required');
     if (!formValues.subject) newErrors.subject = t('messages.validation_required');
-    if (!formValues.category) newErrors.category = t('messages.validation_required');
+    if (!formValues.duration.trim()) newErrors.duration = t('messages.validation_required');
     if (!formValues.description.trim()) newErrors.description = t('messages.validation_required');
 
     setErrors(newErrors);
