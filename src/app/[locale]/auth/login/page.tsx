@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "src/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useToast } from "src/components/toast";
+import { useAuth } from "src/contexts/AuthContext";
+import { login as loginAction } from "src/actions";
+import { PATH_AFTER_LOGIN } from "src/config-global";
 import {
   Box,
   Typography,
@@ -15,15 +18,41 @@ import {
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations("Login");
+  const { login: authLogin } = useAuth();
+  const { success, error: toastError } = useToast();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("store@user.com");
-  const [password, setPassword] = useState("Admin@123456");
+  const [email, setEmail] = useState("admin@aspire.com");
+  const [password, setPassword] = useState("Secret@1234");
   const [loading, setLoading] = useState(false);
-  const { success } = useToast();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toastError(t("fill_fields") || "Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await loginAction({ email, password });
+      console.log("Login result: ⚠️⚠️⚠️⚠️", result);
+      if (!result.success) {
+        toastError(result.error);
+        return;
+      }
+
+      authLogin(result.data);
+      success(t("login_success"));
+      router.push(PATH_AFTER_LOGIN);
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : t("generic_error"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -88,7 +117,6 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 type={showPassword ? "text" : "password"}
                 placeholder={t("password_placeholder")}
-                
                 slotProps={{
                   input: {
                     endAdornment: (
@@ -134,13 +162,7 @@ export default function LoginPage() {
             </Box>
 
             <Button
-              onClick={() => {
-                setLoading(true);
-                success(t("login_success"));
-                setTimeout(() => {
-                  router.push("/");
-                }, 1000);
-              }}
+              onClick={handleLogin}
               disabled={loading}
               sx={{
                 bgcolor: "#ebedef",
@@ -211,7 +233,6 @@ export default function LoginPage() {
           sx={{ width: { xs: 200, md: 350 }, objectFit: "contain" }}
         />
       </Box>
-
     </Box>
   );
 }

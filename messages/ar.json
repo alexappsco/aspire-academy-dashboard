@@ -1,4 +1,8 @@
 {
+  "Metadata": {
+    "login": "تسجيل الدخول"
+  },
+
   "Sidebar": {
     "home": "الرئيسية",
     "course_management": "إدارة الدورات التدريبية",
@@ -544,6 +548,13 @@
     }
   },
   "Global": {
+    "Server": {
+      "unauthorized": "غير مصرح",
+      "not_found": "غير موجود",
+      "internal_server_error": "خطأ في الخادم",
+      "service_not_available": "الخدمة غير متاحة",
+      "unexpected_error": "حدث خطأ غير متوقع"
+    },
     "Label": {
       "no_data": "لا توجد بيانات"
     },
@@ -566,6 +577,7 @@
     "processing": "جاري المعالجة...",
     "login": "تسجيل الدخول",
     "or": "أو",
+    "fill_fields": "يرجى تعبئة جميع الحقول",
     "create_account": "إنشاء حساب جديد",
     "transition_success": "تم تسجيل الدخول بنجاح"
   },

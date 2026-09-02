@@ -1,9 +1,20 @@
-import { HOST_API } from 'src/config-global';
+import { HOST_API, COOKIES_KEYS } from 'src/config-global';
 
 type RequestConfig = RequestInit & {
   data?: unknown;
   url?: string;
 };
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getLocaleFromCookie(): string {
+  const lang = getCookie(COOKIES_KEYS.lang);
+  return lang || 'ar';
+}
 
 async function request<T = unknown>(url: string, config: RequestConfig = {}): Promise<T> {
   const { data, headers, ...rest } = config;
@@ -12,6 +23,7 @@ async function request<T = unknown>(url: string, config: RequestConfig = {}): Pr
     ...rest,
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': getLocaleFromCookie(),
       ...headers,
     },
     body: data === undefined ? rest.body : JSON.stringify(data),
