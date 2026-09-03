@@ -6,7 +6,6 @@ import { usePathname } from "src/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { scrollbar } from "src/theme/css";
 import SvgColor from "src/components/svg-color";
-import { useAuth } from "src/contexts/AuthContext";
 import {
   Box,
   Collapse,
@@ -66,7 +65,7 @@ const sidebarItems: SidebarItem[] = [
       },
       {
         key: "lecturers_management",
-        path: "/lecturers",
+        path: "/minutes-management",
       },
     ],
   },
@@ -164,19 +163,14 @@ const sidebarItems: SidebarItem[] = [
   },
 ];
 
-const logoutItem: SidebarItem = {
-  key: "logout",
-  icon: "/icons/logout.svg",
-};
-
 const COLORS = {
   text: "#1E293B",
   textMuted: "#64748B",
-  activeBg: "#F1F5F9",
+  activeBg: "#EAF7F0",
+  activeBgSoft: "#F4FBF7",
   hoverBg: "#F8FAFC",
   activeIcon: "#1B8354",
-  logout: "#DC2626",
-  logoutHover: "#FEE2E2",
+  activeBorder: "#1B8354",
   border: "#E2E8F0",
 };
 
@@ -213,43 +207,35 @@ function SidebarItemButton({
   isRtl,
   expanded,
   onToggle,
-  isLogout = false,
   depth = 0,
-  onClick,
 }: {
   item: SidebarItem;
   currentPathname: string;
   isRtl: boolean;
   expanded?: boolean;
   onToggle?: () => void;
-  isLogout?: boolean;
   depth?: number;
-  onClick?: () => void;
 }) {
   const t = useTranslations("Sidebar");
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
 
-  const isCurrentActive = !isLogout && (
+  const isCurrentActive = (
     hasChildren
       ? item.children!.some((child) => checkIsActive(child.path, currentPathname))
       : checkIsActive(item.path, currentPathname)
   );
 
-  const isCurrentActiveLeaf = isCurrentActive && !hasChildren && !isLogout;
+  const isCurrentActiveLeaf = isCurrentActive && !hasChildren;
+  const isActiveGroup = isCurrentActive && hasChildren;
 
-  const itemColor = isLogout
-    ? COLORS.logout
-    : isCurrentActiveLeaf
+  const itemColor = isCurrentActiveLeaf || isActiveGroup
     ? COLORS.activeIcon
     : COLORS.text;
-  const iconColor = isLogout ? COLORS.logout : undefined;
 
   const handleClick = () => {
     if (isExpandable) {
       onToggle();
-    } else if (onClick) {
-      onClick();
     }
   };
 
@@ -258,14 +244,29 @@ function SidebarItemButton({
       onClick={handleClick}
       selected={isCurrentActiveLeaf}
       sx={{
+        position: "relative",
+        overflow: "hidden",
         borderRadius: 1.5,
         gap: 1.5,
         minHeight: depth > 0 ? 38 : 44,
         mb: 0.5,
         px: 1.5,
         alignItems: "center",
+        bgcolor: isActiveGroup ? COLORS.activeBgSoft : "transparent",
+        boxShadow: isCurrentActiveLeaf ? "0 8px 18px rgba(27, 131, 84, 0.12)" : "none",
+        transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 8,
+          bottom: 8,
+          width: 4,
+          borderRadius: 999,
+          bgcolor: isCurrentActiveLeaf ? COLORS.activeBorder : "transparent",
+          ...(isRtl ? { right: 6 } : { left: 6 }),
+        },
         "&:hover": {
-          bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
+          bgcolor: COLORS.hoverBg,
         },
         "&.Mui-selected": {
           bgcolor: COLORS.activeBg,
@@ -290,9 +291,10 @@ function SidebarItemButton({
               width: 5,
               height: 5,
               borderRadius: "50%",
-              bgcolor: isCurrentActiveLeaf ? COLORS.activeIcon : "#1E293B",
-              transition: "transform 0.15s ease",
-              transform: isCurrentActiveLeaf ? "scale(1.3)" : "scale(1)",
+              bgcolor: isCurrentActiveLeaf ? COLORS.activeIcon : "#94A3B8",
+              boxShadow: isCurrentActiveLeaf ? "0 0 0 4px rgba(27, 131, 84, 0.14)" : "none",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
+              transform: isCurrentActiveLeaf ? "scale(1.45)" : "scale(1)",
             }}
           />
         </Box>
@@ -309,7 +311,7 @@ function SidebarItemButton({
             <SidebarIcon
               active={isCurrentActiveLeaf || (hasChildren && isCurrentActive)}
               src={item.icon}
-              color={iconColor}
+              color={isActiveGroup ? COLORS.activeIcon : undefined}
             />
           </ListItemIcon>
         )
@@ -351,7 +353,7 @@ function SidebarItemButton({
           <KeyboardArrowDownRoundedIcon
             sx={{
               fontSize: 18,
-              color: COLORS.textMuted,
+              color: isActiveGroup ? COLORS.activeIcon : COLORS.textMuted,
               transition: "transform 0.2s ease-in-out",
               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
             }}
@@ -403,14 +405,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const anchor = isRtl ? "right" : "left";
-  const { logout } = useAuth();
 
-  const [expandedItems, setExpandedItems] = useState<string[]>([
-    "course_management",
-    "user_management",
-    "academic_hierarchy",
-    "legal_info",
-  ]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpand = useCallback((key: string) => {
     setExpandedItems((prev) =>
@@ -458,25 +454,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </List>
       </Box>
 
-      {/* Bottom Logout Item */}
-      <Box
-        sx={{
-          px: 1.5,
-          pb: 2,
-          pt: 1,
-          borderTop: `1px solid ${COLORS.border}`,
-        }}
-      >
-        <List disablePadding>
-          <SidebarItemButton
-            item={logoutItem}
-            currentPathname={pathname}
-            isRtl={isRtl}
-            isLogout
-            onClick={logout}
-          />
-        </List>
-      </Box>
     </Box>
   );
 
