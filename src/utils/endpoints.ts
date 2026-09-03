@@ -8,5 +8,9 @@ export const endpoints = {
   },
   currencies: {
     list: '/admin/currencies',
+    details: (id: string) => `/admin/currencies/${id}`,
+    create: '/admin/currencies',
+    update: (id: string) => `/admin/currencies/${id}`,
+    delete: (id: string) => `/admin/currencies/${id}`,
   },
 };

@@ -102,6 +102,11 @@ const sidebarItems: SidebarItem[] = [
         icon: "/icons/package.svg",
         path: "/countries",
       },
+      {
+        key: "currencies",
+        icon: "/icons/finance.svg",
+        path: "/currencies",
+      },
     ],
   },
   {
