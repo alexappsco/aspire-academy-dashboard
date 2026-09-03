@@ -152,8 +152,8 @@ const sidebarItems: SidebarItem[] = [
         path: "/terms",
       },
       {
-        key: "privacy_policy",
-        path: "/privacy-policy",
+        key: "about_us",
+        path: "/about-us",
       },
       {
         key: "common_questions",
