@@ -3,18 +3,18 @@
 import { getData, postData, editData, deleteData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type {
-  CountryDto,
-  CountriesListResponse,
-  GetCountriesParams,
-  CreateCountryDto,
-  UpdateCountryDto,
-} from 'src/sections/countries/types';
+  CurrencyDto,
+  CurrenciesListResponse,
+  GetCurrenciesParams,
+  CreateCurrencyDto,
+  UpdateCurrencyDto,
+} from 'src/sections/currencies/types';
 
-export async function getCountriesAction(
-  params?: GetCountriesParams
-): Promise<{ success: boolean; data?: CountriesListResponse; error?: string }> {
+export async function getCurrenciesAction(
+  params?: GetCurrenciesParams
+): Promise<{ success: boolean; data?: CurrenciesListResponse; error?: string }> {
   try {
-    let endpoint = endpoints.countries.list;
+    let endpoint = endpoints.currencies.list;
     if (params) {
       const searchParams = new URLSearchParams();
 
@@ -44,92 +44,91 @@ export async function getCountriesAction(
       }
     }
 
-    const res = await getData<CountriesListResponse>(endpoint);
+    const res = await getData<CurrenciesListResponse>(endpoint);
 
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
 
-    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to fetch countries';
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to fetch currencies';
     return { success: false, error: errorMsg };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch countries',
+      error: error instanceof Error ? error.message : 'Failed to fetch currencies',
     };
   }
 }
 
-export async function getCountryByIdAction(
+export async function getCurrencyByIdAction(
   id: string
-): Promise<{ success: boolean; data?: CountryDto; error?: string }> {
+): Promise<{ success: boolean; data?: CurrencyDto; error?: string }> {
   try {
-    const res = await getData<CountryDto>(endpoints.countries.details(id));
+    const res = await getData<CurrencyDto>(endpoints.currencies.details(id));
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
-    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to get country';
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to get currency';
     return { success: false, error: errorMsg };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get country',
+      error: error instanceof Error ? error.message : 'Failed to get currency',
     };
   }
 }
 
-export async function createCountryAction(
-  data: CreateCountryDto
-): Promise<{ success: boolean; data?: CountryDto; error?: string }> {
+export async function createCurrencyAction(
+  data: CreateCurrencyDto
+): Promise<{ success: boolean; data?: CurrencyDto; error?: string }> {
   try {
-    const res = await postData<CountryDto, CreateCountryDto>(endpoints.countries.create, data);
+    const res = await postData<CurrencyDto, CreateCurrencyDto>(endpoints.currencies.create, data);
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
-    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to create country';
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to create currency';
     return { success: false, error: errorMsg };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create country',
+      error: error instanceof Error ? error.message : 'Failed to create currency',
     };
   }
 }
 
-export async function updateCountryAction(
+export async function updateCurrencyAction(
   id: string,
-  data: UpdateCountryDto
-): Promise<{ success: boolean; data?: CountryDto; error?: string }> {
+  data: UpdateCurrencyDto
+): Promise<{ success: boolean; data?: CurrencyDto; error?: string }> {
   try {
-    const res = await editData<CountryDto, UpdateCountryDto>(endpoints.countries.update(id), 'PUT', data);
+    const res = await editData<CurrencyDto, UpdateCurrencyDto>(endpoints.currencies.update(id), 'PUT', data);
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
-    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to update country';
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to update currency';
     return { success: false, error: errorMsg };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to update country',
+      error: error instanceof Error ? error.message : 'Failed to update currency',
     };
   }
 }
 
-export async function deleteCountryAction(
+export async function deleteCurrencyAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await deleteData(endpoints.countries.delete(id));
+    const res = await deleteData(endpoints.currencies.delete(id));
     if ('success' in res && res.success) {
       return { success: true };
     }
-    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to delete country';
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to delete currency';
     return { success: false, error: errorMsg };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete country',
+      error: error instanceof Error ? error.message : 'Failed to delete currency',
     };
   }
 }
-

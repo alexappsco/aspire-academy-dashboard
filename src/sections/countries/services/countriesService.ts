@@ -4,8 +4,8 @@ import {
   createCountryAction,
   updateCountryAction,
   deleteCountryAction,
-  getCurrenciesAction,
 } from 'src/actions/countries';
+import { getCurrenciesAction } from 'src/actions/currencies';
 import {
   CountryDto,
   CountriesListResponse,
@@ -76,6 +76,11 @@ export const countriesService = {
    */
   getCurrencies: async (): Promise<CurrencyDto[]> => {
     const res = await getCurrenciesAction();
-    return res.data || [];
+    if (res.success && res.data) {
+      if (Array.isArray(res.data.items)) {
+        return res.data.items;
+      }
+    }
+    return [];
   },
 };
