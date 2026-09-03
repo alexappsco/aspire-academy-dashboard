@@ -226,13 +226,13 @@ export default function MinutesManagementView() {
         <Button
           variant="contained"
           href={`/${locale}/minutes-management/new`}
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: '10px',
             px: 2.5,
             py: 1.2,
+            gap: 1,
             fontWeight: 700,
             fontSize: '14px',
             textTransform: 'none',
@@ -240,6 +240,7 @@ export default function MinutesManagementView() {
             '&:hover': { bgcolor: '#0F172A' },
           }}
         >
+          <Iconify icon="mingcute:add-line" width={20} />
           {t('add_minutes')}
         </Button>
       </Box>

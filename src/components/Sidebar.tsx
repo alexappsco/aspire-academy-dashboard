@@ -57,8 +57,43 @@ const sidebarItems: SidebarItem[] = [
   },
   // 3. إدارة المستخدمين
   {
+<<<<<<< HEAD
     key: "user_management",
     icon: "/icons/profile.svg",
+=======
+    key: "booking_management",
+    icon: "/icons/booking.svg",
+    children: [
+      { key: "home", icon: "/icons/main.svg", path: "/bookings" },
+    ],
+  },
+  {
+    key: "user_management",
+    icon: "/icons/booking.svg",
+    children: [
+      {
+        key: "minutes_management",
+        icon: "/icons/booking.svg",
+        path: "/minutes-management",
+      },
+    ],
+  },
+  {
+    key: "finance_payments",
+    icon: "/icons/finance.svg",
+    path: "/finance",
+  },
+  {
+    key: "reports_analytics",
+    icon: "/icons/reports.svg",
+    children: [
+      { key: "home", icon: "/icons/main.svg", path: "/reports" },
+    ],
+  },
+  {
+    key: "academic_hierarchy",
+    icon: "/icons/curriculum.svg",
+>>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
     children: [
       {
         key: "students_management",
@@ -147,6 +182,7 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "legal_info",
     icon: "/icons/invoice.svg",
+<<<<<<< HEAD
     children: [
       {
         key: "terms_and_conditions",
@@ -161,6 +197,23 @@ const sidebarItems: SidebarItem[] = [
         path: "/common-questions",
       },
     ],
+=======
+    path: "/terms",
+  },
+  {
+    key: "about_us",
+    icon: "/icons/profile.svg",
+    path: "/about-us",
+  },
+ 
+];
+
+const bottomItems: SidebarItem[] = [
+  {
+    key: "settings",
+    icon: "/icons/settings.svg",
+    path: "/settings",
+>>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
   },
 ];
 
