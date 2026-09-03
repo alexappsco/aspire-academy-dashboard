@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
@@ -13,39 +14,100 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
 import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { deleteData, editData, getData, postData } from 'src/utils/crud-fetch-api';
 
-import { MOCK_CATEGORIES, CategoryItem } from './_mock';
 import CategoryFormDialog from './new-edit-category-dialog';
 import DeleteConfirmDialog from './delete-confirm-dialog';
+import type { CategoryFormValues, CategoryItem, FieldsListResponse } from '../../types/category';
+
+const FIELDS_ENDPOINT = '/admin/fields';
 
 interface FormattedCategory {
   id: string;
   name: string;
   image: string;
   order: number;
-  createdDate: string;
   active: boolean;
 }
 
-export default function CategoryView() {
+interface CategoryViewProps {
+  initialItems?: CategoryItem[];
+  initialTotal?: number;
+}
+
+export default function CategoryView({
+  initialItems = [],
+  initialTotal = 0,
+}: CategoryViewProps) {
   const t = useTranslations('Categories');
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const { error: toastError, success: toastSuccess } = useToast();
 
-  const [categories, setCategories] = useState<CategoryItem[]>(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<CategoryItem[]>(initialItems);
+  const [totalCount, setTotalCount] = useState(initialTotal);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const skipInitialFetch = useRef(true);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogKey, setDialogKey] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const fetchCategories = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (debouncedSearch.trim()) params.set('Filter', debouncedSearch.trim());
+      if (statusFilter === 'active') params.set('IsActive', 'true');
+      if (statusFilter === 'inactive') params.set('IsActive', 'false');
+      params.set('SkipCount', '0');
+      params.set('MaxResultCount', '1000');
+
+      const res = await getData<FieldsListResponse>(`${FIELDS_ENDPOINT}?${params.toString()}`);
+
+      if (res.success) {
+        setCategories(res.data.items ?? []);
+        setTotalCount(res.data.totalCount ?? 0);
+      } else {
+        toastError(res.error || t('subtitle'));
+      }
+    } catch (error) {
+      toastError(error instanceof Error ? error.message : 'Error');
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, statusFilter, t, toastError]);
+
+  useEffect(() => {
+    if (skipInitialFetch.current && !debouncedSearch && statusFilter === 'all') {
+      skipInitialFetch.current = false;
+      return;
+    }
+    skipInitialFetch.current = false;
+    void fetchCategories();
+  }, [fetchCategories, debouncedSearch, statusFilter]);
+
   const handleOpenAdd = () => {
     setEditingCategory(null);
+    setDialogKey((key) => key + 1);
     setDialogOpen(true);
   };
 
@@ -53,6 +115,7 @@ export default function CategoryView() {
     const category = categories.find((c) => c.id === row.id);
     if (category) {
       setEditingCategory(category);
+      setDialogKey((key) => key + 1);
       setDialogOpen(true);
     }
   };
@@ -62,65 +125,96 @@ export default function CategoryView() {
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (deletingId) {
-      setCategories((prev) => prev.filter((c) => c.id !== deletingId));
-      setDeletingId(null);
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    setDeleting(true);
+    try {
+      const res = await deleteData(`${FIELDS_ENDPOINT}/${deletingId}`);
+      if (res.success) {
+        toastSuccess(t('dialog.delete'));
+        setDeleteDialogOpen(false);
+        setDeletingId(null);
+        await fetchCategories();
+      } else {
+        toastError(res.error || 'Error');
+      }
+    } catch (error) {
+      toastError(error instanceof Error ? error.message : 'Error');
+    } finally {
+      setDeleting(false);
     }
   };
 
-  const handleSaveCategory = (data: Partial<CategoryItem>) => {
-    if (editingCategory) {
-      setCategories((prev) =>
-        prev.map((c) => (c.id === editingCategory.id ? { ...c, ...data } : c))
-      );
-    } else {
-      const newCategory: CategoryItem = {
-        id: Date.now().toString(),
-        name_ar: data.name_ar ?? '',
-        name_en: data.name_en ?? '',
-        image: data.image ?? '/icons/package.svg',
-        order: data.order ?? 1,
-        createdDate_ar: new Date().toLocaleDateString('ar-EG'),
-        createdDate_en: new Date().toLocaleDateString('en-US'),
-        active: data.active ?? true,
-      };
-      setCategories((prev) => [newCategory, ...prev]);
+  const handleSaveCategory = async (data: CategoryFormValues) => {
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('NameAr', data.nameAr);
+      formData.append('NameEn', data.nameEn);
+      formData.append('Order', String(data.order));
+      formData.append('IsActive', String(data.isActive));
+      if (data.imageFile) {
+        formData.append('Image', data.imageFile);
+      }
+
+      const res = editingCategory
+        ? await editData(`${FIELDS_ENDPOINT}/${editingCategory.id}`, 'PUT', formData)
+        : await postData(`${FIELDS_ENDPOINT}`, formData);
+
+      if (res.success) {
+        toastSuccess(t('dialog.save'));
+        setDialogOpen(false);
+        setEditingCategory(null);
+        await fetchCategories();
+      } else {
+        toastError(('error' in res && res.error) || 'Error');
+      }
+    } catch (error) {
+      toastError(error instanceof Error ? error.message : 'Error');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
-    );
+  const handleToggleStatus = async (id: string) => {
+    const category = categories.find((c) => c.id === id);
+    if (!category || togglingId) return;
+
+    setTogglingId(id);
+    try {
+      const formData = new FormData();
+      formData.append('NameAr', category.nameAr);
+      formData.append('NameEn', category.nameEn);
+      formData.append('Order', String(category.order));
+      formData.append('IsActive', String(!category.isActive));
+
+      const res = await editData(`${FIELDS_ENDPOINT}/${id}`, 'PUT', formData);
+      if (res.success) {
+        setCategories((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, isActive: !c.isActive } : c))
+        );
+      } else {
+        toastError(res.error || 'Error');
+      }
+    } catch (error) {
+      toastError(error instanceof Error ? error.message : 'Error');
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const formattedCategories: FormattedCategory[] = categories.map((item) => ({
     id: item.id,
-    name: isRtl ? item.name_ar : item.name_en,
-    image: item.image,
+    name: isRtl ? item.nameAr : item.nameEn,
+    image: item.imageUrl,
     order: item.order,
-    createdDate: isRtl ? item.createdDate_ar : item.createdDate_en,
-    active: item.active,
+    active: item.isActive,
   }));
-
-  const filteredCategories = formattedCategories.filter((item) => {
-    const matchesSearch = item.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && item.active) ||
-      (statusFilter === 'inactive' && !item.active);
-
-    return matchesSearch && matchesStatus;
-  });
 
   const tableHead = [
     { id: 'image', label: t('columns.image'), align: (isRtl ? 'right' : 'left') as cellAlignment },
     { id: 'name', label: t('columns.name'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'createdDate', label: t('columns.created_date'), align: 'center' as cellAlignment },
     { id: 'order', label: t('columns.order'), align: 'center' as cellAlignment },
     { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
@@ -147,27 +241,55 @@ export default function CategoryView() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 110,
-          height: 90,
+          width: 140,
+          height: 120,
           border: '1px solid #E2E8F0',
           borderRadius: '20px',
-          p: 1,
+          p: 1.5,
           bgcolor: '#FFFFFF',
+          gap: 1,
         }}
       >
-        <Box sx={{ width: 32, height: 32, mb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src={row.image}
+        <Box
+          sx={{
+            width: 72,
+            height: 72,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: '#F8FAFC',
+          }}
+        >
+          <Box
+            component="img"
+            src={row.image || '/icons/package.svg'}
             alt={row.name}
-            width={32}
-            height={32}
-            style={{ objectFit: 'contain' }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/icons/package.svg';
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+              e.currentTarget.src = '/icons/package.svg';
+              e.currentTarget.style.objectFit = 'contain';
             }}
           />
         </Box>
-        <Typography variant="caption" sx={{ fontWeight: 700, color: '#1E293B', fontSize: 13 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 700,
+            color: '#1E293B',
+            fontSize: 13,
+            textAlign: 'center',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {row.name}
         </Typography>
       </Box>
@@ -183,6 +305,7 @@ export default function CategoryView() {
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
           <Switch
             checked={isActive}
+            disabled={togglingId === row.id}
             onChange={() => handleToggleStatus(row.id)}
             sx={{
               '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
@@ -199,7 +322,6 @@ export default function CategoryView() {
 
   return (
     <Box sx={{ py: 2 }}>
-      {/* Header section */}
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
@@ -237,7 +359,6 @@ export default function CategoryView() {
         </Button>
       </Stack>
 
-      {/* Main card containing filter row and table */}
       <Card
         sx={{
           borderRadius: 3,
@@ -247,7 +368,6 @@ export default function CategoryView() {
           bgcolor: '#FFFFFF',
         }}
       >
-        {/* Filters and search row */}
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
@@ -300,11 +420,25 @@ export default function CategoryView() {
           </SelectField>
         </Stack>
 
-        {/* Table list */}
-        <Box sx={{ px: 1 }}>
+        <Box sx={{ px: 1, position: 'relative', minHeight: 200 }}>
+          {loading && (
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(255,255,255,0.6)',
+                zIndex: 2,
+              }}
+            >
+              <CircularProgress size={32} />
+            </Box>
+          )}
           <SharedTable<FormattedCategory>
-            data={filteredCategories}
-            count={filteredCategories.length}
+            data={formattedCategories}
+            count={totalCount || formattedCategories.length}
             tableHead={tableHead}
             actions={actions}
             customRender={customRender}
@@ -312,22 +446,21 @@ export default function CategoryView() {
         </Box>
       </Card>
 
-      {/* Add / Edit Dialog */}
       <CategoryFormDialog
-        key={editingCategory?.id ?? 'new'}
+        key={dialogKey}
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => !saving && setDialogOpen(false)}
         initialData={editingCategory}
+        loading={saving}
         onSave={handleSaveCategory}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
+        onClose={() => !deleting && setDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
+        loading={deleting}
       />
     </Box>
-
   );
 }
