@@ -13,7 +13,7 @@ export async function loginAction(
 ): Promise<ApiSingleResponse<LoginResponse>> {
   try {
     const res = await postData<LoginResponse, LoginPayload>(
-      '/api/v1/admin/auth/login',
+      '/admin/auth/login',
       data,
       { skipAuth: true }
     );
