@@ -5,17 +5,47 @@ import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
-import SelectField from 'src/components/SelectField/SelectField';
 import { useRouter } from 'src/i18n/routing';
 
 export default function HomeHeader() {
   const t = useTranslations('Home.header');
   const router = useRouter();
   const [timeRange, setTimeRange] = useState('30_days');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSelect = (val: string) => {
+    setTimeRange(val);
+    handleClose();
+  };
+
+  const getTimeRangeLabel = () => {
+    switch (timeRange) {
+      case '7_days':
+        return t('time_range.last_7_days');
+      case '30_days':
+        return t('time_range.last_30_days');
+      case '90_days':
+        return t('time_range.last_90_days');
+      case 'year':
+        return t('time_range.this_year');
+      default:
+        return t('time_range.last_30_days');
+    }
+  };
 
   return (
     <Stack
@@ -69,42 +99,89 @@ export default function HomeHeader() {
           gap: 1,
         }}
       >
-        {/* Time Range Selector */}
-        <SelectField
-          size="small"
-          value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
-          slotProps={{
-            select: {
-              displayEmpty: true,
-              startAdornment: (
-                <Iconify
-                  icon="solar:calendar-date-bold"
-                  width={18}
-                  sx={{ color: '#2563EB', mr: 1 }}
-                />
-              ),
-            },
-          }}
+        {/* Time Range Selector Button */}
+        <Button
+          onClick={handleOpen}
+          variant="outlined"
+          startIcon={
+            <Iconify
+              icon="solar:calendar-date-bold"
+              width={18}
+              sx={{ color: '#2563EB' }}
+            />
+          }
+          endIcon={
+            <Iconify
+              icon="solar:alt-arrow-down-linear"
+              width={15}
+              sx={{ color: '#64748B', ml: 0.5 }}
+            />
+          }
           sx={{
-            minWidth: 150,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              bgcolor: '#FFFFFF',
-              height: 40,
-              fontSize: 13.5,
-              fontWeight: 600,
-              color: '#1E293B',
-              '& fieldset': { borderColor: '#E2E8F0' },
-              '&:hover fieldset': { borderColor: '#CBD5E1' },
+            height: 40,
+            borderRadius: 2,
+            borderColor: '#E2E8F0',
+            color: '#1E293B',
+            bgcolor: '#FFFFFF',
+            fontWeight: 600,
+            fontSize: 13.5,
+            px: 2,
+            gap: 1,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            '&:hover': {
+              borderColor: '#CBD5E1',
+              bgcolor: '#F8FAFC',
             },
           }}
         >
-          <MenuItem value="7_days">{t('time_range.last_7_days')}</MenuItem>
-          <MenuItem value="30_days">{t('time_range.last_30_days')}</MenuItem>
-          <MenuItem value="90_days">{t('time_range.last_90_days')}</MenuItem>
-          <MenuItem value="year">{t('time_range.this_year')}</MenuItem>
-        </SelectField>
+          {getTimeRangeLabel()}
+        </Button>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          slotProps={{
+            paper: {
+              sx: {
+                borderRadius: 2,
+                mt: 0.75,
+                minWidth: 150,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                border: '1px solid #E2E8F0',
+              },
+            },
+          }}
+        >
+          <MenuItem
+            onClick={() => handleSelect('7_days')}
+            selected={timeRange === '7_days'}
+            sx={{ fontSize: 13.5, fontWeight: 600 }}
+          >
+            {t('time_range.last_7_days')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => handleSelect('30_days')}
+            selected={timeRange === '30_days'}
+            sx={{ fontSize: 13.5, fontWeight: 600 }}
+          >
+            {t('time_range.last_30_days')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => handleSelect('90_days')}
+            selected={timeRange === '90_days'}
+            sx={{ fontSize: 13.5, fontWeight: 600 }}
+          >
+            {t('time_range.last_90_days')}
+          </MenuItem>
+          <MenuItem
+            onClick={() => handleSelect('year')}
+            selected={timeRange === 'year'}
+            sx={{ fontSize: 13.5, fontWeight: 600 }}
+          >
+            {t('time_range.this_year')}
+          </MenuItem>
+        </Menu>
 
         {/* Export Report Button */}
         <Button
