@@ -25,9 +25,11 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     const token = getTokenFromCookie();
     if (!token) {
       router.replace(LOGIN_PATH);
-      return;
+    } else {
+      queueMicrotask(() => {
+        setChecked(true);
+      });
     }
-    setChecked(true);
   }, [router]);
 
   if (!checked) return null;
@@ -47,9 +49,11 @@ export function GuestOnly({ children }: { children: ReactNode }) {
     const token = getTokenFromCookie();
     if (token) {
       router.replace(PATH_AFTER_LOGIN);
-      return;
+    } else {
+      queueMicrotask(() => {
+        setChecked(true);
+      });
     }
-    setChecked(true);
   }, [router]);
 
   if (!checked) return null;
