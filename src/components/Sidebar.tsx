@@ -80,10 +80,6 @@ const sidebarItems: SidebarItem[] = [
         path: "/countries",
       },
       {
-        key: "currencies",
-        path: "/currencies",
-      },
-      {
         key: "universities",
         path: "/university",
       },
@@ -105,43 +101,49 @@ const sidebarItems: SidebarItem[] = [
       },
     ],
   },
-  // 5. أكواد الخصم
+  // 5. العملات (مستقلة خارج الهيكل الأكاديمي)
+  {
+    key: "currencies",
+    icon: "/icons/finance.svg",
+    path: "/currencies",
+  },
+  // 6. أكواد الخصم
   {
     key: "discount_codes",
     icon: "/icons/bxs--discount.svg",
     path: "/discount-codes",
   },
-  // 6. إدارة المجالات
+  // 7. إدارة المجالات
   {
     key: "categories",
     icon: "/icons/course.svg",
     path: "/category",
   },
-  // 7. التقارير
+  // 8. التقارير
   {
     key: "reports",
     icon: "/icons/reports.svg",
     path: "/reports",
   },
-  // 8. إدارة البانرات
+  // 9. إدارة البانرات
   {
     key: "banners",
     icon: "/icons/package.svg",
     path: "/banners",
   },
-  // 9. الإشعارات
+  // 10. الإشعارات
   {
     key: "notifications",
     icon: "/icons/mingcute--notification-line.svg",
     path: "/notifications",
   },
-  // 10. الدعم الفني
+  // 11. الدعم الفني
   {
     key: "support",
     icon: "/icons/suport.svg",
     path: "/support",
   },
-  // 11. المعلومات القانونية
+  // 12. المعلومات القانونية
   {
     key: "legal_info",
     icon: "/icons/invoice.svg",
@@ -178,6 +180,12 @@ const COLORS = {
   border: "#E2E8F0",
 };
 
+function checkIsActive(path?: string, currentPath: string = ""): boolean {
+  if (!path) return false;
+  if (path === "/") return currentPath === "/" || currentPath === "";
+  return currentPath === path || currentPath.startsWith(`${path}/`);
+}
+
 function SidebarIcon({
   active = false,
   src,
@@ -201,7 +209,7 @@ function SidebarIcon({
 
 function SidebarItemButton({
   item,
-  active,
+  currentPathname,
   isRtl,
   expanded,
   onToggle,
@@ -210,7 +218,7 @@ function SidebarItemButton({
   onClick,
 }: {
   item: SidebarItem;
-  active: boolean;
+  currentPathname: string;
   isRtl: boolean;
   expanded?: boolean;
   onToggle?: () => void;
@@ -222,7 +230,19 @@ function SidebarItemButton({
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
 
-  const itemColor = isLogout ? COLORS.logout : active && !hasChildren ? COLORS.activeIcon : COLORS.text;
+  const isCurrentActive = !isLogout && (
+    hasChildren
+      ? item.children!.some((child) => checkIsActive(child.path, currentPathname))
+      : checkIsActive(item.path, currentPathname)
+  );
+
+  const isCurrentActiveLeaf = isCurrentActive && !hasChildren && !isLogout;
+
+  const itemColor = isLogout
+    ? COLORS.logout
+    : isCurrentActiveLeaf
+    ? COLORS.activeIcon
+    : COLORS.text;
   const iconColor = isLogout ? COLORS.logout : undefined;
 
   const handleClick = () => {
@@ -236,7 +256,7 @@ function SidebarItemButton({
   const buttonContent = (
     <ListItemButton
       onClick={handleClick}
-      selected={active && !hasChildren && !isLogout}
+      selected={isCurrentActiveLeaf}
       sx={{
         borderRadius: 1.5,
         gap: 1.5,
@@ -270,9 +290,9 @@ function SidebarItemButton({
               width: 5,
               height: 5,
               borderRadius: "50%",
-              bgcolor: active ? COLORS.activeIcon : "#1E293B",
+              bgcolor: isCurrentActiveLeaf ? COLORS.activeIcon : "#1E293B",
               transition: "transform 0.15s ease",
-              transform: active ? "scale(1.2)" : "scale(1)",
+              transform: isCurrentActiveLeaf ? "scale(1.3)" : "scale(1)",
             }}
           />
         </Box>
@@ -287,7 +307,7 @@ function SidebarItemButton({
             }}
           >
             <SidebarIcon
-              active={active && !hasChildren && !isLogout}
+              active={isCurrentActiveLeaf || (hasChildren && isCurrentActive)}
               src={item.icon}
               color={iconColor}
             />
@@ -301,7 +321,7 @@ function SidebarItemButton({
           <Typography
             variant="body2"
             sx={{
-              fontWeight: active && !hasChildren && !isLogout ? 700 : depth > 0 ? 500 : 600,
+              fontWeight: isCurrentActiveLeaf ? 700 : depth > 0 ? 500 : 600,
               color: itemColor,
               fontSize: depth > 0 ? 13.5 : 14,
               lineHeight: 1.4,
@@ -364,7 +384,7 @@ function SidebarItemButton({
               <SidebarItemButton
                 key={child.key}
                 item={child}
-                active={child.path ? active : false}
+                currentPathname={currentPathname}
                 isRtl={isRtl}
                 depth={depth + 1}
               />
@@ -398,15 +418,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     );
   }, []);
 
-  const isActive = (path?: string) =>
-    !path ? false : path === "/" ? pathname === path : pathname.startsWith(path);
-
-  const isChildActive = (item: SidebarItem): boolean => {
-    if (item.path && isActive(item.path)) return true;
-    if (item.children) return item.children.some((child) => isChildActive(child));
-    return false;
-  };
-
   const drawer = (
     <Box
       sx={{
@@ -432,13 +443,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <List disablePadding>
           {sidebarItems.map((item) => {
             const expanded = expandedItems.includes(item.key);
-            const active = item.children ? isChildActive(item) : isActive(item.path);
 
             return (
               <SidebarItemButton
                 key={item.key}
                 item={item}
-                active={active}
+                currentPathname={pathname}
                 isRtl={isRtl}
                 expanded={expanded}
                 onToggle={() => toggleExpand(item.key)}
@@ -460,7 +470,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <List disablePadding>
           <SidebarItemButton
             item={logoutItem}
-            active={false}
+            currentPathname={pathname}
             isRtl={isRtl}
             isLogout
             onClick={logout}

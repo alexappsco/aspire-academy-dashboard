@@ -16,21 +16,21 @@ import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
-import { getFields } from 'src/actions/specializations';
-import type { Specialization, CreateSpecializationInput } from 'src/types/specialization';
-import type { Field } from 'src/types/field';
+import { getFields, CreateSpecializationPayload } from 'src/actions/specializations';
+import type { Specialization } from 'src/types/specialization';
+import type { Field } from 'src/types/specialization';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   initialData?: Specialization | null;
-  onSave: (data: CreateSpecializationInput) => void;
+  onSave: (data: CreateSpecializationPayload) => void;
 }
 
 interface FormContentProps {
   initialData?: Specialization | null;
   onClose: () => void;
-  onSave: (data: CreateSpecializationInput) => void;
+  onSave: (data: CreateSpecializationPayload) => void;
   isRtl: boolean;
 }
 
@@ -141,7 +141,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
           >
             {fields.map((f) => (
               <MenuItem key={f.id} value={f.id}>
-                {isRtl ? f.nameAr || f.name : f.nameEn || f.name}
+                {isRtl ? f.nameAr : f.nameEn}
               </MenuItem>
             ))}
           </TextField>

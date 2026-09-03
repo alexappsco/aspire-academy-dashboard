@@ -67,6 +67,32 @@ export default function SpecializationsView() {
   const [editingItem, setEditingItem] = useState<Specialization | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const fetchData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const params: Record<string, unknown> = {
+        SkipCount: 0,
+        MaxResultCount: 1000,
+      };
+      if (statusFilter === 'active') params.IsActive = true;
+      if (statusFilter === 'inactive') params.IsActive = false;
+      if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
+
+      const res = await getSpecializations(params);
+
+      if (res.success && res.data) {
+        setItems(res.data.items);
+        setTotalCount(res.data.totalCount);
+      } else {
+        toast.error(res.error || 'Failed to load');
+      }
+    } catch {
+      toast.error('Failed to load');
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -90,10 +116,14 @@ export default function SpecializationsView() {
           setTotalCount(res.data.totalCount);
         } else {
           toast.error(res.error || 'Failed to load');
+          setItems([]);
+          setTotalCount(0);
         }
       } catch {
         if (!isMounted) return;
         toast.error('Failed to load');
+        setItems([]);
+        setTotalCount(0);
       } finally {
         if (isMounted) setLoading(false);
       }
