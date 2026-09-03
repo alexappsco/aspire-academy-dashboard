@@ -50,13 +50,13 @@ export default function HomeView() {
       {/* 8. Top Enrolled Courses SharedTable */}
       <TopCoursesTable />
 
-      {/* 9. Bottom Split Row (Latest Users & Recent Activities Timeline) */}
+      {/* 9. Bottom Split Row (Recent Activities Timeline & Latest Users) */}
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <LatestUsersList />
-        </Grid>
         <Grid size={{ xs: 12, md: 7 }}>
           <RecentActivitiesTimeline />
+        </Grid>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <LatestUsersList />
         </Grid>
       </Grid>
     </Box>
