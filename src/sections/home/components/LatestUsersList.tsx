@@ -43,15 +43,8 @@ export default function LatestUsersList() {
             alignItems: 'center',
           }}
         >
-          <Button
-            size="small"
-            onClick={() => router.push('/profile')}
-            sx={{ color: '#2563EB', fontWeight: 700, fontSize: 13, p: 0, minWidth: 'auto' }}
-          >
-            {t('view_accounts')}
-          </Button>
-
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {/* Right in RTL: Icon & Title */}
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
                 width: 32,
@@ -73,6 +66,15 @@ export default function LatestUsersList() {
               {t('title')}
             </Typography>
           </Stack>
+
+          {/* Left in RTL: View Accounts */}
+          <Button
+            size="small"
+            onClick={() => router.push('/profile')}
+            sx={{ color: '#2563EB', fontWeight: 700, fontSize: 13, p: 0, minWidth: 'auto' }}
+          >
+            {t('view_accounts')}
+          </Button>
         </Stack>
       </Box>
 
@@ -88,22 +90,19 @@ export default function LatestUsersList() {
               alignItems: 'center',
             }}
           >
-            {/* Status on Left (in RTL) */}
-            <Typography
-              sx={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: user.isActiveStatus ? '#10B981' : '#94A3B8',
-                minWidth: 50,
-              }}
-            >
-              {user.statusText}
-            </Typography>
+            {/* Right in RTL: Avatar + Info */}
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+              <Avatar
+                src={user.avatar}
+                alt={user.name}
+                sx={{ width: 42, height: 42, borderRadius: 2 }}
+              />
 
-            {/* Info and Avatar on Right (in RTL) */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-              <Box sx={{ textAlign: 'right' }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Box sx={{ textAlign: 'start' }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                    {user.name}
+                  </Typography>
                   <Chip
                     label={t(`roles.${user.role}`)}
                     size="small"
@@ -116,22 +115,26 @@ export default function LatestUsersList() {
                       borderRadius: 1,
                     }}
                   />
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {user.name}
-                  </Typography>
                 </Stack>
 
                 <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
                   {user.university}
                 </Typography>
               </Box>
-
-              <Avatar
-                src={user.avatar}
-                alt={user.name}
-                sx={{ width: 42, height: 42, borderRadius: 2 }}
-              />
             </Stack>
+
+            {/* Left in RTL: Status Text */}
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: user.isActiveStatus ? '#10B981' : '#94A3B8',
+                minWidth: 50,
+                textAlign: 'end',
+              }}
+            >
+              {user.statusText}
+            </Typography>
           </Stack>
         ))}
       </Stack>

@@ -42,15 +42,8 @@ export default function CoursesBreakdownCard() {
             mb: 0.5,
           }}
         >
-          <Button
-            size="small"
-            onClick={() => router.push('/courses')}
-            sx={{ color: '#2563EB', fontWeight: 700, fontSize: 13, p: 0, minWidth: 'auto' }}
-          >
-            {t('view_all')}
-          </Button>
-
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {/* Right in RTL: Icon & Title */}
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
                 width: 32,
@@ -72,11 +65,20 @@ export default function CoursesBreakdownCard() {
               {t('title')}
             </Typography>
           </Stack>
+
+          {/* Left in RTL: View All */}
+          <Button
+            size="small"
+            onClick={() => router.push('/courses')}
+            sx={{ color: '#2563EB', fontWeight: 700, fontSize: 13, p: 0, minWidth: 'auto' }}
+          >
+            {t('view_all')}
+          </Button>
         </Stack>
 
         <Typography
           variant="caption"
-          sx={{ color: '#64748B', fontSize: 12, fontWeight: 500, display: 'block', textAlign: 'right' }}
+          sx={{ color: '#64748B', fontSize: 12, fontWeight: 500, display: 'block' }}
         >
           {t('subtitle')}
         </Typography>
@@ -117,21 +119,8 @@ export default function CoursesBreakdownCard() {
               alignItems: 'center',
             }}
           >
-            {/* Percentage & Count on Left (in RTL) */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-              <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, minWidth: 40 }}>
-                {item.percentage}%
-              </Typography>
-              <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, minWidth: 30 }}>
-                {item.count}
-              </Typography>
-            </Stack>
-
-            {/* Label & Dot on Right */}
+            {/* Right in RTL: Dot & Label */}
             <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
-              <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
-                {t(item.labelKey)}
-              </Typography>
               <Box
                 sx={{
                   width: 9,
@@ -140,6 +129,19 @@ export default function CoursesBreakdownCard() {
                   bgcolor: item.color,
                 }}
               />
+              <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
+                {t(item.labelKey)}
+              </Typography>
+            </Stack>
+
+            {/* Left in RTL: Count & Percentage */}
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, minWidth: 30 }}>
+                {item.count}
+              </Typography>
+              <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, minWidth: 40 }}>
+                {item.percentage}%
+              </Typography>
             </Stack>
           </Stack>
         ))}

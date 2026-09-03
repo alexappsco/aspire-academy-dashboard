@@ -198,16 +198,18 @@ export default function StudentsOverviewChart() {
       {/* Bottom 3 KPIs Row */}
       <Box
         sx={{
-          pt: 2,
-          mt: 1,
-          borderTop: '1px solid #F1F5F9',
+          p: 1.75,
+          mt: 1.5,
+          borderRadius: 2.5,
+          bgcolor: '#F0F3FF80',
+          border: '1px solid #E8EEFF',
         }}
       >
         <Grid container spacing={2}>
-          <Grid size={{ xs: 4 }}>
+          <Grid size={{ xs: 4 }} sx={{ textAlign: isRtl ? 'right' : 'left' }}>
             <Typography
               variant="caption"
-              sx={{ color: '#94A3B8', fontSize: 11, fontWeight: 600, display: 'block', mb: 0.5 }}
+              sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 600, display: 'block', mb: 0.5 }}
             >
               {t('monthly_active')}
             </Typography>
@@ -222,7 +224,7 @@ export default function StudentsOverviewChart() {
           <Grid size={{ xs: 4 }} sx={{ textAlign: 'center' }}>
             <Typography
               variant="caption"
-              sx={{ color: '#94A3B8', fontSize: 11, fontWeight: 600, display: 'block', mb: 0.5 }}
+              sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 600, display: 'block', mb: 0.5 }}
             >
               {t('completion_rate')}
             </Typography>
@@ -237,7 +239,7 @@ export default function StudentsOverviewChart() {
           <Grid size={{ xs: 4 }} sx={{ textAlign: isRtl ? 'left' : 'right' }}>
             <Typography
               variant="caption"
-              sx={{ color: '#94A3B8', fontSize: 11, fontWeight: 600, display: 'block', mb: 0.5 }}
+              sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 600, display: 'block', mb: 0.5 }}
             >
               {t('avg_study_hours')}
             </Typography>

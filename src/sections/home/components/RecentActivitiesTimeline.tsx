@@ -37,21 +37,8 @@ export default function RecentActivitiesTimeline() {
             alignItems: 'center',
           }}
         >
-          <Typography
-            variant="caption"
-            sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600 }}
-          >
-            {t('subtitle')}
-          </Typography>
-
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}
-            >
-              {t('title')}
-            </Typography>
-
+          {/* Right in RTL: Icon & Title */}
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
                 width: 32,
@@ -66,7 +53,22 @@ export default function RecentActivitiesTimeline() {
             >
               <Iconify icon="solar:history-bold" width={18} />
             </Box>
+
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}
+            >
+              {t('title')}
+            </Typography>
           </Stack>
+
+          {/* Left in RTL: Subtitle */}
+          <Typography
+            variant="caption"
+            sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600 }}
+          >
+            {t('subtitle')}
+          </Typography>
         </Stack>
       </Box>
 
@@ -82,36 +84,12 @@ export default function RecentActivitiesTimeline() {
               justifyContent: 'space-between',
             }}
           >
-            {/* Time on Left in RTL */}
-            <Typography
-              variant="caption"
-              sx={{
-                color: '#94A3B8',
-                fontSize: 11.5,
-                fontWeight: 600,
-                minWidth: 75,
-                textAlign: isRtl ? 'left' : 'right',
-                mt: 0.25,
-                flexShrink: 0,
-              }}
+            {/* Right in RTL: Icon + Text */}
+            <Stack
+              direction="row"
+              spacing={1.5}
+              sx={{ alignItems: 'flex-start', flex: 1, gap: 1.5 }}
             >
-              {isRtl ? item.timeAr : item.timeEn}
-            </Typography>
-
-            {/* Content & Icon on Right in RTL */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', flex: 1, justifyContent: 'flex-end' }}>
-              <Typography
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: '#1E293B',
-                  lineHeight: 1.5,
-                  textAlign: isRtl ? 'right' : 'left',
-                }}
-              >
-                {isRtl ? item.titleAr : item.titleEn}
-              </Typography>
-
               <Box
                 sx={{
                   width: 34,
@@ -128,7 +106,35 @@ export default function RecentActivitiesTimeline() {
               >
                 <Iconify icon={item.icon} width={18} />
               </Box>
+
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#1E293B',
+                  lineHeight: 1.5,
+                  textAlign: 'start',
+                }}
+              >
+                {isRtl ? item.titleAr : item.titleEn}
+              </Typography>
             </Stack>
+
+            {/* Left in RTL: Time */}
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#94A3B8',
+                fontSize: 11.5,
+                fontWeight: 600,
+                minWidth: 75,
+                textAlign: 'end',
+                mt: 0.25,
+                flexShrink: 0,
+              }}
+            >
+              {isRtl ? item.timeAr : item.timeEn}
+            </Typography>
           </Stack>
         ))}
       </Stack>

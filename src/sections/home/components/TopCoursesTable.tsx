@@ -115,10 +115,45 @@ export default function TopCoursesTable() {
           borderBottom: '1px solid #F1F5F9',
         }}
       >
+        {/* Right in RTL: Icon & Title */}
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: 2,
+              bgcolor: '#EFF6FF',
+              color: '#2563EB',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Iconify icon="solar:medal-ribbon-star-bold" width={22} />
+          </Box>
+
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
+            >
+              {t('title')}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}
+            >
+              {t('subtitle')}
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* Left in RTL: View All Courses Button */}
         <Button
           variant="outlined"
           onClick={() => router.push('/courses')}
-          startIcon={<Iconify icon="solar:arrow-right-linear" width={16} />}
+          endIcon={<Iconify icon="solar:arrow-left-linear" width={16} sx={{ ml: 0.5 }} />}
           sx={{
             borderRadius: 2,
             borderColor: '#E2E8F0',
@@ -136,39 +171,6 @@ export default function TopCoursesTable() {
         >
           {t('view_all_btn')}
         </Button>
-
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-          <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
-            >
-              {t('title')}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}
-            >
-              {t('subtitle')}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              width: 38,
-              height: 38,
-              borderRadius: 2,
-              bgcolor: '#EFF6FF',
-              color: '#2563EB',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <Iconify icon="solar:medal-ribbon-star-bold" width={22} />
-          </Box>
-        </Stack>
       </Stack>
 
       {/* SharedTable Integration */}

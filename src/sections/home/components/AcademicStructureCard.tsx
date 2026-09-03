@@ -23,9 +23,9 @@ export default function AcademicStructureCard() {
         p: { xs: 2, md: 2.5 },
         mb: 3,
         borderRadius: 3,
-        bgcolor: '#EFF6FF',
-        border: '1px solid #BFDBFE',
-        boxShadow: '0 1px 4px rgba(37, 99, 235, 0.05)',
+        background: 'linear-gradient(90deg, #DEE9FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 4px rgba(37, 99, 235, 0.04)',
       }}
     >
       <Stack
@@ -37,21 +37,25 @@ export default function AcademicStructureCard() {
         }}
       >
         {/* Right side in RTL (Icon + Title + Hierarchy Flow) */}
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+        <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.75 }}>
           <Box
             sx={{
               width: 44,
               height: 44,
               borderRadius: 2.5,
-              bgcolor: '#1D4ED8',
-              color: '#FFFFFF',
+              bgcolor: '#0047AB',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Iconify icon="solar:buildings-3-bold" width={24} />
+            <Box
+              component="img"
+              src="/icons/build.svg"
+              alt="Build"
+              sx={{ width: 22, height: 22 }}
+            />
           </Box>
 
           <Box>
@@ -95,7 +99,7 @@ export default function AcademicStructureCard() {
           sx={{
             flexShrink: 0,
             borderRadius: 2,
-            borderColor: '#93C5FD',
+            borderColor: '#E2E8F0',
             color: '#1D4ED8',
             bgcolor: '#FFFFFF',
             fontWeight: 700,
@@ -103,8 +107,9 @@ export default function AcademicStructureCard() {
             px: 2.5,
             py: 1,
             gap: 1,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
             '&:hover': {
-              borderColor: '#60A5FA',
+              borderColor: '#BFDBFE',
               bgcolor: '#F8FAFC',
             },
           }}

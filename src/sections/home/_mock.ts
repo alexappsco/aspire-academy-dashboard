@@ -162,12 +162,12 @@ export const MOCK_SALES_SUMMARY = {
   completedOrders: '17,850',
   pendingOrders: 420,
   monthlyBars: [
-    { month: 'يوليو', monthEn: 'Jul', fill: '#DBEAFE', height: 40 },
-    { month: 'أغسطس', monthEn: 'Aug', fill: '#DBEAFE', height: 50 },
-    { month: 'سبتمبر', monthEn: 'Sep', fill: '#BFDBFE', height: 65 },
-    { month: 'أكتوبر', monthEn: 'Oct', fill: '#93C5FD', height: 80 },
-    { month: 'نوفمبر', monthEn: 'Nov', fill: '#1E3A8A', height: 95 },
-    { month: 'ديسمبر', monthEn: 'Dec', fill: '#0F172A', height: 100, active: true },
+    { month: 'يوليو', monthEn: 'Jul', fill: '#DDE9FF', height: 36 },
+    { month: 'أغسطس', monthEn: 'Aug', fill: '#DDE9FF', height: 42 },
+    { month: 'سبتمبر', monthEn: 'Sep', fill: '#DDE9FF', height: 46 },
+    { month: 'أكتوبر', monthEn: 'Oct', fill: '#DDE9FF', height: 46 },
+    { month: 'نوفمبر', monthEn: 'Nov', fill: '#1E293B', height: 48 },
+    { month: 'ديسمبر', monthEn: 'Dec', fill: '#0047AB', height: 50, active: true },
   ],
 };
 
