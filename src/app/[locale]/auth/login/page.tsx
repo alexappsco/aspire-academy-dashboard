@@ -181,7 +181,7 @@ export default function LoginPage() {
               {loading ? t("processing") : t("login")}
             </Button>
 
-            <Box
+            {/* <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -194,7 +194,7 @@ export default function LoginPage() {
                 {t("or")}
               </Typography>
               <Box sx={{ flex: 1, height: 1, bgcolor: "rgba(255,255,255,0.25)" }} />
-            </Box>
+            </Box> */}
 
             {/* <Button
               onClick={() => router.push("/auth/register")}
