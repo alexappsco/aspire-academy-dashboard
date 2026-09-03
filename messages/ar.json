@@ -765,7 +765,11 @@
       "status": "الحالة",
       "add_btn": "إضافة",
       "save_btn": "حفظ",
-      "cancel_btn": "إلغاء"
+      "cancel_btn": "إلغاء",
+      "is_active": "مفعل",
+      "add_button": "إضافة تخصص",
+      "edit_button": "تعديل تخصص",
+      "cancel": "إلغاء"
     },
     "delete_dialog": {
       "title": "حذف تخصص",

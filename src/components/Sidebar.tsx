@@ -59,10 +59,10 @@ const sidebarItems: SidebarItem[] = [
     key: "user_management",
     icon: "/icons/profile.svg",
     children: [
-      {
-        key: "students_management",
-        path: "/students",
-      },
+      // {
+      //   key: "students_management",
+      //   path: "/students",
+      // },
       {
         key: "lecturers_management",
         path: "/minutes-management",
@@ -119,11 +119,11 @@ const sidebarItems: SidebarItem[] = [
     path: "/category",
   },
   // 8. التقارير
-  {
-    key: "reports",
-    icon: "/icons/reports.svg",
-    path: "/reports",
-  },
+  // {
+  //   key: "reports",
+  //   icon: "/icons/reports.svg",
+  //   path: "/reports",
+  // },
   // 9. إدارة البانرات
   {
     key: "banners",
