@@ -86,14 +86,14 @@ const sidebarItems: SidebarItem[] = [
         key: "college",
         path: "/college",
       },
-      {
-        key: "academic_years",
-        path: "/academic-years",
-      },
-      {
-        key: "academic_semesters",
-        path: "/semesters",
-      },
+      // {
+      //   key: "academic_years",
+      //   path: "/academic-years",
+      // },
+      // {
+      //   key: "academic_semesters",
+      //   path: "/semesters",
+      // },
       {
         key: "subjects",
         path: "/subjects",
