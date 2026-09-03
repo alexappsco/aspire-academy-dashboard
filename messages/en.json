@@ -809,5 +809,137 @@
       "delete_success": "Lecturer deleted successfully",
       "status_updated": "Lecturer status updated successfully"
     }
+  },
+  "Home": {
+    "header": {
+      "greeting": "Welcome, System Administrator",
+      "subtitle": "Here is a quick comprehensive overview of Aspire Medical Academy platform metrics and performance today.",
+      "time_range": {
+        "last_7_days": "Last 7 days",
+        "last_30_days": "Last 30 days",
+        "last_90_days": "Last 3 months",
+        "this_year": "This year"
+      },
+      "export_report": "Export Platform Report",
+      "quick_course": "Quick Course"
+    },
+    "attention_banner": {
+      "badge": "24 Pending Approval",
+      "title": "Academic Courses Review",
+      "description": "There are 24 courses submitted by lecturers requiring administrative and academic approval prior to direct mobile app publication.",
+      "review_now": "Review Now"
+    },
+    "kpi": {
+      "total_students": "Total Students",
+      "total_lecturers": "Total Lecturers",
+      "total_courses": "Total Courses",
+      "published_courses": "Published Courses",
+      "under_review_courses": "Courses Under Review",
+      "total_orders": "Total Orders",
+      "vs_last_month": "vs last month",
+      "active_now_for_students": "active now for students",
+      "needs_audit": "Needs Audit",
+      "action_required": "Action Required"
+    },
+    "needs_attention": {
+      "title": "Needs Your Attention",
+      "subtitle": "3 key tasks pending",
+      "card_1": {
+        "count": "24",
+        "title": "Courses Pending Review",
+        "description": "Courses submitted by lecturers requiring medical content review and auditing.",
+        "action": "Review Courses",
+        "badge": "Top Priority"
+      },
+      "card_2": {
+        "count": "18",
+        "title": "New Lecturers",
+        "description": "Lecturers whose accounts were recently created and await specialty and university approval.",
+        "action": "View Lecturers",
+        "badge": "Pending Verification"
+      },
+      "card_3": {
+        "count": "7",
+        "title": "Rejected Courses",
+        "description": "Courses requiring follow-up with lecturers to adjust academic feedback.",
+        "action": "View Courses",
+        "badge": "Follow Notes"
+      }
+    },
+    "academic_structure": {
+      "title": "Comprehensive Academic Hierarchy",
+      "countries": "Countries",
+      "universities": "Universities",
+      "colleges": "Colleges",
+      "subjects": "Medical Subjects",
+      "active_courses": "Active Courses",
+      "manage_btn": "Manage Academic Hierarchy"
+    },
+    "students_chart": {
+      "title": "Students Overview",
+      "subtitle": "New student enrollment rate across the year",
+      "growth_badge": "+8.5% Growth",
+      "total_new": "Total New: 840 Students",
+      "monthly_active": "Monthly Active",
+      "completion_rate": "Completion Rate",
+      "avg_study_hours": "Avg Study Hours",
+      "hours_per_student": "hrs/student"
+    },
+    "courses_breakdown": {
+      "title": "Courses Overview",
+      "subtitle": "Detailed status distribution of 856 courses",
+      "view_all": "View All",
+      "published": "Published for students",
+      "in_review": "Technical review",
+      "drafts": "Lecturer drafts",
+      "rejected": "Rejected / Needs edit",
+      "paused": "Paused / Expired",
+      "view_all_courses_btn": "View All Courses and Content"
+    },
+    "sales_revenue": {
+      "title": "Sales & Payments Overview",
+      "subtitle": "Collections and financial transactions during the current monthly cycle",
+      "gateways": "Fawry Gateway / Bank Cards / Vodafone Cash",
+      "total_revenue": "Total Revenue",
+      "currency": "KWD",
+      "revenue_growth": "+14.2% Revenue Growth",
+      "completed_orders": "Completed Collections",
+      "orders_unit": "Orders",
+      "conversion_rate": "94.3% Conversion Rate",
+      "pending_orders": "Pending Orders",
+      "expires_in": "Expires in 24 hours",
+      "comparison_title": "Revenue comparison for the past 6 months"
+    },
+    "top_courses": {
+      "title": "Top Enrolled Courses",
+      "subtitle": "Most popular courses among medical students",
+      "view_all_btn": "View All Courses (856)",
+      "columns": {
+        "course_name": "Course Name",
+        "lecturer": "Lecturer",
+        "specialty": "Specialty",
+        "students": "Students",
+        "rating": "Rating",
+        "price": "Price",
+        "status": "Status",
+        "last_update": "Last Update",
+        "actions": "Actions"
+      },
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "latest_users": {
+      "title": "Latest Lecturers & Students",
+      "view_accounts": "View Accounts",
+      "roles": {
+        "lecturer": "Lecturer",
+        "student": "Student"
+      },
+      "active_today_total": "Total active users today: 1,420"
+    },
+    "recent_activities": {
+      "title": "Recent Activities",
+      "subtitle": "Real-time synced log"
+    }
   }
 }
