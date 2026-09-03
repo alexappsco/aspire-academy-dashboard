@@ -41,13 +41,24 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "course_management",
     icon: "/icons/course.svg",
-    path: "/courses",
+    children: [
+      {
+        key: "courses",
+        icon: "/icons/course.svg",
+        path: "/courses",
+      },
+      {
+        key: "specializations",
+        icon: "/icons/course.svg",
+        path: "/specializations",
+      },
+    ],
   },
-  {
-    key: "curriculum_management",
-    icon: "/icons/curriculum.svg",
-    path: "/curriculum",
-  },
+  // {
+  //   key: "curriculum_management",
+  //   icon: "/icons/curriculum.svg",
+  //   path: "/curriculum",
+  // },
   {
     key: "booking_management",
     icon: "/icons/booking.svg",
@@ -653,7 +664,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </List>
       </Box>
 
-      <Box
+      {/* <Box
         sx={{
           px: 1.5,
           pb: 2,
@@ -681,7 +692,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             isLogout
           />
         </List>
-      </Box>
+      </Box> */}
     </Box>
   );
 
