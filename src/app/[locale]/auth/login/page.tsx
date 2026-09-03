@@ -196,7 +196,7 @@ export default function LoginPage() {
               <Box sx={{ flex: 1, height: 1, bgcolor: "rgba(255,255,255,0.25)" }} />
             </Box>
 
-            <Button
+            {/* <Button
               onClick={() => router.push("/auth/register")}
               sx={{
                 bgcolor: "rgba(255,255,255,0.14)",
@@ -212,7 +212,7 @@ export default function LoginPage() {
               }}
             >
               {t("create_account")}
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       </Box>
