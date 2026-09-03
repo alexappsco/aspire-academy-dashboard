@@ -5,8 +5,8 @@ import { useRouter } from "src/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useToast } from "src/components/toast";
 import { useAuth } from "src/contexts/AuthContext";
-import { login as loginAction } from "src/actions";
 import { PATH_AFTER_LOGIN } from "src/config-global";
+import type { ApiSingleResponse, LoginResponse } from "src/types/crud-types";
 import {
   Box,
   Typography,
@@ -37,10 +37,16 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const result = await loginAction({ email, password });
-      console.log("Login result: ⚠️⚠️⚠️⚠️", result);
-      if (!result.success) {
-        toastError(result.error);
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result: ApiSingleResponse<LoginResponse> = await res.json();
+
+      if (!result.success || !result.data) {
+        toastError(result.error || t("generic_error"));
         return;
       }
 

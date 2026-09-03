@@ -25,6 +25,12 @@ export type RequestOptions = {
   tags?: string[];
 };
 
+export type ApiSingleResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
+
 // ── Auth types ──────────────────────────────────────────────
 
 export type LoginRequest = {
