@@ -18,11 +18,27 @@ export async function getCountriesAction(
     let endpoint = endpoints.countries.list;
     if (params) {
       const searchParams = new URLSearchParams();
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          searchParams.append(key, String(value));
-        }
-      });
+
+      if (params.Filter && params.Filter.trim() !== '') {
+        searchParams.append('Filter', params.Filter.trim());
+      }
+
+      if (typeof params.IsActive === 'boolean') {
+        searchParams.append('IsActive', String(params.IsActive));
+      }
+
+      if (params.Sorting) {
+        searchParams.append('Sorting', params.Sorting);
+      }
+
+      if (typeof params.SkipCount === 'number') {
+        searchParams.append('SkipCount', String(params.SkipCount));
+      }
+
+      if (typeof params.MaxResultCount === 'number') {
+        searchParams.append('MaxResultCount', String(params.MaxResultCount));
+      }
+
       const query = searchParams.toString();
       if (query) {
         endpoint += `?${query}`;

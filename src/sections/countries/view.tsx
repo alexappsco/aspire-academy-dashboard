@@ -73,6 +73,7 @@ export default function CountriesView() {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -80,6 +81,17 @@ export default function CountriesView() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingCountry, setEditingCountry] = useState<CountryDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Debounce search input to optimize backend requests
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
 
   // Re-fetch helper
   const refetchCountries = async () => {
@@ -89,7 +101,7 @@ export default function CountriesView() {
         statusFilter === 'all' ? undefined : statusFilter === 'active';
 
       const res = await countriesService.getCountries({
-        Filter: searchQuery.trim() || undefined,
+        Filter: debouncedSearch.trim() || undefined,
         IsActive: isActiveParam,
       });
 
@@ -118,7 +130,7 @@ export default function CountriesView() {
 
         const [res, currs] = await Promise.all([
           countriesService.getCountries({
-            Filter: searchQuery.trim() || undefined,
+            Filter: debouncedSearch.trim() || undefined,
             IsActive: isActiveParam,
           }),
           countriesService.getCurrencies(),
@@ -151,7 +163,7 @@ export default function CountriesView() {
     return () => {
       isMounted = false;
     };
-  }, [searchQuery, statusFilter, t, toast]);
+  }, [debouncedSearch, statusFilter, t, toast]);
 
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
