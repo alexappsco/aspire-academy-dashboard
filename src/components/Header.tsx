@@ -7,6 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import PersonIcon from "@mui/icons-material/Person";
 import Iconify from "src/components/iconify";
+import { useAuth } from "src/contexts/AuthContext";
 import { localesSettings, LocaleType, allLocales } from "src/i18n/config-locale";
 import {
   AppBar,
@@ -30,6 +31,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
+  const { isAuthenticated, logout } = useAuth();
   const currentLocaleSetting = localesSettings[locale as LocaleType];
 
   const [langAnchorEl, setLangAnchorEl] = useState<HTMLElement | null>(null);
@@ -53,6 +55,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   const handleLogin = () => {
     handleAvatarClose();
+    router.push("/auth/login");
+  };
+
+  const handleLogout = () => {
+    handleAvatarClose();
+    logout();
     router.push("/auth/login");
   };
 
@@ -186,11 +194,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
           },
         }}
       >
-        <MenuItem onClick={handleLogin}>
+        <MenuItem onClick={isAuthenticated ? handleLogout : handleLogin}>
           <ListItemIcon sx={{ minWidth: 36 }}>
-            <Iconify icon="solar:login-2-outline" width={20} />
+            <Iconify
+              icon={isAuthenticated ? "solar:logout-2-outline" : "solar:login-2-outline"}
+              width={20}
+            />
           </ListItemIcon>
-          <ListItemText>تسجيل الدخول</ListItemText>
+          <ListItemText>{isAuthenticated ? "تسجيل خروج" : "تسجيل الدخول"}</ListItemText>
         </MenuItem>
       </Menu>
     </AppBar>

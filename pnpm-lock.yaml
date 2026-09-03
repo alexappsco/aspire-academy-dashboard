@@ -24,7 +24,7 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2(react@19.2.4)
       '@mui/icons-material':
-        specifier: ^9.0.1
+        specifier: ^9.4.0
         version: 9.4.0(@mui/material@9.4.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.4))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.4))(@types/react@19.2.18)(react@19.2.4))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(@types/react@19.2.18)(react@19.2.4)
       '@mui/material':
         specifier: ^9.0.1

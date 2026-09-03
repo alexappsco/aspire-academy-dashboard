@@ -1,9 +1,14 @@
 import DashboardLayout from "src/layouts/DashboardLayout";
+import { RequireAuth } from "src/components/auth/AuthGuard";
 
 export default function DashboardShellLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <RequireAuth>
+      <DashboardLayout>{children}</DashboardLayout>
+    </RequireAuth>
+  );
 }

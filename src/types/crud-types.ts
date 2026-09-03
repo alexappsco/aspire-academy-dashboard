@@ -24,3 +24,30 @@ export type RequestOptions = {
   skipAuth?: boolean;
   tags?: string[];
 };
+
+export type ApiSingleResponse<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
+
+// ── Auth types ──────────────────────────────────────────────
+
+export type LoginRequest = {
+  email: string;
+  password: string;
+};
+
+export type LoginResponse = {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  email: string;
+  role: string;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpireAt: string;
+  refreshTokenExpireAt: string;
+  completeTeacherProfile: boolean;
+  adminAcepptedTeacherProfile: boolean;
+};

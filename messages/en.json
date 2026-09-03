@@ -1,4 +1,7 @@
 {
+   "Metadata": {
+    "login": "Login"
+  },
   "Sidebar": {
     "home": "Home",
     "course_management": "Course Management",
@@ -545,6 +548,13 @@
     }
   },
   "Global": {
+    "Server": {
+      "unauthorized": "Unauthorized",
+      "not_found": "Not found",
+      "internal_server_error": "Internal server error",
+      "service_not_available": "Service not available",
+      "unexpected_error": "Something went wrong"
+    },
     "Label": {
       "no_data": "No data found"
     },
@@ -567,6 +577,7 @@
     "processing": "Processing...",
     "login": "Sign In",
     "or": "or",
+    "fill_fields": "Please fill in all fields",
     "create_account": "Create New Account",
     "transition_success": "Signed in successfully"
   },
