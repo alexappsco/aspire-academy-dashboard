@@ -360,10 +360,12 @@
       "code": "الكود",
       "type": "النوع",
       "value": "القيمة",
-      "startDate": "تاريخ البداية",
-      "endDate": "تاريخ الانتهاء",
-      "maxUsage": "الحد الأقصى للاستخدام",
-      "usedCount": "عدد مرات الاستخدام",
+      "minOrderAmount": "الحد الأدنى للطلب",
+      "maxDiscountAmount": "الخصم الأقصى",
+      "startAt": "تاريخ البداية",
+      "endAt": "تاريخ الانتهاء",
+      "maxRedemptions": "الحد الأقصى للاستخدام",
+      "redemptionCount": "عدد مرات الاستخدام",
       "status": "الحالة"
     },
     "status": {
@@ -382,10 +384,16 @@
       "type": "نوع الكود",
       "value": "القيمة",
       "value_placeholder": "أدخل القيمة...",
-      "maxUsage": "الحد الأقصى للاستخدام",
-      "maxUsage_placeholder": "أدخل الحد الأقصى...",
-      "startDate": "تاريخ البداية",
-      "endDate": "تاريخ النهاية",
+      "minOrderAmount": "الحد الأدنى للطلب",
+      "minOrderAmount_placeholder": "أدخل الحد الأدنى...",
+      "maxDiscountAmount": "الخصم الأقصى",
+      "maxDiscountAmount_placeholder": "أدخل الخصم الأقصى...",
+      "maxRedemptions": "الحد الأقصى للاستخدام",
+      "maxRedemptions_placeholder": "أدخل الحد الأقصى...",
+      "maxRedemptionsPerStudent": "الحد الأقصى لكل طالب",
+      "maxRedemptionsPerStudent_placeholder": "أدخل الحد الأقصى لكل طالب...",
+      "startAt": "تاريخ البداية",
+      "endAt": "تاريخ النهاية",
       "status": "الحالة",
       "save": "حفظ",
       "cancel": "إلغاء",
@@ -403,7 +411,9 @@
       "add_success": "تمت إضافة كود الخصم بنجاح",
       "edit_success": "تم تعديل كود الخصم بنجاح",
       "delete_success": "تم حذف كود الخصم بنجاح",
-      "status_updated": "تم تحديث حالة كود الخصم بنجاح"
+      "status_updated": "تم تحديث حالة كود الخصم بنجاح",
+      "fetch_error": "حدث خطأ أثناء جلب البيانات",
+      "operation_error": "حدث خطأ أثناء تنفيذ العملية"
     }
   },
   "Universities": {
