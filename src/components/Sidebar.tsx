@@ -133,6 +133,11 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/profile.svg",
     path: "/about-us",
   },
+  {
+    key: "minutes_management",
+    icon: "/icons/booking.svg",
+    path: "/minutes-management",
+  },
 ];
 
 const bottomItems: SidebarItem[] = [

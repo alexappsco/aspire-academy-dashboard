@@ -23,6 +23,7 @@
     "discount_codes": "أكواد الخصم",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
+    "minutes_management": "إدارة المحاضرات",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },
@@ -721,6 +722,85 @@
       "edit_success": "تم تعديل الدولة بنجاح",
       "delete_success": "تم حذف الدولة بنجاح",
       "status_updated": "تم تحديث حالة الدولة بنجاح"
+    }
+  },
+  "MinutesManagement": {
+    "title": "إدارة المحاضرون",
+    "subtitle": "إدارة جميع المحاضرين والجلسات التعليمية",
+    "add_minutes": "إضافة محاضر",
+    "search_placeholder": "بحث...",
+    "columns": {
+      "name": "الاسم",
+      "joined_date": "تاريخ الانضمام",
+      "specialty": "التخصص",
+      "subject": "المادة",
+      "courses": "الدورات",
+      "students": "الطلاب",
+      "rating": "التقييم",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "معطل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "معطل"
+    },
+    "pagination": {
+      "rows_per_page": "Rows per page:"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "breadcrumb_dashboard": "لوحة التحكم",
+    "breadcrumb_lecturers": "المحاضرون",
+    "breadcrumb_add_lecturer": "إضافة محاضر",
+    "page_title": "إضافة محاضر",
+    "page_subtitle": "إنشاء حساب جديد لملاحظ وإدخاله إلى منصة Aspire Academy.",
+    "section_personal_info": "البيانات الشخصية",
+    "section_login_credentials": "بيانات تسجيل الدخول",
+    "login_credentials_subtitle": "سيستخدم المحاضر اسم المستخدم وكلمة المرور للدخول إلى لوحة تحكم المحاضر.",
+    "field_full_name": "الاسم الكامل",
+    "field_title": "اللقب",
+    "field_country": "الدولة",
+    "field_university": "الجامعة",
+    "field_qualification": "المؤهل العلمي",
+    "field_start_date": "تاريخ البداية",
+    "field_bio": "نبذة عن المحاضر",
+    "field_email": "الايميل",
+    "field_password": "كلمة المرور",
+    "field_confirm_password": "تأكيد كلمة المرور",
+    "upload_photo": "رفع صورة",
+    "photo_hint": "(JPG, PNG الحد الأقصى 2)",
+    "password_strength_weak": "ضعيفة",
+    "btn_create_lecturer": "إنشاء حساب المحاضر",
+    "btn_cancel": "إلغاء",
+    "dialog": {
+      "add_title": "إضافة محاضر جديد",
+      "edit_title": "تعديل بيانات المحاضر",
+      "subtitle": "أدخل بيانات المحاضر",
+      "name_ar": "الاسم (عربي)",
+      "name_en": "الاسم (إنجليزي)",
+      "email": "البريد الإلكتروني",
+      "specialty": "التخصص",
+      "subject": "المادة",
+      "status": "الحالة",
+      "status_active": "مفعل",
+      "status_inactive": "معطل",
+      "save": "حفظ",
+      "save_edit": "حفظ التعديلات",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت تأكد من إتمام عملية الحذف؟",
+      "delete": "حذف"
+    },
+    "toast": {
+      "create_success": "تم إضافة المحاضر بنجاح",
+      "edit_success": "تم تعديل بيانات المحاضر بنجاح",
+      "delete_success": "تم حذف المحاضر بنجاح",
+      "status_updated": "تم تحديث حالة المحاضر بنجاح"
     }
   }
 }
