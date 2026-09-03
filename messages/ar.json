@@ -22,6 +22,7 @@
     "academic_hierarchy": "الهيكل الأكاديمي",
     "subjects": "المواد",
     "countries": "الدول",
+    "currencies": "العملات",
     "discount_codes": "أكواد الخصم",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
@@ -987,6 +988,53 @@
     "recent_activities": {
       "title": "آخر النشاطات",
       "subtitle": "سجل فوري متزامن"
+    }
+  },
+  "Currencies": {
+    "title": "إدارة العملات",
+    "add_currency": "إضافة عملة",
+    "search_placeholder": "بحث",
+    "all_status": "الحالة",
+    "active": "مفعل",
+    "inactive": "معطل",
+    "columns": {
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم بالانجليزية",
+      "symbol_ar": "الرمز بالعربية",
+      "symbol_en": "الرمز بالانجليزية",
+      "code": "الكود",
+      "status": "الحالة"
+    },
+    "dialog": {
+      "add_title": "إضافة عملة",
+      "edit_title": "تعديل عملة",
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم بالانجليزية",
+      "symbol_ar": "الرمز بالعربية",
+      "symbol_en": "الرمز بالانجليزية",
+      "code": "الكود",
+      "status": "الحالة",
+      "status_active": "مفعل",
+      "status_inactive": "معطل",
+      "add_button": "إضافة",
+      "save_button": "حفظ",
+      "cancel_button": "إلغاء",
+      "delete_title": "هل انت متاكد انك تريد الحذف؟",
+      "delete_button": "حذف"
+    },
+    "validation": {
+      "name_ar_required": "الاسم بالعربية مطلوب",
+      "name_en_required": "الاسم بالانجليزية مطلوب",
+      "symbol_required": "الرمز مطلوب",
+      "code_required": "الكود مطلوب"
+    },
+    "messages": {
+      "create_success": "تم إضافة العملة بنجاح",
+      "update_success": "تم تعديل بيانات العملة بنجاح",
+      "delete_success": "تم حذف العملة بنجاح",
+      "status_success": "تم تغيير حالة العملة بنجاح",
+      "fetch_error": "حدث خطأ أثناء جلب بيانات العملات",
+      "operation_error": "حدث خطأ أثناء إتمام العملية"
     }
   }
 }
