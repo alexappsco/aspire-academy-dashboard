@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, usePathname } from 'src/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -66,15 +68,25 @@ export default function CountriesView() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlIsActive = searchParams.get('IsActive');
+  const initialStatus =
+    urlIsActive === 'true' ? 'active' : urlIsActive === 'false' ? 'inactive' : 'all';
+
   const [countries, setCountries] = useState<CountryDto[]>([]);
   const [currencies, setCurrencies] = useState<CurrencyDto[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -92,6 +104,33 @@ export default function CountriesView() {
       clearTimeout(timer);
     };
   }, [searchQuery]);
+
+  // Sync browser URL parameters with current active filters
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    } else {
+      params.delete('Filter');
+    }
+
+    if (statusFilter === 'active') {
+      params.set('IsActive', 'true');
+    } else if (statusFilter === 'inactive') {
+      params.set('IsActive', 'false');
+    } else {
+      params.delete('IsActive');
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, statusFilter, pathname, router, searchParams]);
 
   // Re-fetch helper
   const refetchCountries = async () => {
