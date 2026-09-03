@@ -6,6 +6,7 @@ import { usePathname } from "src/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { scrollbar } from "src/theme/css";
 import SvgColor from "src/components/svg-color";
+import { useAuth } from "src/contexts/AuthContext";
 import {
   Box,
   Collapse,
@@ -27,140 +28,137 @@ interface SidebarProps {
 
 interface SidebarItem {
   key: string;
-  icon: string;
+  icon?: string;
   path?: string;
   children?: SidebarItem[];
 }
 
 const sidebarItems: SidebarItem[] = [
+  // 1. الرئيسية
   {
     key: "home",
     icon: "/icons/main.svg",
     path: "/",
   },
+  // 2. إدارة الدورات التدريبية
   {
     key: "course_management",
     icon: "/icons/course.svg",
     children: [
       {
         key: "courses",
-        icon: "/icons/course.svg",
         path: "/courses",
       },
       {
         key: "specializations",
-        icon: "/icons/course.svg",
         path: "/specializations",
       },
     ],
   },
-  // {
-  //   key: "curriculum_management",
-  //   icon: "/icons/curriculum.svg",
-  //   path: "/curriculum",
-  // },
+  // 3. إدارة المستخدمين
   {
-    key: "booking_management",
-    icon: "/icons/booking.svg",
+    key: "user_management",
+    icon: "/icons/profile.svg",
     children: [
-      { key: "home", icon: "/icons/main.svg", path: "/bookings" },
+      {
+        key: "students_management",
+        path: "/students",
+      },
+      {
+        key: "lecturers_management",
+        path: "/lecturers",
+      },
     ],
   },
-  {
-    key: "finance_payments",
-    icon: "/icons/finance.svg",
-    path: "/finance",
-  },
-  {
-    key: "reports_analytics",
-    icon: "/icons/reports.svg",
-    children: [
-      { key: "home", icon: "/icons/main.svg", path: "/reports" },
-    ],
-  },
+  // 4. الهيكل الأكاديمي
   {
     key: "academic_hierarchy",
-    icon: "/icons/curriculum.svg",
+    icon: "/icons/build.svg",
     children: [
       {
-        key: "universities",
-        icon: "/icons/curriculum.svg",
-        path: "/university",
-      },
-      {
-        key: "college",
-        icon: "/icons/course.svg",
-        path: "/college",
-      },
-      {
-        key: "subjects",
-        icon: "/icons/course.svg",
-        path: "/subjects",
-      },
-      {
         key: "countries",
-        icon: "/icons/package.svg",
         path: "/countries",
       },
       {
         key: "currencies",
-        icon: "/icons/finance.svg",
         path: "/currencies",
+      },
+      {
+        key: "universities",
+        path: "/university",
+      },
+      {
+        key: "college",
+        path: "/college",
+      },
+      {
+        key: "academic_years",
+        path: "/academic-years",
+      },
+      {
+        key: "academic_semesters",
+        path: "/semesters",
+      },
+      {
+        key: "subjects",
+        path: "/subjects",
       },
     ],
   },
-  {
-    key: "notifications",
-    icon: "/icons/mingcute--notification-line.svg",
-    path: "/notifications",
-  },
-  {
-    key: "support",
-    icon: "/icons/suport.svg",
-    path: "/support",
-  },
-  {
-    key: "banners",
-    icon: "/icons/package.svg",
-    path: "/banners",
-  },
-  {
-    key: "common_questions",
-    icon: "/icons/faq.svg",
-    path: "/common-questions",
-  },
-  {
-    key: "categories",
-    icon: "/icons/course.svg",
-    path: "/category",
-  },
+  // 5. أكواد الخصم
   {
     key: "discount_codes",
     icon: "/icons/bxs--discount.svg",
     path: "/discount-codes",
   },
+  // 6. إدارة المجالات
   {
-    key: "terms_and_conditions",
+    key: "categories",
+    icon: "/icons/course.svg",
+    path: "/category",
+  },
+  // 7. التقارير
+  {
+    key: "reports",
+    icon: "/icons/reports.svg",
+    path: "/reports",
+  },
+  // 8. إدارة البانرات
+  {
+    key: "banners",
+    icon: "/icons/package.svg",
+    path: "/banners",
+  },
+  // 9. الإشعارات
+  {
+    key: "notifications",
+    icon: "/icons/mingcute--notification-line.svg",
+    path: "/notifications",
+  },
+  // 10. الدعم الفني
+  {
+    key: "support",
+    icon: "/icons/suport.svg",
+    path: "/support",
+  },
+  // 11. المعلومات القانونية
+  {
+    key: "legal_info",
     icon: "/icons/invoice.svg",
-    path: "/terms",
-  },
-  {
-    key: "about_us",
-    icon: "/icons/profile.svg",
-    path: "/about-us",
-  },
-  {
-    key: "minutes_management",
-    icon: "/icons/booking.svg",
-    path: "/minutes-management",
-  },
-];
-
-const bottomItems: SidebarItem[] = [
-  {
-    key: "settings",
-    icon: "/icons/settings.svg",
-    path: "/settings",
+    children: [
+      {
+        key: "terms_and_conditions",
+        path: "/terms",
+      },
+      {
+        key: "privacy_policy",
+        path: "/privacy-policy",
+      },
+      {
+        key: "common_questions",
+        path: "/common-questions",
+      },
+    ],
   },
 ];
 
@@ -180,293 +178,27 @@ const COLORS = {
   border: "#E2E8F0",
 };
 
-function SidebarIcon({ active = false, src, color }: { active?: boolean; src: string; color?: string }) {
+function SidebarIcon({
+  active = false,
+  src,
+  color,
+}: {
+  active?: boolean;
+  src: string;
+  color?: string;
+}) {
   return (
     <SvgColor
       src={src}
       sx={{
-        width: 22,
-        height: 22,
+        width: 20,
+        height: 20,
         color: color || (active ? COLORS.activeIcon : COLORS.textMuted),
       }}
     />
   );
 }
 
-// function SidebarItemButton({
-//   item,
-//   active,
-//   isRtl,
-//   expanded,
-//   onToggle,
-//   isLogout = false,
-//   depth = 0,
-// }: {
-//   item: SidebarItem;
-//   active: boolean;
-//   isRtl: boolean;
-//   expanded?: boolean;
-//   onToggle?: () => void;
-//   isLogout?: boolean;
-//   depth?: number;
-// }) {
-//   const t = useTranslations("Sidebar");
-//   const hasChildren = !!item.children?.length;
-//   const isExpandable = hasChildren && onToggle;
-
-//   const itemColor = isLogout ? COLORS.logout : COLORS.text;
-//   const iconColor = isLogout ? COLORS.logout : undefined;
-
-//   const buttonContent = (
-//     <ListItemButton
-//       onClick={isExpandable ? onToggle : undefined}
-//       selected={active && !hasChildren && !isLogout}
-//       sx={{
-//         borderRadius: 1.5,
-//         gap: 1.5,
-//         minHeight: 44,
-//         mb: 0.5,
-//         px: 1.5,
-//         justifyContent: "flex-start",
-//         "&:hover": {
-//           bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
-//         },
-//         "&.Mui-selected": {
-//           bgcolor: COLORS.activeBg,
-//           "&:hover": { bgcolor: COLORS.activeBg },
-//         },
-//       }}
-//     >
-//       {/* 1. Leading Icon (Renders on Left for LTR, Right for RTL) */}
-//       <ListItemIcon
-//         sx={{
-//           minWidth: 0,
-//           justifyContent: "center",
-//         }}
-//       >
-//         <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-//       </ListItemIcon>
-
-//       {/* 2. Text Label */}
-//       {/* <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{ my: 0 }}
-//       /> */}
-//       {/* 2. Text Label */}
-//       <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//               textAlign: isRtl ? "right" : "left",
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{
-//           my: 0,
-//           flex: 1,
-//           textAlign: isRtl ? "right" : "left",
-//           order: 2,
-//         }}
-//       />
-
-//       {/* 3. Trailing Chevron Arrow (Renders on Right for LTR, Left for RTL) */}
-//       {isExpandable && (
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "center",
-//             minWidth: 20,
-//             ml: isRtl ? 0 : "auto",
-//             mr: isRtl ? "auto" : 0,
-//           }}
-//         >
-//           <KeyboardArrowDownRoundedIcon
-//             sx={{
-//               fontSize: 20,
-//               color: COLORS.textMuted,
-//               transition: "transform 0.2s ease-in-out",
-//               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-//             }}
-//           />
-//         </Box>
-//       )}
-//     </ListItemButton>
-//   );
-
-//   return (
-//     <>
-//       {item.path && !hasChildren ? (
-//         <Link href={item.path} style={{ textDecoration: "none" }}>
-//           {buttonContent}
-//         </Link>
-//       ) : (
-//         buttonContent
-//       )}
-
-//       {hasChildren && (
-//         <Collapse in={expanded} timeout="auto" unmountOnExit>
-//           <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
-//             {item.children!.map((child) => (
-//               <SidebarItemButton
-//                 key={child.key}
-//                 item={child}
-//                 active={child.path ? active : false}
-//                 isRtl={isRtl}
-//                 depth={depth + 1}
-//               />
-//             ))}
-//           </List>
-//         </Collapse>
-//       )}
-//     </>
-//   );
-// }
-// function SidebarItemButton({
-//   item,
-//   active,
-//   isRtl,
-//   expanded,
-//   onToggle,
-//   isLogout = false,
-//   depth = 0,
-// }: {
-//   item: SidebarItem;
-//   active: boolean;
-//   isRtl: boolean;
-//   expanded?: boolean;
-//   onToggle?: () => void;
-//   isLogout?: boolean;
-//   depth?: number;
-// }) {
-//   const t = useTranslations("Sidebar");
-//   const hasChildren = !!item.children?.length;
-//   const isExpandable = hasChildren && onToggle;
-
-//   const itemColor = isLogout ? COLORS.logout : COLORS.text;
-//   const iconColor = isLogout ? COLORS.logout : undefined;
-
-//   const buttonContent = (
-//     <ListItemButton
-//       onClick={isExpandable ? onToggle : undefined}
-//       selected={active && !hasChildren && !isLogout}
-//       sx={{
-//         borderRadius: 1.5,
-//         gap: 1.5,
-//         minHeight: 44,
-//         mb: 0.5,
-//         px: 1.5,
-//         alignItems: "center",
-//         "&:hover": {
-//           bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
-//         },
-//         "&.Mui-selected": {
-//           bgcolor: COLORS.activeBg,
-//           "&:hover": { bgcolor: COLORS.activeBg },
-//         },
-//       }}
-//     >
-//       {/* 1. Start Icon */}
-//       <ListItemIcon
-//         sx={{
-//           minWidth: 0,
-//           justifyContent: "center",
-//         }}
-//       >
-//         <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-//       </ListItemIcon>
-
-//       {/* 2. Label (Flexgrow fills remaining horizontal space) */}
-//       <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{
-//           my: 0,
-//           flexGrow: 1,
-//         }}
-//       />
-
-//       {/* 3. End Chevron (Pushed automatically to the far edge) */}
-//       {isExpandable && (
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "center",
-//             minWidth: 20,
-//           }}
-//         >
-//           <KeyboardArrowDownRoundedIcon
-//             sx={{
-//               fontSize: 20,
-//               color: COLORS.textMuted,
-//               transition: "transform 0.2s ease-in-out",
-//               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-//             }}
-//           />
-//         </Box>
-//       )}
-//     </ListItemButton>
-//   );
-
-//   return (
-//     <>
-//       {item.path && !hasChildren ? (
-//         <Link href={item.path} style={{ textDecoration: "none" }}>
-//           {buttonContent}
-//         </Link>
-//       ) : (
-//         buttonContent
-//       )}
-
-//       {hasChildren && (
-//         <Collapse in={expanded} timeout="auto" unmountOnExit>
-//           <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
-//             {item.children!.map((child) => (
-//               <SidebarItemButton
-//                 key={child.key}
-//                 item={child}
-//                 active={child.path ? active : false}
-//                 isRtl={isRtl}
-//                 depth={depth + 1}
-//               />
-//             ))}
-//           </List>
-//         </Collapse>
-//       )}
-//     </>
-//   );
-// }
 function SidebarItemButton({
   item,
   active,
@@ -475,6 +207,7 @@ function SidebarItemButton({
   onToggle,
   isLogout = false,
   depth = 0,
+  onClick,
 }: {
   item: SidebarItem;
   active: boolean;
@@ -483,22 +216,31 @@ function SidebarItemButton({
   onToggle?: () => void;
   isLogout?: boolean;
   depth?: number;
+  onClick?: () => void;
 }) {
   const t = useTranslations("Sidebar");
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
 
-  const itemColor = isLogout ? COLORS.logout : COLORS.text;
+  const itemColor = isLogout ? COLORS.logout : active && !hasChildren ? COLORS.activeIcon : COLORS.text;
   const iconColor = isLogout ? COLORS.logout : undefined;
+
+  const handleClick = () => {
+    if (isExpandable) {
+      onToggle();
+    } else if (onClick) {
+      onClick();
+    }
+  };
 
   const buttonContent = (
     <ListItemButton
-      onClick={isExpandable ? onToggle : undefined}
+      onClick={handleClick}
       selected={active && !hasChildren && !isLogout}
       sx={{
         borderRadius: 1.5,
         gap: 1.5,
-        minHeight: 44,
+        minHeight: depth > 0 ? 38 : 44,
         mb: 0.5,
         px: 1.5,
         alignItems: "center",
@@ -511,27 +253,57 @@ function SidebarItemButton({
         },
       }}
     >
-      {/* 1. Main Icon */}
-      <ListItemIcon
-        sx={{
-          minWidth: 0,
-          mr: 0,
-          ml: 0,
-          justifyContent: "center",
-        }}
-      >
-        <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-      </ListItemIcon>
+      {/* 1. Leading Bullet Dot for Children, or SVG Icon for Parent */}
+      {depth > 0 ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 16,
+            height: 16,
+            flexShrink: 0,
+          }}
+        >
+          <Box
+            sx={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              bgcolor: active ? COLORS.activeIcon : "#1E293B",
+              transition: "transform 0.15s ease",
+              transform: active ? "scale(1.2)" : "scale(1)",
+            }}
+          />
+        </Box>
+      ) : (
+        item.icon && (
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: 0,
+              ml: 0,
+              justifyContent: "center",
+            }}
+          >
+            <SidebarIcon
+              active={active && !hasChildren && !isLogout}
+              src={item.icon}
+              color={iconColor}
+            />
+          </ListItemIcon>
+        )
+      )}
 
-      {/* 2. Text Label (aligned toward the icon with flex-grow pushing chevron) */}
+      {/* 2. Text Label */}
       <ListItemText
         primary={
           <Typography
             variant="body2"
             sx={{
-              fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
+              fontWeight: active && !hasChildren && !isLogout ? 700 : depth > 0 ? 500 : 600,
               color: itemColor,
-              fontSize: 14,
+              fontSize: depth > 0 ? 13.5 : 14,
               lineHeight: 1.4,
               textAlign: isRtl ? "right" : "left",
             }}
@@ -546,7 +318,7 @@ function SidebarItemButton({
         }}
       />
 
-      {/* 3. Trailing Chevron Arrow */}
+      {/* 3. Expand / Collapse Arrow for Parent Groups */}
       {isExpandable && (
         <Box
           sx={{
@@ -558,7 +330,7 @@ function SidebarItemButton({
         >
           <KeyboardArrowDownRoundedIcon
             sx={{
-              fontSize: 20,
+              fontSize: 18,
               color: COLORS.textMuted,
               transition: "transform 0.2s ease-in-out",
               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
@@ -572,7 +344,7 @@ function SidebarItemButton({
   return (
     <>
       {item.path && !hasChildren ? (
-        <Link href={item.path} style={{ textDecoration: "none" }}>
+        <Link href={item.path} style={{ textDecoration: "none", color: "inherit" }}>
           {buttonContent}
         </Link>
       ) : (
@@ -581,7 +353,13 @@ function SidebarItemButton({
 
       {hasChildren && (
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
+          <List
+            disablePadding
+            sx={{
+              pr: isRtl ? 2 : 0,
+              pl: isRtl ? 0 : 2,
+            }}
+          >
             {item.children!.map((child) => (
               <SidebarItemButton
                 key={child.key}
@@ -605,8 +383,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const anchor = isRtl ? "right" : "left";
+  const { logout } = useAuth();
 
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    "course_management",
+    "user_management",
+    "academic_hierarchy",
+    "legal_info",
+  ]);
 
   const toggleExpand = useCallback((key: string) => {
     setExpandedItems((prev) =>
@@ -664,7 +448,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </List>
       </Box>
 
-      {/* <Box
+      {/* Bottom Logout Item */}
+      <Box
         sx={{
           px: 1.5,
           pb: 2,
@@ -673,26 +458,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         }}
       >
         <List disablePadding>
-          {bottomItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <SidebarItemButton
-                key={item.key}
-                item={item}
-                active={active}
-                isRtl={isRtl}
-              />
-            );
-          })}
-
           <SidebarItemButton
             item={logoutItem}
             active={false}
             isRtl={isRtl}
             isLogout
+            onClick={logout}
           />
         </List>
-      </Box> */}
+      </Box>
     </Box>
   );
 

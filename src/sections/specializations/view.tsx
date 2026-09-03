@@ -67,35 +67,44 @@ export default function SpecializationsView() {
   const [editingItem, setEditingItem] = useState<Specialization | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, unknown> = {
-        SkipCount: 0,
-        MaxResultCount: 1000,
-      };
-      if (statusFilter === 'active') params.IsActive = true;
-      if (statusFilter === 'inactive') params.IsActive = false;
-      if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
-
-      const res = await getSpecializations(params);
-
-      if (res.success && res.data) {
-        setItems(res.data.items);
-        setTotalCount(res.data.totalCount);
-      } else {
-        toast.error(res.error || 'Failed to load');
-      }
-    } catch {
-      toast.error('Failed to load');
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearch, statusFilter, toast]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const params: Record<string, unknown> = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+        if (statusFilter === 'active') params.IsActive = true;
+        if (statusFilter === 'inactive') params.IsActive = false;
+        if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
+
+        const res = await getSpecializations(params);
+
+        if (!isMounted) return;
+
+        if (res.success && res.data) {
+          setItems(res.data.items);
+          setTotalCount(res.data.totalCount);
+        } else {
+          toast.error(res.error || 'Failed to load');
+        }
+      } catch {
+        if (!isMounted) return;
+        toast.error('Failed to load');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedSearch, statusFilter, toast]);
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedIds(checked ? items.map((c) => c.id) : []);
