@@ -4,40 +4,42 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
 
-import { CategoryItem } from './_mock';
+import type { CategoryFormValues, CategoryItem } from '../../types/category';
 
 interface CategoryFormDialogProps {
   open: boolean;
   onClose: () => void;
   initialData?: CategoryItem | null;
-  onSave: (data: Partial<CategoryItem>) => void;
+  loading?: boolean;
+  onSave: (data: CategoryFormValues) => void | Promise<void>;
 }
 
 export default function CategoryFormDialog({
   open,
   onClose,
   initialData,
+  loading = false,
   onSave,
 }: CategoryFormDialogProps) {
   const t = useTranslations('Categories');
   const isEdit = !!initialData;
 
-  const [nameAr, setNameAr] = useState(initialData?.name_ar ?? '');
-  const [nameEn, setNameEn] = useState(initialData?.name_en ?? '');
-  const [order, setOrder] = useState(initialData?.order ?? 1);
-  const [active, setActive] = useState(initialData?.active ?? true);
+  const [nameAr, setNameAr] = useState(initialData?.nameAr ?? '');
+  const [nameEn, setNameEn] = useState(initialData?.nameEn ?? '');
+  const [order, setOrder] = useState(initialData?.order ?? 0);
+  const [active, setActive] = useState(initialData?.isActive ?? true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.image ?? null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.imageUrl ?? null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,21 +49,22 @@ export default function CategoryFormDialog({
     }
   };
 
-  const handleSubmit = () => {
-    onSave({
-      name_ar: nameAr,
-      name_en: nameEn,
+  const handleSubmit = async () => {
+    await onSave({
+      nameAr,
+      nameEn,
       order,
-      active,
-      image: previewUrl || '/icons/package.svg',
+      isActive: active,
+      imageFile: selectedFile,
     });
-    onClose();
   };
+
+  const canSubmit = nameAr.trim() && nameEn.trim() && (isEdit || !!selectedFile);
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={loading ? undefined : onClose}
       fullWidth
       maxWidth="sm"
       slotProps={{
@@ -69,7 +72,7 @@ export default function CategoryFormDialog({
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-        <IconButton onClick={onClose} size="small">
+        <IconButton onClick={onClose} size="small" disabled={loading}>
           <Iconify icon="ic:round-close" sx={{ color: '#64748B', width: 20, height: 20 }} />
         </IconButton>
       </Box>
@@ -82,7 +85,6 @@ export default function CategoryFormDialog({
           {t('dialog.subtitle')}
         </Typography>
 
-        {/* File Upload */}
         <Box
           component="label"
           sx={{
@@ -94,26 +96,35 @@ export default function CategoryFormDialog({
             bgcolor: '#F8FAFC',
             border: '1.5px dashed #CBD5E1',
             borderRadius: 2,
-            cursor: 'pointer',
+            cursor: loading ? 'default' : 'pointer',
             mb: 3,
-            '&:hover': { bgcolor: '#F1F5F9', borderColor: '#94A3B8' },
+            '&:hover': loading ? undefined : { bgcolor: '#F1F5F9', borderColor: '#94A3B8' },
           }}
         >
-          <input type="file" hidden accept="image/*" onChange={handleFileChange} />
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              bgcolor: '#E6F4EA',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 1.5,
-            }}
-          >
-            <Iconify icon="eva:folder-open-outline" sx={{ fontSize: 32, color: '#00A76F' }} />
-          </Box>
+          <input type="file" hidden accept="image/*" onChange={handleFileChange} disabled={loading} />
+          {previewUrl ? (
+            <Box
+              component="img"
+              src={previewUrl}
+              alt={nameEn || nameAr || 'preview'}
+              sx={{ width: 72, height: 72, objectFit: 'contain', mb: 1.5, borderRadius: 1 }}
+            />
+          ) : (
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                bgcolor: '#E6F4EA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 1.5,
+              }}
+            >
+              <Iconify icon="eva:folder-open-outline" sx={{ fontSize: 32, color: '#00A76F' }} />
+            </Box>
+          )}
           <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', mb: 0.5 }}>
             {selectedFile ? selectedFile.name : t('dialog.select_image')}
           </Typography>
@@ -125,7 +136,6 @@ export default function CategoryFormDialog({
           </Typography>
         </Box>
 
-        {/* Name Fields */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
           <TextField
             fullWidth
@@ -134,6 +144,7 @@ export default function CategoryFormDialog({
             placeholder={t('dialog.name_ar_placeholder')}
             value={nameAr}
             onChange={(e) => setNameAr(e.target.value)}
+            disabled={loading}
             slotProps={{ inputLabel: { shrink: true } }}
             sx={{
               '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#E5E7EB' } },
@@ -146,6 +157,7 @@ export default function CategoryFormDialog({
             placeholder={t('dialog.name_en_placeholder')}
             value={nameEn}
             onChange={(e) => setNameEn(e.target.value)}
+            disabled={loading}
             slotProps={{ inputLabel: { shrink: true } }}
             sx={{
               '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#E5E7EB' } },
@@ -153,7 +165,6 @@ export default function CategoryFormDialog({
           />
         </Box>
 
-        {/* Order Field */}
         <TextField
           fullWidth
           size="small"
@@ -161,11 +172,11 @@ export default function CategoryFormDialog({
           type="number"
           value={order}
           onChange={(e) => setOrder(Number(e.target.value))}
+          disabled={loading}
           slotProps={{ inputLabel: { shrink: true } }}
           sx={{ mb: 3, '& .MuiOutlinedInput-root': { borderRadius: 2, '& fieldset': { borderColor: '#E5E7EB' } } }}
         />
 
-        {/* Status Toggle */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B' }}>
             {t('dialog.status')}
@@ -173,6 +184,7 @@ export default function CategoryFormDialog({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Switch
               checked={active}
+              disabled={loading}
               onChange={(e) => setActive(e.target.checked)}
               sx={{
                 '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
@@ -185,11 +197,12 @@ export default function CategoryFormDialog({
           </Box>
         </Box>
 
-        {/* Actions */}
         <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-start' }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
+            disabled={loading || !canSubmit}
+            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
             sx={{
               bgcolor: '#1E293B',
               color: '#FFFFFF',
@@ -205,6 +218,7 @@ export default function CategoryFormDialog({
           <Button
             variant="outlined"
             onClick={onClose}
+            disabled={loading}
             sx={{
               borderColor: '#CBD5E1',
               color: '#1E293B',
