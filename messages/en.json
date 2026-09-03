@@ -780,7 +780,11 @@
       "status": "Status",
       "add_btn": "Add",
       "save_btn": "Save",
-      "cancel_btn": "Cancel"
+      "cancel_btn": "Cancel",
+      "is_active": "Active",
+      "add_button": "Add Specialization",
+      "edit_button": "Edit Specialization",
+      "cancel": "Cancel"
     },
     "delete_dialog": {
       "title": "Delete Specialization",

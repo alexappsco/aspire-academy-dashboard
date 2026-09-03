@@ -36,12 +36,35 @@ interface MinutesFormViewProps {
   id?: string;
 }
 
-const inputRootSx = {
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 2,
-    '& fieldset': { borderColor: '#E5E7EB' },
-  },
-};
+function FormField({
+  label,
+  required = false,
+  children,
+  rtl,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+  rtl: boolean;
+}) {
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Typography
+        sx={{
+          mb: 0.75,
+          color: '#475467',
+          fontSize: 13,
+          fontWeight: 600,
+          textAlign: rtl ? 'right' : 'left',
+        }}
+      >
+        {label}
+        {required && <Box component="span" sx={{ color: '#D14343', ml: 0.5 }}>*</Box>}
+      </Typography>
+      {children}
+    </Box>
+  );
+}
 
 export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
   const t = useTranslations('MinutesManagement');
@@ -49,6 +72,23 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
   const router = useRouter();
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  const inputRootSx = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: 2,
+      direction: isRtl ? 'rtl' : 'ltr',
+      textAlign: isRtl ? 'right' : 'left',
+      '& fieldset': { borderColor: '#E5E7EB' },
+      '&:hover fieldset': { borderColor: '#B0B8C1' },
+      '&.Mui-focused fieldset': { borderColor: '#1D4ED8' },
+      '& input, & textarea': {
+        direction: isRtl ? 'rtl' : 'ltr',
+        textAlign: isRtl ? 'right' : 'left',
+        fontSize: 14,
+      },
+    },
+  };
+
   const isEdit = !!id;
   const listPath = `/${locale}/minutes-management`;
 
@@ -233,7 +273,15 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
   }
 
   return (
-    <Box sx={{ py: 2, pb: 6 }}>
+    <Box
+      dir={isRtl ? 'rtl' : 'ltr'}
+      sx={{
+        py: 2,
+        pb: 6,
+        direction: isRtl ? 'rtl' : 'ltr',
+        textAlign: isRtl ? 'right' : 'left',
+      }}
+    >
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
@@ -353,99 +401,105 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Stack spacing={2.5}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={t('field_full_name')}
-                    required
-                    value={formData.fullName}
-                    onChange={handleChange('fullName')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  />
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={t('field_title')}
-                    value={formData.title}
-                    onChange={handleChange('title')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  />
+                  <FormField label={t('field_full_name')} required rtl={isRtl}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={formData.fullName}
+                      onChange={handleChange('fullName')}
+                      placeholder={t('field_full_name')}
+                      sx={inputRootSx}
+                    />
+                  </FormField>
+
+                  <FormField label={t('field_title')} rtl={isRtl}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={formData.title}
+                      onChange={handleChange('title')}
+                      placeholder={t('field_title')}
+                      sx={inputRootSx}
+                    />
+                  </FormField>
                 </Stack>
 
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <SelectField
-                    fullWidth
-                    size="small"
-                    label={t('field_country')}
-                    value={formData.country}
-                    onChange={handleSelectChange('country')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  >
-                    <MenuItem value="">
-                      <em>{isRtl ? 'اختر الدولة' : 'Select country...'}</em>
-                    </MenuItem>
-                    {countries.map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {isRtl ? c.nameAr ?? c.name : c.nameEn ?? c.name}
+                  <FormField label={t('field_country')} rtl={isRtl}>
+                    <SelectField
+                      fullWidth
+                      size="small"
+                      value={formData.country}
+                      onChange={handleSelectChange('country')}
+                      sx={inputRootSx}
+                    >
+                      <MenuItem value="">
+                        <em>{isRtl ? 'اختر الدولة' : 'Select country...'}</em>
                       </MenuItem>
-                    ))}
-                  </SelectField>
-                  <SelectField
-                    fullWidth
-                    size="small"
-                    label={t('field_university')}
-                    value={formData.university}
-                    onChange={handleSelectChange('university')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  >
-                    <MenuItem value="">
-                      <em>{isRtl ? 'اختر الجامعة' : 'Select university...'}</em>
-                    </MenuItem>
-                    {universities.map((u) => (
-                      <MenuItem key={u.id} value={u.id}>
-                        {isRtl ? u.nameAr : u.nameEn}
+                      {countries.map((c) => (
+                        <MenuItem key={c.id} value={c.id}>
+                          {isRtl ? c.nameAr ?? c.name : c.nameEn ?? c.name}
+                        </MenuItem>
+                      ))}
+                    </SelectField>
+                  </FormField>
+
+                  <FormField label={t('field_university')} rtl={isRtl}>
+                    <SelectField
+                      fullWidth
+                      size="small"
+                      value={formData.university}
+                      onChange={handleSelectChange('university')}
+                      sx={inputRootSx}
+                    >
+                      <MenuItem value="">
+                        <em>{isRtl ? 'اختر الجامعة' : 'Select university...'}</em>
                       </MenuItem>
-                    ))}
-                  </SelectField>
+                      {universities.map((u) => (
+                        <MenuItem key={u.id} value={u.id}>
+                          {isRtl ? u.nameAr : u.nameEn}
+                        </MenuItem>
+                      ))}
+                    </SelectField>
+                  </FormField>
                 </Stack>
 
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={t('field_qualification')}
-                    value={formData.qualification}
-                    onChange={handleChange('qualification')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  />
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label={t('field_start_date')}
-                    type="date"
-                    value={formData.startDate}
-                    onChange={handleChange('startDate')}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    sx={inputRootSx}
-                  />
+                  <FormField label={t('field_qualification')} rtl={isRtl}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={formData.qualification}
+                      onChange={handleChange('qualification')}
+                      placeholder={t('field_qualification')}
+                      sx={inputRootSx}
+                    />
+                  </FormField>
+
+                  <FormField label={t('field_start_date')} rtl={isRtl}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={handleChange('startDate')}
+                      sx={inputRootSx}
+                    />
+                  </FormField>
                 </Stack>
 
-                <TextField
-                  fullWidth
-                  size="small"
-                  label={t('field_bio')}
-                  multiline
-                  rows={4}
-                  value={formData.bio}
-                  onChange={handleChange('bio')}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  sx={inputRootSx}
-                />
+                <FormField label={t('field_bio')} rtl={isRtl}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={4}
+                    value={formData.bio}
+                    onChange={handleChange('bio')}
+                    placeholder={t('field_bio')}
+                    sx={inputRootSx}
+                  />
+                </FormField>
               </Stack>
             </Box>
           </Stack>
@@ -472,55 +526,56 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
             <Divider sx={{ mb: 3, borderColor: '#E5E7EB' }} />
 
             <Stack spacing={2.5}>
-              <TextField
-                fullWidth
-                size="small"
-                label={t('field_email')}
-                required
-                type="email"
-                value={formData.email}
-                onChange={handleChange('email')}
-                slotProps={{ inputLabel: { shrink: true } }}
-                sx={inputRootSx}
-              />
-
-              <TextField
-                fullWidth
-                size="small"
-                label={t('field_phone')}
-                value={formData.phone}
-                onChange={handleChange('phone')}
-                slotProps={{ inputLabel: { shrink: true } }}
-                sx={inputRootSx}
-              />
-
-              <Box>
+              <FormField label={t('field_email')} required rtl={isRtl}>
                 <TextField
                   fullWidth
                   size="small"
-                  label={t('field_password')}
-                  required
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleChange('password')}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword((prev) => !prev)}
-                            edge="end"
-                            size="small"
-                          >
-                            {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange('email')}
+                  placeholder={t('field_email')}
                   sx={inputRootSx}
                 />
+              </FormField>
+
+              <FormField label={t('field_phone')} rtl={isRtl}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={formData.phone}
+                  onChange={handleChange('phone')}
+                  placeholder={t('field_phone')}
+                  sx={inputRootSx}
+                />
+              </FormField>
+
+              <Box>
+                <FormField label={t('field_password')} required rtl={isRtl}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={handleChange('password')}
+                    placeholder={t('field_password')}
+                    slotProps={{
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword((prev) => !prev)}
+                              edge="end"
+                              size="small"
+                            >
+                              {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    sx={inputRootSx}
+                  />
+                </FormField>
                 {formData.password && (
                   <Box sx={{ mt: 1.5 }}>
                     <Stack direction="row" spacing={0.75} sx={{ mb: 0.5 }}>
@@ -550,32 +605,32 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
                 )}
               </Box>
 
-              <TextField
-                fullWidth
-                size="small"
-                label={t('field_confirm_password')}
-                required
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={handleChange('confirmPassword')}
-                slotProps={{
-                  inputLabel: { shrink: true },
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowConfirmPassword((prev) => !prev)}
-                          edge="end"
-                          size="small"
-                        >
-                          {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                sx={inputRootSx}
-              />
+              <FormField label={t('field_confirm_password')} required rtl={isRtl}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange('confirmPassword')}
+                  placeholder={t('field_confirm_password')}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                            edge="end"
+                            size="small"
+                          >
+                            {showConfirmPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  sx={inputRootSx}
+                />
+              </FormField>
             </Stack>
           </Box>
         </Card>

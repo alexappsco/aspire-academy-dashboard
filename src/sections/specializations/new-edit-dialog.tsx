@@ -35,7 +35,7 @@ interface FormContentProps {
 }
 
 function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) {
-  const t = useTranslations('Specializations');
+  const t = useTranslations('Specializations.dialog');
   const isEdit = !!initialData;
 
   const [nameAr, setNameAr] = useState(initialData?.nameAr ?? '');
@@ -160,7 +160,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2 }}>
+      <DialogActions sx={{ px: 3, py: 2, gap: 1.5, justifyContent: 'flex-end' }}>
         <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 1.5 }}>
           {t('cancel')}
         </Button>
@@ -173,7 +173,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             '&:hover': { bgcolor: '#2C353E' },
           }}
         >
-          {isEdit ? t('save') : t('add')}
+          {isEdit ? t('edit_button') : t('add_button')}
         </Button>
       </DialogActions>
     </>
