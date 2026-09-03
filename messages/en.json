@@ -693,6 +693,8 @@
       "id": "Country Code",
       "name_ar": "Arabic Name",
       "name_en": "English Name",
+      "code": "Code",
+      "currency": "Currency",
       "status": "Status",
       "actions": "Actions"
     },
@@ -703,6 +705,10 @@
       "name_ar_placeholder": "Name...",
       "name_en": "English Country Name",
       "name_en_placeholder": "Name...",
+      "code": "Country Code",
+      "code_placeholder": "e.g. KW or +965",
+      "currency": "Currency",
+      "currency_placeholder": "Select currency...",
       "order": "Display Order",
       "order_placeholder": "2",
       "status": "Status",
@@ -720,7 +726,9 @@
       "add_success": "Country added successfully",
       "edit_success": "Country updated successfully",
       "delete_success": "Country deleted successfully",
-      "status_updated": "Country status updated successfully"
+      "status_updated": "Country status updated successfully",
+      "fetch_error": "Error fetching countries data",
+      "operation_error": "Error performing operation"
     }
   },
   "MinutesManagement": {

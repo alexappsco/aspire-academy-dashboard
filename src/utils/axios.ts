@@ -1,8 +1,9 @@
 import { HOST_API, COOKIES_KEYS } from 'src/config-global';
 
-type RequestConfig = RequestInit & {
+export type RequestConfig = RequestInit & {
   data?: unknown;
   url?: string;
+  params?: Record<string, unknown>;
 };
 
 function getCookie(name: string): string | null {
@@ -16,18 +17,57 @@ function getLocaleFromCookie(): string {
   return lang || 'ar';
 }
 
-async function request<T = unknown>(url: string, config: RequestConfig = {}): Promise<T> {
-  const { data, headers, ...rest } = config;
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return (
+    getCookie(COOKIES_KEYS.session) ||
+    getCookie('accessToken') ||
+    localStorage.getItem('accessToken') ||
+    localStorage.getItem(COOKIES_KEYS.session)
+  );
+}
 
-  const response = await fetch(`${HOST_API}${url}`, {
+async function request<T = unknown>(url: string, config: RequestConfig = {}): Promise<T> {
+  const { data, headers, params, ...rest } = config;
+
+  let fullUrl = url.startsWith('http')
+    ? url
+    : `${HOST_API}${url.startsWith('/') ? '' : '/'}${url}`;
+
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      fullUrl += `${fullUrl.includes('?') ? '&' : '?'}${queryString}`;
+    }
+  }
+
+  const token = getAuthToken();
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
+
+  const reqHeaders: HeadersInit = {
+    ...(!isFormData && { 'Content-Type': 'application/json' }),
+    'Accept-Language': getLocaleFromCookie(),
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(headers as Record<string, string>),
+  };
+
+  const body = data === undefined ? rest.body : isFormData ? (data as FormData) : JSON.stringify(data);
+
+  const response = await fetch(fullUrl, {
     ...rest,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept-Language': getLocaleFromCookie(),
-      ...headers,
-    },
-    body: data === undefined ? rest.body : JSON.stringify(data),
+    headers: reqHeaders,
+    body,
   });
+
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return {} as T;
+  }
 
   const responseData = await response.json().catch(() => null);
 
@@ -41,7 +81,7 @@ async function request<T = unknown>(url: string, config: RequestConfig = {}): Pr
       }
     }
 
-    return Promise.reject({ message, status });
+    return Promise.reject({ message, status, data: responseData });
   }
 
   return responseData as T;
@@ -67,8 +107,23 @@ export const getErrorMessage = (error: unknown): string => {
     return error.message;
   }
 
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message);
+  if (error && typeof error === 'object') {
+    const errObj = error as Record<string, unknown>;
+    if (errObj.error && typeof errObj.error === 'object') {
+      const nested = errObj.error as Record<string, unknown>;
+      if (nested.message) return String(nested.message);
+      if (nested.details) return String(nested.details);
+    }
+    if (errObj.message) {
+      if (Array.isArray(errObj.message)) return errObj.message.join(' | ');
+      return String(errObj.message);
+    }
+    if (errObj.error && typeof errObj.error === 'string') {
+      return errObj.error;
+    }
+    if (errObj.title && typeof errObj.title === 'string') {
+      return errObj.title;
+    }
   }
 
   if (typeof error === 'string') {

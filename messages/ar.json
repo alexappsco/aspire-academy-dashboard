@@ -694,6 +694,8 @@
       "id": "رقم الدولة",
       "name_ar": "الاسم عربي",
       "name_en": "الاسم انجليزي",
+      "code": "كود الدولة",
+      "currency": "العملة",
       "status": "الحالة",
       "actions": "الإجراءات"
     },
@@ -704,6 +706,10 @@
       "name_ar_placeholder": "الاسم...",
       "name_en": "اسم الدولة انجليزي",
       "name_en_placeholder": "الاسم...",
+      "code": "كود الدولة",
+      "code_placeholder": "مثال: KW أو +965",
+      "currency": "العملة",
+      "currency_placeholder": "اختر العملة...",
       "order": "رقم الظهور",
       "order_placeholder": "2",
       "status": "الحالة",
@@ -721,7 +727,9 @@
       "add_success": "تمت إضافة الدولة بنجاح",
       "edit_success": "تم تعديل الدولة بنجاح",
       "delete_success": "تم حذف الدولة بنجاح",
-      "status_updated": "تم تحديث حالة الدولة بنجاح"
+      "status_updated": "تم تحديث حالة الدولة بنجاح",
+      "fetch_error": "حدث خطأ أثناء جلب البيانات",
+      "operation_error": "حدث خطأ أثناء تنفيذ العملية"
     }
   },
   "MinutesManagement": {
