@@ -802,12 +802,11 @@
     "search_placeholder": "Search...",
     "columns": {
       "name": "Name",
+      "title": "Title",
+      "qualification": "Qualification",
+      "country": "Country",
+      "university": "University",
       "joined_date": "Joined Date",
-      "specialty": "Specialty",
-      "subject": "Subject",
-      "courses": "Courses",
-      "students": "Students",
-      "rating": "Rating",
       "status": "Status"
     },
     "status": {
@@ -829,7 +828,9 @@
     "breadcrumb_dashboard": "Dashboard",
     "breadcrumb_lecturers": "Lecturers",
     "breadcrumb_add_lecturer": "Add Lecturer",
+    "breadcrumb_edit_lecturer": "Edit Lecturer",
     "page_title": "Add Lecturer",
+    "page_title_edit": "Edit Lecturer",
     "page_subtitle": "Create a new lecturer account and add them to the Aspire Academy platform.",
     "section_personal_info": "Personal Information",
     "section_login_credentials": "Login Credentials",
@@ -842,12 +843,14 @@
     "field_start_date": "Start Date",
     "field_bio": "Bio about the Lecturer",
     "field_email": "Email",
+    "field_phone": "Phone Number",
     "field_password": "Password",
     "field_confirm_password": "Confirm Password",
     "upload_photo": "Upload Photo",
     "photo_hint": "(JPG, PNG Max 2MB)",
     "password_strength_weak": "Weak",
     "btn_create_lecturer": "Create Lecturer Account",
+    "btn_update_lecturer": "Save Changes",
     "btn_cancel": "Cancel",
     "dialog": {
       "add_title": "Add New Lecturer",
@@ -872,6 +875,15 @@
       "edit_success": "Lecturer updated successfully",
       "delete_success": "Lecturer deleted successfully",
       "status_updated": "Lecturer status updated successfully"
+    },
+    "messages": {
+      "add_success": "Lecturer added successfully",
+      "update_success": "Lecturer updated successfully",
+      "delete_success": "Lecturer deleted successfully",
+      "required_name": "Please enter the full name",
+      "required_email": "Please enter the email",
+      "required_password": "Please enter a password",
+      "password_mismatch": "Passwords do not match"
     }
   },
   "Home": {
