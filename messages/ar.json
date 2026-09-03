@@ -5,28 +5,30 @@
 
   "Sidebar": {
     "home": "الرئيسية",
-    "course_management": "إدارة الدورات التدريبية",
-    "courses": "الدورات",
+    "course_management": "ادارة الدورات التدريبية",
+    "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
-    "curriculum_management": "إدارة المناهج التعليمية",
-    "booking_management": "إدارة الحجوزات",
-    "finance_payments": "المالية والمدفوعات",
-    "reports_analytics": "التقارير والتحليلات",
-    "support": "الدعم الفني",
-    "notifications": "الإشعارات",
-    "banners": "البانرات",
-    "common_questions": "الأسئلة الشائعة",
-    "categories": "ادارة المجالات",
-    "universities": "الجامعات",
-    "college": "الكليات",
-    "academic_hierarchy": "الهيكل الأكاديمي",
-    "subjects": "المواد",
+    "user_management": "ادارة المستخدمين",
+    "students_management": "إدارة الطلاب",
+    "lecturers_management": "ادارة المحاضرون",
+    "academic_hierarchy": "الهيكل الاكاديمي",
     "countries": "الدول",
+    "currencies": "العملات",
+    "universities": "ادارة الجامعات",
+    "college": "ادارة الكليات",
+    "academic_years": "ادارة السنين الدراسية",
+    "academic_semesters": "ادارة الفصول الدراسية",
+    "subjects": "ادارة المواد",
     "discount_codes": "أكواد الخصم",
+    "categories": "ادارة المجالات",
+    "reports": "التقارير",
+    "banners": "إدارة البانرات",
+    "notifications": "الاشعارات",
+    "support": "الدعم الفني",
+    "legal_info": "المعلومات القانونية",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
-    "minutes_management": "إدارة المحاضرات",
-    "settings": "الإعدادات",
+    "common_questions": "الاسئلة الشائعة",
     "logout": "تسجيل الخروج"
   },
   "Courses": {
@@ -773,7 +775,11 @@
       "status": "الحالة",
       "add_btn": "إضافة",
       "save_btn": "حفظ",
-      "cancel_btn": "إلغاء"
+      "cancel_btn": "إلغاء",
+      "is_active": "مفعل",
+      "add_button": "إضافة تخصص",
+      "edit_button": "تعديل تخصص",
+      "cancel": "إلغاء"
     },
     "delete_dialog": {
       "title": "حذف تخصص",
@@ -795,12 +801,11 @@
     "search_placeholder": "بحث...",
     "columns": {
       "name": "الاسم",
+      "title": "اللقب",
+      "qualification": "المؤهل العلمي",
+      "country": "الدولة",
+      "university": "الجامعة",
       "joined_date": "تاريخ الانضمام",
-      "specialty": "التخصص",
-      "subject": "المادة",
-      "courses": "الدورات",
-      "students": "الطلاب",
-      "rating": "التقييم",
       "status": "الحالة"
     },
     "status": {
@@ -822,7 +827,9 @@
     "breadcrumb_dashboard": "لوحة التحكم",
     "breadcrumb_lecturers": "المحاضرون",
     "breadcrumb_add_lecturer": "إضافة محاضر",
+    "breadcrumb_edit_lecturer": "تعديل محاضر",
     "page_title": "إضافة محاضر",
+    "page_title_edit": "تعديل محاضر",
     "page_subtitle": "إنشاء حساب جديد لملاحظ وإدخاله إلى منصة Aspire Academy.",
     "section_personal_info": "البيانات الشخصية",
     "section_login_credentials": "بيانات تسجيل الدخول",
@@ -835,12 +842,14 @@
     "field_start_date": "تاريخ البداية",
     "field_bio": "نبذة عن المحاضر",
     "field_email": "الايميل",
+    "field_phone": "رقم الموبايل",
     "field_password": "كلمة المرور",
     "field_confirm_password": "تأكيد كلمة المرور",
     "upload_photo": "رفع صورة",
     "photo_hint": "(JPG, PNG الحد الأقصى 2)",
     "password_strength_weak": "ضعيفة",
     "btn_create_lecturer": "إنشاء حساب المحاضر",
+    "btn_update_lecturer": "حفظ التعديلات",
     "btn_cancel": "إلغاء",
     "dialog": {
       "add_title": "إضافة محاضر جديد",
@@ -865,6 +874,15 @@
       "edit_success": "تم تعديل بيانات المحاضر بنجاح",
       "delete_success": "تم حذف المحاضر بنجاح",
       "status_updated": "تم تحديث حالة المحاضر بنجاح"
+    },
+    "messages": {
+      "add_success": "تم إضافة المحاضر بنجاح",
+      "update_success": "تم تعديل بيانات المحاضر بنجاح",
+      "delete_success": "تم حذف المحاضر بنجاح",
+      "required_name": "الرجاء إدخال الاسم الكامل",
+      "required_email": "الرجاء إدخال الايميل",
+      "required_password": "الرجاء إدخال كلمة المرور",
+      "password_mismatch": "كلمتا المرور غير متطابقتين"
     }
   },
   "Home": {
@@ -997,6 +1015,53 @@
     "recent_activities": {
       "title": "آخر النشاطات",
       "subtitle": "سجل فوري متزامن"
+    }
+  },
+  "Currencies": {
+    "title": "إدارة العملات",
+    "add_currency": "إضافة عملة",
+    "search_placeholder": "بحث",
+    "all_status": "الحالة",
+    "active": "مفعل",
+    "inactive": "معطل",
+    "columns": {
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم بالانجليزية",
+      "symbol_ar": "الرمز بالعربية",
+      "symbol_en": "الرمز بالانجليزية",
+      "code": "الكود",
+      "status": "الحالة"
+    },
+    "dialog": {
+      "add_title": "إضافة عملة",
+      "edit_title": "تعديل عملة",
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم بالانجليزية",
+      "symbol_ar": "الرمز بالعربية",
+      "symbol_en": "الرمز بالانجليزية",
+      "code": "الكود",
+      "status": "الحالة",
+      "status_active": "مفعل",
+      "status_inactive": "معطل",
+      "add_button": "إضافة",
+      "save_button": "حفظ",
+      "cancel_button": "إلغاء",
+      "delete_title": "هل انت متاكد انك تريد الحذف؟",
+      "delete_button": "حذف"
+    },
+    "validation": {
+      "name_ar_required": "الاسم بالعربية مطلوب",
+      "name_en_required": "الاسم بالانجليزية مطلوب",
+      "symbol_required": "الرمز مطلوب",
+      "code_required": "الكود مطلوب"
+    },
+    "messages": {
+      "create_success": "تم إضافة العملة بنجاح",
+      "update_success": "تم تعديل بيانات العملة بنجاح",
+      "delete_success": "تم حذف العملة بنجاح",
+      "status_success": "تم تغيير حالة العملة بنجاح",
+      "fetch_error": "حدث خطأ أثناء جلب بيانات العملات",
+      "operation_error": "حدث خطأ أثناء إتمام العملية"
     }
   }
 }

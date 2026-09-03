@@ -27,478 +27,246 @@ interface SidebarProps {
 
 interface SidebarItem {
   key: string;
-  icon: string;
+  icon?: string;
   path?: string;
   children?: SidebarItem[];
 }
 
 const sidebarItems: SidebarItem[] = [
+  // 1. الرئيسية
   {
     key: "home",
     icon: "/icons/main.svg",
     path: "/",
   },
+  // 2. إدارة الدورات التدريبية
   {
     key: "course_management",
     icon: "/icons/course.svg",
     children: [
       {
         key: "courses",
-        icon: "/icons/course.svg",
         path: "/courses",
       },
       {
         key: "specializations",
-        icon: "/icons/course.svg",
         path: "/specializations",
       },
     ],
   },
+  // 3. إدارة المستخدمين
   {
-    key: "curriculum_management",
-    icon: "/icons/curriculum.svg",
-    path: "/curriculum",
-  },
-  {
-    key: "booking_management",
-    icon: "/icons/booking.svg",
+    key: "user_management",
+    icon: "/icons/profile.svg",
     children: [
-      { key: "home", icon: "/icons/main.svg", path: "/bookings" },
+      // {
+      //   key: "students_management",
+      //   path: "/students",
+      // },
+      {
+        key: "lecturers_management",
+        path: "/minutes-management",
+      },
     ],
   },
-  {
-    key: "finance_payments",
-    icon: "/icons/finance.svg",
-    path: "/finance",
-  },
-  {
-    key: "reports_analytics",
-    icon: "/icons/reports.svg",
-    children: [
-      { key: "home", icon: "/icons/main.svg", path: "/reports" },
-    ],
-  },
+  // 4. الهيكل الأكاديمي
   {
     key: "academic_hierarchy",
-    icon: "/icons/curriculum.svg",
+    icon: "/icons/build.svg",
     children: [
       {
+        key: "countries",
+        path: "/countries",
+      },
+      {
         key: "universities",
-        icon: "/icons/curriculum.svg",
         path: "/university",
       },
       {
         key: "college",
-        icon: "/icons/course.svg",
         path: "/college",
       },
       {
-        key: "subjects",
-        icon: "/icons/course.svg",
-        path: "/subjects",
+        key: "academic_years",
+        path: "/academic-years",
       },
       {
-        key: "countries",
-        icon: "/icons/package.svg",
-        path: "/countries",
+        key: "academic_semesters",
+        path: "/semesters",
+      },
+      {
+        key: "subjects",
+        path: "/subjects",
       },
     ],
   },
+  // 5. العملات (مستقلة خارج الهيكل الأكاديمي)
   {
-    key: "notifications",
-    icon: "/icons/mingcute--notification-line.svg",
-    path: "/notifications",
+    key: "currencies",
+    icon: "/icons/finance.svg",
+    path: "/currencies",
   },
-  {
-    key: "support",
-    icon: "/icons/suport.svg",
-    path: "/support",
-  },
-  {
-    key: "banners",
-    icon: "/icons/package.svg",
-    path: "/banners",
-  },
-  {
-    key: "common_questions",
-    icon: "/icons/faq.svg",
-    path: "/common-questions",
-  },
-  {
-    key: "categories",
-    icon: "/icons/course.svg",
-    path: "/category",
-  },
+  // 6. أكواد الخصم
   {
     key: "discount_codes",
     icon: "/icons/bxs--discount.svg",
     path: "/discount-codes",
   },
+  // 7. إدارة المجالات
   {
-    key: "terms_and_conditions",
+    key: "categories",
+    icon: "/icons/course.svg",
+    path: "/category",
+  },
+  // 8. التقارير
+  // {
+  //   key: "reports",
+  //   icon: "/icons/reports.svg",
+  //   path: "/reports",
+  // },
+  // 9. إدارة البانرات
+  {
+    key: "banners",
+    icon: "/icons/package.svg",
+    path: "/banners",
+  },
+  // 10. الإشعارات
+  {
+    key: "notifications",
+    icon: "/icons/mingcute--notification-line.svg",
+    path: "/notifications",
+  },
+  // 11. الدعم الفني
+  {
+    key: "support",
+    icon: "/icons/suport.svg",
+    path: "/support",
+  },
+  // 12. المعلومات القانونية
+  {
+    key: "legal_info",
     icon: "/icons/invoice.svg",
-    path: "/terms",
-  },
-  {
-    key: "about_us",
-    icon: "/icons/profile.svg",
-    path: "/about-us",
-  },
-  {
-    key: "minutes_management",
-    icon: "/icons/booking.svg",
-    path: "/minutes-management",
-  },
-];
-
-const bottomItems: SidebarItem[] = [
-  {
-    key: "settings",
-    icon: "/icons/settings.svg",
-    path: "/settings",
+    children: [
+      {
+        key: "terms_and_conditions",
+        path: "/terms",
+      },
+      {
+        key: "about_us",
+        path: "/about-us",
+      },
+      {
+        key: "common_questions",
+        path: "/common-questions",
+      },
+    ],
   },
 ];
-
-const logoutItem: SidebarItem = {
-  key: "logout",
-  icon: "/icons/logout.svg",
-};
 
 const COLORS = {
   text: "#1E293B",
   textMuted: "#64748B",
-  activeBg: "#F1F5F9",
+  activeBg: "#EAF7F0",
+  activeBgSoft: "#F4FBF7",
   hoverBg: "#F8FAFC",
   activeIcon: "#1B8354",
-  logout: "#DC2626",
-  logoutHover: "#FEE2E2",
+  activeBorder: "#1B8354",
   border: "#E2E8F0",
 };
 
-function SidebarIcon({ active = false, src, color }: { active?: boolean; src: string; color?: string }) {
+function checkIsActive(path?: string, currentPath: string = ""): boolean {
+  if (!path) return false;
+  if (path === "/") return currentPath === "/" || currentPath === "";
+  return currentPath === path || currentPath.startsWith(`${path}/`);
+}
+
+function SidebarIcon({
+  active = false,
+  src,
+  color,
+}: {
+  active?: boolean;
+  src: string;
+  color?: string;
+}) {
   return (
     <SvgColor
       src={src}
       sx={{
-        width: 22,
-        height: 22,
+        width: 20,
+        height: 20,
         color: color || (active ? COLORS.activeIcon : COLORS.textMuted),
       }}
     />
   );
 }
 
-// function SidebarItemButton({
-//   item,
-//   active,
-//   isRtl,
-//   expanded,
-//   onToggle,
-//   isLogout = false,
-//   depth = 0,
-// }: {
-//   item: SidebarItem;
-//   active: boolean;
-//   isRtl: boolean;
-//   expanded?: boolean;
-//   onToggle?: () => void;
-//   isLogout?: boolean;
-//   depth?: number;
-// }) {
-//   const t = useTranslations("Sidebar");
-//   const hasChildren = !!item.children?.length;
-//   const isExpandable = hasChildren && onToggle;
-
-//   const itemColor = isLogout ? COLORS.logout : COLORS.text;
-//   const iconColor = isLogout ? COLORS.logout : undefined;
-
-//   const buttonContent = (
-//     <ListItemButton
-//       onClick={isExpandable ? onToggle : undefined}
-//       selected={active && !hasChildren && !isLogout}
-//       sx={{
-//         borderRadius: 1.5,
-//         gap: 1.5,
-//         minHeight: 44,
-//         mb: 0.5,
-//         px: 1.5,
-//         justifyContent: "flex-start",
-//         "&:hover": {
-//           bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
-//         },
-//         "&.Mui-selected": {
-//           bgcolor: COLORS.activeBg,
-//           "&:hover": { bgcolor: COLORS.activeBg },
-//         },
-//       }}
-//     >
-//       {/* 1. Leading Icon (Renders on Left for LTR, Right for RTL) */}
-//       <ListItemIcon
-//         sx={{
-//           minWidth: 0,
-//           justifyContent: "center",
-//         }}
-//       >
-//         <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-//       </ListItemIcon>
-
-//       {/* 2. Text Label */}
-//       {/* <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{ my: 0 }}
-//       /> */}
-//       {/* 2. Text Label */}
-//       <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//               textAlign: isRtl ? "right" : "left",
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{
-//           my: 0,
-//           flex: 1,
-//           textAlign: isRtl ? "right" : "left",
-//           order: 2,
-//         }}
-//       />
-
-//       {/* 3. Trailing Chevron Arrow (Renders on Right for LTR, Left for RTL) */}
-//       {isExpandable && (
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "center",
-//             minWidth: 20,
-//             ml: isRtl ? 0 : "auto",
-//             mr: isRtl ? "auto" : 0,
-//           }}
-//         >
-//           <KeyboardArrowDownRoundedIcon
-//             sx={{
-//               fontSize: 20,
-//               color: COLORS.textMuted,
-//               transition: "transform 0.2s ease-in-out",
-//               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-//             }}
-//           />
-//         </Box>
-//       )}
-//     </ListItemButton>
-//   );
-
-//   return (
-//     <>
-//       {item.path && !hasChildren ? (
-//         <Link href={item.path} style={{ textDecoration: "none" }}>
-//           {buttonContent}
-//         </Link>
-//       ) : (
-//         buttonContent
-//       )}
-
-//       {hasChildren && (
-//         <Collapse in={expanded} timeout="auto" unmountOnExit>
-//           <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
-//             {item.children!.map((child) => (
-//               <SidebarItemButton
-//                 key={child.key}
-//                 item={child}
-//                 active={child.path ? active : false}
-//                 isRtl={isRtl}
-//                 depth={depth + 1}
-//               />
-//             ))}
-//           </List>
-//         </Collapse>
-//       )}
-//     </>
-//   );
-// }
-// function SidebarItemButton({
-//   item,
-//   active,
-//   isRtl,
-//   expanded,
-//   onToggle,
-//   isLogout = false,
-//   depth = 0,
-// }: {
-//   item: SidebarItem;
-//   active: boolean;
-//   isRtl: boolean;
-//   expanded?: boolean;
-//   onToggle?: () => void;
-//   isLogout?: boolean;
-//   depth?: number;
-// }) {
-//   const t = useTranslations("Sidebar");
-//   const hasChildren = !!item.children?.length;
-//   const isExpandable = hasChildren && onToggle;
-
-//   const itemColor = isLogout ? COLORS.logout : COLORS.text;
-//   const iconColor = isLogout ? COLORS.logout : undefined;
-
-//   const buttonContent = (
-//     <ListItemButton
-//       onClick={isExpandable ? onToggle : undefined}
-//       selected={active && !hasChildren && !isLogout}
-//       sx={{
-//         borderRadius: 1.5,
-//         gap: 1.5,
-//         minHeight: 44,
-//         mb: 0.5,
-//         px: 1.5,
-//         alignItems: "center",
-//         "&:hover": {
-//           bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
-//         },
-//         "&.Mui-selected": {
-//           bgcolor: COLORS.activeBg,
-//           "&:hover": { bgcolor: COLORS.activeBg },
-//         },
-//       }}
-//     >
-//       {/* 1. Start Icon */}
-//       <ListItemIcon
-//         sx={{
-//           minWidth: 0,
-//           justifyContent: "center",
-//         }}
-//       >
-//         <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-//       </ListItemIcon>
-
-//       {/* 2. Label (Flexgrow fills remaining horizontal space) */}
-//       <ListItemText
-//         primary={
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
-//               color: itemColor,
-//               fontSize: 14,
-//               lineHeight: 1.4,
-//             }}
-//           >
-//             {t(item.key)}
-//           </Typography>
-//         }
-//         sx={{
-//           my: 0,
-//           flexGrow: 1,
-//         }}
-//       />
-
-//       {/* 3. End Chevron (Pushed automatically to the far edge) */}
-//       {isExpandable && (
-//         <Box
-//           sx={{
-//             display: "flex",
-//             alignItems: "center",
-//             justifyContent: "center",
-//             minWidth: 20,
-//           }}
-//         >
-//           <KeyboardArrowDownRoundedIcon
-//             sx={{
-//               fontSize: 20,
-//               color: COLORS.textMuted,
-//               transition: "transform 0.2s ease-in-out",
-//               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-//             }}
-//           />
-//         </Box>
-//       )}
-//     </ListItemButton>
-//   );
-
-//   return (
-//     <>
-//       {item.path && !hasChildren ? (
-//         <Link href={item.path} style={{ textDecoration: "none" }}>
-//           {buttonContent}
-//         </Link>
-//       ) : (
-//         buttonContent
-//       )}
-
-//       {hasChildren && (
-//         <Collapse in={expanded} timeout="auto" unmountOnExit>
-//           <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
-//             {item.children!.map((child) => (
-//               <SidebarItemButton
-//                 key={child.key}
-//                 item={child}
-//                 active={child.path ? active : false}
-//                 isRtl={isRtl}
-//                 depth={depth + 1}
-//               />
-//             ))}
-//           </List>
-//         </Collapse>
-//       )}
-//     </>
-//   );
-// }
 function SidebarItemButton({
   item,
-  active,
+  currentPathname,
   isRtl,
   expanded,
   onToggle,
-  isLogout = false,
   depth = 0,
 }: {
   item: SidebarItem;
-  active: boolean;
+  currentPathname: string;
   isRtl: boolean;
   expanded?: boolean;
   onToggle?: () => void;
-  isLogout?: boolean;
   depth?: number;
 }) {
   const t = useTranslations("Sidebar");
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
 
-  const itemColor = isLogout ? COLORS.logout : COLORS.text;
-  const iconColor = isLogout ? COLORS.logout : undefined;
+  const isCurrentActive = (
+    hasChildren
+      ? item.children!.some((child) => checkIsActive(child.path, currentPathname))
+      : checkIsActive(item.path, currentPathname)
+  );
+
+  const isCurrentActiveLeaf = isCurrentActive && !hasChildren;
+  const isActiveGroup = isCurrentActive && hasChildren;
+
+  const itemColor = isCurrentActiveLeaf || isActiveGroup
+    ? COLORS.activeIcon
+    : COLORS.text;
+
+  const handleClick = () => {
+    if (isExpandable) {
+      onToggle();
+    }
+  };
 
   const buttonContent = (
     <ListItemButton
-      onClick={isExpandable ? onToggle : undefined}
-      selected={active && !hasChildren && !isLogout}
+      onClick={handleClick}
+      selected={isCurrentActiveLeaf}
       sx={{
+        position: "relative",
+        overflow: "hidden",
         borderRadius: 1.5,
         gap: 1.5,
-        minHeight: 44,
+        minHeight: depth > 0 ? 38 : 44,
         mb: 0.5,
         px: 1.5,
         alignItems: "center",
+        bgcolor: isActiveGroup ? COLORS.activeBgSoft : "transparent",
+        boxShadow: isCurrentActiveLeaf ? "0 8px 18px rgba(27, 131, 84, 0.12)" : "none",
+        transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 8,
+          bottom: 8,
+          width: 4,
+          borderRadius: 999,
+          bgcolor: isCurrentActiveLeaf ? COLORS.activeBorder : "transparent",
+          ...(isRtl ? { right: 6 } : { left: 6 }),
+        },
         "&:hover": {
-          bgcolor: isLogout ? COLORS.logoutHover : COLORS.hoverBg,
+          bgcolor: COLORS.hoverBg,
         },
         "&.Mui-selected": {
           bgcolor: COLORS.activeBg,
@@ -506,27 +274,58 @@ function SidebarItemButton({
         },
       }}
     >
-      {/* 1. Main Icon */}
-      <ListItemIcon
-        sx={{
-          minWidth: 0,
-          mr: 0,
-          ml: 0,
-          justifyContent: "center",
-        }}
-      >
-        <SidebarIcon active={active && !hasChildren && !isLogout} src={item.icon} color={iconColor} />
-      </ListItemIcon>
+      {/* 1. Leading Bullet Dot for Children, or SVG Icon for Parent */}
+      {depth > 0 ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 16,
+            height: 16,
+            flexShrink: 0,
+          }}
+        >
+          <Box
+            sx={{
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              bgcolor: isCurrentActiveLeaf ? COLORS.activeIcon : "#94A3B8",
+              boxShadow: isCurrentActiveLeaf ? "0 0 0 4px rgba(27, 131, 84, 0.14)" : "none",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
+              transform: isCurrentActiveLeaf ? "scale(1.45)" : "scale(1)",
+            }}
+          />
+        </Box>
+      ) : (
+        item.icon && (
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: 0,
+              ml: 0,
+              justifyContent: "center",
+            }}
+          >
+            <SidebarIcon
+              active={isCurrentActiveLeaf || (hasChildren && isCurrentActive)}
+              src={item.icon}
+              color={isActiveGroup ? COLORS.activeIcon : undefined}
+            />
+          </ListItemIcon>
+        )
+      )}
 
-      {/* 2. Text Label (aligned toward the icon with flex-grow pushing chevron) */}
+      {/* 2. Text Label */}
       <ListItemText
         primary={
           <Typography
             variant="body2"
             sx={{
-              fontWeight: active && !hasChildren && !isLogout ? 600 : 400,
+              fontWeight: isCurrentActiveLeaf ? 700 : depth > 0 ? 500 : 600,
               color: itemColor,
-              fontSize: 14,
+              fontSize: depth > 0 ? 13.5 : 14,
               lineHeight: 1.4,
               textAlign: isRtl ? "right" : "left",
             }}
@@ -541,7 +340,7 @@ function SidebarItemButton({
         }}
       />
 
-      {/* 3. Trailing Chevron Arrow */}
+      {/* 3. Expand / Collapse Arrow for Parent Groups */}
       {isExpandable && (
         <Box
           sx={{
@@ -553,8 +352,8 @@ function SidebarItemButton({
         >
           <KeyboardArrowDownRoundedIcon
             sx={{
-              fontSize: 20,
-              color: COLORS.textMuted,
+              fontSize: 18,
+              color: isActiveGroup ? COLORS.activeIcon : COLORS.textMuted,
               transition: "transform 0.2s ease-in-out",
               transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
             }}
@@ -567,7 +366,7 @@ function SidebarItemButton({
   return (
     <>
       {item.path && !hasChildren ? (
-        <Link href={item.path} style={{ textDecoration: "none" }}>
+        <Link href={item.path} style={{ textDecoration: "none", color: "inherit" }}>
           {buttonContent}
         </Link>
       ) : (
@@ -576,12 +375,18 @@ function SidebarItemButton({
 
       {hasChildren && (
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <List disablePadding sx={{ pl: isRtl ? 0 : 2.5, pr: isRtl ? 2.5 : 0 }}>
+          <List
+            disablePadding
+            sx={{
+              pr: isRtl ? 2 : 0,
+              pl: isRtl ? 0 : 2,
+            }}
+          >
             {item.children!.map((child) => (
               <SidebarItemButton
                 key={child.key}
                 item={child}
-                active={child.path ? active : false}
+                currentPathname={currentPathname}
                 isRtl={isRtl}
                 depth={depth + 1}
               />
@@ -609,15 +414,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     );
   }, []);
 
-  const isActive = (path?: string) =>
-    !path ? false : path === "/" ? pathname === path : pathname.startsWith(path);
-
-  const isChildActive = (item: SidebarItem): boolean => {
-    if (item.path && isActive(item.path)) return true;
-    if (item.children) return item.children.some((child) => isChildActive(child));
-    return false;
-  };
-
   const drawer = (
     <Box
       sx={{
@@ -643,13 +439,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <List disablePadding>
           {sidebarItems.map((item) => {
             const expanded = expandedItems.includes(item.key);
-            const active = item.children ? isChildActive(item) : isActive(item.path);
 
             return (
               <SidebarItemButton
                 key={item.key}
                 item={item}
-                active={active}
+                currentPathname={pathname}
                 isRtl={isRtl}
                 expanded={expanded}
                 onToggle={() => toggleExpand(item.key)}
@@ -659,35 +454,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </List>
       </Box>
 
-      <Box
-        sx={{
-          px: 1.5,
-          pb: 2,
-          pt: 1,
-          borderTop: `1px solid ${COLORS.border}`,
-        }}
-      >
-        <List disablePadding>
-          {bottomItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <SidebarItemButton
-                key={item.key}
-                item={item}
-                active={active}
-                isRtl={isRtl}
-              />
-            );
-          })}
-
-          <SidebarItemButton
-            item={logoutItem}
-            active={false}
-            isRtl={isRtl}
-            isLogout
-          />
-        </List>
-      </Box>
     </Box>
   );
 
