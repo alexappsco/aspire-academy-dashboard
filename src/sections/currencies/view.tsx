@@ -459,6 +459,17 @@ export default function CurrenciesView() {
           mb: 3,
         }}
       >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 800,
+            color: '#0F172A',
+            fontSize: { xs: '1.25rem', sm: '1.5rem' },
+          }}
+        >
+          {t('title')}
+        </Typography>
+
         <Button
           variant="contained"
           onClick={() => {
@@ -481,17 +492,6 @@ export default function CurrenciesView() {
         >
           {t('add_currency')}
         </Button>
-
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 800,
-            color: '#0F172A',
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
-          }}
-        >
-          {t('title')}
-        </Typography>
       </Stack>
 
       {/* Main Content Card with Filters & Table */}
@@ -513,29 +513,6 @@ export default function CurrenciesView() {
             mb: 3,
           }}
         >
-          {/* Status Filter */}
-          <SelectField
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            sx={{
-              minWidth: { xs: '100%', sm: 150 },
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                height: 44,
-                fontSize: '0.9375rem',
-                color: '#64748B',
-                '& fieldset': { borderColor: '#E2E8F0' },
-                '&:hover fieldset': { borderColor: '#CBD5E1' },
-              },
-            }}
-          >
-            <MenuItem value="all">{t('all_status')}</MenuItem>
-            <MenuItem value="active">{t('active')}</MenuItem>
-            <MenuItem value="inactive">{t('inactive')}</MenuItem>
-          </SelectField>
-
           {/* Search Input */}
           <TextField
             fullWidth
@@ -569,6 +546,29 @@ export default function CurrenciesView() {
               }),
             }}
           />
+
+          {/* Status Filter */}
+          <SelectField
+            size="small"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            sx={{
+              minWidth: { xs: '100%', sm: 150 },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                bgcolor: '#FFFFFF',
+                height: 44,
+                fontSize: '0.9375rem',
+                color: '#64748B',
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: '#CBD5E1' },
+              },
+            }}
+          >
+            <MenuItem value="all">{t('all_status')}</MenuItem>
+            <MenuItem value="active">{t('active')}</MenuItem>
+            <MenuItem value="inactive">{t('inactive')}</MenuItem>
+          </SelectField>
         </Stack>
 
         {/* Table Content */}
