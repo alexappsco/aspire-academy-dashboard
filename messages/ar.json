@@ -8,12 +8,10 @@
     "course_management": "ادارة الدورات التدريبية",
     "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
-<<<<<<< HEAD
     "user_management": "ادارة المستخدمين",
     "students_management": "إدارة الطلاب",
     "lecturers_management": "ادارة المحاضرون",
     "academic_hierarchy": "الهيكل الاكاديمي",
-=======
     "curriculum_management": "إدارة المناهج التعليمية",
     "booking_management": "إدارة الحجوزات",
     "user_management": "إدارة المستخدمين",
@@ -28,7 +26,6 @@
     "college": "الكليات",
     "academic_hierarchy": "الهيكل الأكاديمي",
     "subjects": "المواد",
->>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
     "countries": "الدول",
     "currencies": "العملات",
     "universities": "ادارة الجامعات",
@@ -44,14 +41,11 @@
     "support": "الدعم الفني",
     "legal_info": "المعلومات القانونية",
     "terms_and_conditions": "الشروط والأحكام",
-<<<<<<< HEAD
     "privacy_policy": "سياسة الخصوصية",
     "common_questions": "الاسئلة الشائعة",
-=======
     "about_us": "من نحن",
     "minutes_management": "المحاضرون",
     "settings": "الإعدادات",
->>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
     "logout": "تسجيل الخروج"
   },
   "Courses": {
