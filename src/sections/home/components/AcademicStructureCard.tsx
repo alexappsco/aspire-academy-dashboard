@@ -102,6 +102,7 @@ export default function AcademicStructureCard() {
             fontSize: 13.5,
             px: 2.5,
             py: 1,
+            gap: 1,
             '&:hover': {
               borderColor: '#60A5FA',
               bgcolor: '#F8FAFC',

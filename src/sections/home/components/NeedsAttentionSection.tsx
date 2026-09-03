@@ -22,44 +22,46 @@ export default function NeedsAttentionSection() {
       {/* Section Header */}
       <Stack
         direction="row"
-        spacing={1.5}
+        spacing={2}
         sx={{
           justifyContent: 'space-between',
           alignItems: 'center',
           mb: 2,
         }}
       >
-        <Typography
-          variant="caption"
-          sx={{ color: '#94A3B8', fontWeight: 600, fontSize: 13 }}
-        >
-          {t('subtitle')}
-        </Typography>
-
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
-          >
-            {t('title')}
-          </Typography>
+        {/* Right side in RTL: Title + Alert Icon */}
+        <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
-              width: 20,
-              height: 20,
+              width: 22,
+              height: 22,
               borderRadius: '50%',
               bgcolor: '#FEF3C7',
               color: '#D97706',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 800,
             }}
           >
             !
           </Box>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
+          >
+            {t('title')}
+          </Typography>
         </Stack>
+
+        {/* Left side in RTL: Subtitle */}
+        <Typography
+          variant="caption"
+          sx={{ color: '#94A3B8', fontWeight: 600, fontSize: 13 }}
+        >
+          {t('subtitle')}
+        </Typography>
       </Stack>
 
       {/* 3 Action Cards */}
@@ -89,7 +91,7 @@ export default function NeedsAttentionSection() {
                 <Stack
                   direction="row"
                   spacing={1.75}
-                  sx={{ alignItems: 'center', mb: 1.5 }}
+                  sx={{ alignItems: 'center', mb: 1.5, gap: 1.5 }}
                 >
                   <Box
                     sx={{
@@ -134,7 +136,7 @@ export default function NeedsAttentionSection() {
               {/* Action Button & Status dot */}
               <Stack
                 direction="row"
-                spacing={1}
+                spacing={1.5}
                 sx={{
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -142,28 +144,8 @@ export default function NeedsAttentionSection() {
                   borderTop: '1px solid #F8FAFC',
                 }}
               >
-                <Button
-                  size="small"
-                  onClick={() => router.push(card.actionHref)}
-                  endIcon={<Iconify icon="solar:arrow-left-linear" width={16} />}
-                  sx={{
-                    bgcolor: card.btnBg,
-                    color: card.btnColor,
-                    borderRadius: 1.5,
-                    px: 2,
-                    py: 0.75,
-                    fontWeight: 700,
-                    fontSize: 13,
-                    boxShadow: 'none',
-                    '&:hover': {
-                      bgcolor: card.btnHoverBg,
-                    },
-                  }}
-                >
-                  {t(card.actionKey)}
-                </Button>
-
-                <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+                {/* Right side in RTL: Status Dot & Badge */}
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
                   <Box
                     sx={{
                       width: 8,
@@ -174,7 +156,7 @@ export default function NeedsAttentionSection() {
                   />
                   <Typography
                     sx={{
-                      fontSize: 12,
+                      fontSize: 12.5,
                       fontWeight: 700,
                       color: card.badgeColor,
                     }}
@@ -182,6 +164,35 @@ export default function NeedsAttentionSection() {
                     {t(card.badgeKey)}
                   </Typography>
                 </Stack>
+
+                {/* Left side in RTL: Action Button */}
+                <Button
+                  size="small"
+                  onClick={() => router.push(card.actionHref)}
+                  endIcon={
+                    <Iconify
+                      icon="solar:arrow-left-linear"
+                      width={16}
+                      sx={{ transform: 'scaleX(var(--rtl-flip, 1))', ml: 0.5 }}
+                    />
+                  }
+                  sx={{
+                    bgcolor: card.btnBg,
+                    color: card.btnColor,
+                    borderRadius: 1.5,
+                    px: 2,
+                    py: 0.75,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    gap: 0.75,
+                    boxShadow: 'none',
+                    '&:hover': {
+                      bgcolor: card.btnHoverBg,
+                    },
+                  }}
+                >
+                  {t(card.actionKey)}
+                </Button>
               </Stack>
             </Card>
           </Grid>

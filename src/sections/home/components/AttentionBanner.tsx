@@ -22,41 +22,49 @@ export default function AttentionBanner() {
         p: { xs: 2.5, md: 3 },
         mb: 3,
         borderRadius: 3,
-        background: 'linear-gradient(135deg, #F0F7FF 0%, #E6F4FE 100%)',
-        border: '1px solid #BAE6FD',
-        boxShadow: '0 2px 8px rgba(186, 230, 253, 0.25)',
+        background: 'linear-gradient(270deg, rgba(0, 82, 204, 0.1) 0%, #FFFFFF 50%, #FFFFFF 100%)',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 2px 8px rgba(0, 82, 204, 0.04)',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <Stack
         direction={{ xs: 'column', md: 'row' }}
-        spacing={2.5}
+        spacing={3}
         sx={{
           justifyContent: 'space-between',
           alignItems: { xs: 'flex-start', md: 'center' },
         }}
       >
         {/* Right side in RTL (Icon & Info) */}
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start' }}>
+        <Stack direction="row" spacing={2.5} sx={{ alignItems: 'flex-start' }}>
           <Box
             sx={{
               width: 52,
               height: 52,
               borderRadius: 2.5,
-              bgcolor: '#BFDBFE',
-              color: '#1E40AF',
+              bgcolor: '#F1F5F9',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Iconify icon="solar:checklist-minimalistic-bold" width={28} />
+            <Box
+              component="img"
+              src="/icons/review.svg"
+              alt="Review"
+              sx={{ width: 22, height: 24 }}
+            />
           </Box>
 
           <Box>
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 0.75, flexWrap: 'wrap', gap: 0.5 }}>
+            <Stack
+              direction="row"
+              spacing={1.5}
+              sx={{ alignItems: 'center', mb: 0.75, flexWrap: 'wrap', gap: 1 }}
+            >
               <Typography
                 variant="h6"
                 sx={{
@@ -100,7 +108,13 @@ export default function AttentionBanner() {
         <Button
           variant="contained"
           onClick={() => router.push('/courses?status=pending')}
-          endIcon={<Iconify icon="solar:arrow-left-linear" width={18} sx={{ transform: 'scaleX(var(--rtl-flip, 1))' }} />}
+          endIcon={
+            <Iconify
+              icon="solar:arrow-left-linear"
+              width={18}
+              sx={{ transform: 'scaleX(var(--rtl-flip, 1))', ml: 0.5 }}
+            />
+          }
           sx={{
             flexShrink: 0,
             bgcolor: '#1C252E',
@@ -110,6 +124,7 @@ export default function AttentionBanner() {
             py: 1.25,
             fontWeight: 700,
             fontSize: 14,
+            gap: 1,
             boxShadow: 'none',
             '&:hover': {
               bgcolor: '#2C353E',

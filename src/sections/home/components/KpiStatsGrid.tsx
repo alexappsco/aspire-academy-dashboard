@@ -24,7 +24,10 @@ export default function KpiStatsGrid() {
               p: 2.25,
               borderRadius: 3,
               bgcolor: '#FFFFFF',
-              border: item.id === 'under_review' ? '1.5px solid #FCA5A5' : '1px solid #F1F5F9',
+              border: '1px solid #F1F5F9',
+              ...(item.id === 'under_review' && {
+                borderTop: '4px solid #BA1A1A',
+              }),
               boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
               height: '100%',
               display: 'flex',
@@ -40,7 +43,7 @@ export default function KpiStatsGrid() {
             {/* Header with Title and Icon */}
             <Stack
               direction="row"
-              spacing={1}
+              spacing={1.5}
               sx={{
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
@@ -78,7 +81,7 @@ export default function KpiStatsGrid() {
 
             {/* Value & Badge */}
             <Box sx={{ my: 0.5 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
                 <Typography
                   variant="h4"
                   sx={{
@@ -94,7 +97,7 @@ export default function KpiStatsGrid() {
                 {item.badge && (
                   <Typography
                     sx={{
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: 700,
                       color: item.badgeColor || '#DC2626',
                     }}
@@ -121,16 +124,17 @@ export default function KpiStatsGrid() {
                   }}
                 />
               ) : (
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
                   {item.change && (
                     <Stack
                       direction="row"
-                      spacing={0.25}
+                      spacing={0.5}
                       sx={{
                         alignItems: 'center',
                         color: item.isPositive ? '#10B981' : '#EF4444',
                         fontWeight: 700,
                         fontSize: 12,
+                        gap: 0.25,
                       }}
                     >
                       <Typography component="span" sx={{ fontSize: 12, fontWeight: 700 }}>

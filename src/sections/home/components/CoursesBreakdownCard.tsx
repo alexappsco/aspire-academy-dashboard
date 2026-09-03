@@ -128,7 +128,7 @@ export default function CoursesBreakdownCard() {
             </Stack>
 
             {/* Label & Dot on Right */}
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
               <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
                 {t(item.labelKey)}
               </Typography>
@@ -149,13 +149,14 @@ export default function CoursesBreakdownCard() {
       <Button
         fullWidth
         onClick={() => router.push('/courses')}
-        endIcon={<Iconify icon="solar:arrow-left-linear" width={16} />}
+        endIcon={<Iconify icon="solar:arrow-left-linear" width={16} sx={{ ml: 0.5 }} />}
         sx={{
           mt: 2,
           bgcolor: '#F8FAFC',
           color: '#2563EB',
           borderRadius: 2,
           py: 1,
+          gap: 1,
           fontWeight: 700,
           fontSize: 13.5,
           border: '1px solid #E2E8F0',

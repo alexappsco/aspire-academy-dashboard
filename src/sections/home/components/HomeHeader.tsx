@@ -119,6 +119,7 @@ export default function HomeHeader() {
             fontWeight: 600,
             fontSize: 13.5,
             px: 2,
+            gap: 1,
             boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
             '&:hover': {
               borderColor: '#CBD5E1',
@@ -142,6 +143,7 @@ export default function HomeHeader() {
             fontWeight: 700,
             fontSize: 13.5,
             px: 2.5,
+            gap: 1,
             boxShadow: 'none',
             '&:hover': {
               bgcolor: '#2C353E',

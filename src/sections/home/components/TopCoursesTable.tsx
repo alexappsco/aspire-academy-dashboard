@@ -56,7 +56,7 @@ export default function TopCoursesTable() {
       </Typography>
     ),
     rating: (row: TopCourseItem) => (
-      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
         <Iconify icon="solar:star-bold" width={16} sx={{ color: '#F59E0B' }} />
         <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
           {row.rating}
@@ -127,6 +127,7 @@ export default function TopCoursesTable() {
             fontSize: 13,
             px: 2,
             py: 0.75,
+            gap: 1,
             '&:hover': {
               borderColor: '#BFDBFE',
               bgcolor: '#EFF6FF',
