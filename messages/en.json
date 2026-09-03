@@ -7,11 +7,9 @@
     "course_management": "Course Management",
     "courses": "Courses",
     "specializations": "Specializations",
-<<<<<<< HEAD
     "user_management": "User Management",
     "students_management": "Students Management",
     "lecturers_management": "Lecturers Management",
-=======
     "curriculum_management": "Curriculum Management",
     "booking_management": "Booking Management",
     "user_management": "User Management",
@@ -24,7 +22,6 @@
     "categories": "Fields Management",
     "universities": "Universities",
     "college": "College",
->>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
     "academic_hierarchy": "Academic Structure",
     "countries": "Countries",
     "currencies": "Currencies",
@@ -41,14 +38,11 @@
     "support": "Technical Support",
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
-<<<<<<< HEAD
     "privacy_policy": "Privacy Policy",
     "common_questions": "Common Questions",
-=======
     "about_us": "About Us",
     "minutes_management": "Instructors",
     "settings": "Settings",
->>>>>>> d623115f4d30fd1e22c6da8306e3c5d9b51ec703
     "logout": "Logout"
   },
   "Courses": {
