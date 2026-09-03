@@ -6,6 +6,8 @@
   "Sidebar": {
     "home": "الرئيسية",
     "course_management": "إدارة الدورات التدريبية",
+    "courses": "الدورات",
+    "specializations": "التخصصات",
     "curriculum_management": "إدارة المناهج التعليمية",
     "booking_management": "إدارة الحجوزات",
     "finance_payments": "المالية والمدفوعات",
@@ -722,6 +724,50 @@
       "edit_success": "تم تعديل الدولة بنجاح",
       "delete_success": "تم حذف الدولة بنجاح",
       "status_updated": "تم تحديث حالة الدولة بنجاح"
+    }
+  },
+  "Specializations": {
+    "title": "التخصصات",
+    "add_specialization": "إضافة تخصص",
+    "search_placeholder": "بحث...",
+    "filter_status": "الحالة",
+    "status": {
+      "all": "الحالة",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "columns": {
+      "name_ar": "الاسم بالعربي",
+      "name_en": "الاسم بالإنجليزي",
+      "field": "المجال",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "dialog": {
+      "add_title": "إضافة تخصص",
+      "edit_title": "تعديل تخصص",
+      "field": "المجال",
+      "field_placeholder": "اختر المجال...",
+      "name_ar": "الاسم بالعربي",
+      "name_ar_placeholder": "الاسم...",
+      "name_en": "الاسم بالإنجليزي",
+      "name_en_placeholder": "الاسم...",
+      "status": "الحالة",
+      "add_btn": "إضافة",
+      "save_btn": "حفظ",
+      "cancel_btn": "إلغاء"
+    },
+    "delete_dialog": {
+      "title": "حذف تخصص",
+      "message": "هل أنت متأكد من حذف هذا التخصص؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
+    },
+    "messages": {
+      "add_success": "تمت إضافة التخصص بنجاح",
+      "edit_success": "تم تعديل التخصص بنجاح",
+      "delete_success": "تم حذف التخصص بنجاح",
+      "status_updated": "تم تحديث حالة التخصص بنجاح"
     }
   },
   "MinutesManagement": {
