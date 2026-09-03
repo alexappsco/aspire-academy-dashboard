@@ -13,4 +13,16 @@ export const endpoints = {
     update: (id: string) => `/admin/currencies/${id}`,
     delete: (id: string) => `/admin/currencies/${id}`,
   },
+  instructors: {
+    list: '/admin/instructors',
+    details: (id: string) => `/admin/instructors/${id}`,
+    create: '/admin/instructors',
+    update: (id: string) => `/admin/instructors/${id}`,
+    delete: (id: string) => `/admin/instructors/${id}`,
+    verify: (id: string) => `/admin/instructors/${id}/verify`,
+    reject: (id: string) => `/admin/instructors/${id}/reject`,
+  },
+  universities: {
+    list: '/admin/universities',
+  },
 };
