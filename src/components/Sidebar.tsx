@@ -41,7 +41,18 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "course_management",
     icon: "/icons/course.svg",
-    path: "/courses",
+    children: [
+      {
+        key: "courses",
+        icon: "/icons/course.svg",
+        path: "/courses",
+      },
+      {
+        key: "specializations",
+        icon: "/icons/course.svg",
+        path: "/specializations",
+      },
+    ],
   },
   {
     key: "curriculum_management",
