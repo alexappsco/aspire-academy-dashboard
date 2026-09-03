@@ -15,12 +15,14 @@ interface DeleteConfirmDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
 export default function DeleteConfirmDialog({
   open,
   onClose,
   onConfirm,
+  loading,
 }: DeleteConfirmDialogProps) {
   const t = useTranslations('DiscountCodes');
 
@@ -62,6 +64,7 @@ export default function DeleteConfirmDialog({
               onConfirm();
               onClose();
             }}
+            disabled={loading}
             sx={{
               bgcolor: '#DC2626',
               color: '#FFFFFF',

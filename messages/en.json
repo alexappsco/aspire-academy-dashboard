@@ -359,10 +359,12 @@
       "code": "Code",
       "type": "Type",
       "value": "Value",
-      "startDate": "Start Date",
-      "endDate": "End Date",
-      "maxUsage": "Max Usage",
-      "usedCount": "Times Used",
+      "minOrderAmount": "Min Order Amount",
+      "maxDiscountAmount": "Max Discount",
+      "startAt": "Start Date",
+      "endAt": "End Date",
+      "maxRedemptions": "Max Redemptions",
+      "redemptionCount": "Redemptions Used",
       "status": "Status"
     },
     "status": {
@@ -381,10 +383,16 @@
       "type": "Code Type",
       "value": "Value",
       "value_placeholder": "Enter value...",
-      "maxUsage": "Max Usage",
-      "maxUsage_placeholder": "Enter max usage...",
-      "startDate": "Start Date",
-      "endDate": "End Date",
+      "minOrderAmount": "Min Order Amount",
+      "minOrderAmount_placeholder": "Enter min order amount...",
+      "maxDiscountAmount": "Max Discount",
+      "maxDiscountAmount_placeholder": "Enter max discount...",
+      "maxRedemptions": "Max Redemptions",
+      "maxRedemptions_placeholder": "Enter max redemptions...",
+      "maxRedemptionsPerStudent": "Max Redemptions Per Student",
+      "maxRedemptionsPerStudent_placeholder": "Enter max per student...",
+      "startAt": "Start Date",
+      "endAt": "End Date",
       "status": "Status",
       "save": "Save",
       "cancel": "Cancel",
@@ -402,7 +410,9 @@
       "add_success": "Discount code added successfully",
       "edit_success": "Discount code updated successfully",
       "delete_success": "Discount code deleted successfully",
-      "status_updated": "Discount code status updated successfully"
+      "status_updated": "Discount code status updated successfully",
+      "fetch_error": "Error fetching coupons data",
+      "operation_error": "Error performing operation"
     }
   },
   "Universities": {

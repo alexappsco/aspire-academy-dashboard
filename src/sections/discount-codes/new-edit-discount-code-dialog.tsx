@@ -19,7 +19,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import SelectField from 'src/components/SelectField/SelectField';
-import { DiscountCodeItem } from './_mock';
+import { CouponDto, CouponType, CreateCouponDto, COUPON_TYPE_MAP } from './types';
 
 const getTextFieldStyles = (isRtl: boolean) => ({
   '& .MuiOutlinedInput-root': {
@@ -47,8 +47,9 @@ const getTextFieldStyles = (isRtl: boolean) => ({
 interface DiscountCodeFormDialogProps {
   open: boolean;
   onClose: () => void;
-  initialData?: DiscountCodeItem | null;
-  onSave: (data: Partial<DiscountCodeItem>) => void;
+  initialData?: CouponDto | null;
+  onSave: (data: CreateCouponDto) => void;
+  loading?: boolean;
 }
 
 export default function DiscountCodeFormDialog({
@@ -56,6 +57,7 @@ export default function DiscountCodeFormDialog({
   onClose,
   initialData,
   onSave,
+  loading,
 }: DiscountCodeFormDialogProps) {
   const t = useTranslations('DiscountCodes');
   const locale = useLocale();
@@ -63,12 +65,15 @@ export default function DiscountCodeFormDialog({
   const isEdit = !!initialData;
 
   const [code, setCode] = useState(initialData?.code ?? '');
-  const [type, setType] = useState<'percentage' | 'fixed'>(initialData?.type ?? 'percentage');
+  const [type, setType] = useState<CouponType>(initialData?.type ? (COUPON_TYPE_MAP[initialData.type] || 'Percentage') : 'Percentage');
   const [value, setValue] = useState<string>(initialData ? String(initialData.value) : '');
-  const [maxUsage, setMaxUsage] = useState<string>(initialData ? String(initialData.maxUsage) : '');
-  const [startDate, setStartDate] = useState(initialData?.startDate ?? '');
-  const [endDate, setEndDate] = useState(initialData?.endDate ?? '');
-  const [active, setActive] = useState(initialData?.active ?? true);
+  const [maxDiscountAmount, setMaxDiscountAmount] = useState<string>(initialData ? String(initialData.maxDiscountAmount) : '');
+  const [minOrderAmount, setMinOrderAmount] = useState<string>(initialData ? String(initialData.minOrderAmount) : '');
+  const [startAt, setStartAt] = useState(initialData?.startAt?.slice(0, 10) ?? '');
+  const [endAt, setEndAt] = useState(initialData?.endAt?.slice(0, 10) ?? '');
+  const [maxRedemptions, setMaxRedemptions] = useState<string>(initialData ? String(initialData.maxRedemptions) : '');
+  const [maxRedemptionsPerStudent, setMaxRedemptionsPerStudent] = useState<string>(initialData ? String(initialData.maxRedemptionsPerStudent) : '');
+  const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
 
   const handleSubmit = () => {
     if (!code.trim() || !value) {
@@ -77,11 +82,14 @@ export default function DiscountCodeFormDialog({
     onSave({
       code,
       type,
-      value: Number(value),
-      maxUsage: Number(maxUsage) || 0,
-      startDate,
-      endDate,
-      active,
+      value: Number(value) || 0,
+      maxDiscountAmount: Number(maxDiscountAmount) || 0,
+      minOrderAmount: Number(minOrderAmount) || 0,
+      startAt: startAt ? new Date(startAt).toISOString() : new Date().toISOString(),
+      endAt: endAt ? new Date(endAt).toISOString() : new Date().toISOString(),
+      maxRedemptions: Number(maxRedemptions) || 0,
+      maxRedemptionsPerStudent: Number(maxRedemptionsPerStudent) || 0,
+      isActive,
     });
     onClose();
   };
@@ -96,7 +104,6 @@ export default function DiscountCodeFormDialog({
         paper: { sx: { borderRadius: '20px', p: 2, boxShadow: '0px 8px 32px rgba(0,0,0,0.08)' } },
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           display: 'flex',
@@ -117,9 +124,7 @@ export default function DiscountCodeFormDialog({
       </Box>
 
       <DialogContent sx={{ px: 2, pt: 1, pb: 2 }}>
-        {/* Form grid */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2.5 }}>
-          {/* Row 1: code + type */}
           <TextField
             fullWidth
             label={t('dialog.code')}
@@ -134,15 +139,14 @@ export default function DiscountCodeFormDialog({
             fullWidth
             label={t('dialog.type')}
             value={type}
-            onChange={(e) => setType(e.target.value as 'percentage' | 'fixed')}
+            onChange={(e) => setType(e.target.value as CouponType)}
             slotProps={{ inputLabel: { shrink: true } }}
             sx={getTextFieldStyles(isRtl)}
           >
-            <MenuItem value="percentage">{t('filters.percentage')}</MenuItem>
-            <MenuItem value="fixed">{t('filters.fixed')}</MenuItem>
+            <MenuItem value="Percentage">{t('filters.percentage')}</MenuItem>
+            <MenuItem value="Fixed">{t('filters.fixed')}</MenuItem>
           </SelectField>
 
-          {/* Row 2: value + max usage */}
           <TextField
             fullWidth
             type="number"
@@ -157,21 +161,53 @@ export default function DiscountCodeFormDialog({
           <TextField
             fullWidth
             type="number"
-            label={t('dialog.maxUsage')}
-            placeholder={t('dialog.maxUsage_placeholder')}
-            value={maxUsage}
-            onChange={(e) => setMaxUsage(e.target.value)}
+            label={t('dialog.minOrderAmount')}
+            placeholder={t('dialog.minOrderAmount_placeholder')}
+            value={minOrderAmount}
+            onChange={(e) => setMinOrderAmount(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
             sx={getTextFieldStyles(isRtl)}
           />
 
-          {/* Row 3: start + end date */}
+          <TextField
+            fullWidth
+            type="number"
+            label={t('dialog.maxDiscountAmount')}
+            placeholder={t('dialog.maxDiscountAmount_placeholder')}
+            value={maxDiscountAmount}
+            onChange={(e) => setMaxDiscountAmount(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={getTextFieldStyles(isRtl)}
+          />
+
+          <TextField
+            fullWidth
+            type="number"
+            label={t('dialog.maxRedemptions')}
+            placeholder={t('dialog.maxRedemptions_placeholder')}
+            value={maxRedemptions}
+            onChange={(e) => setMaxRedemptions(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={getTextFieldStyles(isRtl)}
+          />
+
+          <TextField
+            fullWidth
+            type="number"
+            label={t('dialog.maxRedemptionsPerStudent')}
+            placeholder={t('dialog.maxRedemptionsPerStudent_placeholder')}
+            value={maxRedemptionsPerStudent}
+            onChange={(e) => setMaxRedemptionsPerStudent(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+            sx={getTextFieldStyles(isRtl)}
+          />
+
           <TextField
             fullWidth
             type="date"
-            label={t('dialog.startDate')}
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            label={t('dialog.startAt')}
+            value={startAt}
+            onChange={(e) => setStartAt(e.target.value)}
             slotProps={{
               inputLabel: { shrink: true },
               input: {
@@ -188,9 +224,9 @@ export default function DiscountCodeFormDialog({
           <TextField
             fullWidth
             type="date"
-            label={t('dialog.endDate')}
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            label={t('dialog.endAt')}
+            value={endAt}
+            onChange={(e) => setEndAt(e.target.value)}
             slotProps={{
               inputLabel: { shrink: true },
               input: {
@@ -205,7 +241,6 @@ export default function DiscountCodeFormDialog({
           />
         </Box>
 
-        {/* Status radio */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 3 }}>
           <FormControl component="fieldset">
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -214,8 +249,8 @@ export default function DiscountCodeFormDialog({
               </FormLabel>
               <RadioGroup
                 row
-                value={active ? 'active' : 'inactive'}
-                onChange={(e) => setActive(e.target.value === 'active')}
+                value={isActive ? 'active' : 'inactive'}
+                onChange={(e) => setIsActive(e.target.value === 'active')}
               >
                 <FormControlLabel
                   value="active"
@@ -234,12 +269,11 @@ export default function DiscountCodeFormDialog({
           </FormControl>
         </Box>
 
-        {/* Action buttons */}
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-start', pt: 3 }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={!code.trim() || !value}
+            disabled={!code.trim() || !value || loading}
             sx={{
               bgcolor: '#1E293B',
               color: '#FFFFFF',
