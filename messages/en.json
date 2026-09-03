@@ -5,6 +5,8 @@
   "Sidebar": {
     "home": "Home",
     "course_management": "Course Management",
+    "courses": "Courses",
+    "specializations": "Specializations",
     "curriculum_management": "Curriculum Management",
     "booking_management": "Booking Management",
     "finance_payments": "Finance & Payments",
@@ -579,6 +581,7 @@
     "or": "or",
     "fill_fields": "Please fill in all fields",
     "create_account": "Create New Account",
+    "fill_fields": "Please fill in all fields",
     "transition_success": "Signed in successfully"
   },
   "Support": {
@@ -731,6 +734,50 @@
       "operation_error": "Error performing operation"
     }
   },
+  "Specializations": {
+    "title": "Specializations",
+    "add_specialization": "Add Specialization",
+    "search_placeholder": "Search...",
+    "filter_status": "Status",
+    "status": {
+      "all": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "name_ar": "Arabic Name",
+      "name_en": "English Name",
+      "field": "Field",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "dialog": {
+      "add_title": "Add Specialization",
+      "edit_title": "Edit Specialization",
+      "field": "Field",
+      "field_placeholder": "Select field...",
+      "name_ar": "Arabic Name",
+      "name_ar_placeholder": "Name...",
+      "name_en": "English Name",
+      "name_en_placeholder": "Name...",
+      "status": "Status",
+      "add_btn": "Add",
+      "save_btn": "Save",
+      "cancel_btn": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete Specialization",
+      "message": "Are you sure you want to delete this specialization? This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
+    },
+    "messages": {
+      "add_success": "Specialization added successfully",
+      "edit_success": "Specialization updated successfully",
+      "delete_success": "Specialization deleted successfully",
+      "status_updated": "Specialization status updated successfully"
+    }
+  },
   "MinutesManagement": {
     "title": "Lecturers Management",
     "subtitle": "Manage all lecturers and educational sessions",
@@ -808,6 +855,138 @@
       "edit_success": "Lecturer updated successfully",
       "delete_success": "Lecturer deleted successfully",
       "status_updated": "Lecturer status updated successfully"
+    }
+  },
+  "Home": {
+    "header": {
+      "greeting": "Welcome, System Administrator",
+      "subtitle": "Here is a quick comprehensive overview of Aspire Medical Academy platform metrics and performance today.",
+      "time_range": {
+        "last_7_days": "Last 7 days",
+        "last_30_days": "Last 30 days",
+        "last_90_days": "Last 3 months",
+        "this_year": "This year"
+      },
+      "export_report": "Export Platform Report",
+      "quick_course": "Quick Course"
+    },
+    "attention_banner": {
+      "badge": "24 Pending Approval",
+      "title": "Academic Courses Review",
+      "description": "There are 24 courses submitted by lecturers requiring administrative and academic approval prior to direct mobile app publication.",
+      "review_now": "Review Now"
+    },
+    "kpi": {
+      "total_students": "Total Students",
+      "total_lecturers": "Total Lecturers",
+      "total_courses": "Total Courses",
+      "published_courses": "Published Courses",
+      "under_review_courses": "Courses Under Review",
+      "total_orders": "Total Orders",
+      "vs_last_month": "vs last month",
+      "active_now_for_students": "active now for students",
+      "needs_audit": "Needs Audit",
+      "action_required": "Action Required"
+    },
+    "needs_attention": {
+      "title": "Needs Your Attention",
+      "subtitle": "3 key tasks pending",
+      "card_1": {
+        "count": "24",
+        "title": "Courses Pending Review",
+        "description": "Courses submitted by lecturers requiring medical content review and auditing.",
+        "action": "Review Courses",
+        "badge": "Top Priority"
+      },
+      "card_2": {
+        "count": "18",
+        "title": "New Lecturers",
+        "description": "Lecturers whose accounts were recently created and await specialty and university approval.",
+        "action": "View Lecturers",
+        "badge": "Pending Verification"
+      },
+      "card_3": {
+        "count": "7",
+        "title": "Rejected Courses",
+        "description": "Courses requiring follow-up with lecturers to adjust academic feedback.",
+        "action": "View Courses",
+        "badge": "Follow Notes"
+      }
+    },
+    "academic_structure": {
+      "title": "Comprehensive Academic Hierarchy",
+      "countries": "Countries",
+      "universities": "Universities",
+      "colleges": "Colleges",
+      "subjects": "Medical Subjects",
+      "active_courses": "Active Courses",
+      "manage_btn": "Manage Academic Hierarchy"
+    },
+    "students_chart": {
+      "title": "Students Overview",
+      "subtitle": "New student enrollment rate across the year",
+      "growth_badge": "+8.5% Growth",
+      "total_new": "Total New: 840 Students",
+      "monthly_active": "Monthly Active",
+      "completion_rate": "Completion Rate",
+      "avg_study_hours": "Avg Study Hours",
+      "hours_per_student": "hrs/student"
+    },
+    "courses_breakdown": {
+      "title": "Courses Overview",
+      "subtitle": "Detailed status distribution of 856 courses",
+      "view_all": "View All",
+      "published": "Published for students",
+      "in_review": "Technical review",
+      "drafts": "Lecturer drafts",
+      "rejected": "Rejected / Needs edit",
+      "paused": "Paused / Expired",
+      "view_all_courses_btn": "View All Courses and Content"
+    },
+    "sales_revenue": {
+      "title": "Sales & Payments Overview",
+      "subtitle": "Collections and financial transactions during the current monthly cycle",
+      "gateways": "Fawry Gateway / Bank Cards / Vodafone Cash",
+      "total_revenue": "Total Revenue",
+      "currency": "KWD",
+      "revenue_growth": "+14.2% Revenue Growth",
+      "completed_orders": "Completed Collections",
+      "orders_unit": "Orders",
+      "conversion_rate": "94.3% Conversion Rate",
+      "pending_orders": "Pending Orders",
+      "expires_in": "Expires in 24 hours",
+      "comparison_title": "Revenue comparison for the past 6 months"
+    },
+    "top_courses": {
+      "title": "Top Enrolled Courses",
+      "subtitle": "Most popular courses among medical students",
+      "view_all_btn": "View All Courses (856)",
+      "columns": {
+        "course_name": "Course Name",
+        "lecturer": "Lecturer",
+        "specialty": "Specialty",
+        "students": "Students",
+        "rating": "Rating",
+        "price": "Price",
+        "status": "Status",
+        "last_update": "Last Update",
+        "actions": "Actions"
+      },
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "latest_users": {
+      "title": "Latest Lecturers & Students",
+      "view_accounts": "View Accounts",
+      "roles": {
+        "lecturer": "Lecturer",
+        "student": "Student"
+      },
+      "active_today_total": "Total active users today: 1,420"
+    },
+    "recent_activities": {
+      "title": "Recent Activities",
+      "subtitle": "Real-time synced log"
     }
   }
 }
