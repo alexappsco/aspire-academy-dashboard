@@ -67,6 +67,17 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
+    key: "user_management",
+    icon: "/icons/booking.svg",
+    children: [
+      {
+        key: "minutes_management",
+        icon: "/icons/booking.svg",
+        path: "/minutes-management",
+      },
+    ],
+  },
+  {
     key: "finance_payments",
     icon: "/icons/finance.svg",
     path: "/finance",
@@ -149,11 +160,7 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/profile.svg",
     path: "/about-us",
   },
-  {
-    key: "minutes_management",
-    icon: "/icons/booking.svg",
-    path: "/minutes-management",
-  },
+ 
 ];
 
 const bottomItems: SidebarItem[] = [
