@@ -10,6 +10,7 @@
     "specializations": "التخصصات",
     "curriculum_management": "إدارة المناهج التعليمية",
     "booking_management": "إدارة الحجوزات",
+    "user_management": "إدارة المستخدمين",
     "finance_payments": "المالية والمدفوعات",
     "reports_analytics": "التقارير والتحليلات",
     "support": "الدعم الفني",
@@ -25,7 +26,7 @@
     "discount_codes": "أكواد الخصم",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
-    "minutes_management": "إدارة المحاضرات",
+    "minutes_management": "المحاضرون",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج"
   },

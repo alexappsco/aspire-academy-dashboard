@@ -9,6 +9,7 @@
     "specializations": "Specializations",
     "curriculum_management": "Curriculum Management",
     "booking_management": "Booking Management",
+    "user_management": "User Management",
     "finance_payments": "Finance & Payments",
     "reports_analytics": "Reports & Analytics",
     "support": "Technical Support",
@@ -24,7 +25,7 @@
     "discount_codes": "Discount Codes",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
-    "minutes_management": "Minutes Management",
+    "minutes_management": "Instructors",
     "settings": "Settings",
     "logout": "Logout"
   },
