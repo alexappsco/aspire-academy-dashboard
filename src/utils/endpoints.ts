@@ -9,4 +9,11 @@ export const endpoints = {
   currencies: {
     list: '/admin/currencies',
   },
+  coupons: {
+    list: '/admin/coupons',
+    details: (id: string) => `/admin/coupons/${id}`,
+    create: '/admin/coupons',
+    update: (id: string) => `/admin/coupons/${id}`,
+    delete: (id: string) => `/admin/coupons/${id}`,
+  },
 };
