@@ -67,14 +67,12 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
 
   const [faculties, setFaculties] = useState<FacultyLookupDto[]>(FALLBACK_FACULTIES);
   const [semesters, setSemesters] = useState<SemesterLookupDto[]>(FALLBACK_SEMESTERS);
-  const [loadingLookups, setLoadingLookups] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let isMounted = true;
     const fetchLookups = async () => {
-      setLoadingLookups(true);
       try {
         const [facultiesRes, semestersRes] = await Promise.all([
           getFacultiesLookupAction(),
@@ -91,8 +89,6 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         }
       } catch {
         // use fallback list
-      } finally {
-        if (isMounted) setLoadingLookups(false);
       }
     };
 
@@ -218,7 +214,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             }}
             error={!!errors.facultyId}
             helperText={errors.facultyId}
-            disabled={submitting || loadingLookups}
+            disabled={submitting}
             required
             sx={{
               '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
@@ -243,7 +239,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             }}
             error={!!errors.semesterId}
             helperText={errors.semesterId}
-            disabled={submitting || loadingLookups}
+            disabled={submitting}
             required
             sx={{
               '& .MuiOutlinedInput-root': { borderRadius: 1.5 },

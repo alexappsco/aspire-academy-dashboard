@@ -155,15 +155,23 @@ export async function deleteStudyMaterialAction(
   }
 }
 
+function timeoutPromise<T>(ms: number): Promise<T> {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Lookup timeout')), ms);
+  });
+}
+
 export async function getFacultiesLookupAction(): Promise<{
   success: boolean;
   data?: FacultyLookupDto[];
   error?: string;
 }> {
   try {
-    const res = await getData<{ items: FacultyLookupDto[] } | FacultyLookupDto[]>(
+    const fetchPromise = getData<{ items: FacultyLookupDto[] } | FacultyLookupDto[]>(
       endpoints.faculties.list
     );
+    const res = await Promise.race([fetchPromise, timeoutPromise<never>(2500)]);
+
     if ('success' in res && res.success && res.data) {
       const items = Array.isArray(res.data)
         ? res.data
@@ -187,9 +195,11 @@ export async function getSemestersLookupAction(): Promise<{
   error?: string;
 }> {
   try {
-    const res = await getData<{ items: SemesterLookupDto[] } | SemesterLookupDto[]>(
+    const fetchPromise = getData<{ items: SemesterLookupDto[] } | SemesterLookupDto[]>(
       endpoints.semesters.list
     );
+    const res = await Promise.race([fetchPromise, timeoutPromise<never>(2500)]);
+
     if ('success' in res && res.success && res.data) {
       const items = Array.isArray(res.data)
         ? res.data

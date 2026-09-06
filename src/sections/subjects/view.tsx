@@ -105,7 +105,7 @@ export default function SubjectsView() {
   const [editingMaterial, setEditingMaterial] = useState<StudyMaterialDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Debounce search input (400ms)
+  // 1. Debounce search input (400ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -114,29 +114,34 @@ export default function SubjectsView() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Sync state to URL params
-  const updateUrlParams = useCallback(
-    (filter: string, status: string) => {
-      const params = new URLSearchParams();
+  // 2. Sync active filters to URL cleanly without infinite loops
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
 
-      if (filter.trim() !== '') {
-        params.set('Filter', filter.trim());
-      }
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    } else {
+      params.delete('Filter');
+    }
 
-      if (status === 'active') {
-        params.set('IsActive', 'true');
-      } else if (status === 'inactive') {
-        params.set('IsActive', 'false');
-      }
+    if (statusFilter === 'active') {
+      params.set('IsActive', 'true');
+    } else if (statusFilter === 'inactive') {
+      params.set('IsActive', 'false');
+    } else {
+      params.delete('IsActive');
+    }
 
-      const queryString = params.toString();
-      const targetUrl = queryString ? `${pathname}?${queryString}` : pathname;
-      router.replace(targetUrl, { scroll: false });
-    },
-    [pathname, router]
-  );
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
 
-  // Fetch data
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, statusFilter, pathname, router, searchParams]);
+
+  // 3. Fetch data function
   const fetchData = useCallback(
     async (filterVal: string, statusVal: string, showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -163,7 +168,6 @@ export default function SubjectsView() {
           setMaterials(items);
           setTotalCount(total);
         } else if (res.error) {
-          toast.error(res.error);
           setMaterials([]);
           setTotalCount(0);
         }
@@ -178,11 +182,9 @@ export default function SubjectsView() {
     [toast]
   );
 
-  // Trigger fetch and URL update on debouncedSearch or statusFilter change
+  // 4. Initial load & filter changes
   useEffect(() => {
     let isMounted = true;
-
-    updateUrlParams(debouncedSearch, statusFilter);
 
     const load = async () => {
       try {
@@ -210,8 +212,7 @@ export default function SubjectsView() {
           const { items, total } = extractStudyMaterialItems(res.data);
           setMaterials(items);
           setTotalCount(total);
-        } else if (res.error) {
-          toast.error(res.error);
+        } else {
           setMaterials([]);
           setTotalCount(0);
         }
@@ -230,7 +231,7 @@ export default function SubjectsView() {
     return () => {
       isMounted = false;
     };
-  }, [debouncedSearch, statusFilter, updateUrlParams, toast]);
+  }, [debouncedSearch, statusFilter, toast]);
 
   // Handlers for Add/Edit
   const handleOpenAdd = () => {
@@ -249,16 +250,35 @@ export default function SubjectsView() {
         const res = await updateStudyMaterialAction(editingMaterial.id, data);
         if (res.success) {
           toast.success(isRtl ? 'تم تحديث المادة الدراسية بنجاح' : 'Study material updated successfully');
-          await fetchData(debouncedSearch, statusFilter, false);
+          setMaterials((prev) =>
+            prev.map((m) =>
+              m.id === editingMaterial.id
+                ? {
+                    ...m,
+                    nameAr: data.nameAr,
+                    nameEn: data.nameEn,
+                    facultyId: data.facultyId,
+                    semesterId: data.semesterId,
+                    isActive: data.isActive,
+                  }
+                : m
+            )
+          );
+          fetchData(debouncedSearch, statusFilter, false);
           return true;
         }
         toast.error(res.error || (isRtl ? 'فشل تحديث المادة الدراسية' : 'Failed to update study material'));
         return false;
       }
+
       const res = await createStudyMaterialAction(data);
       if (res.success) {
         toast.success(isRtl ? 'تمت إضافة المادة الدراسية بنجاح' : 'Study material added successfully');
-        await fetchData(debouncedSearch, statusFilter, false);
+        if (res.data) {
+          setMaterials((prev) => [res.data!, ...prev]);
+          setTotalCount((prev) => prev + 1);
+        }
+        fetchData(debouncedSearch, statusFilter, false);
         return true;
       }
       toast.error(res.error || (isRtl ? 'فشل إضافة المادة الدراسية' : 'Failed to add study material'));
