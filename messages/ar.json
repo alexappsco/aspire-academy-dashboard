@@ -512,10 +512,12 @@
     "title": "الجامعات",
     "subtitle": "إدارة جميع الجامعات",
     "add_university": "إضافة جامعة",
-    "search_placeholder": "البحث في الكليات..",
+    "search_placeholder": "البحث في الجامعات..",
     "columns": {
       "logo": "الشعار",
       "name": "الاسم",
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم بالإنجليزية",
       "country": "الدولة",
       "order": "الترتيب",
       "created_date": "تاريخ الإضافة",
@@ -530,6 +532,14 @@
       "active": "مفعل",
       "inactive": "غير مفعل"
     },
+    "messages": {
+      "fetch_error": "فشل تحميل الجامعات",
+      "add_success": "تم إنشاء الجامعة بنجاح",
+      "edit_success": "تم تحديث الجامعة بنجاح",
+      "delete_success": "تم حذف الجامعة بنجاح",
+      "status_updated": "تم تحديث الحالة بنجاح",
+      "operation_error": "فشلت العملية"
+    },
     "actions": {
       "edit": "تعديل",
       "delete": "حذف"
@@ -541,6 +551,8 @@
       "select_image": "اختر الصورة",
       "drag_drop": "اسحب وأفلت الملفات هنا أو",
       "browse": "تصفح البيانات",
+      "country": "الدولة",
+      "country_placeholder": "اختر الدولة",
       "country_ar": "الدولة (بالعربية)",
       "country_ar_placeholder": "الدولة بالعربية..",
       "country_en": "الدولة (بالإنجليزية)",
@@ -551,10 +563,17 @@
       "name_en_placeholder": "الاسم بالإنجليزية..",
       "order": "الترتيب",
       "status": "الحالة",
+      "add_btn": "إضافة",
       "save": "حفظ",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد حذف هذه الجامعة؟",
       "delete": "حذف"
+    },
+    "delete_dialog": {
+      "title": "حذف الجامعة",
+      "message": "هل أنت متأكد أنك تريد حذف هذه الجامعة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirm_btn": "حذف",
+      "cancel_btn": "إلغاء"
     }
   },
   "Colleges": {

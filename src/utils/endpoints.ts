@@ -24,6 +24,10 @@ export const endpoints = {
   },
   universities: {
     list: '/admin/universities',
+    details: (id: string) => `/admin/universities/${id}`,
+    create: '/admin/universities',
+    update: (id: string) => `/admin/universities/${id}`,
+    delete: (id: string) => `/admin/universities/${id}`,
   },
   coupons: {
     list: '/admin/coupons',
