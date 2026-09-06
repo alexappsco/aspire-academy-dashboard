@@ -5,3 +5,4 @@ export * from './currencies';
 export * from './instructors';
 export * from './coupons';
 export * from './study-materials';
+export * from './unversity';
