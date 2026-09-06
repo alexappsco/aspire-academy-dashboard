@@ -82,6 +82,16 @@ const sidebarItems: SidebarItem[] = [
         path: "/college",
       },
       {
+        key: "academic_years",
+        icon: "/icons/curriculum.svg",
+        path: "/academic-years",
+      },
+      {
+        key: "academic_semesters",
+        icon: "/icons/curriculum.svg",
+        path: "/academic-semester",
+      },
+      {
         key: "subjects",
         icon: "/icons/course.svg",
         path: "/subjects",

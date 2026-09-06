@@ -17,6 +17,8 @@
     "categories": "ادارة المجالات",
     "universities": "الجامعات",
     "college": "الكليات",
+    "academic_years": "السنين الدراسية",
+    "academic_semesters": "الفصول الدراسية",
     "academic_hierarchy": "الهيكل الأكاديمي",
     "subjects": "المواد",
     "countries": "الدول",
@@ -334,6 +336,82 @@
       "save": "حفظ",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا المجال؟",
+      "delete": "حذف"
+    }
+  },
+  "AcademicYears": {
+    "title": "السنين الدراسية",
+    "subtitle": "إدارة جميع السنين الدراسية",
+    "add_year": "إضافة سنة",
+    "search_placeholder": "بحث",
+    "columns": {
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم انجليزي",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة سنة دراسية",
+      "edit_title": "تعديل سنة دراسية",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "status": "الحالة",
+      "add": "إضافة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
+      "delete": "حذف"
+    }
+  },
+  "AcademicSemesters": {
+    "title": "الفصول الدراسية",
+    "subtitle": "إدارة جميع الفصول الدراسية",
+    "add_semester": "إضافة فصل",
+    "search_placeholder": "بحث",
+    "columns": {
+      "name_ar": "الاسم بالعربية",
+      "name_en": "الاسم انجليزي",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "statuses": {
+      "all": "الكل",
+      "active": "مفعل",
+      "inactive": "غير مفعل"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "dialog": {
+      "add_title": "إضافة فصل دراسي",
+      "edit_title": "تعديل فصل دراسي",
+      "name_ar": "الاسم بالعربية",
+      "name_ar_placeholder": "الاسم بالعربية..",
+      "name_en": "الاسم بالإنجليزية",
+      "name_en_placeholder": "الاسم بالإنجليزية..",
+      "status": "الحالة",
+      "add": "إضافة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
       "delete": "حذف"
     }
   },
