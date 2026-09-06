@@ -515,7 +515,7 @@
   "Subjects": {
     "title": "المواد",
     "subtitle": "إدارة جميع المواد",
-    "add_subject": "إضافة موضوع",
+    "add_subject": "إضافة مادة",
     "search_placeholder": "البحث في المواد..",
     "columns": {
       "image": "الصورة",
@@ -540,9 +540,9 @@
       "delete": "حذف"
     },
     "dialog": {
-      "add_title": "إضافة موضوع",
-      "edit_title": "تعديل موضوع",
-      "subtitle": "بيانات الموضوع",
+      "add_title": "إضافة مادة",
+      "edit_title": "تعديل مادة",
+      "subtitle": "بيانات المادة",
       "select_image": "اختر الصورة",
       "drag_drop": "اسحب وأفلت الملفات هنا أو",
       "browse": "تصفح البيانات",
