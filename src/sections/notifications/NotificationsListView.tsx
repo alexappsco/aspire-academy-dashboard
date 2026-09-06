@@ -194,13 +194,13 @@ export default function NotificationsListView({ data, onDelete, onNavigateToSend
         <Button
           variant="contained"
           onClick={onNavigateToSend}
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: 1.5,
             px: 2.5,
             py: 1,
+            gap: 1,
             fontWeight: 700,
             boxShadow: 'none',
             '&:hover': {
@@ -208,6 +208,7 @@ export default function NotificationsListView({ data, onDelete, onNavigateToSend
             },
           }}
         >
+          <Iconify icon="mingcute:add-line" width={20} />
           {t('send_notification')}
         </Button>
       </Stack>

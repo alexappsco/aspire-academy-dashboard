@@ -1,156 +1,205 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'src/i18n/routing';
+import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
-import Switch from '@mui/material/Switch';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import StarIcon from '@mui/icons-material/Star';
 
 import Iconify from 'src/components/iconify';
-import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { useToast } from 'src/components/toast';
+import { getInstructors, deleteInstructor } from 'src/actions/instructors';
+import type { Instructor } from 'src/types/instructor';
 
-import { MOCK_MINUTES, MinutesItem, MinutesStatus } from './_mock';
 import DeleteConfirmDialog from './delete-confirm-dialog';
 
-interface FormattedMinutes {
+interface FormattedInstructor {
   id: string;
   name: string;
-  name_ar: string;
-  name_en: string;
   email: string;
-  avatar: string;
+  imageUrl: string;
+  title: string;
+  qualification: string;
+  country: string;
+  university: string;
   joinedDate: string;
-  specialty: string;
-  subject: string;
-  coursesCount: number;
-  studentsCount: string;
-  rating: number;
-  active: boolean;
+  verified: boolean;
+  actions?: string;
+  raw?: Instructor;
 }
 
-const STATUS_MAP: Record<MinutesStatus, { label: string; color: string; bgColor: string }> = {
-  draft: { label: 'مسودة', color: '#637381', bgColor: '#EDF2F7' },
-  published: { label: 'مفعل', color: '#118D57', bgColor: '#D2F9E5' },
-  archived: { label: 'معطل', color: '#637381', bgColor: '#F4F6F8' },
-};
+function formatDate(date?: string | null): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
 
 export default function MinutesManagementView() {
   const t = useTranslations('MinutesManagement');
+  const toast = useToast();
   const locale = useLocale();
   const router = useRouter();
   const isRtl = locale === 'ar';
 
-  const [minutes, setMinutes] = useState<MinutesItem[]>(MOCK_MINUTES);
+  const [items, setItems] = useState<Instructor[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleOpenDelete = (row: FormattedMinutes) => {
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInstructors() {
+      try {
+        const params: Record<string, unknown> = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+        if (statusFilter === 'verified') params.IsVerified = true;
+        if (statusFilter === 'rejected') params.IsVerified = false;
+        if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
+
+        const res = await getInstructors(params as {
+          IsVerified?: boolean;
+          Filter?: string;
+          SkipCount?: number;
+          MaxResultCount?: number;
+        });
+
+        if (!isMounted) return;
+
+        if (res.success && res.data) {
+          setItems(res.data.items);
+          setTotalCount(res.data.totalCount);
+        } else {
+          toast.error(res.error || 'Failed to load');
+        }
+      } catch {
+        if (isMounted) {
+          toast.error('Failed to load');
+        }
+      }
+    }
+
+    loadInstructors();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedSearch, statusFilter, toast]);
+
+  const handleOpenEdit = (row: FormattedInstructor) => {
+    router.push(`/${locale}/minutes-management/${row.id}`);
+  };
+
+  const handleOpenDelete = (row: FormattedInstructor) => {
     setDeletingId(row.id);
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (deletingId) {
-      setMinutes((prev) => prev.filter((m) => m.id !== deletingId));
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    try {
+      const res = await deleteInstructor(deletingId);
+
+      if (res.success) {
+        toast.success(t('messages.delete_success'));
+        setItems((prev) => prev.filter((i) => i.id !== deletingId));
+        setTotalCount((prev) => prev - 1);
+      } else {
+        toast.error(res.error || 'Failed to delete');
+      }
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
       setDeletingId(null);
     }
   };
 
-  const handleOpenEdit = (row: FormattedMinutes) => {
-    router.push(`/${locale}/minutes-management/${row.id}`);
-  };
-
-  const handleToggleStatus = (id: string) => {
-    setMinutes((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, active: !m.active } : m))
-    );
-  };
-
-  const filteredMinutes: FormattedMinutes[] = minutes
-    .filter((item) => {
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'active' && item.active) ||
-        (statusFilter === 'inactive' && !item.active);
-
-      if (!matchesStatus) return false;
-
-      if (!searchQuery) return true;
-
-      const query = searchQuery.toLowerCase();
-      return (
-        item.name_en.toLowerCase().includes(query) ||
-        item.name_ar.toLowerCase().includes(query) ||
-        item.specialty.toLowerCase().includes(query) ||
-        item.subject.toLowerCase().includes(query)
-      );
-    })
-    .map((item) => ({
-      id: item.id,
-      name: isRtl ? item.name_ar : item.name_en,
-      name_ar: item.name_ar,
-      name_en: item.name_en,
-      email: item.email,
-      avatar: item.avatar,
-      joinedDate: item.joinedDate,
-      specialty: item.specialty,
-      subject: item.subject,
-      coursesCount: item.coursesCount,
-      studentsCount: item.studentsCount,
-      rating: item.rating,
-      active: item.active,
-    }));
+  const verifiedCount = items.filter((i) => i.verifiedAt).length;
+  const rejectedCount = items.filter((i) => i.rejectedAt && !i.verifiedAt).length;
 
   const tableHead = [
     { id: 'name', label: t('columns.name'), align: (isRtl ? 'right' : 'left') as cellAlignment },
+    { id: 'title', label: t('columns.title'), align: 'center' as cellAlignment },
+    { id: 'qualification', label: t('columns.qualification'), align: 'center' as cellAlignment },
+    { id: 'country', label: t('columns.country'), align: 'center' as cellAlignment },
+    { id: 'university', label: t('columns.university'), align: 'center' as cellAlignment },
     { id: 'joinedDate', label: t('columns.joined_date'), align: 'center' as cellAlignment },
-    { id: 'specialty', label: t('columns.specialty'), align: 'center' as cellAlignment },
-    { id: 'subject', label: t('columns.subject'), align: 'center' as cellAlignment },
-    { id: 'coursesCount', label: t('columns.courses'), align: 'center' as cellAlignment },
-    { id: 'studentsCount', label: t('columns.students'), align: 'center' as cellAlignment },
-    { id: 'rating', label: t('columns.rating'), align: 'center' as cellAlignment },
-    { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
+    { id: 'verified', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
 
   const actions = [
     {
       label: t('actions.edit'),
       icon: <Iconify icon="solar:pen-bold" />,
-      onClick: (row: FormattedMinutes) => handleOpenEdit(row),
+      onClick: (row: FormattedInstructor) => handleOpenEdit(row),
     },
     {
       label: t('actions.delete'),
       icon: <Iconify icon="solar:trash-bin-trash-bold" />,
       sx: { color: 'error.main' },
-      onClick: (row: FormattedMinutes) => handleOpenDelete(row),
+      onClick: (row: FormattedInstructor) => handleOpenDelete(row),
     },
   ];
 
+  const tableData: FormattedInstructor[] = items.map((item) => {
+    const countryName = isRtl
+      ? item.country?.nameAr ?? item.country?.name ?? '-'
+      : item.country?.nameEn ?? item.country?.name ?? '-';
+    const universityName = isRtl ? item.university?.nameAr : item.university?.nameEn;
+
+    return {
+      id: item.id,
+      name: item.name,
+      email: item.email,
+      imageUrl: item.imageUrl ?? '',
+      title: item.title ?? '-',
+      qualification: item.educationalQualification ?? '-',
+      country: countryName,
+      university: universityName ?? '-',
+      joinedDate: formatDate(item.startJobAt),
+      verified: !!item.verifiedAt,
+      raw: item,
+    };
+  });
+
   const customRender = {
-    name: (row: FormattedMinutes) => (
+    name: (row: FormattedInstructor) => (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Avatar
-          src={row.avatar}
-          alt={row.name_en}
+          src={row.imageUrl}
+          alt={row.name}
           sx={{ width: 40, height: 40, bgcolor: '#E2F0D9' }}
         />
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isRtl ? 'flex-end' : 'flex-start' }}>
           <Typography variant="body2" sx={{ fontWeight: 700, color: '#1C252E' }}>
             {row.name}
           </Typography>
@@ -160,79 +209,71 @@ export default function MinutesManagementView() {
         </Box>
       </Box>
     ),
-    joinedDate: (row: FormattedMinutes) => (
+    title: (row: FormattedInstructor) => (
+      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
+        {row.title}
+      </Typography>
+    ),
+    qualification: (row: FormattedInstructor) => (
+      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
+        {row.qualification}
+      </Typography>
+    ),
+    country: (row: FormattedInstructor) => (
+      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
+        {row.country}
+      </Typography>
+    ),
+    university: (row: FormattedInstructor) => (
+      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
+        {row.university}
+      </Typography>
+    ),
+    joinedDate: (row: FormattedInstructor) => (
       <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
         {row.joinedDate}
       </Typography>
     ),
-    specialty: (row: FormattedMinutes) => (
-      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
-        {row.specialty}
-      </Typography>
-    ),
-    subject: (row: FormattedMinutes) => (
-      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
-        {row.subject}
-      </Typography>
-    ),
-    coursesCount: (row: FormattedMinutes) => (
-      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
-        {row.coursesCount}
-      </Typography>
-    ),
-    studentsCount: (row: FormattedMinutes) => (
-      <Typography variant="body2" sx={{ color: '#1C252E', fontSize: '13px', fontWeight: 500 }}>
-        {row.studentsCount}
-      </Typography>
-    ),
-    rating: (row: FormattedMinutes) => (
-      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-        <StarIcon sx={{ color: '#FFAB00', fontSize: '18px' }} />
-        <Typography variant="body2" sx={{ fontWeight: 700, color: '#1C252E' }}>
-          {row.rating}
-        </Typography>
-      </Box>
-    ),
-    active: (row: FormattedMinutes) => {
-      const isActive = row.active;
+    verified: (row: FormattedInstructor) => {
+      const isVerified = row.verified;
       return (
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-          <Switch
-            checked={isActive}
-            onChange={() => handleToggleStatus(row.id)}
+          <Chip
+            size="small"
+            label={isVerified ? t('status.active') : t('status.inactive')}
             sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#00A76F' },
+              bgcolor: isVerified ? '#D2F9E5' : '#EDF2F7',
+              color: isVerified ? '#118D57' : '#637381',
+              fontWeight: 600,
+              fontSize: '12px',
             }}
           />
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 600, color: isActive ? '#1C252E' : '#919EAB', fontSize: '13px' }}
-          >
-            {isActive ? t('status.active') : t('status.inactive')}
-          </Typography>
         </Box>
       );
     },
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#F4F6F8', minHeight: '100vh', fontFamily: 'sans-serif' }}>
-      {/* Top Header */}
+    <Box sx={{ py: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '24px' }}>
-          {t('title')}
-        </Typography>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
+            {t('title')}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>
+            {t('subtitle')}
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           href={`/${locale}/minutes-management/new`}
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: '10px',
             px: 2.5,
             py: 1.2,
+            gap: 1,
             fontWeight: 700,
             fontSize: '14px',
             textTransform: 'none',
@@ -240,17 +281,17 @@ export default function MinutesManagementView() {
             '&:hover': { bgcolor: '#0F172A' },
           }}
         >
+          <Iconify icon="mingcute:add-line" width={20} />
           {t('add_minutes')}
         </Button>
       </Box>
 
-      {/* Main Content Card */}
       <Card
         sx={{
           borderRadius: '16px',
           boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)',
           border: '1px solid #F1F5F9',
-          overflow: 'hidden',
+          overflow: 'visible',
           bgcolor: '#FFFFFF',
         }}
       >
@@ -271,7 +312,7 @@ export default function MinutesManagementView() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <span>{t('statuses.all')}</span>
                 <Chip
-                  label={filteredMinutes.length}
+                  label={totalCount}
                   size="small"
                   sx={{
                     bgcolor: statusFilter === 'all' ? '#1C252E' : '#EDF2F7',
@@ -285,12 +326,12 @@ export default function MinutesManagementView() {
               </Box>
             </Button>
             <Button
-              onClick={() => setStatusFilter('active')}
+              onClick={() => setStatusFilter('verified')}
               sx={{
                 fontWeight: 700,
-                color: statusFilter === 'active' ? '#1C252E' : '#637381',
+                color: statusFilter === 'verified' ? '#1C252E' : '#637381',
                 textTransform: 'none',
-                borderBottom: statusFilter === 'active' ? '3px solid #1C252E' : '3px solid transparent',
+                borderBottom: statusFilter === 'verified' ? '3px solid #1C252E' : '3px solid transparent',
                 borderRadius: 0,
                 pb: 1,
               }}
@@ -298,7 +339,7 @@ export default function MinutesManagementView() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <span>{t('status.active')}</span>
                 <Chip
-                  label={minutes.filter((m) => m.active).length}
+                  label={verifiedCount}
                   size="small"
                   sx={{
                     bgcolor: '#D2F9E5',
@@ -312,12 +353,12 @@ export default function MinutesManagementView() {
               </Box>
             </Button>
             <Button
-              onClick={() => setStatusFilter('inactive')}
+              onClick={() => setStatusFilter('rejected')}
               sx={{
                 fontWeight: 700,
-                color: statusFilter === 'inactive' ? '#1C252E' : '#637381',
+                color: statusFilter === 'rejected' ? '#1C252E' : '#637381',
                 textTransform: 'none',
-                borderBottom: statusFilter === 'inactive' ? '3px solid #1C252E' : '3px solid transparent',
+                borderBottom: statusFilter === 'rejected' ? '3px solid #1C252E' : '3px solid transparent',
                 borderRadius: 0,
                 pb: 1,
               }}
@@ -325,7 +366,7 @@ export default function MinutesManagementView() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <span>{t('status.inactive')}</span>
                 <Chip
-                  label={minutes.filter((m) => !m.active).length}
+                  label={rejectedCount}
                   size="small"
                   sx={{
                     bgcolor: '#EDF2F7',
@@ -366,39 +407,13 @@ export default function MinutesManagementView() {
               },
             }}
           />
-          <Select
-            displayEmpty
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as string)}
-            renderValue={(selectedVal) =>
-              selectedVal === 'all' ? (
-                <span style={{ color: '#919EAB' }}>{t('statuses.all')}</span>
-              ) : (
-                selectedVal === 'active'
-                  ? t('status.active')
-                  : t('status.inactive')
-              )
-            }
-            sx={{
-              width: '180px',
-              height: '44px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              color: '#637381',
-              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E5E8EB' },
-            }}
-          >
-            <MenuItem value="all">{t('statuses.all')}</MenuItem>
-            <MenuItem value="active">{t('status.active')}</MenuItem>
-            <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
-          </Select>
         </Box>
 
         {/* Table */}
         <Box sx={{ px: 1 }}>
-          <SharedTable<FormattedMinutes>
-            data={filteredMinutes}
-            count={filteredMinutes.length}
+          <SharedTable<FormattedInstructor>
+            data={tableData}
+            count={totalCount}
             tableHead={tableHead}
             actions={actions}
             customRender={customRender}
@@ -406,13 +421,11 @@ export default function MinutesManagementView() {
         </Box>
       </Card>
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
       />
     </Box>
-    
   );
 }

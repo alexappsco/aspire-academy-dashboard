@@ -8,7 +8,6 @@ import type {
   GetCountriesParams,
   CreateCountryDto,
   UpdateCountryDto,
-  CurrencyDto,
 } from 'src/sections/countries/types';
 
 export async function getCountriesAction(
@@ -134,23 +133,3 @@ export async function deleteCountryAction(
   }
 }
 
-export async function getCurrenciesAction(): Promise<{
-  success: boolean;
-  data?: CurrencyDto[];
-  error?: string;
-}> {
-  try {
-    const res = await getData<CurrencyDto[] | { items: CurrencyDto[] }>(endpoints.currencies.list);
-    if ('success' in res && res.success) {
-      const data = res.data;
-      if (Array.isArray(data)) return { success: true, data };
-      if (data && 'items' in data && Array.isArray(data.items)) {
-        return { success: true, data: data.items };
-      }
-      return { success: true, data: [] };
-    }
-    return { success: true, data: [] };
-  } catch {
-    return { success: true, data: [] };
-  }
-}

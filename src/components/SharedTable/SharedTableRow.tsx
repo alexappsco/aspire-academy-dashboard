@@ -48,7 +48,7 @@ function SharedTableRow<T extends { id: string }>({
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}
-        arrow="right-top"
+        // arrow="right-top"
         sx={{ minWidth: 140 }}
       >
         <MenuList>
@@ -61,9 +61,9 @@ function SharedTableRow<T extends { id: string }>({
                   action.onClick(row);
                   popover.onClose();
                 }}
-                sx={action.sx}
+                sx={{ gap: 2, ...action.sx }}
               >
-                <ListItemIcon>{action.icon}</ListItemIcon>
+                <ListItemIcon sx={{ minWidth: 0 }}>{action.icon}</ListItemIcon>
                 <ListItemText>{action.label}</ListItemText>
               </MenuItem>
             ))}

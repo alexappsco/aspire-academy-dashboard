@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
@@ -14,7 +15,7 @@ import Iconify from 'src/components/iconify';
 interface DeleteConfirmDialogProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }
 
 export default function DeleteConfirmDialog({
@@ -23,6 +24,17 @@ export default function DeleteConfirmDialog({
   onConfirm,
 }: DeleteConfirmDialogProps) {
   const t = useTranslations('MinutesManagement');
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    setDeleting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setDeleting(false);
+      onClose();
+    }
+  };
 
   return (
     <Dialog
@@ -48,28 +60,29 @@ export default function DeleteConfirmDialog({
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
             variant="contained"
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
+            onClick={handleConfirm}
+            disabled={deleting}
             sx={{
               bgcolor: '#D32F2F',
               color: '#FFFFFF',
               borderRadius: 1.5,
               px: 4,
               py: 1,
+              gap: 1,
               fontWeight: 600,
               fontSize: 15,
               minWidth: 100,
               '&:hover': { bgcolor: '#C62828' },
             }}
           >
+            {deleting ? <CircularProgress size={16} color="inherit" /> : null}
             {t('dialog.delete')}
           </Button>
 
           <Button
             variant="outlined"
             onClick={onClose}
+            disabled={deleting}
             sx={{
               borderColor: '#E2E8F0',
               color: '#1E293B',

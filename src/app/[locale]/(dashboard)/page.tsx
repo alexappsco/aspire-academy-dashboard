@@ -1,5 +1,5 @@
-import EmptyPage from '@/components/EmptyPage';
+import { HomeView } from 'src/sections/home';
 
 export default function Home() {
-  return <EmptyPage tKey="home" />;
+  return <HomeView />;
 }

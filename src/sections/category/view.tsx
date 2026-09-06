@@ -342,7 +342,6 @@ export default function CategoryView({
 
         <Button
           variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           onClick={handleOpenAdd}
           sx={{
             bgcolor: '#1C252E',
@@ -350,11 +349,13 @@ export default function CategoryView({
             borderRadius: 1.5,
             px: 2.5,
             py: 1,
+            gap: 1,
             fontWeight: 700,
             boxShadow: 'none',
             '&:hover': { bgcolor: '#2C353E' },
           }}
         >
+          <Iconify icon="mingcute:add-line" width={20} />
           {t('add_category')}
         </Button>
       </Stack>

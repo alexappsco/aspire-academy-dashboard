@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useToast } from "src/components/toast";
 import { useAuth } from "src/contexts/AuthContext";
 import { PATH_AFTER_LOGIN } from "src/config-global";
+import { loginAction } from "src/actions/auth";
 import type { ApiSingleResponse, LoginResponse } from "src/types/crud-types";
 import {
   Box,
@@ -37,13 +38,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const result: ApiSingleResponse<LoginResponse> = await res.json();
+      const result = await loginAction({ email, password });
 
       if (!result.success || !result.data) {
         toastError(result.error || t("generic_error"));
@@ -186,7 +181,7 @@ export default function LoginPage() {
               {loading ? t("processing") : t("login")}
             </Button>
 
-            <Box
+            {/* <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -199,9 +194,9 @@ export default function LoginPage() {
                 {t("or")}
               </Typography>
               <Box sx={{ flex: 1, height: 1, bgcolor: "rgba(255,255,255,0.25)" }} />
-            </Box>
+            </Box> */}
 
-            <Button
+            {/* <Button
               onClick={() => router.push("/auth/register")}
               sx={{
                 bgcolor: "rgba(255,255,255,0.14)",
@@ -217,7 +212,7 @@ export default function LoginPage() {
               }}
             >
               {t("create_account")}
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       </Box>
