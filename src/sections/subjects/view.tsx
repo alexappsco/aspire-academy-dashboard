@@ -1,244 +1,497 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, usePathname } from 'src/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Switch from '@mui/material/Switch';
 import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
 import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { useToast } from 'src/components/toast';
+import { getErrorMessage } from 'src/utils/axios';
 
-import { MOCK_SUBJECTS, SubjectItem, getUniversityName, getCollegeName } from './_mock';
+import {
+  StudyMaterialDto,
+  CreateStudyMaterialDto,
+  GetStudyMaterialsParams,
+} from 'src/types/study-material';
+import {
+  getStudyMaterialsAction,
+  createStudyMaterialAction,
+  updateStudyMaterialAction,
+  deleteStudyMaterialAction,
+} from 'src/actions/study-materials';
 import SubjectFormDialog from './new-edit-subject-dialog';
 import DeleteConfirmDialog from './delete-confirm-dialog';
 
-interface FormattedSubject {
+interface FormattedSubjectRow {
   id: string;
-  logo: string;
-  name: string;
-  university: string;
-  college: string;
-  order: number;
-  createdDate: string;
-  active: boolean;
+  nameAr: string;
+  nameEn: string;
+  facultyName: string;
+  semesterName: string;
+  status: boolean;
+  raw: StudyMaterialDto;
+}
+
+function extractStudyMaterialItems(res: unknown): { items: StudyMaterialDto[]; total: number } {
+  if (!res) return { items: [], total: 0 };
+  const r = res as Record<string, unknown>;
+  if (Array.isArray(r.items)) {
+    return {
+      items: r.items as StudyMaterialDto[],
+      total: typeof r.totalCount === 'number' ? r.totalCount : r.items.length,
+    };
+  }
+  if (r.data && typeof r.data === 'object') {
+    const d = r.data as Record<string, unknown>;
+    if (Array.isArray(d.items)) {
+      return {
+        items: d.items as StudyMaterialDto[],
+        total: typeof d.totalCount === 'number' ? d.totalCount : d.items.length,
+      };
+    }
+    if (Array.isArray(r.data)) {
+      return { items: r.data as StudyMaterialDto[], total: r.data.length };
+    }
+  }
+  if (Array.isArray(res)) {
+    return { items: res as StudyMaterialDto[], total: res.length };
+  }
+  return { items: [], total: 0 };
 }
 
 export default function SubjectsView() {
   const t = useTranslations('Subjects');
+  const toast = useToast();
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
-  const [subjects, setSubjects] = useState<SubjectItem[]>(MOCK_SUBJECTS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlIsActive = searchParams.get('IsActive');
+  const initialStatus =
+    urlIsActive === 'true' ? 'active' : urlIsActive === 'false' ? 'inactive' : 'all';
+
+  const [materials, setMaterials] = useState<StudyMaterialDto[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<SubjectItem | null>(null);
+  const [editingMaterial, setEditingMaterial] = useState<StudyMaterialDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Debounce search input (400ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Sync state to URL params
+  const updateUrlParams = useCallback(
+    (filter: string, status: string) => {
+      const params = new URLSearchParams();
+
+      if (filter.trim() !== '') {
+        params.set('Filter', filter.trim());
+      }
+
+      if (status === 'active') {
+        params.set('IsActive', 'true');
+      } else if (status === 'inactive') {
+        params.set('IsActive', 'false');
+      }
+
+      const queryString = params.toString();
+      const targetUrl = queryString ? `${pathname}?${queryString}` : pathname;
+      router.replace(targetUrl, { scroll: false });
+    },
+    [pathname, router]
+  );
+
+  // Fetch data
+  const fetchData = useCallback(
+    async (filterVal: string, statusVal: string, showLoading = true) => {
+      if (showLoading) setLoading(true);
+      try {
+        const params: GetStudyMaterialsParams = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+
+        if (filterVal.trim() !== '') {
+          params.Filter = filterVal.trim();
+        }
+
+        if (statusVal === 'active') {
+          params.IsActive = true;
+        } else if (statusVal === 'inactive') {
+          params.IsActive = false;
+        }
+
+        const res = await getStudyMaterialsAction(params);
+
+        if (res.success && res.data) {
+          const { items, total } = extractStudyMaterialItems(res.data);
+          setMaterials(items);
+          setTotalCount(total);
+        } else if (res.error) {
+          toast.error(res.error);
+          setMaterials([]);
+          setTotalCount(0);
+        }
+      } catch (err: unknown) {
+        toast.error(getErrorMessage(err));
+        setMaterials([]);
+        setTotalCount(0);
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    [toast]
+  );
+
+  // Trigger fetch and URL update on debouncedSearch or statusFilter change
+  useEffect(() => {
+    let isMounted = true;
+
+    updateUrlParams(debouncedSearch, statusFilter);
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        const params: GetStudyMaterialsParams = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+
+        if (debouncedSearch.trim() !== '') {
+          params.Filter = debouncedSearch.trim();
+        }
+
+        if (statusFilter === 'active') {
+          params.IsActive = true;
+        } else if (statusFilter === 'inactive') {
+          params.IsActive = false;
+        }
+
+        const res = await getStudyMaterialsAction(params);
+
+        if (!isMounted) return;
+
+        if (res.success && res.data) {
+          const { items, total } = extractStudyMaterialItems(res.data);
+          setMaterials(items);
+          setTotalCount(total);
+        } else if (res.error) {
+          toast.error(res.error);
+          setMaterials([]);
+          setTotalCount(0);
+        }
+      } catch (err: unknown) {
+        if (!isMounted) return;
+        toast.error(getErrorMessage(err));
+        setMaterials([]);
+        setTotalCount(0);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedSearch, statusFilter, updateUrlParams, toast]);
+
+  // Handlers for Add/Edit
   const handleOpenAdd = () => {
-    setEditingSubject(null);
-    setDialogOpen(true);
+    setEditingMaterial(null);
+    setFormDialogOpen(true);
   };
 
-  const handleOpenEdit = (row: FormattedSubject) => {
-    const subject = subjects.find((s) => s.id === row.id);
-    if (subject) {
-      setEditingSubject(subject);
-      setDialogOpen(true);
+  const handleOpenEdit = (material: StudyMaterialDto) => {
+    setEditingMaterial(material);
+    setFormDialogOpen(true);
+  };
+
+  const handleSave = async (data: CreateStudyMaterialDto): Promise<boolean> => {
+    try {
+      if (editingMaterial) {
+        const res = await updateStudyMaterialAction(editingMaterial.id, data);
+        if (res.success) {
+          toast.success(isRtl ? 'تم تحديث المادة الدراسية بنجاح' : 'Study material updated successfully');
+          await fetchData(debouncedSearch, statusFilter, false);
+          return true;
+        }
+        toast.error(res.error || (isRtl ? 'فشل تحديث المادة الدراسية' : 'Failed to update study material'));
+        return false;
+      }
+      const res = await createStudyMaterialAction(data);
+      if (res.success) {
+        toast.success(isRtl ? 'تمت إضافة المادة الدراسية بنجاح' : 'Study material added successfully');
+        await fetchData(debouncedSearch, statusFilter, false);
+        return true;
+      }
+      toast.error(res.error || (isRtl ? 'فشل إضافة المادة الدراسية' : 'Failed to add study material'));
+      return false;
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
+      return false;
     }
   };
 
-  const handleOpenDelete = (row: FormattedSubject) => {
-    setDeletingId(row.id);
+  // Handlers for Delete
+  const handleOpenDelete = (id: string) => {
+    setDeletingId(id);
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (deletingId) {
-      setSubjects((prev) => prev.filter((s) => s.id !== deletingId));
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      const res = await deleteStudyMaterialAction(deletingId);
+      if (res.success) {
+        toast.success(isRtl ? 'تم حذف المادة بنجاح' : 'Subject deleted successfully');
+        setMaterials((prev) => prev.filter((m) => m.id !== deletingId));
+        setSelectedIds((prev) => prev.filter((id) => id !== deletingId));
+        setTotalCount((prev) => Math.max(0, prev - 1));
+      } else {
+        toast.error(res.error || (isRtl ? 'فشل حذف المادة' : 'Failed to delete subject'));
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
+    } finally {
       setDeletingId(null);
     }
   };
 
-  const handleSaveSubject = (data: Partial<SubjectItem>) => {
-    if (editingSubject) {
-      setSubjects((prev) =>
-        prev.map((s) => (s.id === editingSubject.id ? { ...s, ...data } : s))
+  // Toggle status inline
+  const handleToggleStatus = async (material: StudyMaterialDto) => {
+    try {
+      const updatedStatus = !material.isActive;
+      // Optimistic update
+      setMaterials((prev) =>
+        prev.map((m) => (m.id === material.id ? { ...m, isActive: updatedStatus } : m))
       );
-    } else {
-      const newSubject: SubjectItem = {
-        id: Date.now().toString(),
-        logo: data.logo ?? '/icons/course.svg',
-        name_ar: data.name_ar ?? '',
-        name_en: data.name_en ?? '',
-        universityId: data.universityId ?? '',
-        collegeId: data.collegeId ?? '',
-        order: data.order ?? 1,
-        createdDate_ar: new Date().toLocaleDateString('ar-EG'),
-        createdDate_en: new Date().toLocaleDateString('en-US'),
-        active: data.active ?? true,
-      };
-      setSubjects((prev) => [newSubject, ...prev]);
+
+      const res = await updateStudyMaterialAction(material.id, {
+        nameAr: material.nameAr,
+        nameEn: material.nameEn,
+        facultyId: material.facultyId,
+        semesterId: material.semesterId,
+        isActive: updatedStatus,
+      });
+
+      if (res.success) {
+        toast.success(isRtl ? 'تم تغيير الحالة بنجاح' : 'Status updated successfully');
+      } else {
+        // Revert
+        setMaterials((prev) =>
+          prev.map((m) => (m.id === material.id ? { ...m, isActive: material.isActive } : m))
+        );
+        toast.error(res.error || (isRtl ? 'فشل تغيير الحالة' : 'Failed to change status'));
+      }
+    } catch (err: unknown) {
+      setMaterials((prev) =>
+        prev.map((m) => (m.id === material.id ? { ...m, isActive: material.isActive } : m))
+      );
+      toast.error(getErrorMessage(err));
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setSubjects((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, active: !s.active } : s))
+  // Selection
+  const isAllSelected = materials.length > 0 && selectedIds.length === materials.length;
+  const isIndeterminate = selectedIds.length > 0 && selectedIds.length < materials.length;
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedIds(checked ? materials.map((m) => m.id) : []);
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
-  const formattedSubjects: FormattedSubject[] = subjects.map((item) => ({
-    id: item.id,
-    logo: item.logo,
-    name: isRtl ? item.name_ar : item.name_en,
-    university: getUniversityName(item.universityId, locale),
-    college: getCollegeName(item.collegeId, locale),
-    order: item.order,
-    createdDate: isRtl ? item.createdDate_ar : item.createdDate_en,
-    active: item.active,
+  // Table formatting
+  const tableData: FormattedSubjectRow[] = materials.map((m) => ({
+    id: m.id,
+    nameAr: m.nameAr,
+    nameEn: m.nameEn,
+    facultyName: isRtl
+      ? m.faculty?.nameAr || m.faculty?.name || m.faculty?.nameEn || '-'
+      : m.faculty?.nameEn || m.faculty?.name || m.faculty?.nameAr || '-',
+    semesterName: isRtl
+      ? m.semester?.nameAr || m.semester?.name || m.semester?.nameEn || '-'
+      : m.semester?.nameEn || m.semester?.name || m.semester?.nameAr || '-',
+    status: m.isActive,
+    raw: m,
   }));
 
-  const filteredSubjects = formattedSubjects.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.college.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && item.active) ||
-      (statusFilter === 'inactive' && !item.active);
-
-    return matchesSearch && matchesStatus;
-  });
-
   const tableHead = [
-    { id: 'logo', label: t('columns.image'), align: 'center' as cellAlignment },
-    { id: 'name', label: t('columns.name'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'university', label: t('columns.university'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'college', label: t('columns.college'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'order', label: t('columns.order'), align: 'center' as cellAlignment },
-    { id: 'createdDate', label: t('columns.created_date'), align: 'center' as cellAlignment },
-    { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
-  ];
-
-  const actions = [
     {
-      label: t('actions.edit'),
-      icon: <Iconify icon="solar:pen-bold" />,
-      onClick: (row: FormattedSubject) => handleOpenEdit(row),
+      id: 'checkbox',
+      label: (
+        <Checkbox
+          checked={isAllSelected}
+          indeterminate={isIndeterminate}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+          size="small"
+        />
+      ),
+      align: cellAlignment.center,
+      width: 50,
     },
-    {
-      label: t('actions.delete'),
-      icon: <Iconify icon="solar:trash-bin-trash-bold" />,
-      sx: { color: 'error.main' },
-      onClick: (row: FormattedSubject) => handleOpenDelete(row),
-    },
+    { id: 'nameAr', label: t('dialog.name_ar'), align: cellAlignment.center },
+    { id: 'nameEn', label: t('dialog.name_en'), align: cellAlignment.center },
+    { id: 'facultyName', label: t('columns.college'), align: cellAlignment.center },
+    { id: 'semesterName', label: isRtl ? 'الفصل الدراسي' : 'Semester', align: cellAlignment.center },
+    { id: 'status', label: t('columns.status'), align: cellAlignment.center, width: 140 },
+    { id: 'actions', label: '', align: cellAlignment.center, width: 100 },
   ];
 
   const customRender = {
-    logo: (row: FormattedSubject) => (
+    checkbox: (row: FormattedSubjectRow) => (
+      <Checkbox
+        checked={selectedIds.includes(row.id)}
+        onChange={() => handleToggleSelect(row.id)}
+        size="small"
+      />
+    ),
+    nameAr: (row: FormattedSubjectRow) => (
+      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+        {row.nameAr}
+      </Typography>
+    ),
+    nameEn: (row: FormattedSubjectRow) => (
+      <Typography variant="body2" sx={{ fontWeight: 500, color: '#64748B' }}>
+        {row.nameEn}
+      </Typography>
+    ),
+    facultyName: (row: FormattedSubjectRow) => (
+      <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
+        {row.facultyName}
+      </Typography>
+    ),
+    semesterName: (row: FormattedSubjectRow) => (
+      <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
+        {row.semesterName}
+      </Typography>
+    ),
+    status: (row: FormattedSubjectRow) => (
       <Box
         sx={{
-          display: 'inline-flex',
-          flexDirection: 'column',
+          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 110,
-          height: 75,
-          border: '1px solid #E2E8F0',
-          borderRadius: '16px',
-          p: 1.5,
-          bgcolor: '#FFFFFF',
+          gap: 1,
         }}
       >
-        <Box sx={{ width: 32, height: 32, mb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src={row.logo}
-            alt={row.name}
-            width={32}
-            height={32}
-            style={{ objectFit: 'contain' }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/icons/course.svg';
-            }}
-          />
-        </Box>
-        <Typography variant="caption" sx={{ fontWeight: 600, color: '#1E293B', fontSize: 11 }}>
-          {row.name}
+        <Switch
+          checked={row.status}
+          onChange={() => handleToggleStatus(row.raw)}
+          color="success"
+          size="small"
+        />
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            fontSize: 13,
+            color: row.status ? '#00A76F' : '#64748B',
+          }}
+        >
+          {row.status ? t('status.active') : t('status.inactive')}
         </Typography>
       </Box>
     ),
-    order: (row: FormattedSubject) => (
-      <Typography variant="body2" sx={{ color: '#1E293B', fontWeight: 500 }}>
-        {row.order}
-      </Typography>
+    actions: (row: FormattedSubjectRow) => (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 0.5,
+        }}
+      >
+        <IconButton
+          size="small"
+          onClick={() => handleOpenDelete(row.id)}
+          sx={{ color: '#E53935' }}
+        >
+          <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+        </IconButton>
+        <IconButton
+          size="small"
+          onClick={() => handleOpenEdit(row.raw)}
+          sx={{ color: '#637381' }}
+        >
+          <Iconify icon="solar:pen-bold" width={18} />
+        </IconButton>
+      </Box>
     ),
-    active: (row: FormattedSubject) => {
-      const isActive = row.active;
-      return (
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-          <Switch
-            checked={isActive}
-            onChange={() => handleToggleStatus(row.id)}
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#00A76F' },
-            }}
-          />
-          <Typography variant="body2" sx={{ fontWeight: 600, color: isActive ? '#1E293B' : '#94A3B8' }}>
-            {isActive ? t('status.active') : t('status.inactive')}
-          </Typography>
-        </Box>
-      );
-    },
   };
 
   return (
     <Box sx={{ py: 2 }}>
-      {/* Header section */}
+      {/* 1. Header: Title on Right, Add Button on Left in RTL */}
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={2}
+        direction="row"
         sx={{
-          mb: 4,
+          mb: 3,
           justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 2,
         }}
       >
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E', mb: 0.5 }}>
-            {t('title')}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#637381' }}>
-            {t('subtitle')}
-          </Typography>
-        </Box>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
+          {t('title')}
+        </Typography>
 
         <Button
           variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           onClick={handleOpenAdd}
+          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: 1.5,
             px: 2.5,
-            py: 1,
+            py: 1.2,
             fontWeight: 700,
+            fontSize: '0.875rem',
             boxShadow: 'none',
+            gap: 1,
             '&:hover': { bgcolor: '#2C353E' },
           }}
         >
@@ -246,7 +499,7 @@ export default function SubjectsView() {
         </Button>
       </Stack>
 
-      {/* Main card containing filter row and table */}
+      {/* 2. Main Card with Filters & Table */}
       <Card
         sx={{
           borderRadius: 3,
@@ -256,11 +509,16 @@ export default function SubjectsView() {
           bgcolor: '#FFFFFF',
         }}
       >
-        {/* Filters and search row */}
+        {/* Filters: Search on Right, Status on Left in RTL */}
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
-          sx={{ p: 2.5, borderBottom: '1px dashed #F1F3F5' }}
+          sx={{
+            p: 2.5,
+            borderBottom: '1px dashed #F1F3F5',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
         >
           <TextField
             fullWidth
@@ -272,62 +530,76 @@ export default function SubjectsView() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB', width: 20, height: 20 }} />
+                    <Iconify
+                      icon="solar:magnifer-linear"
+                      sx={{ color: '#919EAB' }}
+                      width={20}
+                    />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
+              maxWidth: { md: 360 },
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
-                bgcolor: '#FFFFFF',
                 '& fieldset': { borderColor: '#E5E7EB' },
               },
             }}
           />
 
-          <SelectField
-            fullWidth
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            slotProps={{
-              select: { displayEmpty: true },
-            }}
-            sx={{
-              maxWidth: 200,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                '& fieldset': { borderColor: '#E5E7EB' },
-              },
-            }}
-          >
-            <MenuItem value="all">{t('statuses.all')}</MenuItem>
-            <MenuItem value="active">{t('status.active')}</MenuItem>
-            <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
-          </SelectField>
+          <Box sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+            <SelectField
+              fullWidth
+              size="small"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              slotProps={{ select: { displayEmpty: true } }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '& fieldset': { borderColor: '#E5E7EB' },
+                },
+              }}
+            >
+              <MenuItem value="all">{t('statuses.all')}</MenuItem>
+              <MenuItem value="active">{t('statuses.active')}</MenuItem>
+              <MenuItem value="inactive">{t('statuses.inactive')}</MenuItem>
+            </SelectField>
+          </Box>
         </Stack>
 
-        {/* Table list */}
-        <Box sx={{ px: 1 }}>
-          <SharedTable<FormattedSubject>
-            data={filteredSubjects}
-            count={filteredSubjects.length}
-            tableHead={tableHead}
-            actions={actions}
-            customRender={customRender}
-          />
+        {/* Table / Loading */}
+        <Box sx={{ px: 1, py: 1 }}>
+          {loading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: 280,
+              }}
+            >
+              <CircularProgress size={32} />
+            </Box>
+          ) : (
+            <SharedTable<FormattedSubjectRow>
+              tableHead={tableHead}
+              data={tableData}
+              count={totalCount}
+              customRender={customRender}
+            />
+          )}
         </Box>
       </Card>
 
       {/* Add / Edit Dialog */}
       <SubjectFormDialog
-        key={editingSubject?.id ?? 'new'}
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        initialData={editingSubject}
-        onSave={handleSaveSubject}
+        key={editingMaterial?.id ?? 'new'}
+        open={formDialogOpen}
+        onClose={() => setFormDialogOpen(false)}
+        initialData={editingMaterial}
+        onSave={handleSave}
       />
 
       {/* Delete Confirmation Dialog */}

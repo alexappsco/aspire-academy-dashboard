@@ -3,3 +3,5 @@ export * from './specializations';
 export * from './countries';
 export * from './currencies';
 export * from './instructors';
+export * from './coupons';
+export * from './study-materials';
