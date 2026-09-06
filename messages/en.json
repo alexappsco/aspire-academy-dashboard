@@ -508,10 +508,12 @@
     "title": "Universities",
     "subtitle": "Manage all universities",
     "add_university": "Add University",
-    "search_placeholder": "Search in colleges..",
+    "search_placeholder": "Search in universities..",
     "columns": {
       "logo": "Logo",
       "name": "Name",
+      "name_ar": "Name (Arabic)",
+      "name_en": "Name (English)",
       "country": "Country",
       "order": "Order",
       "created_date": "Created Date",
@@ -526,6 +528,14 @@
       "active": "Active",
       "inactive": "Inactive"
     },
+    "messages": {
+      "fetch_error": "Failed to load universities",
+      "add_success": "University created successfully",
+      "edit_success": "University updated successfully",
+      "delete_success": "University deleted successfully",
+      "status_updated": "Status updated successfully",
+      "operation_error": "Operation failed"
+    },
     "actions": {
       "edit": "Edit",
       "delete": "Delete"
@@ -537,6 +547,8 @@
       "select_image": "Select Image",
       "drag_drop": "Drag and drop files here or",
       "browse": "browse",
+      "country": "Country",
+      "country_placeholder": "Select Country",
       "country_ar": "Country (Arabic)",
       "country_ar_placeholder": "Country in Arabic..",
       "country_en": "Country (English)",
@@ -547,10 +559,17 @@
       "name_en_placeholder": "Name in English..",
       "order": "Order",
       "status": "Status",
+      "add_btn": "Add",
       "save": "Save",
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete this university?",
       "delete": "Delete"
+    },
+    "delete_dialog": {
+      "title": "Delete University",
+      "message": "Are you sure you want to delete this university? This action cannot be undone.",
+      "confirm_btn": "Delete",
+      "cancel_btn": "Cancel"
     }
   },
   "Colleges": {
