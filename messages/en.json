@@ -5,6 +5,19 @@
   "Sidebar": {
     "home": "Home",
     "course_management": "Course Management",
+    "curriculum_management": "Curriculum Management",
+    "booking_management": "Booking Management",
+    "finance_payments": "Finance & Payments",
+    "reports_analytics": "Reports & Analytics",
+    "support": "Technical Support",
+    "notifications": "Notifications",
+    "banners": "Banners",
+    "common_questions": "Common Questions",
+    "categories": "Fields Management",
+    "universities": "Universities",
+    "college": "College",
+    "academic_years": "Academic Years",
+    "academic_semesters": "Academic Semesters",
     "courses": "Courses",
     "specializations": "Specializations",
     "user_management": "User Management",
@@ -337,6 +350,82 @@
       "save": "Save",
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete this category?",
+      "delete": "Delete"
+    }
+  },
+  "AcademicYears": {
+    "title": "Academic Years",
+    "subtitle": "Manage all academic years",
+    "add_year": "Add Year",
+    "search_placeholder": "Search",
+    "columns": {
+      "name_ar": "Name (Arabic)",
+      "name_en": "Name (English)",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Academic Year",
+      "edit_title": "Edit Academic Year",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "status": "Status",
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete?",
+      "delete": "Delete"
+    }
+  },
+  "AcademicSemesters": {
+    "title": "Academic Semesters",
+    "subtitle": "Manage all academic semesters",
+    "add_semester": "Add Semester",
+    "search_placeholder": "Search",
+    "columns": {
+      "name_ar": "Name (Arabic)",
+      "name_en": "Name (English)",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "statuses": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "dialog": {
+      "add_title": "Add Academic Semester",
+      "edit_title": "Edit Academic Semester",
+      "name_ar": "Name (Arabic)",
+      "name_ar_placeholder": "Name in Arabic..",
+      "name_en": "Name (English)",
+      "name_en_placeholder": "Name in English..",
+      "status": "Status",
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete_confirm": "Are you sure you want to delete?",
       "delete": "Delete"
     }
   },
