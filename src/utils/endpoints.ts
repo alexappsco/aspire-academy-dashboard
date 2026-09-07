@@ -62,5 +62,12 @@ export const endpoints = {
     details: (id: string) => `/admin/semesters/${id}`,
     update: (id: string) => `/admin/semesters/${id}`,
     delete: (id: string) => `/admin/semesters/${id}`,
-  }
+  },
+  courses: {
+    list: '/admin/courses',
+    details: (id: string) => `/admin/courses/${id}`,
+    create: '/admin/courses',
+    update: (id: string) => `/admin/courses/${id}`,
+    delete: (id: string) => `/admin/courses/${id}`,
+  },
 };

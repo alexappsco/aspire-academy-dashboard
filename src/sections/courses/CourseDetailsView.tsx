@@ -23,6 +23,8 @@ import CourseKpiCards from './details/CourseKpiCards';
 import ContentSummaryCard from './details/ContentSummaryCard';
 import RecentReviewsCard from './details/RecentReviewsCard';
 import RecentEnrollmentsTable from './details/RecentEnrollmentsTable';
+import CourseContentTab from './components/CourseContentTab';
+import CourseStudentsTab from './components/CourseStudentsTab';
 import { CourseDetailsData } from './types';
 import { MOCK_COURSE_DETAILS } from './_mock';
 
@@ -38,7 +40,7 @@ export default function CourseDetailsView({ id: _id }: CourseDetailsViewProps) {
   const toast = useToast();
 
   const [course, setCourse] = useState<CourseDetailsData>(MOCK_COURSE_DETAILS);
-  const [currentTab, setCurrentTab] = useState('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'content' | 'students'>('overview');
 
   const handleTogglePublish = () => {
     const nextStatus = course.status === 'published' ? 'unpublished' : 'published';
@@ -195,7 +197,7 @@ export default function CourseDetailsView({ id: _id }: CourseDetailsViewProps) {
       {/* 3. KPI Statistics Cards */}
       <CourseKpiCards course={course} />
 
-      {/* 4. Navigation Tabs */}
+      {/* 4. Navigation Tabs (Only 3 tabs: Overview, Content, Students) */}
       <Box sx={{ borderBottom: 1, borderColor: '#E2E8F0', mb: 3 }}>
         <Tabs
           value={currentTab}
@@ -223,15 +225,14 @@ export default function CourseDetailsView({ id: _id }: CourseDetailsViewProps) {
           <Tab value="overview" label={t('tabs.overview')} />
           <Tab value="content" label={t('tabs.content')} />
           <Tab value="students" label={t('tabs.students')} />
-          <Tab value="reviews" label={t('tabs.reviews')} />
-          <Tab value="analytics" label={t('tabs.analytics')} />
         </Tabs>
       </Box>
 
-      {/* 5. Main Tab Content (2 Columns Layout) */}
+      {/* 5. Tab Panels */}
+      {/* 5.1 Overview Tab */}
       {currentTab === 'overview' && (
         <Grid container spacing={3}>
-          {/* Main Area (Right in RTL / Left in LTR): Course Info & Recent Enrollments */}
+          {/* Main Area: Course Info & Recent Enrollments */}
           <Grid size={{ xs: 12, lg: 8 }}>
             <Stack spacing={3}>
               {/* Course Information Card */}
@@ -286,7 +287,7 @@ export default function CourseDetailsView({ id: _id }: CourseDetailsViewProps) {
             </Stack>
           </Grid>
 
-          {/* Sidebar Area (Left in RTL / Right in LTR): Content Summary & Recent Reviews */}
+          {/* Sidebar Area: Content Summary & Recent Reviews */}
           <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
               {/* Content Summary */}
@@ -298,27 +299,18 @@ export default function CourseDetailsView({ id: _id }: CourseDetailsViewProps) {
               {/* Recent Reviews */}
               <RecentReviewsCard
                 reviews={course.recentReviews}
-                onViewAll={() => setCurrentTab('reviews')}
               />
             </Stack>
           </Grid>
         </Grid>
       )}
 
-      {currentTab !== 'overview' && (
-        <Card
-          sx={{
-            p: 6,
-            borderRadius: 2.5,
-            bgcolor: '#FFFFFF',
-            border: '1px solid #F1F3F5',
-            textAlign: 'center',
-          }}
-        >
-          <Typography sx={{ color: '#64748B', fontSize: 15, fontWeight: 500 }}>
-            {t(`tabs.${currentTab}`)} - قريباً
-          </Typography>
-        </Card>
+      {/* 5.2 Content Tab */}
+      {currentTab === 'content' && <CourseContentTab />}
+
+      {/* 5.3 Students Tab */}
+      {currentTab === 'students' && (
+        <CourseStudentsTab enrollments={course.recentEnrollments} />
       )}
     </Box>
   );

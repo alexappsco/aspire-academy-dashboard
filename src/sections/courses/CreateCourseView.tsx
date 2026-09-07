@@ -206,7 +206,6 @@ export default function CreateCourseView() {
         <Button
           variant="outlined"
           onClick={() => router.push('/courses')}
-          startIcon={<Iconify icon="mingcute:close-line" width={18} />}
           sx={{
             borderColor: '#E2E8F0',
             color: '#1E293B',
@@ -215,6 +214,8 @@ export default function CreateCourseView() {
             py: 1,
             fontWeight: 600,
             fontSize: 15,
+            display: 'flex',
+            alignItems: 'center',
             gap: 1,
             width: { xs: '100%', sm: 'auto' },
             '&:hover': {
@@ -223,7 +224,8 @@ export default function CreateCourseView() {
             },
           }}
         >
-          {t('actions.cancel')}
+          <Iconify icon="mingcute:close-line" width={18} />
+          <span>{t('actions.cancel')}</span>
         </Button>
 
         {/* Right Actions (Draft & Next/Submit) */}
@@ -236,7 +238,6 @@ export default function CreateCourseView() {
           <Button
             variant="outlined"
             onClick={handleSaveDraft}
-            startIcon={<Iconify icon="solar:disk-bold" width={18} />}
             sx={{
               borderColor: '#E2E8F0',
               color: '#1E293B',
@@ -245,6 +246,8 @@ export default function CreateCourseView() {
               py: 1,
               fontWeight: 600,
               fontSize: 15,
+              display: 'flex',
+              alignItems: 'center',
               gap: 1,
               flex: { xs: 1, sm: 'none' },
               '&:hover': {
@@ -253,7 +256,8 @@ export default function CreateCourseView() {
               },
             }}
           >
-            {t('actions.save_draft')}
+            <Iconify icon="solar:disk-bold" width={18} />
+            <span>{t('actions.save_draft')}</span>
           </Button>
 
           {/* Continue (Step 1) or Create Course (Step 2) */}
@@ -261,12 +265,6 @@ export default function CreateCourseView() {
             <Button
               variant="contained"
               onClick={handleContinue}
-              endIcon={
-                <Iconify
-                  icon={isRtl ? 'solar:arrow-left-linear' : 'solar:arrow-right-linear'}
-                  width={18}
-                />
-              }
               sx={{
                 bgcolor: '#1C252E',
                 color: '#FFFFFF',
@@ -276,18 +274,23 @@ export default function CreateCourseView() {
                 fontWeight: 700,
                 fontSize: 15,
                 boxShadow: 'none',
+                display: 'flex',
+                alignItems: 'center',
                 gap: 1,
                 flex: { xs: 1, sm: 'none' },
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
-              {t('actions.continue')}
+              <span>{t('actions.continue')}</span>
+              <Iconify
+                icon={isRtl ? 'solar:arrow-left-linear' : 'solar:arrow-right-linear'}
+                width={18}
+              />
             </Button>
           ) : (
             <Button
               variant="contained"
               onClick={handleCreateCourse}
-              startIcon={<Iconify icon="mingcute:add-line" width={18} />}
               sx={{
                 bgcolor: '#1C252E',
                 color: '#FFFFFF',
@@ -297,12 +300,15 @@ export default function CreateCourseView() {
                 fontWeight: 700,
                 fontSize: 15,
                 boxShadow: 'none',
+                display: 'flex',
+                alignItems: 'center',
                 gap: 1,
                 flex: { xs: 1, sm: 'none' },
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
-              {t('actions.create_course')}
+              <Iconify icon="mingcute:add-line" width={18} />
+              <span>{t('actions.create_course')}</span>
             </Button>
           )}
         </Stack>
