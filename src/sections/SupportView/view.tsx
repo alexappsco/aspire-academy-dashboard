@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'src/i18n/routing';
 import { useSearchParams } from 'next/navigation';
@@ -20,7 +20,10 @@ import DateInput from 'src/components/DateInput';
 import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
-import type { ContactUsMessageDto } from 'src/types/support';
+import { useToast } from 'src/components/toast';
+
+import { getContactUsMessages } from 'src/actions/support';
+import type { ContactUsMessageDto, GetContactUsMessagesParams } from 'src/types/support';
 
 interface FormattedSupportMessage {
   id: string;
@@ -32,78 +35,11 @@ interface FormattedSupportMessage {
   raw: ContactUsMessageDto;
 }
 
-// Initial mock data to ensure UI matches design perfectly
-const INITIAL_MOCK_MESSAGES: ContactUsMessageDto[] = [
-  {
-    id: '1',
-    senderName: 'علي محمود',
-    senderType: 'student',
-    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-    status: 'new',
-    creationTime: '2026-08-03T10:00:00.000Z',
-  },
-  {
-    id: '2',
-    senderName: 'علي محمود',
-    senderType: 'student',
-    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-    status: 'new',
-    creationTime: '2026-08-03T11:00:00.000Z',
-  },
-  {
-    id: '3',
-    senderName: 'محمد منتصر',
-    senderType: 'lecturer',
-    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
-    status: 'resolved',
-    creationTime: '2026-08-03T12:00:00.000Z',
-  },
-  {
-    id: '4',
-    senderName: 'علي محمود',
-    senderType: 'student',
-    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-    status: 'new',
-    creationTime: '2026-08-03T13:00:00.000Z',
-  },
-  {
-    id: '5',
-    senderName: 'محمد منتصر',
-    senderType: 'lecturer',
-    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
-    status: 'resolved',
-    creationTime: '2026-08-03T14:00:00.000Z',
-  },
-  {
-    id: '6',
-    senderName: 'علي محمود',
-    senderType: 'student',
-    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-    status: 'new',
-    creationTime: '2026-08-03T15:00:00.000Z',
-  },
-  {
-    id: '7',
-    senderName: 'علي محمود',
-    senderType: 'student',
-    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-    status: 'new',
-    creationTime: '2026-08-03T16:00:00.000Z',
-  },
-  {
-    id: '8',
-    senderName: 'محمد منتصر',
-    senderType: 'lecturer',
-    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
-    status: 'resolved',
-    creationTime: '2026-08-03T17:00:00.000Z',
-  },
-];
-
 export default function SupportView() {
   const t = useTranslations('Support');
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const toast = useToast();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -113,8 +49,9 @@ export default function SupportView() {
   const urlStatus = searchParams.get('Status') || searchParams.get('status') || 'all';
   const urlDate = searchParams.get('Date') || searchParams.get('date') || '';
 
-  const [messages, setMessages] = useState<ContactUsMessageDto[]>(INITIAL_MOCK_MESSAGES);
-  const [totalCount, setTotalCount] = useState<number>(INITIAL_MOCK_MESSAGES.length);
+  const [messages, setMessages] = useState<ContactUsMessageDto[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [searchQuery, setSearchQuery] = useState(urlFilter);
@@ -164,6 +101,59 @@ export default function SupportView() {
       router.replace(target, { scroll: false });
     }
   }, [debouncedSearch, statusFilter, dateFilter, pathname, router, searchParams]);
+
+  // Fetch contact us messages from Backend API
+  const fetchMessagesData = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) setLoading(true);
+      try {
+        const params: GetContactUsMessagesParams = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+
+        if (debouncedSearch.trim()) {
+          params.Filter = debouncedSearch.trim();
+        }
+
+        if (statusFilter && statusFilter !== 'all') {
+          params.Status = statusFilter;
+        }
+
+        if (dateFilter) {
+          params.Date = dateFilter;
+        }
+
+        const res = await getContactUsMessages(params);
+
+        if (res.success && res.data) {
+          setMessages(res.data.items || []);
+          setTotalCount(res.data.totalCount || 0);
+        } else {
+          // Keep current or empty on error
+          if (res.error) {
+            toast.error(res.error);
+          }
+        }
+      } catch (err) {
+        toast.error('Failed to load contact us messages');
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    [debouncedSearch, statusFilter, dateFilter, toast]
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      if (isMounted) await fetchMessagesData(true);
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchMessagesData]);
 
   // Handle row selection
   const handleSelectAll = (checked: boolean) => {
@@ -286,7 +276,7 @@ export default function SupportView() {
     });
   }, [messages, isRtl]);
 
-  // Client-side filtering
+  // Client-side filtering as secondary safeguard
   const filteredMessages = useMemo(() => {
     return formattedMessages.filter((item) => {
       const matchesSearch =
