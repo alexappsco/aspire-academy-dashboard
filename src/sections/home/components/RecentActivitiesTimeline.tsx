@@ -1,20 +1,16 @@
 'use client';
 
 import React from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
-import { MOCK_RECENT_ACTIVITIES } from '../_mock';
 
 export default function RecentActivitiesTimeline() {
   const t = useTranslations('Home.recent_activities');
-  const locale = useLocale();
-  const isRtl = locale === 'ar';
-  const activities = MOCK_RECENT_ACTIVITIES;
 
   return (
     <Card
@@ -25,6 +21,8 @@ export default function RecentActivitiesTimeline() {
         border: '1px solid #F1F5F9',
         boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* Header */}
@@ -72,72 +70,44 @@ export default function RecentActivitiesTimeline() {
         </Stack>
       </Box>
 
-      {/* Activity Timeline Items */}
-      <Stack spacing={2.25}>
-        {activities.map((item) => (
-          <Stack
-            key={item.id}
-            direction="row"
-            spacing={1.75}
-            sx={{
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-            }}
-          >
-            {/* Right in RTL: Icon + Text */}
-            <Stack
-              direction="row"
-              spacing={1.5}
-              sx={{ alignItems: 'flex-start', flex: 1, gap: 1.5 }}
-            >
-              <Box
-                sx={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: '50%',
-                  bgcolor: item.iconBg,
-                  color: item.iconColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  mt: -0.25,
-                }}
-              >
-                <Iconify icon={item.icon} width={18} />
-              </Box>
-
-              <Typography
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: '#1E293B',
-                  lineHeight: 1.5,
-                  textAlign: 'start',
-                }}
-              >
-                {isRtl ? item.titleAr : item.titleEn}
-              </Typography>
-            </Stack>
-
-            {/* Left in RTL: Time */}
-            <Typography
-              variant="caption"
-              sx={{
-                color: '#94A3B8',
-                fontSize: 11.5,
-                fontWeight: 600,
-                minWidth: 75,
-                textAlign: 'end',
-                mt: 0.25,
-                flexShrink: 0,
-              }}
-            >
-              {isRtl ? item.timeAr : item.timeEn}
-            </Typography>
-          </Stack>
-        ))}
-      </Stack>
+      {/* No Data From Backend Placeholder */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 8,
+          px: 3,
+          bgcolor: '#F8FAFC',
+          borderRadius: 2,
+          border: '1px dashed #E2E8F0',
+          textAlign: 'center',
+        }}
+      >
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            bgcolor: '#F1F5F9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mb: 1.5,
+            color: '#94A3B8',
+          }}
+        >
+          <Iconify icon="solar:inbox-line-bold" width={24} />
+        </Box>
+        <Typography sx={{ color: '#475569', fontSize: 14, fontWeight: 700, mb: 0.5 }}>
+          No data from backend
+        </Typography>
+        <Typography sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 500 }}>
+          لا توجد بيانات متاحة لهذا القسم من الخادم حالياً
+        </Typography>
+      </Box>
     </Card>
   );
 }

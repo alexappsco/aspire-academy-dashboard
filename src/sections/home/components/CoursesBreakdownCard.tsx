@@ -10,12 +10,64 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_COURSES_BREAKDOWN } from '../_mock';
+import type { DashboardCourseStatusItem } from 'src/types/dashboard';
 
-export default function CoursesBreakdownCard() {
+interface Props {
+  courseStatusDistribution?: DashboardCourseStatusItem[];
+}
+
+export default function CoursesBreakdownCard({ courseStatusDistribution }: Props) {
   const t = useTranslations('Home.courses_breakdown');
   const router = useRouter();
-  const items = MOCK_COURSES_BREAKDOWN;
+
+  const parseStatusToString = (status: string | number | undefined | null): string => {
+    if (status === null || status === undefined) return '';
+    if (typeof status === 'number') {
+      switch (status) {
+        case 0:
+          return 'Draft';
+        case 1:
+          return 'Pending';
+        case 2:
+          return 'Published';
+        case 3:
+          return 'Rejected';
+        case 4:
+          return 'Paused';
+        default:
+          return String(status);
+      }
+    }
+    return String(status);
+  };
+
+  const getStatusColor = (status: string | number | undefined | null, idx: number) => {
+    const s = parseStatusToString(status).toLowerCase();
+    if (s.includes('publish') || s.includes('منشور')) return '#10B981';
+    if (s.includes('pend') || s.includes('مراجعة') || s.includes('انتظار')) return '#F59E0B';
+    if (s.includes('draft') || s.includes('مسود')) return '#2563EB';
+    if (s.includes('reject') || s.includes('مرفوض')) return '#EF4444';
+    if (s.includes('pause') || s.includes('archiv') || s.includes('متوقف')) return '#94A3B8';
+    const fallbackPalette = ['#10B981', '#F59E0B', '#2563EB', '#EF4444', '#8B5CF6', '#EC4899'];
+    return fallbackPalette[idx % fallbackPalette.length];
+  };
+
+  const getStatusLabel = (status: string | number | undefined | null) => {
+    const s = parseStatusToString(status).toLowerCase();
+    if (s.includes('publish')) return t('published');
+    if (s.includes('pend')) return t('in_review');
+    if (s.includes('draft')) return t('drafts');
+    if (s.includes('reject')) return t('rejected');
+    if (s.includes('pause')) return t('paused');
+    return parseStatusToString(status);
+  };
+
+  const hasData =
+    courseStatusDistribution !== undefined && courseStatusDistribution.length > 0;
+
+  const totalCourses = hasData
+    ? courseStatusDistribution.reduce((acc, curr) => acc + (curr.count || 0), 0)
+    : 0;
 
   return (
     <Card
@@ -80,72 +132,100 @@ export default function CoursesBreakdownCard() {
           variant="caption"
           sx={{ color: '#64748B', fontSize: 12, fontWeight: 500, display: 'block' }}
         >
-          {t('subtitle')}
+          {hasData
+            ? `التوزيع التفصيلي لحالات ${totalCourses} دورة`
+            : 'No data from backend'}
         </Typography>
       </Box>
 
-      {/* Multi-Segment Color Bar */}
-      <Box
-        sx={{
-          height: 10,
-          borderRadius: 2,
-          display: 'flex',
-          overflow: 'hidden',
-          my: 1.5,
-          bgcolor: '#F1F5F9',
-        }}
-      >
-        {items.map((item) => (
+      {hasData ? (
+        <>
+          {/* Multi-Segment Color Bar */}
           <Box
-            key={item.id}
             sx={{
-              width: `${item.percentage}%`,
-              bgcolor: item.color,
-              height: '100%',
-            }}
-          />
-        ))}
-      </Box>
-
-      {/* Itemized Breakdown List */}
-      <Stack spacing={1.5} sx={{ my: 1 }}>
-        {items.map((item) => (
-          <Stack
-            key={item.id}
-            direction="row"
-            spacing={1.5}
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              height: 10,
+              borderRadius: 2,
+              display: 'flex',
+              overflow: 'hidden',
+              my: 1.5,
+              bgcolor: '#F1F5F9',
             }}
           >
-            {/* Right in RTL: Dot & Label */}
-            <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
+            {courseStatusDistribution.map((item, idx) => (
               <Box
+                key={idx}
                 sx={{
-                  width: 9,
-                  height: 9,
-                  borderRadius: '50%',
-                  bgcolor: item.color,
+                  width: `${item.percent || 0}%`,
+                  bgcolor: getStatusColor(item.status, idx),
+                  height: '100%',
                 }}
               />
-              <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
-                {t(item.labelKey)}
-              </Typography>
-            </Stack>
+            ))}
+          </Box>
 
-            {/* Left in RTL: Count & Percentage */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1 }}>
-              <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, minWidth: 30 }}>
-                {item.count}
-              </Typography>
-              <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, minWidth: 40 }}>
-                {item.percentage}%
-              </Typography>
-            </Stack>
+          {/* Itemized Breakdown List */}
+          <Stack spacing={1.5} sx={{ my: 1 }}>
+            {courseStatusDistribution.map((item, idx) => {
+              const color = getStatusColor(item.status, idx);
+              return (
+                <Stack
+                  key={idx}
+                  direction="row"
+                  spacing={1.5}
+                  sx={{
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  {/* Right in RTL: Dot & Label */}
+                  <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 9,
+                        height: 9,
+                        borderRadius: '50%',
+                        bgcolor: color,
+                      }}
+                    />
+                    <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
+                      {getStatusLabel(item.status)}
+                    </Typography>
+                  </Stack>
+
+                  {/* Left in RTL: Count & Percentage */}
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, minWidth: 30 }}
+                    >
+                      {item.count ?? 0}
+                    </Typography>
+                    <Typography
+                      sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, minWidth: 40 }}
+                    >
+                      {item.percent ?? 0}%
+                    </Typography>
+                  </Stack>
+                </Stack>
+              );
+            })}
           </Stack>
-        ))}
-      </Stack>
+        </>
+      ) : (
+        <Box
+          sx={{
+            py: 4,
+            textAlign: 'center',
+            bgcolor: '#F8FAFC',
+            borderRadius: 2,
+            border: '1px dashed #CBD5E1',
+            my: 2,
+          }}
+        >
+          <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            No data from backend
+          </Typography>
+        </Box>
+      )}
 
       {/* Bottom Button */}
       <Button

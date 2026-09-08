@@ -11,10 +11,18 @@ import Chip from '@mui/material/Chip';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
+import type { DashboardPendingTasks } from 'src/types/dashboard';
 
-export default function AttentionBanner() {
+interface Props {
+  pendingTasks?: DashboardPendingTasks;
+}
+
+export default function AttentionBanner({ pendingTasks }: Props) {
   const t = useTranslations('Home.attention_banner');
   const router = useRouter();
+
+  const reviewCount = pendingTasks?.coursesPendingReview ?? 0;
+  const hasData = pendingTasks !== undefined;
 
   return (
     <Card
@@ -76,18 +84,33 @@ export default function AttentionBanner() {
                 {t('title')}
               </Typography>
 
-              <Chip
-                label={t('badge')}
-                size="small"
-                sx={{
-                  bgcolor: '#FEE2E2',
-                  color: '#DC2626',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  height: 24,
-                  borderRadius: 1.5,
-                }}
-              />
+              {hasData ? (
+                <Chip
+                  label={`${reviewCount} ${t('badge')}`}
+                  size="small"
+                  sx={{
+                    bgcolor: '#FEE2E2',
+                    color: '#DC2626',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    height: 24,
+                    borderRadius: 1.5,
+                  }}
+                />
+              ) : (
+                <Chip
+                  label="No data from backend"
+                  size="small"
+                  sx={{
+                    bgcolor: '#F1F5F9',
+                    color: '#64748B',
+                    fontWeight: 600,
+                    fontSize: 11,
+                    height: 24,
+                    borderRadius: 1.5,
+                  }}
+                />
+              )}
             </Stack>
 
             <Typography
@@ -99,7 +122,9 @@ export default function AttentionBanner() {
                 maxWidth: 750,
               }}
             >
-              {t('description')}
+              {hasData
+                ? `توجد ${reviewCount} دورة تم إرسالها من المحاضرين تتطلب اعتماد الإدارة الفني والأكاديمي قبل النشر الفوري للطلاب عبر تطبيق الهاتف.`
+                : 'No data from backend'}
             </Typography>
           </Box>
         </Stack>

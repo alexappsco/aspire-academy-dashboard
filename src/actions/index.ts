@@ -9,3 +9,4 @@ export * from './unversity';
 export * from './courses';
 export * from './banners';
 export * from './support';
+export * from './dashboard';

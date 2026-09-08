@@ -83,4 +83,7 @@ export const endpoints = {
     delete: (id: string) => `/admin/contact-us-messages/${id}`,
     updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
   },
+  dashboard: {
+    get: '/admin/dashboard',
+  },
 };
