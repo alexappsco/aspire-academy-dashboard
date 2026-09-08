@@ -18,8 +18,10 @@ import Link from 'next/link';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
+import { useToast } from 'src/components/toast/ToastProvider';
 import { MOCK_STUDENTS, MOCK_ENROLLED_COURSES, MOCK_ORDER_PAYMENTS } from './_mock';
-import { StudentItem } from 'src/types/student';
+import { StudentItem, StudentOrderPayment } from 'src/types/student';
+import PaymentReceiptDialog from './PaymentReceiptDialog';
 
 interface Props {
   studentId: string;
@@ -27,8 +29,12 @@ interface Props {
 
 export default function StudentDetailsView({ studentId }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [currentTab, setCurrentTab] = useState<'overview' | 'academic' | 'courses' | 'orders'>('overview');
   const [copied, setCopied] = useState(false);
+  const [openReceiptModal, setOpenReceiptModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<StudentOrderPayment | null>(null);
+  const [ordersList, setOrdersList] = useState<StudentOrderPayment[]>(MOCK_ORDER_PAYMENTS);
 
   // Find student by ID or fallback to first student
   const student: StudentItem =
@@ -38,6 +44,37 @@ export default function StudentDetailsView({ studentId }: Props) {
     navigator.clipboard.writeText(student.studentCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenReceipt = (order: StudentOrderPayment) => {
+    setSelectedOrder(order);
+    setOpenReceiptModal(true);
+  };
+
+  const handleAcceptReceipt = () => {
+    if (selectedOrder) {
+      setOrdersList((prev) =>
+        prev.map((o) =>
+          o.id === selectedOrder.id
+            ? { ...o, status: 'paid_active' as const, statusText: 'تم الدفع والتفعيل' }
+            : o
+        )
+      );
+    }
+    toast.success('تم قبول إيصال الدفع وتفعيل الاشتراك بنجاح');
+  };
+
+  const handleRejectReceipt = () => {
+    if (selectedOrder) {
+      setOrdersList((prev) =>
+        prev.map((o) =>
+          o.id === selectedOrder.id
+            ? { ...o, status: 'under_review' as const, statusText: 'تم رفض الإيصال' }
+            : o
+        )
+      );
+    }
+    toast.error('تم رفض إيصال التحويل المصرفي');
   };
 
   return (
@@ -849,7 +886,7 @@ export default function StudentDetailsView({ studentId }: Props) {
               </Box>
 
               <Box component="tbody">
-                {MOCK_ORDER_PAYMENTS.map((order, idx) => {
+                {ordersList.map((order, idx) => {
                   const isReview = order.status === 'under_review';
 
                   return (
@@ -904,6 +941,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                           <Button
                             size="small"
                             variant="contained"
+                            onClick={() => handleOpenReceipt(order)}
                             sx={{
                               bgcolor: '#D97706',
                               color: '#FFFFFF',
@@ -921,6 +959,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                           <Button
                             size="small"
                             variant="outlined"
+                            onClick={() => handleOpenReceipt(order)}
                             sx={{
                               borderRadius: 1.5,
                               borderColor: '#E2E8F0',
@@ -943,6 +982,16 @@ export default function StudentDetailsView({ studentId }: Props) {
           </Box>
         </Card>
       )}
+
+      {/* Payment Receipt Verification Dialog */}
+      <PaymentReceiptDialog
+        open={openReceiptModal}
+        onClose={() => setOpenReceiptModal(false)}
+        order={selectedOrder}
+        studentName={student.nameAr}
+        onAccept={handleAcceptReceipt}
+        onReject={handleRejectReceipt}
+      />
     </Box>
   );
 }
