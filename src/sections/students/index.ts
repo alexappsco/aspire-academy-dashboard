@@ -1,0 +1,3 @@
+export { default as StudentsListView } from './StudentsListView';
+export { default as StudentDetailsView } from './StudentDetailsView';
+export { default as StudentCourseProgressView } from './StudentCourseProgressView';

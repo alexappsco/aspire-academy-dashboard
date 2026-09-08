@@ -59,10 +59,10 @@ const sidebarItems: SidebarItem[] = [
     key: "user_management",
     icon: "/icons/profile.svg",
     children: [
-      // {
-      //   key: "students_management",
-      //   path: "/students",
-      // },
+      {
+        key: "students_management",
+        path: "/students",
+      },
       {
         key: "lecturers_management",
         path: "/minutes-management",

@@ -1188,5 +1188,22 @@
       "fetch_error": "حدث خطأ أثناء جلب بيانات العملات",
       "operation_error": "حدث خطأ أثناء إتمام العملية"
     }
+  },
+  "Students": {
+    "title": "إدارة الطلاب",
+    "search_placeholder": "بحث...",
+    "all": "الكل",
+    "active": "مفعل",
+    "inactive": "معطل",
+    "status": "الحالة",
+    "columns": {
+      "name": "الاسم",
+      "joined_date": "تاريخ الانضمام",
+      "phone": "رقم الهاتف",
+      "courses_count": "عدد الدورات",
+      "progress": "التقدم",
+      "status": "الحالة"
+    }
   }
 }
+

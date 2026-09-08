@@ -1185,5 +1185,22 @@
       "fetch_error": "An error occurred while fetching currencies",
       "operation_error": "An error occurred while processing the request"
     }
+  },
+  "Students": {
+    "title": "Students Management",
+    "search_placeholder": "Search...",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "columns": {
+      "name": "Name",
+      "joined_date": "Joined Date",
+      "phone": "Phone Number",
+      "courses_count": "Courses Count",
+      "progress": "Progress",
+      "status": "Status"
+    }
   }
 }
+
