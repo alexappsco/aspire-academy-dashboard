@@ -44,9 +44,29 @@ export default function SupportView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // Helper to normalize status to backend PascalCase enum ('New' | 'InProgress' | 'Resolved')
+  const normalizeStatus = (st: unknown): string => {
+    if (st === null || st === undefined) return 'New';
+    const s = String(st).toLowerCase().trim();
+    if (s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'New';
+    if (
+      s === '1' ||
+      s === 'inprogress' ||
+      s === 'in_progress' ||
+      s === 'in progress' ||
+      s === 'قيد المعالجة' ||
+      s === 'جاري العمل'
+    )
+      return 'InProgress';
+    if (s === '2' || s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل')
+      return 'Resolved';
+    return String(st);
+  };
+
   // Read initial filter values from URL
-  const urlFilter = searchParams.get('Filter') || searchParams.get('search') || '';
-  const urlStatus = searchParams.get('Status') || searchParams.get('status') || 'all';
+  const rawUrlFilter = searchParams.get('Filter') || searchParams.get('search') || '';
+  const rawUrlStatus = searchParams.get('Status') || searchParams.get('status') || 'all';
+  const urlStatus = rawUrlStatus !== 'all' ? normalizeStatus(rawUrlStatus) : 'all';
   const urlDate = searchParams.get('Date') || searchParams.get('date') || '';
 
   const [messages, setMessages] = useState<ContactUsMessageDto[]>([]);
@@ -54,8 +74,8 @@ export default function SupportView() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [searchQuery, setSearchQuery] = useState(urlFilter);
-  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [searchQuery, setSearchQuery] = useState(rawUrlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(rawUrlFilter);
   const [statusFilter, setStatusFilter] = useState(urlStatus);
   const [dateFilter, setDateFilter] = useState(urlDate);
 
@@ -80,7 +100,7 @@ export default function SupportView() {
     }
 
     if (statusFilter && statusFilter !== 'all') {
-      params.set('Status', statusFilter);
+      params.set('Status', normalizeStatus(statusFilter));
     } else {
       params.delete('Status');
       params.delete('status');
@@ -185,18 +205,6 @@ export default function SupportView() {
     }
   };
 
-  // Helper to normalize status (handles enum numbers 0,1,2 and string formats)
-  const normalizeStatus = (st: unknown): string => {
-    if (st === null || st === undefined) return 'new';
-    const s = String(st).toLowerCase().trim();
-    if (s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'new';
-    if (s === '1' || s === 'in_progress' || s === 'inprogress' || s === 'in progress' || s === 'قيد المعالجة' || s === 'جاري العمل')
-      return 'in_progress';
-    if (s === '2' || s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل')
-      return 'resolved';
-    return s;
-  };
-
   // Helper to format sender type (handles enum numbers and strings)
   const formatSenderType = (type?: unknown) => {
     if (type === null || type === undefined) return isRtl ? 'طالب' : 'Student';
@@ -211,10 +219,10 @@ export default function SupportView() {
   // Helper to render status badge safely
   const renderStatusBadge = (status: unknown) => {
     const s = normalizeStatus(status);
-    if (s === 'resolved') {
+    if (s === 'Resolved') {
       return (
         <Chip
-          label={isRtl ? 'تم الرد' : 'Resolved'}
+          label={t('statuses.resolved')}
           sx={{
             fontWeight: 700,
             fontSize: 13,
@@ -228,10 +236,10 @@ export default function SupportView() {
       );
     }
 
-    if (s === 'in_progress') {
+    if (s === 'InProgress') {
       return (
         <Chip
-          label={isRtl ? 'in progress' : 'In Progress'}
+          label={t('statuses.in_progress')}
           sx={{
             fontWeight: 700,
             fontSize: 13,
@@ -245,10 +253,10 @@ export default function SupportView() {
       );
     }
 
-    // Default: new
+    // Default: New
     return (
       <Chip
-        label={isRtl ? 'جديد' : 'New'}
+        label={t('statuses.new')}
         sx={{
           fontWeight: 700,
           fontSize: 13,
@@ -504,9 +512,9 @@ export default function SupportView() {
               }}
             >
               <MenuItem value="all">{t('statuses.all')}</MenuItem>
-              <MenuItem value="new">{t('statuses.new')}</MenuItem>
-              <MenuItem value="in_progress">{t('statuses.in_progress')}</MenuItem>
-              <MenuItem value="resolved">{t('statuses.resolved')}</MenuItem>
+              <MenuItem value="New">{t('statuses.new')}</MenuItem>
+              <MenuItem value="InProgress">{t('statuses.in_progress')}</MenuItem>
+              <MenuItem value="Resolved">{t('statuses.resolved')}</MenuItem>
             </SelectField>
           </Stack>
         </Stack>

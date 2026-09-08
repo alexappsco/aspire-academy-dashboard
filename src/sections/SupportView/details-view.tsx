@@ -26,9 +26,9 @@ type SupportDetailsViewProps = {
 };
 
 const STATUS_OPTIONS = [
-  { value: 'new', label: 'جديد' },
-  { value: 'in_progress', label: 'in progress' },
-  { value: 'resolved', label: 'تم الرد' },
+  { value: 'New', label: 'جديد' },
+  { value: 'InProgress', label: 'قيد المعالجة' },
+  { value: 'Resolved', label: 'تم الرد' },
 ];
 
 export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps) {
@@ -119,9 +119,16 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         color: '#00A76F',
       };
     }
-    if (str === '1' || str === 'in_progress' || str === 'inprogress' || str === 'in progress' || str === 'قيد المعالجة' || str === 'جاري العمل') {
+    if (
+      str === '1' ||
+      str === 'inprogress' ||
+      str === 'in_progress' ||
+      str === 'in progress' ||
+      str === 'قيد المعالجة' ||
+      str === 'جاري العمل'
+    ) {
       return {
-        label: 'in progress',
+        label: 'قيد المعالجة',
         bgcolor: '#E0F2FE',
         color: '#0284C7',
       };

@@ -718,6 +718,7 @@
     },
     "statuses": {
       "all": "Status",
+      "all_label": "All",
       "new": "New",
       "in_progress": "In Progress",
       "resolved": "Resolved"

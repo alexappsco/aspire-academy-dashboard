@@ -721,8 +721,9 @@
     },
     "statuses": {
       "all": "الحالة",
+      "all_label": "الكل",
       "new": "جديد",
-      "in_progress": "in progress",
+      "in_progress": "قيد المعالجة",
       "resolved": "تم الرد"
     },
     "user_types": {
