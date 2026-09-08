@@ -709,23 +709,36 @@
   },
   "Support": {
     "title": "الدعم الفني",
+    "search_placeholder": "بحث باسم المرسل",
+    "send_date": "تاريخ الارسال",
+    "status": "الحالة",
+    "columns": {
+      "sender_name": "اسم المرسل",
+      "send_date": "تاريخ الارسال",
+      "sender_type": "نوع المرسل",
+      "complaint_content": "محتوى الشكوى",
+      "status": "الحالة"
+    },
+    "statuses": {
+      "all": "الحالة",
+      "new": "جديد",
+      "in_progress": "in progress",
+      "resolved": "تم الرد"
+    },
+    "user_types": {
+      "student": "طالب",
+      "lecturer": "محاضر",
+      "instructor": "محاضر",
+      "admin": "مسؤول"
+    },
+    "actions": {
+      "view": "عرض"
+    },
     "send_ticket": "إرسال تذكرة",
-    "search_placeholder": "البحث في التذاكر..",
     "all": "الكل",
     "replied": "تم الرد",
-    "pending": "قيد المراجعة",
+    "pending": "جديد",
     "view": "عرض",
-    "create_title": "إنشاء تذكرة جديدة",
-    "create_complaint_title": "عنوان الشكوى",
-    "create_complaint_placeholder": "أدخل عنوان التذكرة",
-    "create_description": "وصف المشكلة",
-    "create_description_placeholder": "اشرح المشكلة بالتفصيل...",
-    "send": "إرسال",
-    "sending": "جاري الإرسال...",
-    "create_success": "تم إرسال التذكرة بنجاح",
-    "error_create": "حدث خطأ أثناء إنشاء التذكرة",
-    "error_fetch": "حدث خطأ أثناء تحميل التذكرة",
-    "error_unexpected": "حدث خطأ غير متوقع",
     "details_title": "تفاصيل التذكرة",
     "details_ticket_number": "رقم التذكرة",
     "details_complaint_title": "عنوان الشكوى",

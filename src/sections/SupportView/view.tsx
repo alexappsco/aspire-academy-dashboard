@@ -1,165 +1,529 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Box, Card, Chip, IconButton } from '@mui/material';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'src/i18n/routing';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'src/i18n/routing';
+import { useSearchParams } from 'next/navigation';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Chip from '@mui/material/Chip';
+import Checkbox from '@mui/material/Checkbox';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+
 import Iconify from 'src/components/iconify';
-import SimpleTable from 'src/components/SimpleTable';
-import SupportHeader from './components/SupportHeader';
-import SupportSearchBar from './components/SupportSearchBar';
-import SupportStatusTabs from './components/SupportStatusTabs';
-import { STATUS_STYLES, TABLE_HEAD, DEFAULT_PAGE_SIZE } from './constants';
-import { MOCK_TICKETS } from './_mock';
-import type { StatusFilter, SupportTicket } from './types';
+import DateInput from 'src/components/DateInput';
+import SelectField from 'src/components/SelectField/SelectField';
+import SharedTable from 'src/components/SharedTable/SharedTable';
+import { cellAlignment } from 'src/components/SharedTable/types';
+import type { ContactUsMessageDto } from 'src/types/support';
+
+interface FormattedSupportMessage {
+  id: string;
+  senderName: string;
+  sendDate: string;
+  senderType: string;
+  complaintContent: string;
+  status: string;
+  raw: ContactUsMessageDto;
+}
+
+// Initial mock data to ensure UI matches design perfectly
+const INITIAL_MOCK_MESSAGES: ContactUsMessageDto[] = [
+  {
+    id: '1',
+    senderName: 'علي محمود',
+    senderType: 'student',
+    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+    status: 'new',
+    creationTime: '2026-08-03T10:00:00.000Z',
+  },
+  {
+    id: '2',
+    senderName: 'علي محمود',
+    senderType: 'student',
+    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+    status: 'new',
+    creationTime: '2026-08-03T11:00:00.000Z',
+  },
+  {
+    id: '3',
+    senderName: 'محمد منتصر',
+    senderType: 'lecturer',
+    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
+    status: 'resolved',
+    creationTime: '2026-08-03T12:00:00.000Z',
+  },
+  {
+    id: '4',
+    senderName: 'علي محمود',
+    senderType: 'student',
+    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+    status: 'new',
+    creationTime: '2026-08-03T13:00:00.000Z',
+  },
+  {
+    id: '5',
+    senderName: 'محمد منتصر',
+    senderType: 'lecturer',
+    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
+    status: 'resolved',
+    creationTime: '2026-08-03T14:00:00.000Z',
+  },
+  {
+    id: '6',
+    senderName: 'علي محمود',
+    senderType: 'student',
+    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+    status: 'new',
+    creationTime: '2026-08-03T15:00:00.000Z',
+  },
+  {
+    id: '7',
+    senderName: 'علي محمود',
+    senderType: 'student',
+    message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+    status: 'new',
+    creationTime: '2026-08-03T16:00:00.000Z',
+  },
+  {
+    id: '8',
+    senderName: 'محمد منتصر',
+    senderType: 'lecturer',
+    message: 'يوجد لدي مشكلة عند رفع الفيديوهات الطويلة داخل الدورة التدريبية',
+    status: 'resolved',
+    creationTime: '2026-08-03T17:00:00.000Z',
+  },
+];
 
 export default function SupportView() {
+  const t = useTranslations('Support');
   const locale = useLocale();
+  const isRtl = locale === 'ar';
   const router = useRouter();
-  const t = useTranslations("Support");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const [tickets] = useState<SupportTicket[]>(MOCK_TICKETS);
-  const [searchInput, setSearchInput] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || searchParams.get('search') || '';
+  const urlStatus = searchParams.get('Status') || searchParams.get('status') || 'all';
+  const urlDate = searchParams.get('Date') || searchParams.get('date') || '';
 
-  const filteredTickets = useMemo(() => {
-    const query = searchInput.trim().toLowerCase();
+  const [messages, setMessages] = useState<ContactUsMessageDto[]>(INITIAL_MOCK_MESSAGES);
+  const [totalCount, setTotalCount] = useState<number>(INITIAL_MOCK_MESSAGES.length);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-    return tickets.filter((ticket) => {
-      if (statusFilter !== 'all' && ticket.status !== statusFilter) {
-        return false;
-      }
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [statusFilter, setStatusFilter] = useState(urlStatus);
+  const [dateFilter, setDateFilter] = useState(urlDate);
 
-      if (!query) {
-        return true;
-      }
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-      return (
-        ticket.ticketNumber.toLowerCase().includes(query) ||
-        ticket.requestDate.includes(query) ||
-        ticket.title.toLowerCase().includes(query) ||
-        t(ticket.status).toLowerCase().includes(query)
-      );
-    });
-  }, [tickets, searchInput, statusFilter, t]);
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchQuery]);
 
-  const counts = useMemo(() => ({
-    all: tickets.length,
-    pending: tickets.filter((t) => t.status === 'pending').length,
-    replied: tickets.filter((t) => t.status === 'replied').length,
-  }), [tickets]);
+  // Synchronize browser URL query parameters with active filters
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
 
-  const tabs = [
-    {
-      label: t("all"),
-      value: 'all' as StatusFilter,
-      count: counts.all,
-      bgColor: '#1f2937',
-      textColor: '#fff',
-    },
-    {
-      label: t("replied"),
-      value: 'replied' as StatusFilter,
-      count: counts.replied,
-      bgColor: '#d1fae5',
-      textColor: '#059669',
-    },
-    {
-      label: t("pending"),
-      value: 'pending' as StatusFilter,
-      count: counts.pending,
-      bgColor: 'rgba(255, 193, 7, 0.16)',
-      textColor: 'rgb(183, 129, 3)',
-    },
-  ];
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    } else {
+      params.delete('Filter');
+      params.delete('search');
+    }
 
-  const handleStatusFilterChange = (filter: StatusFilter) => {
-    setStatusFilter(filter);
+    if (statusFilter && statusFilter !== 'all') {
+      params.set('Status', statusFilter);
+    } else {
+      params.delete('Status');
+      params.delete('status');
+    }
+
+    if (dateFilter) {
+      params.set('Date', dateFilter);
+    } else {
+      params.delete('Date');
+      params.delete('date');
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, statusFilter, dateFilter, pathname, router, searchParams]);
+
+  // Handle row selection
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(messages.map((m) => m.id));
+    } else {
+      setSelectedIds([]);
+    }
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchInput(value);
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
-  const customRender = {
-    status: (row: SupportTicket) => {
-      const status = STATUS_STYLES[row.status];
+  // Helper to format date string cleanly
+  const formatDateDisplay = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    try {
+      const clean = dateStr.split('T')[0];
+      const parts = clean.split('-');
+      if (parts.length === 3) {
+        return `${parts[0]}-${parts[1]}-${parseInt(parts[2], 10)}`;
+      }
+      return clean;
+    } catch {
+      return dateStr;
+    }
+  };
 
+  // Helper to format sender type
+  const formatSenderType = (type?: string) => {
+    if (!type) return isRtl ? 'طالب' : 'Student';
+    const lower = type.toLowerCase();
+    if (lower === 'student' || lower === 'طالب') return isRtl ? 'طالب' : 'Student';
+    if (lower === 'lecturer' || lower === 'instructor' || lower === 'محاضر' || lower === 'معلم')
+      return isRtl ? 'محاضر' : 'Lecturer';
+    if (lower === 'admin' || lower === 'مسؤول') return isRtl ? 'مسؤول' : 'Admin';
+    return type;
+  };
+
+  // Helper to render status badge
+  const renderStatusBadge = (status: string) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل' || s === '2') {
       return (
         <Chip
-          label={t(row.status)}
+          label={isRtl ? 'تم الرد' : 'Resolved'}
           sx={{
-            fontWeight: 600,
-            borderRadius: '8px',
-            bgcolor: status.bgcolor,
-            color: status.color,
-            border: 'none',
-            minWidth: 96,
+            fontWeight: 700,
+            fontSize: 13,
+            borderRadius: 1.5,
+            bgcolor: '#E6F4EA',
+            color: '#00A76F',
+            minWidth: 80,
+            height: 30,
           }}
         />
       );
-    },
+    }
+
+    if (
+      s === 'in_progress' ||
+      s === 'inprogress' ||
+      s === 'in progress' ||
+      s === 'قيد المعالجة' ||
+      s === 'جاري العمل' ||
+      s === '1'
+    ) {
+      return (
+        <Chip
+          label={isRtl ? 'in progress' : 'In Progress'}
+          sx={{
+            fontWeight: 700,
+            fontSize: 13,
+            borderRadius: 1.5,
+            bgcolor: '#E0F2FE',
+            color: '#0284C7',
+            minWidth: 80,
+            height: 30,
+          }}
+        />
+      );
+    }
+
+    // Default: new
+    return (
+      <Chip
+        label={isRtl ? 'جديد' : 'New'}
+        sx={{
+          fontWeight: 700,
+          fontSize: 13,
+          borderRadius: 1.5,
+          bgcolor: '#FEF3C7',
+          color: '#D97706',
+          minWidth: 80,
+          height: 30,
+        }}
+      />
+    );
   };
 
-  const tableHead = useMemo(
-    () => [
-      ...TABLE_HEAD,
-      {
-        id: 'view',
-        label: '',
-        // align: 'center',
-        width: 80,
-        renderCell: (row: SupportTicket) => (
-          <IconButton
-            aria-label={t("view")}
-            onClick={() => router.push(`/support/${row.id}`)}
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: '10px',
-              color: '#475569',
-              align: 'start',
-              '&:hover': {
-                bgcolor: '#F1F5F9',
-                color: '#1E293B',
-              },
-            }}
-          >
-            <Iconify icon="solar:eye-outline" width={22} />
-          </IconButton>
-        ),
-      },
-    ],
-    [router, t]
-  );
+  const formattedMessages: FormattedSupportMessage[] = useMemo(() => {
+    return messages.map((m) => {
+      const name = m.senderName || m.name || m.fullName || '-';
+      const date = formatDateDisplay(m.creationTime || m.createdAt || m.created_at);
+      const type = formatSenderType(m.senderType || m.userType);
+      const content = m.message || m.content || m.description || m.details || m.title || '-';
 
-  return (
-    <Box sx={{ textAlign: locale === 'ar' ? 'right' : 'left' }}>
-      <SupportHeader canAdd={false} />
+      return {
+        id: m.id,
+        senderName: name,
+        sendDate: date,
+        senderType: type,
+        complaintContent: content,
+        status: m.status || 'new',
+        raw: m,
+      };
+    });
+  }, [messages, isRtl]);
 
-      <Card
+  // Client-side filtering
+  const filteredMessages = useMemo(() => {
+    return formattedMessages.filter((item) => {
+      const matchesSearch =
+        !debouncedSearch.trim() ||
+        item.senderName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        item.complaintContent.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        item.senderType.toLowerCase().includes(debouncedSearch.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        item.status.toLowerCase() === statusFilter.toLowerCase() ||
+        (statusFilter === 'resolved' && (item.status === 'replied' || item.status === 'resolved')) ||
+        (statusFilter === 'new' && (item.status === 'new' || item.status === 'pending')) ||
+        (statusFilter === 'in_progress' && (item.status === 'in_progress' || item.status === 'inprogress'));
+
+      const rawCreation = item.raw.creationTime || item.raw.createdAt || '';
+      const rawDateOnly = rawCreation.split('T')[0];
+      const matchesDate = !dateFilter || rawDateOnly === dateFilter;
+
+      return matchesSearch && matchesStatus && matchesDate;
+    });
+  }, [formattedMessages, debouncedSearch, statusFilter, dateFilter]);
+
+  const isAllSelected =
+    filteredMessages.length > 0 && selectedIds.length === filteredMessages.length;
+  const isIndeterminate =
+    selectedIds.length > 0 && selectedIds.length < filteredMessages.length;
+
+  const tableHead = [
+    {
+      id: 'checkbox',
+      label: (
+        <Checkbox
+          checked={isAllSelected}
+          indeterminate={isIndeterminate}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+          size="small"
+        />
+      ),
+      align: cellAlignment.center,
+      width: 50,
+    },
+    {
+      id: 'senderName',
+      label: isRtl ? 'اسم المرسل' : 'Sender Name',
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+      width: 160,
+    },
+    {
+      id: 'sendDate',
+      label: isRtl ? 'تاريخ الارسال' : 'Sent Date',
+      align: cellAlignment.center,
+      width: 140,
+    },
+    {
+      id: 'senderType',
+      label: isRtl ? 'نوع المرسل' : 'Sender Type',
+      align: cellAlignment.center,
+      width: 130,
+    },
+    {
+      id: 'complaintContent',
+      label: isRtl ? 'محتوى الشكوى' : 'Complaint Content',
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'status',
+      label: isRtl ? 'الحالة' : 'Status',
+      align: cellAlignment.center,
+      width: 130,
+    },
+    {
+      id: 'actions',
+      label: '',
+      align: cellAlignment.center,
+      width: 80,
+    },
+  ];
+
+  const customRender = {
+    checkbox: (row: FormattedSupportMessage) => (
+      <Checkbox
+        checked={selectedIds.includes(row.id)}
+        onChange={() => handleToggleSelect(row.id)}
+        size="small"
+      />
+    ),
+    senderName: (row: FormattedSupportMessage) => (
+      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+        {row.senderName}
+      </Typography>
+    ),
+    sendDate: (row: FormattedSupportMessage) => (
+      <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+        {row.sendDate}
+      </Typography>
+    ),
+    senderType: (row: FormattedSupportMessage) => (
+      <Typography variant="body2" sx={{ color: '#475569', fontWeight: 500 }}>
+        {row.senderType}
+      </Typography>
+    ),
+    complaintContent: (row: FormattedSupportMessage) => (
+      <Typography
+        variant="body2"
         sx={{
-          borderRadius: '20px',
-          boxShadow: '0 4px 20px 0 rgba(0,0,0,0.05)',
-          border: '1px solid rgba(0,0,0,0.04)',
+          color: '#334155',
+          maxWidth: 380,
           overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}
       >
-        <Box sx={{ p: 3, bgcolor: '#fff' }}>
-          <SupportStatusTabs
-            tabs={tabs}
-            activeFilter={statusFilter}
-            onFilterChange={handleStatusFilterChange}
-          />
-          <SupportSearchBar value={searchInput} onChange={handleSearchChange} />
-        </Box>
+        {row.complaintContent}
+      </Typography>
+    ),
+    status: (row: FormattedSupportMessage) => renderStatusBadge(row.status),
+    actions: (row: FormattedSupportMessage) => (
+      <IconButton
+        aria-label="view"
+        onClick={() => router.push(`/support/${row.id}`)}
+        sx={{
+          color: '#64748B',
+          '&:hover': { bgcolor: '#F1F5F9', color: '#1E293B' },
+        }}
+      >
+        <Iconify icon="solar:eye-outline" width={20} />
+      </IconButton>
+    ),
+  };
 
-        <SimpleTable<SupportTicket>
-          data={filteredTickets}
-          headCells={tableHead}
-          customRender={customRender}
-          hidePagination={filteredTickets.length <= DEFAULT_PAGE_SIZE}
-        />
+  return (
+    <Box sx={{ py: 2 }}>
+      {/* Title */}
+      <Stack
+        direction="row"
+        sx={{
+          mb: 3,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
+          {t('title')}
+        </Typography>
+      </Stack>
+
+      {/* Main Table Card */}
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.02)',
+          border: '1px solid #F1F3F5',
+          overflow: 'visible',
+          bgcolor: '#FFFFFF',
+        }}
+      >
+        {/* Filter bar */}
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          sx={{
+            p: 2.5,
+            borderBottom: '1px dashed #F1F3F5',
+            alignItems: 'center',
+          }}
+        >
+          {/* Search field */}
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={t('search_placeholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB', width: 20, height: 20 }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              flex: 1,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                bgcolor: '#FFFFFF',
+                '& fieldset': { borderColor: '#E5E7EB' },
+              },
+            }}
+          />
+
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
+            {/* Sent Date Filter */}
+            <DateInput
+              size="small"
+              placeholder={t('send_date')}
+              value={dateFilter}
+              onChange={setDateFilter}
+              sx={{ minWidth: 180 }}
+            />
+
+            {/* Status Filter */}
+            <SelectField
+              size="small"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              slotProps={{
+                select: { displayEmpty: true },
+              }}
+              sx={{
+                minWidth: 150,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: '#FFFFFF',
+                  '& fieldset': { borderColor: '#E5E7EB' },
+                },
+              }}
+            >
+              <MenuItem value="all">{t('statuses.all')}</MenuItem>
+              <MenuItem value="new">{t('statuses.new')}</MenuItem>
+              <MenuItem value="in_progress">{t('statuses.in_progress')}</MenuItem>
+              <MenuItem value="resolved">{t('statuses.resolved')}</MenuItem>
+            </SelectField>
+          </Stack>
+        </Stack>
+
+        {/* Table List */}
+        <Box sx={{ px: 1 }}>
+          <SharedTable<FormattedSupportMessage>
+            data={filteredMessages}
+            count={totalCount || filteredMessages.length}
+            tableHead={tableHead}
+            customRender={customRender}
+          />
+        </Box>
       </Card>
     </Box>
   );

@@ -1,26 +1,48 @@
-export type SupportRequestStatus =
-  | "under_review"
-  | "in_progress"
-  | "resolved"
-  | "closed";
+export type ContactUsMessageStatus = 'new' | 'in_progress' | 'resolved' | string;
 
-export interface SupportRequest {
+export type SenderType = 'student' | 'lecturer' | 'instructor' | string;
+
+export interface ContactUsMessageDto {
   id: string;
-  requestNumber: string;
-  email: string;
-  details: string;
-  status: SupportRequestStatus;
-  createdAt: string;
+  senderName?: string;
+  name?: string;
+  fullName?: string;
+  senderEmail?: string;
+  email?: string;
+  senderPhone?: string;
+  phoneNumber?: string;
+  phone?: string;
+  senderType?: string;
+  userType?: string;
+  title?: string;
+  subject?: string;
+  message?: string;
+  content?: string;
+  description?: string;
+  details?: string;
+  status: ContactUsMessageStatus;
+  creationTime?: string;
+  createdAt?: string;
+  created_at?: string;
+  reply?: string | null;
+  response?: string | null;
 }
 
-export interface CreateSupportRequestInput {
-  email: string;
-  details: string;
+export interface ContactUsMessageListResponse {
+  totalCount: number;
+  items: ContactUsMessageDto[];
 }
 
-export interface SupportRequestFilters {
-  search: string;
-  status: SupportRequestStatus | "all";
+export interface GetContactUsMessagesParams {
+  Status?: string;
+  SenderType?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+  Date?: string;
 }
 
-export type SupportPageView = "list" | "create";
+export interface UpdateContactUsMessageStatusDto {
+  status: string | number;
+}

@@ -706,23 +706,36 @@
   },
   "Support": {
     "title": "Technical Support",
+    "search_placeholder": "Search by sender name..",
+    "send_date": "Sent Date",
+    "status": "Status",
+    "columns": {
+      "sender_name": "Sender Name",
+      "send_date": "Sent Date",
+      "sender_type": "Sender Type",
+      "complaint_content": "Complaint Content",
+      "status": "Status"
+    },
+    "statuses": {
+      "all": "Status",
+      "new": "New",
+      "in_progress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "user_types": {
+      "student": "Student",
+      "lecturer": "Lecturer",
+      "instructor": "Instructor",
+      "admin": "Admin"
+    },
+    "actions": {
+      "view": "View"
+    },
     "send_ticket": "Send Ticket",
-    "search_placeholder": "Search tickets..",
     "all": "All",
-    "replied": "Replied",
-    "pending": "Pending",
+    "replied": "Resolved",
+    "pending": "New",
     "view": "View",
-    "create_title": "Create New Ticket",
-    "create_complaint_title": "Complaint Title",
-    "create_complaint_placeholder": "Enter ticket title",
-    "create_description": "Issue Description",
-    "create_description_placeholder": "Describe the issue in detail...",
-    "send": "Send",
-    "sending": "Sending...",
-    "create_success": "Ticket sent successfully",
-    "error_create": "An error occurred while creating the ticket",
-    "error_fetch": "An error occurred while loading the ticket",
-    "error_unexpected": "An unexpected error occurred",
     "details_title": "Ticket Details",
     "details_ticket_number": "Ticket Number",
     "details_complaint_title": "Complaint Title",
