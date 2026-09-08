@@ -14,8 +14,11 @@ export interface ContactUsMessageDto {
   phone?: string;
   senderType?: string;
   userType?: string;
+  userId?: string | null;
+  userName?: string | null;
   title?: string;
   subject?: string;
+  notes?: string;
   message?: string;
   content?: string;
   description?: string;

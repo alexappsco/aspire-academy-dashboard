@@ -45,12 +45,13 @@ export default function SupportView() {
   const searchParams = useSearchParams();
 
   // Helper to normalize status to backend PascalCase enum ('New' | 'InProgress' | 'Resolved')
+  // Backend Enum values: 1 = New, 2 = InProgress, 3 = Resolved
   const normalizeStatus = (st: unknown): string => {
     if (st === null || st === undefined) return 'New';
     const s = String(st).toLowerCase().trim();
-    if (s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'New';
+    if (s === '1' || s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'New';
     if (
-      s === '1' ||
+      s === '2' ||
       s === 'inprogress' ||
       s === 'in_progress' ||
       s === 'in progress' ||
@@ -58,7 +59,7 @@ export default function SupportView() {
       s === 'جاري العمل'
     )
       return 'InProgress';
-    if (s === '2' || s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل')
+    if (s === '3' || s === 'resolved' || s === 'replied' || s === 'closed' || s === 'تم الرد' || s === 'تم الحل')
       return 'Resolved';
     return String(st);
   };
@@ -272,10 +273,10 @@ export default function SupportView() {
 
   const formattedMessages: FormattedSupportMessage[] = useMemo(() => {
     return messages.map((m) => {
-      const name = String(m.senderName || m.name || m.fullName || '-');
+      const name = String(m.name || m.senderName || m.fullName || m.userName || '-');
       const date = formatDateDisplay(m.creationTime || m.createdAt || m.created_at);
       const type = formatSenderType(m.senderType ?? m.userType);
-      const content = String(m.message || m.content || m.description || m.details || m.title || '-');
+      const content = String(m.notes || m.message || m.content || m.description || m.details || m.title || '-');
       const normalizedSt = normalizeStatus(m.status);
 
       return {
@@ -294,23 +295,27 @@ export default function SupportView() {
   const filteredMessages = useMemo(() => {
     return formattedMessages.filter((item) => {
       const search = debouncedSearch.trim().toLowerCase();
-      const matchesSearch =
-        !search ||
-        item.senderName.toLowerCase().includes(search) ||
-        item.complaintContent.toLowerCase().includes(search) ||
-        item.senderType.toLowerCase().includes(search);
+      if (search) {
+        const matches =
+          item.senderName.toLowerCase().includes(search) ||
+          item.complaintContent.toLowerCase().includes(search) ||
+          item.senderType.toLowerCase().includes(search);
+        if (!matches) return false;
+      }
 
-      const filterSt = normalizeStatus(statusFilter);
-      const matchesStatus =
-        statusFilter === 'all' ||
-        item.status === filterSt ||
-        item.status === statusFilter;
+      if (statusFilter && statusFilter !== 'all') {
+        const filterSt = normalizeStatus(statusFilter).toLowerCase();
+        const itemSt = normalizeStatus(item.status).toLowerCase();
+        if (filterSt !== itemSt) return false;
+      }
 
-      const rawCreation = item.raw.creationTime || item.raw.createdAt || '';
-      const rawDateOnly = rawCreation ? rawCreation.split('T')[0] : '';
-      const matchesDate = !dateFilter || rawDateOnly === dateFilter;
+      if (dateFilter) {
+        const rawCreation = item.raw.creationTime || item.raw.createdAt || '';
+        const rawDateOnly = rawCreation ? rawCreation.split('T')[0] : '';
+        if (rawDateOnly && rawDateOnly !== dateFilter) return false;
+      }
 
-      return matchesSearch && matchesStatus && matchesDate;
+      return true;
     });
   }, [formattedMessages, debouncedSearch, statusFilter, dateFilter]);
 

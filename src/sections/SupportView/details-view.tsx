@@ -112,7 +112,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
 
   const getStatusBadge = (s: unknown) => {
     const str = String(s ?? '').toLowerCase().trim();
-    if (str === '2' || str === 'resolved' || str === 'replied' || str === 'تم الرد' || str === 'تم الحل') {
+    if (str === '3' || str === 'resolved' || str === 'replied' || str === 'closed' || str === 'تم الرد' || str === 'تم الحل') {
       return {
         label: 'تم الرد',
         bgcolor: '#E6F4EA',
@@ -120,7 +120,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
       };
     }
     if (
-      str === '1' ||
+      str === '2' ||
       str === 'inprogress' ||
       str === 'in_progress' ||
       str === 'in progress' ||
@@ -151,7 +151,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
   }
 
   const senderInfo = [
-    { label: 'الاسم', value: message?.senderName || message?.name || message?.fullName || 'علي محمود' },
+    { label: 'الاسم', value: message?.name || message?.senderName || message?.fullName || message?.userName || 'علي محمود' },
     {
       label: 'نوع المرسل',
       value:
@@ -159,11 +159,11 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           ? 'محاضر'
           : 'طالب',
     },
-    { label: 'رقم الهاتف', value: message?.senderPhone || message?.phoneNumber || message?.phone || '+96513325599' },
-    { label: 'البريد الالكتروني', value: message?.senderEmail || message?.email || 'Ali@gmail.com' },
+    { label: 'رقم الهاتف', value: message?.phone || message?.senderPhone || message?.phoneNumber || '-' },
+    { label: 'البريد الالكتروني', value: message?.email || message?.senderEmail || '-' },
     {
       label: 'تاريخ الارسال',
-      value: (message?.creationTime || message?.createdAt || '2026-08-03').split('T')[0],
+      value: (message?.creationTime || message?.createdAt || '').split('T')[0] || '-',
     },
   ];
 
@@ -286,7 +286,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
               whiteSpace: 'pre-wrap',
             }}
           >
-            {message?.message || message?.content || message?.description || message?.details || '-'}
+            {message?.notes || message?.message || message?.content || message?.description || message?.details || '-'}
           </Typography>
         </Box>
       </Card>
