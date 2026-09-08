@@ -185,21 +185,33 @@ export default function SupportView() {
     }
   };
 
-  // Helper to format sender type
-  const formatSenderType = (type?: string) => {
-    if (!type) return isRtl ? 'طالب' : 'Student';
-    const lower = type.toLowerCase();
-    if (lower === 'student' || lower === 'طالب') return isRtl ? 'طالب' : 'Student';
-    if (lower === 'lecturer' || lower === 'instructor' || lower === 'محاضر' || lower === 'معلم')
-      return isRtl ? 'محاضر' : 'Lecturer';
-    if (lower === 'admin' || lower === 'مسؤول') return isRtl ? 'مسؤول' : 'Admin';
-    return type;
+  // Helper to normalize status (handles enum numbers 0,1,2 and string formats)
+  const normalizeStatus = (st: unknown): string => {
+    if (st === null || st === undefined) return 'new';
+    const s = String(st).toLowerCase().trim();
+    if (s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'new';
+    if (s === '1' || s === 'in_progress' || s === 'inprogress' || s === 'in progress' || s === 'قيد المعالجة' || s === 'جاري العمل')
+      return 'in_progress';
+    if (s === '2' || s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل')
+      return 'resolved';
+    return s;
   };
 
-  // Helper to render status badge
-  const renderStatusBadge = (status: string) => {
-    const s = (status || '').toLowerCase();
-    if (s === 'resolved' || s === 'replied' || s === 'تم الرد' || s === 'تم الحل' || s === '2') {
+  // Helper to format sender type (handles enum numbers and strings)
+  const formatSenderType = (type?: unknown) => {
+    if (type === null || type === undefined) return isRtl ? 'طالب' : 'Student';
+    const s = String(type).toLowerCase().trim();
+    if (s === '0' || s === 'student' || s === 'طالب') return isRtl ? 'طالب' : 'Student';
+    if (s === '1' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم')
+      return isRtl ? 'محاضر' : 'Lecturer';
+    if (s === 'admin' || s === 'مسؤول') return isRtl ? 'مسؤول' : 'Admin';
+    return String(type);
+  };
+
+  // Helper to render status badge safely
+  const renderStatusBadge = (status: unknown) => {
+    const s = normalizeStatus(status);
+    if (s === 'resolved') {
       return (
         <Chip
           label={isRtl ? 'تم الرد' : 'Resolved'}
@@ -216,14 +228,7 @@ export default function SupportView() {
       );
     }
 
-    if (
-      s === 'in_progress' ||
-      s === 'inprogress' ||
-      s === 'in progress' ||
-      s === 'قيد المعالجة' ||
-      s === 'جاري العمل' ||
-      s === '1'
-    ) {
+    if (s === 'in_progress') {
       return (
         <Chip
           label={isRtl ? 'in progress' : 'In Progress'}
@@ -259,18 +264,19 @@ export default function SupportView() {
 
   const formattedMessages: FormattedSupportMessage[] = useMemo(() => {
     return messages.map((m) => {
-      const name = m.senderName || m.name || m.fullName || '-';
+      const name = String(m.senderName || m.name || m.fullName || '-');
       const date = formatDateDisplay(m.creationTime || m.createdAt || m.created_at);
-      const type = formatSenderType(m.senderType || m.userType);
-      const content = m.message || m.content || m.description || m.details || m.title || '-';
+      const type = formatSenderType(m.senderType ?? m.userType);
+      const content = String(m.message || m.content || m.description || m.details || m.title || '-');
+      const normalizedSt = normalizeStatus(m.status);
 
       return {
-        id: m.id,
+        id: String(m.id || Math.random()),
         senderName: name,
         sendDate: date,
         senderType: type,
         complaintContent: content,
-        status: m.status || 'new',
+        status: normalizedSt,
         raw: m,
       };
     });
@@ -279,21 +285,21 @@ export default function SupportView() {
   // Client-side filtering as secondary safeguard
   const filteredMessages = useMemo(() => {
     return formattedMessages.filter((item) => {
+      const search = debouncedSearch.trim().toLowerCase();
       const matchesSearch =
-        !debouncedSearch.trim() ||
-        item.senderName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.complaintContent.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        item.senderType.toLowerCase().includes(debouncedSearch.toLowerCase());
+        !search ||
+        item.senderName.toLowerCase().includes(search) ||
+        item.complaintContent.toLowerCase().includes(search) ||
+        item.senderType.toLowerCase().includes(search);
 
+      const filterSt = normalizeStatus(statusFilter);
       const matchesStatus =
         statusFilter === 'all' ||
-        item.status.toLowerCase() === statusFilter.toLowerCase() ||
-        (statusFilter === 'resolved' && (item.status === 'replied' || item.status === 'resolved')) ||
-        (statusFilter === 'new' && (item.status === 'new' || item.status === 'pending')) ||
-        (statusFilter === 'in_progress' && (item.status === 'in_progress' || item.status === 'inprogress'));
+        item.status === filterSt ||
+        item.status === statusFilter;
 
       const rawCreation = item.raw.creationTime || item.raw.createdAt || '';
-      const rawDateOnly = rawCreation.split('T')[0];
+      const rawDateOnly = rawCreation ? rawCreation.split('T')[0] : '';
       const matchesDate = !dateFilter || rawDateOnly === dateFilter;
 
       return matchesSearch && matchesStatus && matchesDate;

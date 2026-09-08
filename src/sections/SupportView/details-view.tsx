@@ -110,16 +110,16 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     }
   };
 
-  const getStatusBadge = (s: string) => {
-    const lower = (s || '').toLowerCase();
-    if (lower === 'resolved' || lower === 'replied' || lower === 'تم الرد' || lower === 'تم الحل') {
+  const getStatusBadge = (s: unknown) => {
+    const str = String(s ?? '').toLowerCase().trim();
+    if (str === '2' || str === 'resolved' || str === 'replied' || str === 'تم الرد' || str === 'تم الحل') {
       return {
         label: 'تم الرد',
         bgcolor: '#E6F4EA',
         color: '#00A76F',
       };
     }
-    if (lower === 'in_progress' || lower === 'inprogress' || lower === 'in progress' || lower === 'قيد المعالجة') {
+    if (str === '1' || str === 'in_progress' || str === 'inprogress' || str === 'in progress' || str === 'قيد المعالجة' || str === 'جاري العمل') {
       return {
         label: 'in progress',
         bgcolor: '#E0F2FE',
