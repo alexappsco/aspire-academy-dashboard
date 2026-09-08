@@ -19,7 +19,6 @@ import CoursesBreakdownCard from './components/CoursesBreakdownCard';
 import SalesRevenueCard from './components/SalesRevenueCard';
 import TopCoursesTable from './components/TopCoursesTable';
 import LatestUsersList from './components/LatestUsersList';
-import RecentActivitiesTimeline from './components/RecentActivitiesTimeline';
 
 export default function HomeView() {
   const [data, setData] = useState<DashboardDataResponse | null>(null);
@@ -88,15 +87,8 @@ export default function HomeView() {
       {/* 8. Top Enrolled Courses SharedTable */}
       <TopCoursesTable topCourses={data?.topCourses} />
 
-      {/* 9. Bottom Split Row (Recent Activities Timeline & Latest Users) */}
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 7 }}>
-          <RecentActivitiesTimeline />
-        </Grid>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <LatestUsersList recentAccounts={data?.recentAccounts} />
-        </Grid>
-      </Grid>
+      {/* 9. Latest Users Full Width */}
+      <LatestUsersList recentAccounts={data?.recentAccounts} />
     </Box>
   );
 }
