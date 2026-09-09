@@ -65,7 +65,7 @@ const sidebarItems: SidebarItem[] = [
       },
       {
         key: "lecturers_management",
-        path: "/minutes-management",
+        path: "/instructors",
       },
     ],
   },

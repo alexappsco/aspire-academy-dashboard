@@ -112,3 +112,76 @@ export type UpdateInstructorPayload = {
   CountryId?: string;
   UniversityId?: string;
 };
+
+// ==========================================
+// Instructor Details UI Domain Types
+// ==========================================
+
+export interface InstructorProfile {
+  id: string;
+  name: string;
+  title: string;
+  specialty: string;
+  imageUrl?: string;
+  avatarInitials: string;
+  isActive: boolean;
+  rating: number;
+  ratingCount: number;
+  joinedDate: string;
+  email: string;
+  phoneNumber: string;
+  country: string;
+  university: string;
+  qualification: string;
+  bio: string;
+  totalCourses: number;
+  activeCourses: number;
+  totalStudents: number;
+  studentsGrowth: string;
+  trainingHours: number;
+  totalSales: number;
+  currency: string;
+  satisfactionRate: number;
+}
+
+export interface InstructorCourseItem {
+  id: string;
+  title: string;
+  specialty: string;
+  studentsCount: number;
+  rating: number;
+  price: number;
+  currency: string;
+  status: 'active' | 'paused';
+  statusText: string;
+  lastUpdated: string;
+}
+
+export interface InstructorSubscriptionRequest {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  studentInitials: string;
+  studentPhone: string;
+  courseTitle: string;
+  courseCategory: string;
+  requestDate: string;
+  status: 'approved' | 'pending' | 'rejected';
+  statusText: string;
+  orderNumber: string;
+  amount: string;
+}
+
+export interface InstructorReviewItem {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  studentInitials: string;
+  courseTitle: string;
+  courseCategory: string;
+  courseRating: number;
+  courseComment: string;
+  instructorRating: number;
+  instructorComment: string;
+  reviewDate: string;
+}
