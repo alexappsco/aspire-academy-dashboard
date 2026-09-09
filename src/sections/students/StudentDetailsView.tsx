@@ -19,9 +19,15 @@ import Link from 'next/link';
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
 import { useToast } from 'src/components/toast';
-import { getStudentById, getStudentCourses, activateStudent, deactivateStudent } from 'src/actions/students';
-import { StudentItem, StudentCourseItem, StudentOrderPayment } from 'src/types/student';
-import { MOCK_STUDENTS, MOCK_ORDER_PAYMENTS } from './_mock';
+import {
+  getStudentById,
+  getStudentCourses,
+  getStudentOrders,
+  activateStudent,
+  deactivateStudent,
+} from 'src/actions/students';
+import { StudentItem, StudentCourseItem, StudentOrderItem } from 'src/types/student';
+import { MOCK_STUDENTS } from './_mock';
 import PaymentReceiptDialog from './PaymentReceiptDialog';
 
 interface Props {
@@ -51,12 +57,13 @@ export default function StudentDetailsView({ studentId }: Props) {
   const [student, setStudent] = useState<StudentItem | null>(null);
   const [courses, setCourses] = useState<StudentCourseItem[]>([]);
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const [orders, setOrders] = useState<StudentOrderItem[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const [currentTab, setCurrentTab] = useState<'overview' | 'academic' | 'courses' | 'orders'>('overview');
   const [copied, setCopied] = useState(false);
   const [openReceiptModal, setOpenReceiptModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<StudentOrderPayment | null>(null);
-  const [ordersList, setOrdersList] = useState<StudentOrderPayment[]>(MOCK_ORDER_PAYMENTS);
+  const [selectedOrder, setSelectedOrder] = useState<StudentOrderItem | null>(null);
 
   const fetchStudentData = useCallback(async () => {
     setLoading(true);
@@ -91,10 +98,26 @@ export default function StudentDetailsView({ studentId }: Props) {
     }
   }, [studentId]);
 
+  const fetchOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await getStudentOrders(studentId);
+      if (res.success && res.data) {
+        setOrders(res.data.items);
+      }
+    } catch {
+      // Ignored
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [studentId]);
+
   useEffect(() => {
     fetchStudentData();
     fetchCourses();
-  }, [fetchStudentData, fetchCourses]);
+    fetchOrders();
+  }, [fetchStudentData, fetchCourses, fetchOrders]);
+
 
   const handleCopyId = () => {
     if (student?.id) {
@@ -121,17 +144,17 @@ export default function StudentDetailsView({ studentId }: Props) {
     }
   };
 
-  const handleOpenReceipt = (order: StudentOrderPayment) => {
+  const handleOpenReceipt = (order: StudentOrderItem) => {
     setSelectedOrder(order);
     setOpenReceiptModal(true);
   };
 
   const handleAcceptReceipt = () => {
     if (selectedOrder) {
-      setOrdersList((prev) =>
+      setOrders((prev) =>
         prev.map((o) =>
           o.id === selectedOrder.id
-            ? { ...o, status: 'paid_active' as const, statusText: 'تم الدفع والتفعيل' }
+            ? { ...o, status: 'Paid', receiptVerified: true }
             : o
         )
       );
@@ -141,16 +164,17 @@ export default function StudentDetailsView({ studentId }: Props) {
 
   const handleRejectReceipt = () => {
     if (selectedOrder) {
-      setOrdersList((prev) =>
+      setOrders((prev) =>
         prev.map((o) =>
           o.id === selectedOrder.id
-            ? { ...o, status: 'under_review' as const, statusText: 'تم رفض الإيصال' }
+            ? { ...o, status: 'Cancelled', receiptVerified: false }
             : o
         )
       );
     }
     toast.error('تم رفض إيصال التحويل المصرفي');
   };
+
 
   if (loading) {
     return (
@@ -602,7 +626,10 @@ export default function StudentDetailsView({ studentId }: Props) {
                     fontWeight: 700,
                   }}
                 >
-                  {currentStudent.pendingOrdersCount ?? 0} معلق
+                  {orders.length > 0
+                    ? orders.filter((o) => o.status?.toLowerCase() === 'pending').length
+                    : (currentStudent.pendingOrdersCount ?? 0)}{' '}
+                  معلق
                 </Box>
                 <span>الطلبات والمدفوعات</span>
               </Stack>
@@ -975,7 +1002,7 @@ export default function StudentDetailsView({ studentId }: Props) {
         </Card>
       )}
 
-      {/* 6. Section: Orders & Payments Table (Informational Note) */}
+      {/* 6. Section: Orders & Payments Table (Live from API) */}
       {(currentTab === 'overview' || currentTab === 'orders') && (
         <Card
           sx={{
@@ -994,114 +1021,135 @@ export default function StudentDetailsView({ studentId }: Props) {
             </Typography>
           </Box>
 
-          <Box sx={{ overflowX: 'auto' }}>
-            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
-              <Box component="thead">
-                <Box component="tr" sx={{ bgcolor: '#F8FAFC', '& th': { p: 1.75, color: '#64748B', fontSize: 12.5, fontWeight: 700, textAlign: 'center' } }}>
-                  <Box component="th" sx={{ textAlign: 'right !important', pr: 3 }}>رقم الطلب</Box>
-                  <Box component="th">تفاصيل البند / الدورة</Box>
-                  <Box component="th">المبلغ</Box>
-                  <Box component="th">تاريخ الطلب</Box>
-                  <Box component="th">حالة الدفع</Box>
-                  <Box component="th">إجراءات</Box>
+          {ordersLoading && (
+            <Box sx={{ py: 6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <CircularProgress size={28} sx={{ color: '#008767' }} />
+            </Box>
+          )}
+
+          {!ordersLoading && orders.length === 0 && (
+            <Box sx={{ py: 6, textAlign: 'center', color: '#64748B' }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                لا توجد طلبات أو تحويلات مسجلة لهذا الطالب حالياً.
+              </Typography>
+            </Box>
+          )}
+
+          {!ordersLoading && orders.length > 0 && (
+            <Box sx={{ overflowX: 'auto' }}>
+              <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
+                <Box component="thead">
+                  <Box component="tr" sx={{ bgcolor: '#F8FAFC', '& th': { p: 1.75, color: '#64748B', fontSize: 12.5, fontWeight: 700, textAlign: 'center' } }}>
+                    <Box component="th" sx={{ textAlign: 'right !important', pr: 3 }}>رقم الطلب</Box>
+                    <Box component="th">تفاصيل البند / الدورة</Box>
+                    <Box component="th">المبلغ</Box>
+                    <Box component="th">تاريخ الطلب</Box>
+                    <Box component="th">حالة الدفع</Box>
+                    <Box component="th">إجراءات</Box>
+                  </Box>
+                </Box>
+
+                <Box component="tbody">
+                  {orders.map((order) => {
+                    const isPending = order.status?.toLowerCase() === 'pending';
+                    const isPaid = order.status?.toLowerCase() === 'paid';
+                    const isCancelled = order.status?.toLowerCase() === 'cancelled';
+                    const orderTitle =
+                      order.items?.map((i) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') ||
+                      'طلب دورة تدريبية';
+
+                    return (
+                      <Box
+                        component="tr"
+                        key={order.id}
+                        sx={{
+                          borderBottom: '1px solid #F1F5F9',
+                          '&:hover': { bgcolor: '#F8FAFC' },
+                          '& td': { p: 2, fontSize: 13, textAlign: 'center' },
+                        }}
+                      >
+                        {/* Order Number */}
+                        <Box component="td" sx={{ textAlign: 'right !important', pr: 3, fontWeight: 800, color: isPending ? '#B45309' : '#0F172A' }}>
+                          #ORD-{order.id.slice(0, 8).toUpperCase()}
+                        </Box>
+
+                        {/* Item Title */}
+                        <Box component="td" sx={{ color: '#0F172A', fontWeight: 700 }}>
+                          {orderTitle}
+                        </Box>
+
+                        {/* Amount */}
+                        <Box component="td" sx={{ color: '#0F172A', fontWeight: 800 }}>
+                          {(order.total ?? order.subtotal ?? 0).toLocaleString()} {currencySymbol}
+                        </Box>
+
+                        {/* Date */}
+                        <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {formatDate(order.creationTime)}
+                        </Box>
+
+                        {/* Status */}
+                        <Box component="td">
+                          <Chip
+                            label={isPending ? 'قيد المراجعة' : isPaid ? 'تم الدفع والتفعيل' : isCancelled ? 'ملغي' : order.status}
+                            size="small"
+                            sx={{
+                              bgcolor: isPending ? '#FEF3C7' : isPaid ? '#ECFDF5' : '#FEE2E2',
+                              color: isPending ? '#B45309' : isPaid ? '#059669' : '#DC2626',
+                              fontWeight: 700,
+                              fontSize: 11.5,
+                              height: 24,
+                              borderRadius: 1.5,
+                            }}
+                          />
+                        </Box>
+
+                        {/* Actions */}
+                        <Box component="td">
+                          {isPending || order.receiptUrl ? (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              onClick={() => handleOpenReceipt(order)}
+                              sx={{
+                                bgcolor: '#D97706',
+                                color: '#FFFFFF',
+                                fontWeight: 700,
+                                fontSize: 12,
+                                borderRadius: 1.5,
+                                px: 2,
+                                boxShadow: 'none',
+                                '&:hover': { bgcolor: '#B45309' },
+                              }}
+                            >
+                              فحص الإيصال
+                            </Button>
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleOpenReceipt(order)}
+                              sx={{
+                                borderRadius: 1.5,
+                                borderColor: '#E2E8F0',
+                                color: '#475569',
+                                fontWeight: 700,
+                                fontSize: 12,
+                                px: 2,
+                                '&:hover': { bgcolor: '#F8FAFC' },
+                              }}
+                            >
+                              عرض الإيصال
+                            </Button>
+                          )}
+                        </Box>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Box>
-
-              <Box component="tbody">
-                {ordersList.map((order, idx) => {
-                  const isReview = order.status === 'under_review';
-
-                  return (
-                    <Box
-                      component="tr"
-                      key={idx}
-                      sx={{
-                        borderBottom: '1px solid #F1F5F9',
-                        '&:hover': { bgcolor: '#F8FAFC' },
-                        '& td': { p: 2, fontSize: 13, textAlign: 'center' },
-                      }}
-                    >
-                      {/* Order Number */}
-                      <Box component="td" sx={{ textAlign: 'right !important', pr: 3, fontWeight: 800, color: isReview ? '#B45309' : '#0F172A' }}>
-                        {order.orderNumber}
-                      </Box>
-
-                      {/* Item Title */}
-                      <Box component="td" sx={{ color: '#0F172A', fontWeight: 700 }}>
-                        {order.itemTitle}
-                      </Box>
-
-                      {/* Amount */}
-                      <Box component="td" sx={{ color: '#0F172A', fontWeight: 800 }}>
-                        {order.amount}
-                      </Box>
-
-                      {/* Date */}
-                      <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>
-                        {order.orderDate}
-                      </Box>
-
-                      {/* Status */}
-                      <Box component="td">
-                        <Chip
-                          label={order.statusText}
-                          size="small"
-                          sx={{
-                            bgcolor: isReview ? '#FEF3C7' : '#ECFDF5',
-                            color: isReview ? '#B45309' : '#059669',
-                            fontWeight: 700,
-                            fontSize: 11.5,
-                            height: 24,
-                            borderRadius: 1.5,
-                          }}
-                        />
-                      </Box>
-
-                      {/* Actions */}
-                      <Box component="td">
-                        {isReview ? (
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => handleOpenReceipt(order)}
-                            sx={{
-                              bgcolor: '#D97706',
-                              color: '#FFFFFF',
-                              fontWeight: 700,
-                              fontSize: 12,
-                              borderRadius: 1.5,
-                              px: 2,
-                              boxShadow: 'none',
-                              '&:hover': { bgcolor: '#B45309' },
-                            }}
-                          >
-                            فحص الإيصال
-                          </Button>
-                        ) : (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleOpenReceipt(order)}
-                            sx={{
-                              borderRadius: 1.5,
-                              borderColor: '#E2E8F0',
-                              color: '#475569',
-                              fontWeight: 700,
-                              fontSize: 12,
-                              px: 2,
-                              '&:hover': { bgcolor: '#F8FAFC' },
-                            }}
-                          >
-                            عرض الفاتورة
-                          </Button>
-                        )}
-                      </Box>
-                    </Box>
-                  );
-                })}
-              </Box>
             </Box>
-          </Box>
+          )}
         </Card>
       )}
 

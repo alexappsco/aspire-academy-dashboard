@@ -112,6 +112,51 @@ export interface GetStudentCoursesParams {
   MaxResultCount?: number;
 }
 
+export interface StudentOrderItemCourse {
+  id: string;
+  price: number;
+  courseId?: string | null;
+  courseTitle?: string | null;
+  packageId?: string | null;
+  packageName?: string | null;
+}
+
+export interface StudentOrderItem {
+  id: string;
+  userId?: string;
+  buyerName?: string;
+  buyerEmail?: string;
+  buyerPhone?: string;
+  status: 'Pending' | 'Paid' | 'Cancelled' | string;
+  subtotal: number;
+  vatAmount: number;
+  discountAmount: number;
+  total: number;
+  appliedCouponCode?: string | null;
+  receiptUrl?: string | null;
+  receiptVerified: boolean;
+  items: StudentOrderItemCourse[];
+  creationTime: string;
+}
+
+export interface StudentOrderListResponse {
+  items: StudentOrderItem[];
+  totalCount: number;
+}
+
+export interface GetStudentOrdersParams {
+  Status?: string;
+  InstructorId?: string;
+  CourseId?: string;
+  UserId?: string;
+  StudentId?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+
 // UI / Legacy Domain Types for Dialogs and Details
 export interface StudentMockItem {
   id: string;

@@ -10,6 +10,8 @@ import type {
   StudentCourseListResponse,
   GetStudentCoursesParams,
   StudentCourseProgressResponse,
+  StudentOrderListResponse,
+  GetStudentOrdersParams,
 } from 'src/types/student';
 
 function buildQueryString(params: Record<string, unknown>): string {
@@ -183,4 +185,30 @@ export async function getStudentCourseProgress(
     };
   }
 }
+
+// ── Student Orders & Payments ──────────────────────────────
+
+export async function getStudentOrders(
+  id: string,
+  params: GetStudentOrdersParams = {}
+): Promise<ApiSingleResponse<StudentOrderListResponse>> {
+  try {
+    const qs = buildQueryString(params as Record<string, unknown>);
+    const res = await getData<StudentOrderListResponse>(`${endpoints.students.orders(id)}${qs}`);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data as StudentOrderListResponse };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to load student orders';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load student orders',
+    };
+  }
+}
+
 

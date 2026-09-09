@@ -12,12 +12,12 @@ import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 
 import Iconify from 'src/components/iconify';
-import { StudentOrderPayment } from 'src/types/student';
+import { StudentOrderPayment, StudentOrderItem } from 'src/types/student';
 
 export interface PaymentReceiptDialogProps {
   open: boolean;
   onClose: () => void;
-  order?: StudentOrderPayment | null;
+  order?: StudentOrderItem | StudentOrderPayment | null;
   studentName?: string;
   onAccept?: () => void;
   onReject?: () => void;
@@ -31,18 +31,29 @@ export default function PaymentReceiptDialog({
   onAccept,
   onReject,
 }: PaymentReceiptDialogProps) {
+  const currentOrder = order as any;
   // Default fallback values matching the official receipt specification
   const bankName = 'بنك مصر • Banque Misr';
   const receiptSubtitle = 'إشعار تحويل مصرفي إلكتروني رسمي';
-  const refCode = 'TRF-2026-9812450';
-  const amountNumber = '450.00';
+  const refCode = currentOrder?.id ? `ORD-${currentOrder.id.slice(0, 8).toUpperCase()}` : currentOrder?.orderNumber || 'TRF-2026-9812450';
+  const amountNumber = currentOrder?.total != null ? String(currentOrder.total) : currentOrder?.amount || '450.00';
   const currencyText = 'جنيه مصري (EGP)';
   const amountTafqeet = 'فقط أربعمائة وخمسون جنيهاً مصرياً لا غير';
-  const transactionTime = '12 أغسطس 2026 - 10:45 ص';
-  const senderText = `${studentName} (****4892)`;
+  const transactionTime = currentOrder?.creationTime
+    ? new Date(currentOrder.creationTime).toLocaleDateString('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : currentOrder?.orderDate || '12 أغسطس 2026 - 10:45 ص';
+  const senderText = `${currentOrder?.buyerName || studentName} (****4892)`;
   const beneficiaryText = 'أكاديمية أسباير للتعليم الطبي (Aspire)';
   const ibanText = 'EG3400020001000000284918234';
-  const purposeText = order?.itemTitle || 'رسوم دورة أساسيات أمراض القلب';
+  const purposeText = currentOrder?.items?.map((i: any) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') || currentOrder?.itemTitle || 'رسوم دورة تدريبية';
+  const receiptUrl = currentOrder?.receiptUrl;
+
 
   return (
     <Dialog
@@ -408,6 +419,33 @@ export default function PaymentReceiptDialog({
             </Typography>
           </Box>
         </Stack>
+
+        {receiptUrl && (
+          <Box sx={{ mb: 2, textAlign: 'center' }}>
+            <Button
+              variant="outlined"
+              size="small"
+              component="a"
+              href={receiptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              startIcon={<Iconify icon="solar:document-text-bold" width={16} />}
+              sx={{
+                borderRadius: 2,
+                borderColor: '#CBD5E1',
+                color: '#2563EB',
+                bgcolor: '#EFF6FF',
+                fontWeight: 700,
+                fontSize: 12.5,
+                px: 2,
+                py: 0.75,
+                '&:hover': { bgcolor: '#DBEAFE', borderColor: '#93C5FD' },
+              }}
+            >
+              معاينة صورة الإيصال المرفقة
+            </Button>
+          </Box>
+        )}
 
         {/* 6. Action Buttons */}
         <Stack direction="row" spacing={2} sx={{ gap: 2 }}>
