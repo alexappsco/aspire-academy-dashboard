@@ -421,6 +421,10 @@ export default function PaymentReceiptDialog({
             }}
             startIcon={<Iconify icon="solar:check-read-linear" width={20} />}
             sx={{
+              gap: 1.25,
+              '& .MuiButton-startIcon': {
+                m: 0,
+              },
               bgcolor: '#00966D',
               color: '#FFFFFF',
               fontWeight: 800,
@@ -447,6 +451,10 @@ export default function PaymentReceiptDialog({
             }}
             startIcon={<Iconify icon="mingcute:close-line" width={18} />}
             sx={{
+              gap: 1.25,
+              '& .MuiButton-startIcon': {
+                m: 0,
+              },
               bgcolor: '#E11D48',
               color: '#FFFFFF',
               fontWeight: 800,
