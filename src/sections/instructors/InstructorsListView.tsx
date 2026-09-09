@@ -371,6 +371,9 @@ export default function InstructorsListView() {
             value={tabFilter}
             onChange={(_, val) => setTabFilter(val)}
             sx={{
+              '& .MuiTabs-flexContainer': {
+                gap: { xs: 2, sm: 3 },
+              },
               '& .MuiTabs-indicator': {
                 bgcolor: '#10B981',
                 height: 3,

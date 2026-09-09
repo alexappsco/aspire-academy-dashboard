@@ -593,26 +593,37 @@ export default function InstructorDetailsView({ instructorId }: Props) {
               boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               height: '100%',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 1.5,
             }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600, mb: 0.25 }}>
                 إجمالي الدورات
               </Typography>
-              <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#ECFDF5', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Iconify icon="solar:book-bookmark-bold" width={18} />
-              </Box>
-            </Stack>
-
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, mb: 0.5 }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, my: 0.25, lineHeight: 1.2 }}>
                 {instructor.totalCourses}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#10B981', fontSize: 11.5, fontWeight: 600 }}>
+              <Typography sx={{ color: '#00A76F', fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>
                 {instructor.activeCourses} دورات نشطة معتمدة
               </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: '#E6F8F3',
+                color: '#00A76F',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:book-2-linear" width={22} />
             </Box>
           </Card>
         </Grid>
@@ -628,26 +639,37 @@ export default function InstructorDetailsView({ instructorId }: Props) {
               boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               height: '100%',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 1.5,
             }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600, mb: 0.25 }}>
                 إجمالي الطلاب
               </Typography>
-              <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Iconify icon="solar:users-group-rounded-bold" width={18} />
-              </Box>
-            </Stack>
-
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#2563EB', fontSize: 26, mb: 0.5 }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, my: 0.25, lineHeight: 1.2 }}>
                 {instructor.totalStudents.toLocaleString()}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#2563EB', fontSize: 11.5, fontWeight: 600 }}>
+              <Typography sx={{ color: '#2563EB', fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>
                 {instructor.studentsGrowth}
               </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: '#EFF6FF',
+                color: '#2563EB',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:users-group-rounded-linear" width={22} />
             </Box>
           </Card>
         </Grid>
@@ -663,31 +685,42 @@ export default function InstructorDetailsView({ instructorId }: Props) {
               boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               height: '100%',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 1.5,
             }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600, mb: 0.25 }}>
                 ساعات التدريب
               </Typography>
-              <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#F5F3FF', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Iconify icon="solar:clock-circle-bold" width={18} />
-              </Box>
-            </Stack>
-
-            <Box>
-              <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', gap: 0.75 }}>
-                <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26 }}>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'baseline', gap: 0.5, my: 0.25 }}>
+                <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, lineHeight: 1.2 }}>
                   {instructor.trainingHours}
                 </Typography>
-                <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 700 }}>
+                <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                   ساعة
                 </Typography>
               </Stack>
-              <Typography variant="caption" sx={{ color: '#7C3AED', fontSize: 11.5, fontWeight: 600, mt: 0.5, display: 'block' }}>
+              <Typography sx={{ color: '#9333EA', fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>
                 ساعات معتمدة
               </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: '#FAF5FF',
+                color: '#9333EA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:clock-circle-bold" width={22} />
             </Box>
           </Card>
         </Grid>
@@ -703,26 +736,42 @@ export default function InstructorDetailsView({ instructorId }: Props) {
               boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               height: '100%',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 1.5,
             }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600, mb: 0.25 }}>
                 إجمالي المبيعات
               </Typography>
-              <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Iconify icon="solar:wallet-bold" width={18} />
-              </Box>
-            </Stack>
-
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, mb: 0.5 }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, my: 0.25, lineHeight: 1.2 }}>
                 {instructor.totalSales.toLocaleString()}
               </Typography>
-              <Typography variant="caption" sx={{ color: '#059669', fontSize: 11.5, fontWeight: 600 }}>
-                {instructor.currency} أرباح تراكمية
-              </Typography>
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
+                <Typography sx={{ color: '#00A76F', fontSize: 12, fontWeight: 700 }}>
+                  {instructor.currency}
+                </Typography>
+                <Typography sx={{ color: '#94A3B8', fontSize: 11, fontWeight: 500 }}>
+                  أرباح تراكمية
+                </Typography>
+              </Stack>
+            </Box>
+
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: '#E6F8F3',
+                color: '#00A76F',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:dollar-circle-linear" width={22} />
             </Box>
           </Card>
         </Grid>
@@ -738,29 +787,40 @@ export default function InstructorDetailsView({ instructorId }: Props) {
               boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
               height: '100%',
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 1.5,
             }}
           >
-            <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600, mb: 0.25 }}>
                 تقييم المحاضر
               </Typography>
-              <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#FFFBEB', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Iconify icon="solar:smile-circle-bold" width={18} />
-              </Box>
-            </Stack>
-
-            <Box>
-              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <Iconify icon="solar:star-bold" width={22} sx={{ color: '#F59E0B' }} />
-                <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26 }}>
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75, my: 0.25 }}>
+                <Iconify icon="solar:star-bold" width={18} sx={{ color: '#F59E0B' }} />
+                <Typography variant="h4" sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26, lineHeight: 1.2 }}>
                   {instructor.rating}
                 </Typography>
               </Stack>
-              <Typography variant="caption" sx={{ color: '#D97706', fontSize: 11.5, fontWeight: 600 }}>
+              <Typography sx={{ color: '#D97706', fontSize: 11.5, fontWeight: 600, lineHeight: 1.3 }}>
                 نسبة رضا {instructor.satisfactionRate}%
               </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                bgcolor: '#FEF3C7',
+                color: '#D97706',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:smile-circle-bold" width={22} />
             </Box>
           </Card>
         </Grid>
@@ -776,6 +836,9 @@ export default function InstructorDetailsView({ instructorId }: Props) {
           }}
           sx={{
             borderBottom: '1px solid #E2E8F0',
+            '& .MuiTabs-flexContainer': {
+              gap: { xs: 3, sm: 5, md: 7 },
+            },
             '& .MuiTabs-indicator': {
               bgcolor: '#2563EB',
               height: 3,
@@ -787,36 +850,57 @@ export default function InstructorDetailsView({ instructorId }: Props) {
           <Tab
             value="courses"
             label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <Iconify icon="solar:folder-with-files-bold" width={18} />
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
+                <Iconify icon="solar:archive-minimalistic-line" width={20} />
                 <span>الدورات المنشورة ({coursesList.length})</span>
               </Stack>
             }
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{
+              fontWeight: 700,
+              fontSize: 15,
+              minHeight: 52,
+              px: 1,
+              color: '#475569',
+              '&.Mui-selected': { color: '#2563EB' },
+            }}
           />
 
           {/* Tab 2: Subscription Requests */}
           <Tab
             value="subscriptions"
             label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <Iconify icon="solar:clipboard-list-bold" width={18} />
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
+                <Iconify icon="solar:clipboard-check-outline" width={20} />
                 <span>طلبات الاشتراك</span>
               </Stack>
             }
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{
+              fontWeight: 700,
+              fontSize: 15,
+              minHeight: 52,
+              px: 1,
+              color: '#475569',
+              '&.Mui-selected': { color: '#2563EB' },
+            }}
           />
 
           {/* Tab 3: Reviews */}
           <Tab
             value="reviews"
             label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <Iconify icon="solar:star-bold" width={18} />
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
+                <Iconify icon="solar:star-outline" width={20} />
                 <span>التقييمات</span>
               </Stack>
             }
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{
+              fontWeight: 700,
+              fontSize: 15,
+              minHeight: 52,
+              px: 1,
+              color: '#475569',
+              '&.Mui-selected': { color: '#2563EB' },
+            }}
           />
         </Tabs>
       </Box>
@@ -1315,48 +1399,32 @@ export default function InstructorDetailsView({ instructorId }: Props) {
                           </Typography>
                         </Box>
 
-                        {/* Course Rating & Comment */}
-                        <Box component="td" sx={{ maxWidth: 260, textAlign: 'center' }}>
-                          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
-                            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
-                              <Typography sx={{ fontWeight: 800, color: '#0F172A', fontSize: 13 }}>
-                                {rev.courseRating.toFixed(1)}
-                              </Typography>
-                              <Rating value={rev.courseRating} precision={0.5} readOnly size="small" />
-                            </Stack>
-                            <Typography
-                              sx={{
-                                color: '#64748B',
-                                fontSize: 12,
-                                fontStyle: 'italic',
-                                lineHeight: 1.4,
-                              }}
-                            >
-                              "{rev.courseComment}"
-                            </Typography>
-                          </Stack>
+                        {/* Course Comment Only */}
+                        <Box component="td" sx={{ maxWidth: 320, textAlign: 'center', py: 2 }}>
+                          <Typography
+                            sx={{
+                              color: '#334155',
+                              fontSize: 13,
+                              lineHeight: 1.6,
+                              fontWeight: 500,
+                            }}
+                          >
+                            "{rev.courseComment}"
+                          </Typography>
                         </Box>
 
-                        {/* Instructor Rating & Comment */}
-                        <Box component="td" sx={{ maxWidth: 260, textAlign: 'center' }}>
-                          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
-                            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
-                              <Typography sx={{ fontWeight: 800, color: '#0F172A', fontSize: 13 }}>
-                                {rev.instructorRating.toFixed(1)}
-                              </Typography>
-                              <Rating value={rev.instructorRating} precision={0.5} readOnly size="small" />
-                            </Stack>
-                            <Typography
-                              sx={{
-                                color: '#64748B',
-                                fontSize: 12,
-                                fontStyle: 'italic',
-                                lineHeight: 1.4,
-                              }}
-                            >
-                              "{rev.instructorComment}"
-                            </Typography>
-                          </Stack>
+                        {/* Instructor Comment Only */}
+                        <Box component="td" sx={{ maxWidth: 320, textAlign: 'center', py: 2 }}>
+                          <Typography
+                            sx={{
+                              color: '#334155',
+                              fontSize: 13,
+                              lineHeight: 1.6,
+                              fontWeight: 500,
+                            }}
+                          >
+                            "{rev.instructorComment}"
+                          </Typography>
                         </Box>
 
                         {/* Date */}
