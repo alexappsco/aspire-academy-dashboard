@@ -63,7 +63,7 @@ export default function PaymentReceiptDialog({
         },
       }}
     >
-      {/* 1. Header: Title & Close Button */}
+      {/* 1. Header: Title on Right, Close Button on Left */}
       <Box
         sx={{
           display: 'flex',
@@ -73,6 +73,17 @@ export default function PaymentReceiptDialog({
           borderBottom: '1px solid #F1F5F9',
         }}
       >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            color: '#0F172A',
+            fontSize: 18,
+          }}
+        >
+          فحص إيصال الدفع
+        </Typography>
+
         <IconButton
           onClick={onClose}
           size="small"
@@ -85,21 +96,10 @@ export default function PaymentReceiptDialog({
         >
           <Iconify icon="mingcute:close-line" width={18} />
         </IconButton>
-
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 800,
-            color: '#0F172A',
-            fontSize: 18,
-          }}
-        >
-          فحص إيصال الدفع
-        </Typography>
       </Box>
 
       <DialogContent sx={{ p: 0, pt: 2.5 }}>
-        {/* 2. Bank Header Banner */}
+        {/* 2. Bank Header Banner: Bank Info on Right, Status Badge on Left */}
         <Stack
           direction="row"
           sx={{
@@ -108,6 +108,34 @@ export default function PaymentReceiptDialog({
             mb: 2.5,
           }}
         >
+          {/* Bank Info & Logo (Right side in RTL) */}
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2.5,
+                bgcolor: '#E6F8F3',
+                border: '1px solid #A7F3D0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Box component="img" src="/icons/build-green.svg" alt="Bank Logo" sx={{ width: 24, height: 24 }} />
+            </Box>
+
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ fontWeight: 800, color: '#0F172A', fontSize: 15, lineHeight: 1.3 }}>
+                {bankName}
+              </Typography>
+              <Typography sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 500, mt: 0.25 }}>
+                {receiptSubtitle}
+              </Typography>
+            </Box>
+          </Stack>
+
           {/* Status Chip & Ref (Left side in RTL) */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <Chip
@@ -141,35 +169,6 @@ export default function PaymentReceiptDialog({
               {refCode}
             </Typography>
           </Box>
-
-          {/* Bank Info & Logo (Right side in RTL) */}
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography sx={{ fontWeight: 800, color: '#0F172A', fontSize: 15, lineHeight: 1.3 }}>
-                {bankName}
-              </Typography>
-              <Typography sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 500, mt: 0.25 }}>
-                {receiptSubtitle}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: 2.5,
-                bgcolor: '#E6F8F3',
-                border: '1px solid #A7F3D0',
-                color: '#00966D',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Iconify icon="solar:buildings-2-bold" width={24} />
-            </Box>
-          </Stack>
         </Stack>
 
         {/* 3. Amount Box */}
@@ -206,15 +205,6 @@ export default function PaymentReceiptDialog({
           >
             <Typography
               sx={{
-                fontWeight: 800,
-                color: '#007A78',
-                fontSize: { xs: 15, sm: 17 },
-              }}
-            >
-              {currencyText}
-            </Typography>
-            <Typography
-              sx={{
                 fontWeight: 900,
                 color: '#0F172A',
                 fontSize: { xs: 32, sm: 38 },
@@ -223,6 +213,15 @@ export default function PaymentReceiptDialog({
               }}
             >
               {amountNumber}
+            </Typography>
+            <Typography
+              sx={{
+                fontWeight: 800,
+                color: '#007A78',
+                fontSize: { xs: 15, sm: 17 },
+              }}
+            >
+              {currencyText}
             </Typography>
           </Stack>
 
@@ -238,7 +237,7 @@ export default function PaymentReceiptDialog({
           </Typography>
         </Box>
 
-        {/* 4. Transaction Details Card with Watermark */}
+        {/* 4. Transaction Details Card with Shield Watermark */}
         <Box
           sx={{
             position: 'relative',
@@ -250,29 +249,32 @@ export default function PaymentReceiptDialog({
             mb: 2.5,
           }}
         >
-          {/* Subtle Shield Watermark */}
+          {/* Custom Shield Watermark from /icons/sheat.svg */}
           <Box
+            component="img"
+            src="/icons/sheat.svg"
+            alt="Shield Watermark"
             sx={{
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              opacity: 0.035,
+              width: 220,
+              height: 220,
+              opacity: 0.045,
               pointerEvents: 'none',
               zIndex: 0,
             }}
-          >
-            <Iconify icon="solar:shield-check-bold" width={240} sx={{ color: '#0F172A' }} />
-          </Box>
+          />
 
           <Stack spacing={1.5} sx={{ position: 'relative', zIndex: 1 }}>
             {/* Row 1: Reference */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700, fontFamily: 'monospace, sans-serif' }}>
-                {refCode}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 رقم المرجع المصرفي
+              </Typography>
+              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700, fontFamily: 'monospace, sans-serif' }}>
+                {refCode}
               </Typography>
             </Box>
 
@@ -280,11 +282,11 @@ export default function PaymentReceiptDialog({
 
             {/* Row 2: Date & Time */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
-                {transactionTime}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 تاريخ وتوقيت العملية
+              </Typography>
+              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
+                {transactionTime}
               </Typography>
             </Box>
 
@@ -292,11 +294,11 @@ export default function PaymentReceiptDialog({
 
             {/* Row 3: Sender Name */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
-                {senderText}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 اسم المحول (الراسل)
+              </Typography>
+              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
+                {senderText}
               </Typography>
             </Box>
 
@@ -304,11 +306,11 @@ export default function PaymentReceiptDialog({
 
             {/* Row 4: Beneficiary Name */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#007A78', fontSize: 13.5, fontWeight: 800 }}>
-                {beneficiaryText}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 اسم المستفيد
+              </Typography>
+              <Typography sx={{ color: '#007A78', fontSize: 13.5, fontWeight: 800 }}>
+                {beneficiaryText}
               </Typography>
             </Box>
 
@@ -316,11 +318,11 @@ export default function PaymentReceiptDialog({
 
             {/* Row 5: IBAN */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#0F172A', fontSize: 12.5, fontWeight: 700, fontFamily: 'monospace, sans-serif', letterSpacing: 0.2 }}>
-                {ibanText}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 الحساب المحول إليه (IBAN)
+              </Typography>
+              <Typography sx={{ color: '#0F172A', fontSize: 12.5, fontWeight: 700, fontFamily: 'monospace, sans-serif', letterSpacing: 0.2 }}>
+                {ibanText}
               </Typography>
             </Box>
 
@@ -328,17 +330,17 @@ export default function PaymentReceiptDialog({
 
             {/* Row 6: Purpose */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
-                {purposeText}
-              </Typography>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
                 الغرض من التحويل
+              </Typography>
+              <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
+                {purposeText}
               </Typography>
             </Box>
           </Stack>
         </Box>
 
-        {/* 5. Verification Footer Seal & QR */}
+        {/* 5. Verification Footer Seal & QR: Stamp on Right, QR on Left */}
         <Stack
           direction="row"
           sx={{
@@ -349,7 +351,40 @@ export default function PaymentReceiptDialog({
             mb: 2.5,
           }}
         >
-          {/* Left: QR Code info */}
+          {/* Right: Stamp & Note (Right side in RTL) */}
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+            {/* Circular Stamp Badge */}
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                border: '1.5px dashed #00A76F',
+                bgcolor: '#ECFDF5',
+                color: '#059669',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Typography sx={{ fontSize: 9.5, fontWeight: 800, lineHeight: 1 }}>معتمد</Typography>
+              <Typography sx={{ fontSize: 7.5, fontWeight: 800, lineHeight: 1, mt: 0.25 }}>BM-AUTH</Typography>
+            </Box>
+
+            <Box sx={{ textAlign: 'right' }}>
+              <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
+                إيصال إلكتروني صادر ومعتمد
+              </Typography>
+              <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 500, mt: 0.25 }}>
+                لا يتطلب توقيعاً خطياً من البنك
+              </Typography>
+            </Box>
+          </Stack>
+
+          {/* Left: QR Code info (Left side in RTL) */}
           <Box sx={{ textAlign: 'center' }}>
             <Box
               sx={{
@@ -372,44 +407,11 @@ export default function PaymentReceiptDialog({
               VERIFIED-REC
             </Typography>
           </Box>
-
-          {/* Right: Stamp & Note */}
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
-                إيصال إلكتروني صادر ومعتمد
-              </Typography>
-              <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 500, mt: 0.25 }}>
-                لا يتطلب توقيعاً خطياً من البنك
-              </Typography>
-            </Box>
-
-            {/* Circular Stamp Badge */}
-            <Box
-              sx={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                border: '1.5px dashed #00A76F',
-                bgcolor: '#ECFDF5',
-                color: '#059669',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Typography sx={{ fontSize: 9.5, fontWeight: 800, lineHeight: 1 }}>معتمد</Typography>
-              <Typography sx={{ fontSize: 7.5, fontWeight: 800, lineHeight: 1, mt: 0.25 }}>BM-AUTH</Typography>
-            </Box>
-          </Stack>
         </Stack>
 
         {/* 6. Action Buttons */}
         <Stack direction="row" spacing={2} sx={{ gap: 2 }}>
-          {/* Accept / Approve Button */}
+          {/* Accept / Approve Button (Right side in RTL) */}
           <Button
             variant="contained"
             fullWidth
@@ -435,7 +437,7 @@ export default function PaymentReceiptDialog({
             قبول
           </Button>
 
-          {/* Reject Button */}
+          {/* Reject Button (Left side in RTL) */}
           <Button
             variant="contained"
             fullWidth
