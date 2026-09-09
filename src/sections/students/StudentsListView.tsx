@@ -303,7 +303,6 @@ export default function StudentsListView() {
               value="all"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>الكل</span>
                   <Box
                     sx={{
                       px: 1,
@@ -317,6 +316,7 @@ export default function StudentsListView() {
                   >
                     {totalCount}
                   </Box>
+                  <span>الكل</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -325,7 +325,6 @@ export default function StudentsListView() {
               value="active"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>مفعل</span>
                   <Box
                     sx={{
                       px: 1,
@@ -339,6 +338,7 @@ export default function StudentsListView() {
                   >
                     {activeCount}
                   </Box>
+                  <span>مفعل</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -347,7 +347,6 @@ export default function StudentsListView() {
               value="inactive"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>معطل</span>
                   <Box
                     sx={{
                       px: 1,
@@ -361,6 +360,7 @@ export default function StudentsListView() {
                   >
                     {inactiveCount}
                   </Box>
+                  <span>معطل</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -378,29 +378,6 @@ export default function StudentsListView() {
             gap: 2,
           }}
         >
-          {/* Status Dropdown Filter */}
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              displayEmpty
-              sx={{
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                fontSize: 13.5,
-                fontWeight: 600,
-                color: '#1E293B',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#E2E8F0',
-                },
-              }}
-            >
-              <MenuItem value="all">الحالة</MenuItem>
-              <MenuItem value="active">مفعل</MenuItem>
-              <MenuItem value="inactive">معطل</MenuItem>
-            </Select>
-          </FormControl>
-
           {/* Search Input */}
           <TextField
             fullWidth
@@ -432,6 +409,29 @@ export default function StudentsListView() {
               },
             }}
           />
+
+          {/* Status Dropdown Filter */}
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                fontWeight: 600,
+                color: '#1E293B',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                },
+              }}
+            >
+              <MenuItem value="all">الحالة</MenuItem>
+              <MenuItem value="active">مفعل</MenuItem>
+              <MenuItem value="inactive">معطل</MenuItem>
+            </Select>
+          </FormControl>
         </Stack>
 
         {/* SharedTable */}

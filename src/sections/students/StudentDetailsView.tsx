@@ -471,7 +471,6 @@ export default function StudentDetailsView({ studentId }: Props) {
             value="courses"
             label={
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <span>الدورات</span>
                 <Box
                   sx={{
                     px: 1,
@@ -485,6 +484,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 >
                   {MOCK_ENROLLED_COURSES.length}
                 </Box>
+                <span>الدورات</span>
               </Stack>
             }
             sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
@@ -493,7 +493,6 @@ export default function StudentDetailsView({ studentId }: Props) {
             value="orders"
             label={
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <span>الطلبات والمدفوعات</span>
                 <Box
                   sx={{
                     px: 1,
@@ -507,6 +506,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 >
                   1 معلق
                 </Box>
+                <span>الطلبات والمدفوعات</span>
               </Stack>
             }
             sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
@@ -640,38 +640,38 @@ export default function StudentDetailsView({ studentId }: Props) {
 
               <Stack spacing={2}>
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {student.country}
-                  </Typography>
                   <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
                     الدولة:
                   </Typography>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                    {student.country}
+                  </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {student.university}
-                  </Typography>
                   <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
                     الجامعة:
                   </Typography>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                    {student.university}
+                  </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {student.college}
-                  </Typography>
                   <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
                     الكلية:
                   </Typography>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                    {student.college}
+                  </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {student.academicYear}
-                  </Typography>
                   <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
                     المرحلة الدراسية:
+                  </Typography>
+                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                    {student.academicYear}
                   </Typography>
                 </Box>
               </Stack>
