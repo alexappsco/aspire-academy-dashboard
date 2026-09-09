@@ -83,6 +83,14 @@ export const endpoints = {
     delete: (id: string) => `/admin/contact-us-messages/${id}`,
     updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
   },
+  students: {
+    list: '/admin/students',
+    details: (id: string) => `/admin/students/${id}`,
+    delete: (id: string) => `/admin/students/${id}`,
+    courses: (id: string) => `/admin/students/${id}/courses`,
+    activate: (id: string) => `/admin/students/${id}/activate`,
+    deactivate: (id: string) => `/admin/students/${id}/deactivate`,
+  },
   dashboard: {
     get: '/admin/dashboard',
   },

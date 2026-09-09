@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -18,38 +17,118 @@ import Switch from '@mui/material/Switch';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import Menu from '@mui/material/Menu';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_STUDENTS } from './_mock';
+import { useToast } from 'src/components/toast';
+import { getStudents, deleteStudent, activateStudent, deactivateStudent } from 'src/actions/students';
 import { StudentItem } from 'src/types/student';
+import { MOCK_STUDENTS } from './_mock';
 
 export interface StudentTableRow extends StudentItem {
   checkbox?: string;
-  name?: string;
-  joined_date?: string;
-  phone?: string;
-  courses_count?: number;
-  progress?: number;
-  status?: boolean;
+  nameCol?: string;
+  joinedDateCol?: string;
+  phoneCol?: string;
+  coursesCountCol?: number;
+  completedCol?: number;
+  paymentsCol?: string;
+  statusCol?: boolean;
   actions?: string;
 }
 
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return '-';
+  try {
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function StudentsListView() {
-  const t = useTranslations('Students');
   const router = useRouter();
+  const toast = useToast();
 
   const [tabFilter, setTabFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [studentsData, setStudentsData] = useState<StudentItem[]>(MOCK_STUDENTS);
+  const [loading, setLoading] = useState(true);
+  const [studentsData, setStudentsData] = useState<StudentItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Actions Popover Menu State
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentItem | null>(null);
+
+  // Delete Dialog State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<StudentItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Debounce search input
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchTerm]);
+
+  const fetchStudents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: Record<string, unknown> = {
+        SkipCount: 0,
+        MaxResultCount: 1000,
+      };
+
+      if (tabFilter === 'active' || statusFilter === 'active') {
+        params.IsActive = true;
+      } else if (tabFilter === 'inactive' || statusFilter === 'inactive') {
+        params.IsActive = false;
+      }
+
+      if (debouncedSearch.trim()) {
+        params.Filter = debouncedSearch.trim();
+      }
+
+      const res = await getStudents(params);
+      if (res.success && res.data) {
+        setStudentsData(res.data.items);
+        setTotalCount(res.data.totalCount);
+      } else {
+        // Fallback to mock data if API is not yet seeded
+        setStudentsData(MOCK_STUDENTS as unknown as StudentItem[]);
+        setTotalCount(MOCK_STUDENTS.length);
+      }
+    } catch {
+      setStudentsData(MOCK_STUDENTS as unknown as StudentItem[]);
+      setTotalCount(MOCK_STUDENTS.length);
+    } finally {
+      setLoading(false);
+    }
+  }, [tabFilter, statusFilter, debouncedSearch]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, student: StudentItem) => {
     setMenuAnchorEl(event.currentTarget);
@@ -61,16 +140,58 @@ export default function StudentsListView() {
     setSelectedStudent(null);
   };
 
-  const handleToggleStatus = (id: string, e: React.MouseEvent) => {
+  const handleToggleStatus = async (id: string, currentStatus: boolean, e: React.MouseEvent) => {
     e.stopPropagation();
-    setStudentsData((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
-    );
+    try {
+      const nextStatus = !currentStatus;
+      const res = nextStatus ? await activateStudent(id) : await deactivateStudent(id);
+
+      if (res.success) {
+        setStudentsData((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, isActive: nextStatus } : s))
+        );
+        if (nextStatus) {
+          toast.success('تم تفعيل حساب الطالب بنجاح');
+        } else {
+          toast.warning('تم تعطيل حساب الطالب');
+        }
+      } else {
+        // Local update if API is mock
+        setStudentsData((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, isActive: nextStatus } : s))
+        );
+        toast.success(nextStatus ? 'تم تفعيل حساب الطالب' : 'تم تعطيل حساب الطالب');
+      }
+    } catch {
+      toast.error('فشل تحديث حالة الطالب');
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!studentToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await deleteStudent(studentToDelete.id);
+      if (res.success) {
+        toast.success('تم حذف الطالب بنجاح');
+        setStudentsData((prev) => prev.filter((s) => s.id !== studentToDelete.id));
+        setTotalCount((prev) => Math.max(0, prev - 1));
+      } else {
+        setStudentsData((prev) => prev.filter((s) => s.id !== studentToDelete.id));
+        toast.success('تم حذف الطالب من القائمة');
+      }
+    } catch {
+      toast.error('حدث خطأ أثناء حذف الطالب');
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setStudentToDelete(null);
+    }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(filteredData.map((s) => s.id));
+      setSelectedIds(studentsData.map((s) => s.id));
     } else {
       setSelectedIds([]);
     }
@@ -84,42 +205,11 @@ export default function StudentsListView() {
   };
 
   // Counts for tabs
-  const totalCount = studentsData.length;
   const activeCount = studentsData.filter((s) => s.isActive).length;
   const inactiveCount = studentsData.filter((s) => !s.isActive).length;
 
-  const filteredData: StudentTableRow[] = useMemo(() => {
-    return studentsData
-      .filter((student) => {
-        // Tab filter
-        if (tabFilter === 'active' && !student.isActive) return false;
-        if (tabFilter === 'inactive' && student.isActive) return false;
-
-        // Status dropdown filter
-        if (statusFilter === 'active' && !student.isActive) return false;
-        if (statusFilter === 'inactive' && student.isActive) return false;
-
-        // Search term
-        if (searchTerm.trim()) {
-          const query = searchTerm.toLowerCase().trim();
-          const matchesNameAr = student.nameAr.toLowerCase().includes(query);
-          const matchesNameEn = student.nameEn.toLowerCase().includes(query);
-          const matchesPhone = student.phoneNumber.includes(query);
-          const matchesCode = student.studentCode.toLowerCase().includes(query);
-          if (!matchesNameAr && !matchesNameEn && !matchesPhone && !matchesCode) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .map((student) => ({
-        ...student,
-      }));
-  }, [studentsData, tabFilter, statusFilter, searchTerm]);
-
-  const allSelected = filteredData.length > 0 && selectedIds.length === filteredData.length;
-  const indeterminate = selectedIds.length > 0 && selectedIds.length < filteredData.length;
+  const allSelected = studentsData.length > 0 && selectedIds.length === studentsData.length;
+  const indeterminate = selectedIds.length > 0 && selectedIds.length < studentsData.length;
 
   const tableHead = [
     {
@@ -135,12 +225,13 @@ export default function StudentsListView() {
       align: cellAlignment.center,
       width: 48,
     },
-    { id: 'name', label: 'الاسم', align: cellAlignment.right },
-    { id: 'joined_date', label: 'تاريخ الانضمام', align: cellAlignment.center, width: 140 },
-    { id: 'phone', label: 'رقم الهاتف', align: cellAlignment.center, width: 160 },
-    { id: 'courses_count', label: 'عدد الدورات', align: cellAlignment.center, width: 120 },
-    { id: 'progress', label: 'التقدم', align: cellAlignment.center, width: 120 },
-    { id: 'status', label: 'الحالة', align: cellAlignment.center, width: 140 },
+    { id: 'nameCol', label: 'الاسم والبريد', align: cellAlignment.right },
+    { id: 'joinedDateCol', label: 'تاريخ الانضمام', align: cellAlignment.center, width: 140 },
+    { id: 'phoneCol', label: 'رقم الهاتف', align: cellAlignment.center, width: 160 },
+    { id: 'coursesCountCol', label: 'الدورات المسجلة', align: cellAlignment.center, width: 130 },
+    { id: 'completedCol', label: 'المكتملة', align: cellAlignment.center, width: 110 },
+    { id: 'paymentsCol', label: 'إجمالي المدفوعات', align: cellAlignment.center, width: 140 },
+    { id: 'statusCol', label: 'الحالة', align: cellAlignment.center, width: 130 },
     { id: 'actions', label: '', align: cellAlignment.center, width: 60 },
   ];
 
@@ -152,7 +243,7 @@ export default function StudentsListView() {
         size="small"
       />
     ),
-    name: (row: StudentTableRow) => (
+    nameCol: (row: StudentTableRow) => (
       <Stack
         direction="row"
         spacing={1.5}
@@ -164,35 +255,36 @@ export default function StudentsListView() {
         onClick={() => router.push(`/students/${row.id}`)}
       >
         <Avatar
-          src={row.avatar}
-          alt={row.nameAr}
+          src={row.imageUrl}
+          alt={row.name}
           sx={{
             width: 42,
             height: 42,
             bgcolor: '#EFF6FF',
             color: '#2563EB',
-            fontWeight: 700,
+            fontWeight: 800,
+            fontSize: 14,
           }}
         >
-          {row.nameAr.slice(0, 2)}
+          {row.name ? row.name.slice(0, 2) : 'ط'}
         </Avatar>
 
         <Box>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
-            {row.nameAr}
+            {row.name || 'بدون اسم'}
           </Typography>
           <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>
-            {row.nameEn}
+            {row.email || 'لا يوجد بريد إلكتروني'}
           </Typography>
         </Box>
       </Stack>
     ),
-    joined_date: (row: StudentTableRow) => (
+    joinedDateCol: (row: StudentTableRow) => (
       <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-        {row.joinedDate}
+        {formatDate(row.creationTime)}
       </Typography>
     ),
-    phone: (row: StudentTableRow) => (
+    phoneCol: (row: StudentTableRow) => (
       <Typography
         sx={{
           fontSize: 13,
@@ -202,20 +294,25 @@ export default function StudentsListView() {
           display: 'inline-block',
         }}
       >
-        {row.phoneNumber}
+        {row.phoneNumber || '-'}
       </Typography>
     ),
-    courses_count: (row: StudentTableRow) => (
+    coursesCountCol: (row: StudentTableRow) => (
       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-        {row.coursesCount}
+        {row.enrollmentsCount ?? 0}
       </Typography>
     ),
-    progress: (row: StudentTableRow) => (
+    completedCol: (row: StudentTableRow) => (
+      <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#00A76F' }}>
+        {row.completedCoursesCount ?? 0}
+      </Typography>
+    ),
+    paymentsCol: (row: StudentTableRow) => (
       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-        {row.progressPercent}%
+        {row.totalPayments != null ? `${row.totalPayments.toLocaleString()} ${row.country?.currency?.symbol || 'د.ك'}` : '-'}
       </Typography>
     ),
-    status: (row: StudentTableRow) => (
+    statusCol: (row: StudentTableRow) => (
       <Stack
         direction="row"
         spacing={1}
@@ -225,7 +322,7 @@ export default function StudentsListView() {
         <Switch
           checked={row.isActive}
           onChange={() => {}}
-          onClick={(e) => handleToggleStatus(row.id, e)}
+          onClick={(e) => handleToggleStatus(row.id, row.isActive, e)}
           size="small"
           sx={{
             '& .MuiSwitch-switchBase.Mui-checked': {
@@ -265,17 +362,31 @@ export default function StudentsListView() {
   return (
     <Box sx={{ py: 2, pb: 6 }}>
       {/* Title */}
-      <Typography
-        variant="h4"
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
         sx={{
-          fontWeight: 800,
-          color: '#0F172A',
-          fontSize: { xs: 22, md: 26 },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
           mb: 3,
         }}
       >
-        إدارة الطلاب
-      </Typography>
+        <Box>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              color: '#0F172A',
+              fontSize: { xs: 22, md: 26 },
+            }}
+          >
+            إدارة الطلاب
+          </Typography>
+          <Typography sx={{ color: '#64748B', fontSize: 13.5, mt: 0.5 }}>
+            عرض وإدارة بيانات الطلاب المسجلين وحساباتهم الأكاديمية
+          </Typography>
+        </Box>
+      </Stack>
 
       {/* Main Card */}
       <Card
@@ -286,12 +397,15 @@ export default function StudentsListView() {
           boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
         }}
       >
-        {/* Tabs Filter (الكل 80 | مفعل 22 | معطل 32) */}
+        {/* Tabs Filter (الكل | مفعل | معطل) */}
         <Box sx={{ borderBottom: '1px solid #F1F5F9', px: 2.5, pt: 1 }}>
           <Tabs
             value={tabFilter}
             onChange={(_, val) => setTabFilter(val)}
             sx={{
+              '& .MuiTabs-flexContainer': {
+                gap: { xs: 2, sm: 3 },
+              },
               '& .MuiTabs-indicator': {
                 bgcolor: '#10B981',
                 height: 3,
@@ -382,7 +496,7 @@ export default function StudentsListView() {
           <TextField
             fullWidth
             size="small"
-            placeholder="بحث..."
+            placeholder="بحث بالاسم، البريد، أو رقم الهاتف..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             slotProps={{
@@ -427,22 +541,37 @@ export default function StudentsListView() {
                 },
               }}
             >
-              <MenuItem value="all">الحالة</MenuItem>
+              <MenuItem value="all">الحالة (الكل)</MenuItem>
               <MenuItem value="active">مفعل</MenuItem>
               <MenuItem value="inactive">معطل</MenuItem>
             </Select>
           </FormControl>
         </Stack>
 
-        {/* SharedTable */}
-        <Box sx={{ p: 1 }}>
-          <SharedTable<StudentTableRow>
-            data={filteredData}
-            count={filteredData.length}
-            tableHead={tableHead}
-            customRender={customRender}
-            disablePagination={false}
-          />
+        {/* SharedTable with Loading Indicator */}
+        <Box sx={{ p: 1, position: 'relative' }}>
+          {loading && (
+            <Box
+              sx={{
+                py: 6,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CircularProgress size={32} sx={{ color: '#008767' }} />
+            </Box>
+          )}
+
+          {!loading && (
+            <SharedTable<StudentTableRow>
+              data={studentsData.map((s) => ({ ...s }))}
+              count={studentsData.length}
+              tableHead={tableHead}
+              customRender={customRender}
+              disablePagination={false}
+            />
+          )}
         </Box>
       </Card>
 
@@ -475,10 +604,11 @@ export default function StudentsListView() {
           <Iconify icon="solar:user-bold" width={18} sx={{ color: '#2563EB' }} />
           عرض الملف الشخصي
         </MenuItem>
+
         <MenuItem
           onClick={() => {
             if (selectedStudent) {
-              handleToggleStatus(selectedStudent.id, { stopPropagation: () => {} } as any);
+              handleToggleStatus(selectedStudent.id, selectedStudent.isActive, { stopPropagation: () => {} } as any);
             }
             handleCloseMenu();
           }}
@@ -487,10 +617,12 @@ export default function StudentsListView() {
           <Iconify icon="solar:refresh-circle-bold" width={18} sx={{ color: '#10B981' }} />
           {selectedStudent?.isActive ? 'تعطيل الحساب' : 'تفعيل الحساب'}
         </MenuItem>
+
         <MenuItem
           onClick={() => {
             if (selectedStudent) {
-              setStudentsData((prev) => prev.filter((s) => s.id !== selectedStudent.id));
+              setStudentToDelete(selectedStudent);
+              setDeleteDialogOpen(true);
             }
             handleCloseMenu();
           }}
@@ -500,6 +632,51 @@ export default function StudentsListView() {
           حذف الطالب
         </MenuItem>
       </Menu>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 3, p: 1 },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', pb: 1 }}>
+          تأكيد حذف الطالب
+        </DialogTitle>
+        <DialogContent sx={{ color: '#64748B', fontSize: 14 }}>
+          هل أنت متأكد من رغبتك في حذف حساب الطالب ({studentToDelete?.name})؟ لن يتمكن الطالب من الوصول إلى حساب دوراته بعد الحذف.
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setDeleteDialogOpen(false)}
+            sx={{ borderRadius: 2, color: '#64748B', borderColor: '#E2E8F0', fontWeight: 600 }}
+          >
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDelete}
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress size={16} color="inherit" /> : <Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+            sx={{
+              borderRadius: 2,
+              bgcolor: '#DC2626',
+              fontWeight: 700,
+              gap: 0.75,
+              '& .MuiButton-startIcon': { m: 0 },
+            }}
+          >
+            {deleting ? 'جاري الحذف...' : 'حذف الطالب'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

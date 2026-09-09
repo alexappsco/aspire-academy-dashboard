@@ -1,44 +1,121 @@
+export interface StudentCountryCurrency {
+  id: string;
+  name?: string;
+  code?: string;
+  symbol?: string;
+}
+
+export interface StudentCountry {
+  id: string;
+  name?: string;
+  code?: string;
+  currencyId?: string;
+  currency?: StudentCountryCurrency | null;
+}
+
 export interface StudentItem {
   id: string;
-  studentCode: string;
-  nameAr: string;
-  nameEn: string;
-  avatar?: string;
-  joinedDate: string;
-  phoneNumber: string;
-  coursesCount: number;
-  progressPercent: number;
-  isActive: boolean;
-  country: string;
-  city: string;
-  university: string;
-  college: string;
-  academicYear: string;
-  username: string;
+  userId?: string;
+  name: string;
   email: string;
-  birthDate: string;
-  gender: string;
-  nationalId: string;
-  totalCourses: number;
-  completedCourses: number;
-  inProgressCourses: number;
-  totalPaid: string;
-  pendingReviews: number;
+  phoneNumber?: string;
+  imageUrl?: string;
+  graduationYear?: number;
+  countryId?: string;
+  country?: StudentCountry | null;
+  isActive: boolean;
+  lastActiveAt?: string;
+  enrollmentsCount: number;
+  completedCoursesCount: number;
+  inProgressCoursesCount: number;
+  totalPayments: number;
+  pendingOrdersCount: number;
+  creationTime: string;
+}
+
+export interface StudentListResponse {
+  items: StudentItem[];
+  totalCount: number;
+}
+
+export interface GetStudentsParams {
+  IsActive?: boolean;
+  CountryId?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+export interface StudentCourseItem {
+  enrollmentId: string;
+  courseId: string;
+  courseTitle: string;
+  courseImageUrl?: string;
+  specializationName?: string;
+  instructorName?: string;
+  enrolledAt?: string;
+  expiresAt?: string;
+  progressPercent: number;
+  isCompleted: boolean;
+  lastActivityAt?: string;
+}
+
+export interface StudentCourseListResponse {
+  items: StudentCourseItem[];
+  totalCount: number;
+}
+
+export interface GetStudentCoursesParams {
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+// UI / Legacy Domain Types for Dialogs and Details
+export interface StudentMockItem {
+  id: string;
+  studentCode?: string;
+  name?: string;
+  nameAr?: string;
+  nameEn?: string;
+  avatar?: string;
+  imageUrl?: string;
+  joinedDate?: string;
+  phoneNumber?: string;
+  coursesCount?: number;
+  progressPercent?: number;
+  isActive?: boolean;
+  country?: string | StudentCountry | null;
+  city?: string;
+  university?: string;
+  college?: string;
+  academicYear?: string;
+  username?: string;
+  email?: string;
+  birthDate?: string;
+  gender?: string;
+  nationalId?: string;
+  totalCourses?: number;
+  completedCourses?: number;
+  inProgressCourses?: number;
+  totalPaid?: string;
+  pendingReviews?: number;
 }
 
 export interface StudentEnrolledCourse {
+
   id: string;
-  code: string;
+  code?: string;
   title: string;
-  lessonsInfo: string;
-  specialization: string;
-  instructor: string;
-  enrollmentDate: string;
+  lessonsInfo?: string;
+  specialization?: string;
+  instructor?: string;
+  enrollmentDate?: string;
   progressPercent: number;
-  progressText: string;
-  lastActivity: string;
-  status: 'in_progress' | 'completed' | 'paused';
-  statusText: string;
+  progressText?: string;
+  lastActivity?: string;
+  status?: 'in_progress' | 'completed' | 'paused';
+  statusText?: string;
 }
 
 export interface StudentOrderPayment {
@@ -87,3 +164,4 @@ export interface StudentCourseProgressData {
   watchTimeTotal: string;
   chapters: CourseProgressChapter[];
 }
+

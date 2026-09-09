@@ -1,11 +1,11 @@
 import {
-  StudentItem,
+  StudentMockItem,
   StudentEnrolledCourse,
   StudentOrderPayment,
   StudentCourseProgressData,
 } from 'src/types/student';
 
-export const MOCK_STUDENTS: StudentItem[] = [
+export const MOCK_STUDENTS: StudentMockItem[] = [
   {
     id: 'stu-1',
     studentCode: 'STU-001284',
