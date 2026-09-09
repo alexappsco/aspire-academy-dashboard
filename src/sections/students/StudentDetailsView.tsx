@@ -619,7 +619,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           <Grid size={{ xs: 12, md: 7 }}>
             <Card
               sx={{
-                p: 2.5,
+                p: { xs: 2.5, md: 3 },
                 borderRadius: 3,
                 bgcolor: '#FFFFFF',
                 border: '1px solid #F1F5F9',
@@ -627,86 +627,86 @@ export default function StudentDetailsView({ studentId }: Props) {
                 height: '100%',
               }}
             >
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, mb: 2.5 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: 2, bgcolor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Iconify icon="solar:user-bold" width={18} />
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 2,
+                    bgcolor: '#EFF6FF',
+                    color: '#2563EB',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="solar:user-bold" width={20} />
                 </Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16.5 }}>
                   البيانات الشخصية والاتصال
                 </Typography>
               </Stack>
 
-              <Grid container spacing={2.5}>
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
+              <Grid container spacing={3}>
+                {/* Row 1: Name + Email */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
                     الاسم بالكامل
                   </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 14, fontWeight: 700 }}>
+                  <Typography sx={{ color: '#0F172A', fontSize: 15, fontWeight: 700 }}>
                     {currentStudent.name || '-'}
                   </Typography>
                 </Grid>
 
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    معرف المستخدم (User ID)
-                  </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 13, fontWeight: 600, direction: 'ltr', textAlign: 'right' }}>
-                    {currentStudent.userId || currentStudent.id}
-                  </Typography>
-                </Grid>
-
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
                     البريد الإلكتروني
                   </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 14, fontWeight: 700 }}>
+                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 600, direction: 'ltr', textAlign: 'right' }}>
                     {currentStudent.email || '-'}
                   </Typography>
                 </Grid>
 
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
+                {/* Row 2: Phone + Birth Date / Academic Year */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
                     رقم الهاتف
                   </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 14, fontWeight: 700, direction: 'ltr', textAlign: 'right' }}>
+                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 700, direction: 'ltr', textAlign: 'right' }}>
                     {currentStudent.phoneNumber || '-'}
                   </Typography>
                 </Grid>
 
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
                     تاريخ الميلاد
                   </Typography>
-                  <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 500, fontStyle: 'italic' }}>
-                    غير متوفر من الخادم (لا توجد بيانات من الباك)
+                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 600 }}>
+                    {(currentStudent as any).birthDate || (currentStudent.graduationYear ? `دفعة ${currentStudent.graduationYear}` : '-')}
                   </Typography>
                 </Grid>
 
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    النوع
-                  </Typography>
-                  <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 500, fontStyle: 'italic' }}>
-                    غير متوفر من الخادم (لا توجد بيانات من الباك)
-                  </Typography>
-                </Grid>
-
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
-                    الرقم القومي / إثبات الشخصية
-                  </Typography>
-                  <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 500, fontStyle: 'italic' }}>
-                    غير متوفر من الخادم (لا توجد بيانات من الباك)
-                  </Typography>
-                </Grid>
-
-                <Grid size={{ xs: 6 }}>
-                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 12, fontWeight: 600, display: 'block', mb: 0.5 }}>
+                {/* Row 3: Account Status */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
                     حالة الحساب
                   </Typography>
                   <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: currentStudent.isActive ? '#10B981' : '#94A3B8' }} />
-                    <Typography sx={{ color: currentStudent.isActive ? '#059669' : '#64748B', fontSize: 14, fontWeight: 700 }}>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: currentStudent.isActive ? '#10B981' : '#94A3B8',
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        color: currentStudent.isActive ? '#10B981' : '#64748B',
+                        fontSize: 14.5,
+                        fontWeight: 700,
+                      }}
+                    >
                       {currentStudent.isActive ? 'مفعل' : 'معطل'}
                     </Typography>
                   </Stack>
@@ -719,7 +719,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           <Grid size={{ xs: 12, md: 5 }}>
             <Card
               sx={{
-                p: 2.5,
+                p: { xs: 2.5, md: 3 },
                 borderRadius: 3,
                 bgcolor: '#FFFFFF',
                 border: '1px solid #F1F5F9',
@@ -727,49 +727,60 @@ export default function StudentDetailsView({ studentId }: Props) {
                 height: '100%',
               }}
             >
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, mb: 2.5 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: 2, bgcolor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Iconify icon="solar:square-academic-cap-2-bold" width={18} />
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 2,
+                    bgcolor: '#EFF6FF',
+                    color: '#2563EB',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="solar:square-academic-cap-2-bold" width={20} />
                 </Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16.5 }}>
                   التسجيل والتدرج الأكاديمي
                 </Typography>
               </Stack>
 
               <Stack spacing={2}>
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
+                  <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
                     الدولة:
                   </Typography>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {currentStudent.country?.name || 'غير محدد'}
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                    {currentStudent.country?.name || '-'}
                   </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
+                  <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
                     سنة التخرج:
                   </Typography>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {currentStudent.graduationYear ? `دفعة ${currentStudent.graduationYear}` : 'غير محدد'}
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                    {currentStudent.graduationYear ? `دفعة ${currentStudent.graduationYear}` : '-'}
                   </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
-                    الجامعة والكلية:
+                  <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
+                    تاريخ التسجيل:
                   </Typography>
-                  <Typography sx={{ fontSize: 12.5, fontWeight: 500, color: '#64748B', fontStyle: 'italic' }}>
-                    غير راجعة من الباك إند
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                    {formatDate(currentStudent.creationTime)}
                   </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>
+                  <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
                     آخر نشاط على المنصة:
                   </Typography>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                    {formatDate(currentStudent.lastActiveAt) || 'غير متوفر'}
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                    {formatDate(currentStudent.lastActiveAt) || '-'}
                   </Typography>
                 </Box>
               </Stack>
