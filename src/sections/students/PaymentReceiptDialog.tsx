@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -27,33 +28,37 @@ export default function PaymentReceiptDialog({
   open,
   onClose,
   order,
-  studentName = 'أحمد محمد علي',
+  studentName,
   onAccept,
   onReject,
 }: PaymentReceiptDialogProps) {
+  const t = useTranslations('Students');
+  const locale = useLocale();
+
   const currentOrder = order as any;
+  const defaultStudentName = studentName || (locale === 'ar' ? 'أحمد محمد علي' : 'Ahmed Mohamed Ali');
+
   // Default fallback values matching the official receipt specification
-  const bankName = 'بنك مصر • Banque Misr';
-  const receiptSubtitle = 'إشعار تحويل مصرفي إلكتروني رسمي';
+  const bankName = t('receipt_dialog.bank_title');
+  const receiptSubtitle = t('receipt_dialog.receipt_subtitle');
   const refCode = currentOrder?.id ? `ORD-${currentOrder.id.slice(0, 8).toUpperCase()}` : currentOrder?.orderNumber || 'TRF-2026-9812450';
   const amountNumber = currentOrder?.total != null ? String(currentOrder.total) : currentOrder?.amount || '450.00';
-  const currencyText = 'جنيه مصري (EGP)';
-  const amountTafqeet = 'فقط أربعمائة وخمسون جنيهاً مصرياً لا غير';
+  const currencyText = locale === 'ar' ? 'جنيه مصري (EGP)' : 'Egyptian Pound (EGP)';
+  const amountTafqeet = t('receipt_dialog.amount_tafqeet');
   const transactionTime = currentOrder?.creationTime
-    ? new Date(currentOrder.creationTime).toLocaleDateString('ar-EG', {
+    ? new Date(currentOrder.creationTime).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
       })
-    : currentOrder?.orderDate || '12 أغسطس 2026 - 10:45 ص';
-  const senderText = `${currentOrder?.buyerName || studentName} (****4892)`;
-  const beneficiaryText = 'أكاديمية أسباير للتعليم الطبي (Aspire)';
+    : currentOrder?.orderDate || (locale === 'ar' ? '12 أغسطس 2026 - 10:45 ص' : 'Aug 12, 2026 - 10:45 AM');
+  const senderText = `${currentOrder?.buyerName || defaultStudentName} (****4892)`;
+  const beneficiaryText = t('receipt_dialog.beneficiary_name');
   const ibanText = 'EG3400020001000000284918234';
-  const purposeText = currentOrder?.items?.map((i: any) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') || currentOrder?.itemTitle || 'رسوم دورة تدريبية';
+  const purposeText = currentOrder?.items?.map((i: any) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') || currentOrder?.itemTitle || t('details.orders_table.default_order_title');
   const receiptUrl = currentOrder?.receiptUrl;
-
 
   return (
     <Dialog
@@ -74,7 +79,7 @@ export default function PaymentReceiptDialog({
         },
       }}
     >
-      {/* 1. Header: Title on Right, Close Button on Left */}
+      {/* 1. Header: Title on Right / Left, Close Button */}
       <Box
         sx={{
           display: 'flex',
@@ -92,7 +97,7 @@ export default function PaymentReceiptDialog({
             fontSize: 18,
           }}
         >
-          فحص إيصال الدفع
+          {t('receipt_dialog.dialog_title')}
         </Typography>
 
         <IconButton
@@ -110,7 +115,7 @@ export default function PaymentReceiptDialog({
       </Box>
 
       <DialogContent sx={{ p: 0, pt: 2.5 }}>
-        {/* 2. Bank Header Banner: Bank Info on Right, Status Badge on Left */}
+        {/* 2. Bank Header Banner */}
         <Stack
           direction="row"
           sx={{
@@ -119,7 +124,7 @@ export default function PaymentReceiptDialog({
             mb: 2.5,
           }}
         >
-          {/* Bank Info & Logo (Right side in RTL) */}
+          {/* Bank Info & Logo */}
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
@@ -137,7 +142,7 @@ export default function PaymentReceiptDialog({
               <Box component="img" src="/icons/build-green.svg" alt="Bank Logo" sx={{ width: 24, height: 24 }} />
             </Box>
 
-            <Box sx={{ textAlign: 'right' }}>
+            <Box sx={{ textAlign: locale === 'ar' ? 'right' : 'left' }}>
               <Typography sx={{ fontWeight: 800, color: '#0F172A', fontSize: 15, lineHeight: 1.3 }}>
                 {bankName}
               </Typography>
@@ -147,13 +152,13 @@ export default function PaymentReceiptDialog({
             </Box>
           </Stack>
 
-          {/* Status Chip & Ref (Left side in RTL) */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          {/* Status Chip & Ref */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: locale === 'ar' ? 'flex-start' : 'flex-end' }}>
             <Chip
               label={
                 <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
                   <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#00A76F' }} />
-                  <span>عملية تحويل ناجحة</span>
+                  <span>{t('receipt_dialog.transfer_success')}</span>
                 </Stack>
               }
               size="small"
@@ -201,7 +206,7 @@ export default function PaymentReceiptDialog({
               mb: 0.5,
             }}
           >
-            المبلغ المحول
+            {t('receipt_dialog.transferred_amount')}
           </Typography>
 
           <Stack
@@ -282,7 +287,7 @@ export default function PaymentReceiptDialog({
             {/* Row 1: Reference */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                رقم المرجع المصرفي
+                {t('receipt_dialog.ref_code_label')}
               </Typography>
               <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700, fontFamily: 'monospace, sans-serif' }}>
                 {refCode}
@@ -294,7 +299,7 @@ export default function PaymentReceiptDialog({
             {/* Row 2: Date & Time */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                تاريخ وتوقيت العملية
+                {t('receipt_dialog.tx_time_label')}
               </Typography>
               <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
                 {transactionTime}
@@ -306,7 +311,7 @@ export default function PaymentReceiptDialog({
             {/* Row 3: Sender Name */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                اسم المحول (الراسل)
+                {t('receipt_dialog.sender_label')}
               </Typography>
               <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
                 {senderText}
@@ -318,7 +323,7 @@ export default function PaymentReceiptDialog({
             {/* Row 4: Beneficiary Name */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                اسم المستفيد
+                {t('receipt_dialog.beneficiary_label')}
               </Typography>
               <Typography sx={{ color: '#007A78', fontSize: 13.5, fontWeight: 800 }}>
                 {beneficiaryText}
@@ -330,7 +335,7 @@ export default function PaymentReceiptDialog({
             {/* Row 5: IBAN */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                الحساب المحول إليه (IBAN)
+                {t('receipt_dialog.iban_label')}
               </Typography>
               <Typography sx={{ color: '#0F172A', fontSize: 12.5, fontWeight: 700, fontFamily: 'monospace, sans-serif', letterSpacing: 0.2 }}>
                 {ibanText}
@@ -342,7 +347,7 @@ export default function PaymentReceiptDialog({
             {/* Row 6: Purpose */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                الغرض من التحويل
+                {t('receipt_dialog.purpose_label')}
               </Typography>
               <Typography sx={{ color: '#0F172A', fontSize: 13.5, fontWeight: 700 }}>
                 {purposeText}
@@ -351,7 +356,7 @@ export default function PaymentReceiptDialog({
           </Stack>
         </Box>
 
-        {/* 5. Verification Footer Seal & QR: Stamp on Right, QR on Left */}
+        {/* 5. Verification Footer Seal & QR: Stamp & QR */}
         <Stack
           direction="row"
           sx={{
@@ -362,7 +367,7 @@ export default function PaymentReceiptDialog({
             mb: 2.5,
           }}
         >
-          {/* Right: Stamp & Note (Right side in RTL) */}
+          {/* Stamp & Note */}
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
             {/* Circular Stamp Badge */}
             <Box
@@ -381,21 +386,21 @@ export default function PaymentReceiptDialog({
                 flexShrink: 0,
               }}
             >
-              <Typography sx={{ fontSize: 9.5, fontWeight: 800, lineHeight: 1 }}>معتمد</Typography>
+              <Typography sx={{ fontSize: 9.5, fontWeight: 800, lineHeight: 1 }}>{t('receipt_dialog.stamp_authorized')}</Typography>
               <Typography sx={{ fontSize: 7.5, fontWeight: 800, lineHeight: 1, mt: 0.25 }}>BM-AUTH</Typography>
             </Box>
 
-            <Box sx={{ textAlign: 'right' }}>
+            <Box sx={{ textAlign: locale === 'ar' ? 'right' : 'left' }}>
               <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
-                إيصال إلكتروني صادر ومعتمد
+                {t('receipt_dialog.stamp_notice')}
               </Typography>
               <Typography sx={{ fontSize: 11, color: '#94A3B8', fontWeight: 500, mt: 0.25 }}>
-                لا يتطلب توقيعاً خطياً من البنك
+                {t('receipt_dialog.stamp_no_sign')}
               </Typography>
             </Box>
           </Stack>
 
-          {/* Left: QR Code info (Left side in RTL) */}
+          {/* QR Code info */}
           <Box sx={{ textAlign: 'center' }}>
             <Box
               sx={{
@@ -442,14 +447,14 @@ export default function PaymentReceiptDialog({
                 '&:hover': { bgcolor: '#DBEAFE', borderColor: '#93C5FD' },
               }}
             >
-              معاينة صورة الإيصال المرفقة
+              {t('receipt_dialog.preview_attached_receipt')}
             </Button>
           </Box>
         )}
 
         {/* 6. Action Buttons */}
         <Stack direction="row" spacing={2} sx={{ gap: 2 }}>
-          {/* Accept / Approve Button (Right side in RTL) */}
+          {/* Accept / Approve Button */}
           <Button
             variant="contained"
             fullWidth
@@ -476,10 +481,10 @@ export default function PaymentReceiptDialog({
               },
             }}
           >
-            قبول
+            {t('receipt_dialog.btn_accept')}
           </Button>
 
-          {/* Reject Button (Left side in RTL) */}
+          {/* Reject Button */}
           <Button
             variant="contained"
             fullWidth
@@ -506,7 +511,7 @@ export default function PaymentReceiptDialog({
               },
             }}
           >
-            رفض
+            {t('receipt_dialog.btn_reject')}
           </Button>
         </Stack>
       </DialogContent>

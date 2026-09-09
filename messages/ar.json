@@ -1191,19 +1191,190 @@
   },
   "Students": {
     "title": "إدارة الطلاب",
-    "search_placeholder": "بحث...",
+    "subtitle": "عرض وإدارة بيانات الطلاب المسجلين وحساباتهم الأكاديمية",
+    "search_placeholder": "البحث باسم الطالب، البريد، أو رقم الهاتف...",
+    "status_all": "الحالة (الكل)",
+    "status_active": "حساب مفعل",
+    "status_inactive": "حساب معطل",
+    "country_all": "جميع الدول",
+    "country_filter": "الدولة",
+    "status_filter": "الحالة",
     "all": "الكل",
     "active": "مفعل",
     "inactive": "معطل",
     "status": "الحالة",
+    "empty": "لا يوجد طلاب يطابقون خيارات البحث.",
     "columns": {
-      "name": "الاسم",
-      "joined_date": "تاريخ الانضمام",
+      "student_name": "الاسم والبريد",
+      "registration_date": "تاريخ الانضمام",
       "phone": "رقم الهاتف",
-      "courses_count": "عدد الدورات",
-      "progress": "التقدم",
-      "status": "الحالة"
+      "enrolled_courses": "الدورات المسجلة",
+      "completed_courses": "المكتملة",
+      "total_payments": "إجمالي المدفوعات",
+      "country": "الدولة",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "actions": {
+      "view_details": "عرض الملف الشخصي",
+      "deactivate": "تعطيل الحساب",
+      "activate": "تفعيل الحساب",
+      "delete": "حذف الطالب"
+    },
+    "delete_dialog": {
+      "title": "تأكيد حذف الطالب",
+      "content": "هل أنت متأكد من رغبتك في حذف هذا الطالب؟ لا يمكن التراجع عن هذا الإجراء.",
+      "content_named": "هل أنت متأكد من رغبتك في حذف حساب الطالب ({name})؟ لن يتمكن الطالب من الوصول إلى حساب دوراته بعد الحذف.",
+      "cancel": "إلغاء",
+      "confirm": "حذف الطالب",
+      "deleting": "جاري الحذف..."
+    },
+    "messages": {
+      "activate_success": "تم تفعيل حساب الطالب بنجاح",
+      "deactivate_success": "تم تعطيل حساب الطالب",
+      "status_error": "حدث خطأ أثناء تعديل حالة الحساب",
+      "delete_success": "تم حذف الطالب بنجاح",
+      "delete_error": "حدث خطأ أثناء حذف الطالب"
+    },
+    "details": {
+      "breadcrumb_students": "إدارة الطلاب",
+      "details_title": "تفاصيل الطالب",
+      "unnamed": "بدون اسم",
+      "no_email": "لا يوجد بريد إلكتروني",
+      "copy_id": "ID: {id}",
+      "copied": "تم النسخ",
+      "toggle_activate": "تفعيل الحساب",
+      "toggle_deactivate": "إيقاف الحساب مؤقتاً",
+      "receipt_accept_toast": "تم قبول إيصال الدفع وتفعيل الاشتراك بنجاح",
+      "receipt_reject_toast": "تم رفض إيصال التحويل المصرفي",
+      "kpi": {
+        "total_courses": "إجمالي الدورات",
+        "total_courses_sub": "مسجل بها بالكامل",
+        "completed_courses": "الدورات المكتملة",
+        "completed_courses_sub": "أنهى كافة متطلباتها",
+        "in_progress_courses": "قيد الدراسة",
+        "in_progress_courses_sub": "دورات مستمرة حالياً",
+        "total_payments": "إجمالي المدفوعات",
+        "total_payments_sub": "مدفوعة بالكامل",
+        "pending_orders": "الطلبات المعلقة",
+        "pending_orders_sub": "• طلبات قيد المراجعة"
+      },
+      "tabs": {
+        "overview": "نظرة عامة",
+        "academic": "البيانات الأكاديمية",
+        "courses": "الدورات",
+        "orders": "الطلبات والمدفوعات",
+        "pending_badge": "معلق"
+      },
+      "personal_info": {
+        "title": "البيانات الشخصية والاتصال",
+        "fullname": "الاسم بالكامل",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "birth_date": "تاريخ الميلاد",
+        "account_status": "حالة الحساب"
+      },
+      "academic_card": {
+        "title": "التسجيل والتدرج الأكاديمي",
+        "country": "الدولة:",
+        "grad_year": "سنة التخرج:",
+        "grad_batch": "دفعة {year}",
+        "registration_date": "تاريخ التسجيل:",
+        "last_activity": "آخر نشاط على المنصة:"
+      },
+      "courses_table": {
+        "title": "سجل الدورات التدريبية والتقدم",
+        "subtitle": "الدورات التي التحق بها الطالب ومستوى التقدم الخاص بكل دورة على حدة.",
+        "empty": "لا توجد دورات مسجلة لهذا الطالب حالياً.",
+        "col_course": "الدورة التدريبية",
+        "col_specialization": "التخصص",
+        "col_instructor": "المحاضر المسؤول",
+        "col_enrolled_date": "تاريخ التسجيل",
+        "col_progress": "نسبة التقدم بالدورة",
+        "col_last_activity": "آخر نشاط",
+        "col_status": "الحالة",
+        "col_action": "الإجراء",
+        "status_completed": "مكتملة",
+        "status_in_progress": "قيد الدراسة",
+        "btn_view_progress": "عرض التقدم"
+      },
+      "orders_table": {
+        "title": "سجل الطلبات والتحويلات المالية الأخيرة",
+        "subtitle": "تفاصيل المدفوعات، إيصالات التحويل البنكي، والطلبات المعلقة.",
+        "empty": "لا توجد طلبات أو تحويلات مسجلة لهذا الطالب حالياً.",
+        "default_order_title": "طلب دورة تدريبية",
+        "col_order_num": "رقم الطلب",
+        "col_items": "تفاصيل البند / الدورة",
+        "col_amount": "المبلغ",
+        "col_date": "تاريخ الطلب",
+        "col_status": "حالة الدفع",
+        "col_actions": "إجراءات",
+        "btn_inspect_receipt": "فحص الإيصال",
+        "btn_view_receipt": "عرض الإيصال",
+        "status_pending": "قيد المراجعة",
+        "status_paid": "تم الدفع والتفعيل",
+        "status_cancelled": "ملغي"
+      }
+    },
+    "course_progress": {
+      "breadcrumb_progress": "تقدم الدورة",
+      "retry": "إعادة المحاولة",
+      "error_load": "تعذر تحميل بيانات تقدم الدورة للطالب",
+      "student_prefix": "الطالب:",
+      "instructor_prefix": "المحاضر المسؤول:",
+      "enrolled_prefix": "تاريخ التسجيل:",
+      "progress_metrics": {
+        "total_progress": "نسبة التقدم الإجمالية",
+        "completed_level": "مكتمل بنجاح",
+        "advanced_level": "مستوى متقدم",
+        "in_progress_level": "قيد الإنجاز",
+        "completed_lessons": "الدروس المكتملة",
+        "all_lessons_completed": "تم إكمال جميع الوحدات",
+        "remaining_lessons": "متبقي {count} درس",
+        "recorded_watch_time": "إجمالي وقت المشاهدة",
+        "hours_unit": "ساعة",
+        "watch_time_sub": "ساعات تدريبية للمادة"
+      },
+      "chapters": {
+        "empty": "لا توجد فصول أو دروس متاحة لهذه الدورة حالياً",
+        "chapter_completed_badge": "مكتمل 100% ✓",
+        "chapter_in_progress_badge": "قيد الدراسة ({percent}%)",
+        "chapter_not_started_badge": "لم يبدأ",
+        "lessons_completed_count": "{completed} من {total} درس مكتمل",
+        "lesson_completed": "تمت المشاهدة",
+        "lesson_in_progress": "قيد المشاهدة",
+        "lesson_not_started": "لم يبدأ",
+        "stopped_at": "توقف عند الدقيقة {time}",
+        "has_test": "يحتوي على اختبار"
+      },
+      "status": {
+        "completed": "مكتملة",
+        "in_progress": "قيد الدراسة حالياً",
+        "not_started": "لم تبدأ بعد"
+      }
+    },
+    "receipt_dialog": {
+      "dialog_title": "فحص إيصال الدفع",
+      "bank_title": "بنك مصر • Banque Misr",
+      "receipt_subtitle": "إشعار تحويل مصرفي إلكتروني رسمي",
+      "transfer_success": "عملية تحويل ناجحة",
+      "transferred_amount": "المبلغ المحول",
+      "amount_tafqeet": "فقط أربعمائة وخمسون جنيهاً مصرياً لا غير",
+      "ref_code_label": "رقم المرجع المصرفي",
+      "tx_time_label": "تاريخ وتوقيت العملية",
+      "sender_label": "اسم المحول (الراسل)",
+      "beneficiary_label": "اسم المستفيد",
+      "beneficiary_name": "أكاديمية أسباير للتعليم الطبي (Aspire)",
+      "iban_label": "الحساب المحول إليه (IBAN)",
+      "purpose_label": "الغرض من التحويل",
+      "stamp_authorized": "معتمد",
+      "stamp_notice": "إيصال إلكتروني صادر ومعتمد",
+      "stamp_no_sign": "لا يتطلب توقيعاً خطياً من البنك",
+      "preview_attached_receipt": "معاينة صورة الإيصال المرفقة",
+      "btn_accept": "قبول",
+      "btn_reject": "رفض"
     }
   }
 }
+
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -45,12 +46,12 @@ export interface StudentTableRow extends StudentItem {
   actions?: string;
 }
 
-function formatDate(dateStr?: string): string {
+function formatDate(dateStr?: string, locale: string = 'ar'): string {
   if (!dateStr) return '-';
   try {
     const d = new Date(dateStr);
     if (Number.isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('ar-EG', {
+    return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -63,6 +64,8 @@ function formatDate(dateStr?: string): string {
 export default function StudentsListView() {
   const router = useRouter();
   const toast = useToast();
+  const t = useTranslations('Students');
+  const locale = useLocale();
 
   const [tabFilter, setTabFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -151,19 +154,19 @@ export default function StudentsListView() {
           prev.map((s) => (s.id === id ? { ...s, isActive: nextStatus } : s))
         );
         if (nextStatus) {
-          toast.success('تم تفعيل حساب الطالب بنجاح');
+          toast.success(t('messages.activate_success'));
         } else {
-          toast.warning('تم تعطيل حساب الطالب');
+          toast.warning(t('messages.deactivate_success'));
         }
       } else {
         // Local update if API is mock
         setStudentsData((prev) =>
           prev.map((s) => (s.id === id ? { ...s, isActive: nextStatus } : s))
         );
-        toast.success(nextStatus ? 'تم تفعيل حساب الطالب' : 'تم تعطيل حساب الطالب');
+        toast.success(nextStatus ? t('messages.activate_success') : t('messages.deactivate_success'));
       }
     } catch {
-      toast.error('فشل تحديث حالة الطالب');
+      toast.error(t('messages.status_error'));
     }
   };
 
@@ -173,15 +176,15 @@ export default function StudentsListView() {
     try {
       const res = await deleteStudent(studentToDelete.id);
       if (res.success) {
-        toast.success('تم حذف الطالب بنجاح');
+        toast.success(t('messages.delete_success'));
         setStudentsData((prev) => prev.filter((s) => s.id !== studentToDelete.id));
         setTotalCount((prev) => Math.max(0, prev - 1));
       } else {
         setStudentsData((prev) => prev.filter((s) => s.id !== studentToDelete.id));
-        toast.success('تم حذف الطالب من القائمة');
+        toast.success(t('messages.delete_success'));
       }
     } catch {
-      toast.error('حدث خطأ أثناء حذف الطالب');
+      toast.error(t('messages.delete_error'));
     } finally {
       setDeleting(false);
       setDeleteDialogOpen(false);
@@ -225,13 +228,13 @@ export default function StudentsListView() {
       align: cellAlignment.center,
       width: 48,
     },
-    { id: 'nameCol', label: 'الاسم والبريد', align: cellAlignment.right },
-    { id: 'joinedDateCol', label: 'تاريخ الانضمام', align: cellAlignment.center, width: 140 },
-    { id: 'phoneCol', label: 'رقم الهاتف', align: cellAlignment.center, width: 160 },
-    { id: 'coursesCountCol', label: 'الدورات المسجلة', align: cellAlignment.center, width: 130 },
-    { id: 'completedCol', label: 'المكتملة', align: cellAlignment.center, width: 110 },
-    { id: 'paymentsCol', label: 'إجمالي المدفوعات', align: cellAlignment.center, width: 140 },
-    { id: 'statusCol', label: 'الحالة', align: cellAlignment.center, width: 130 },
+    { id: 'nameCol', label: t('columns.student_name'), align: locale === 'ar' ? cellAlignment.right : cellAlignment.left },
+    { id: 'joinedDateCol', label: t('columns.registration_date'), align: cellAlignment.center, width: 140 },
+    { id: 'phoneCol', label: t('columns.phone'), align: cellAlignment.center, width: 160 },
+    { id: 'coursesCountCol', label: t('columns.enrolled_courses'), align: cellAlignment.center, width: 130 },
+    { id: 'completedCol', label: t('columns.completed_courses'), align: cellAlignment.center, width: 110 },
+    { id: 'paymentsCol', label: t('columns.total_payments'), align: cellAlignment.center, width: 140 },
+    { id: 'statusCol', label: t('columns.status'), align: cellAlignment.center, width: 130 },
     { id: 'actions', label: '', align: cellAlignment.center, width: 60 },
   ];
 
@@ -266,22 +269,22 @@ export default function StudentsListView() {
             fontSize: 14,
           }}
         >
-          {row.name ? row.name.slice(0, 2) : 'ط'}
+          {row.name ? row.name.slice(0, 2) : (locale === 'ar' ? 'ط' : 'S')}
         </Avatar>
 
         <Box>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
-            {row.name || 'بدون اسم'}
+            {row.name || t('details.unnamed')}
           </Typography>
           <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>
-            {row.email || 'لا يوجد بريد إلكتروني'}
+            {row.email || t('details.no_email')}
           </Typography>
         </Box>
       </Stack>
     ),
     joinedDateCol: (row: StudentTableRow) => (
       <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-        {formatDate(row.creationTime)}
+        {formatDate(row.creationTime, locale)}
       </Typography>
     ),
     phoneCol: (row: StudentTableRow) => (
@@ -341,7 +344,7 @@ export default function StudentsListView() {
             minWidth: 40,
           }}
         >
-          {row.isActive ? 'مفعل' : 'معطل'}
+          {row.isActive ? t('active') : t('inactive')}
         </Typography>
       </Stack>
     ),
@@ -380,10 +383,10 @@ export default function StudentsListView() {
               fontSize: { xs: 22, md: 26 },
             }}
           >
-            إدارة الطلاب
+            {t('title')}
           </Typography>
           <Typography sx={{ color: '#64748B', fontSize: 13.5, mt: 0.5 }}>
-            عرض وإدارة بيانات الطلاب المسجلين وحساباتهم الأكاديمية
+            {t('subtitle')}
           </Typography>
         </Box>
       </Stack>
@@ -430,7 +433,7 @@ export default function StudentsListView() {
                   >
                     {totalCount}
                   </Box>
-                  <span>الكل</span>
+                  <span>{t('all')}</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -452,7 +455,7 @@ export default function StudentsListView() {
                   >
                     {activeCount}
                   </Box>
-                  <span>مفعل</span>
+                  <span>{t('active')}</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -474,7 +477,7 @@ export default function StudentsListView() {
                   >
                     {inactiveCount}
                   </Box>
-                  <span>معطل</span>
+                  <span>{t('inactive')}</span>
                 </Stack>
               }
               sx={{ fontWeight: 700, fontSize: 14, minHeight: 48 }}
@@ -496,7 +499,7 @@ export default function StudentsListView() {
           <TextField
             fullWidth
             size="small"
-            placeholder="بحث بالاسم، البريد، أو رقم الهاتف..."
+            placeholder={t('search_placeholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             slotProps={{
@@ -541,9 +544,9 @@ export default function StudentsListView() {
                 },
               }}
             >
-              <MenuItem value="all">الحالة (الكل)</MenuItem>
-              <MenuItem value="active">مفعل</MenuItem>
-              <MenuItem value="inactive">معطل</MenuItem>
+              <MenuItem value="all">{t('status_all')}</MenuItem>
+              <MenuItem value="active">{t('active')}</MenuItem>
+              <MenuItem value="inactive">{t('inactive')}</MenuItem>
             </Select>
           </FormControl>
         </Stack>
@@ -602,7 +605,7 @@ export default function StudentsListView() {
           sx={{ fontSize: 13.5, fontWeight: 600, gap: 1.5 }}
         >
           <Iconify icon="solar:user-bold" width={18} sx={{ color: '#2563EB' }} />
-          عرض الملف الشخصي
+          {t('actions.view_details')}
         </MenuItem>
 
         <MenuItem
@@ -615,7 +618,7 @@ export default function StudentsListView() {
           sx={{ fontSize: 13.5, fontWeight: 600, gap: 1.5 }}
         >
           <Iconify icon="solar:refresh-circle-bold" width={18} sx={{ color: '#10B981' }} />
-          {selectedStudent?.isActive ? 'تعطيل الحساب' : 'تفعيل الحساب'}
+          {selectedStudent?.isActive ? t('actions.deactivate') : t('actions.activate')}
         </MenuItem>
 
         <MenuItem
@@ -629,7 +632,7 @@ export default function StudentsListView() {
           sx={{ fontSize: 13.5, fontWeight: 600, color: '#DC2626', gap: 1.5 }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" width={18} sx={{ color: '#DC2626' }} />
-          حذف الطالب
+          {t('actions.delete')}
         </MenuItem>
       </Menu>
 
@@ -646,10 +649,12 @@ export default function StudentsListView() {
         }}
       >
         <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', pb: 1 }}>
-          تأكيد حذف الطالب
+          {t('delete_dialog.title')}
         </DialogTitle>
         <DialogContent sx={{ color: '#64748B', fontSize: 14 }}>
-          هل أنت متأكد من رغبتك في حذف حساب الطالب ({studentToDelete?.name})؟ لن يتمكن الطالب من الوصول إلى حساب دوراته بعد الحذف.
+          {studentToDelete?.name
+            ? t('delete_dialog.content_named', { name: studentToDelete.name })
+            : t('delete_dialog.content')}
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
           <Button
@@ -657,7 +662,7 @@ export default function StudentsListView() {
             onClick={() => setDeleteDialogOpen(false)}
             sx={{ borderRadius: 2, color: '#64748B', borderColor: '#E2E8F0', fontWeight: 600 }}
           >
-            إلغاء
+            {t('delete_dialog.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -673,7 +678,7 @@ export default function StudentsListView() {
               '& .MuiButton-startIcon': { m: 0 },
             }}
           >
-            {deleting ? 'جاري الحذف...' : 'حذف الطالب'}
+            {deleting ? t('delete_dialog.deleting') : t('delete_dialog.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

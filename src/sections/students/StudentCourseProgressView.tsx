@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -29,13 +30,16 @@ function formatDurationHours(seconds: number): string {
   return hours.endsWith('.0') ? String(Math.round(seconds / 3600)) : hours;
 }
 
-function formatSecondsToMinutes(seconds: number): string {
-  if (!seconds || seconds <= 0) return '0 دقيقة';
+function formatSecondsToMinutes(seconds: number, locale: string = 'ar'): string {
+  if (!seconds || seconds <= 0) return locale === 'ar' ? '0 دقيقة' : '0 min';
   const mins = Math.round(seconds / 60);
-  if (mins < 60) return `${mins} دقيقة`;
+  if (mins < 60) return locale === 'ar' ? `${mins} دقيقة` : `${mins} min`;
   const hrs = Math.floor(mins / 60);
   const remMins = mins % 60;
-  return remMins > 0 ? `${hrs} ساعة و ${remMins} دقيقة` : `${hrs} ساعة`;
+  if (locale === 'ar') {
+    return remMins > 0 ? `${hrs} ساعة و ${remMins} دقيقة` : `${hrs} ساعة`;
+  }
+  return remMins > 0 ? `${hrs} hr ${remMins} min` : `${hrs} hr`;
 }
 
 function formatTimePosition(seconds: number): string {
@@ -45,11 +49,11 @@ function formatTimePosition(seconds: number): string {
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-function formatDate(dateStr?: string | null): string {
-  if (!dateStr) return 'غير محدد';
+function formatDate(dateStr?: string | null, locale: string = 'ar'): string {
+  if (!dateStr) return locale === 'ar' ? 'غير محدد' : 'Not specified';
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('ar-EG', {
+    return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -60,6 +64,9 @@ function formatDate(dateStr?: string | null): string {
 }
 
 export default function StudentCourseProgressView({ studentId, courseId }: Props) {
+  const t = useTranslations('Students');
+  const locale = useLocale();
+
   const [data, setData] = useState<StudentCourseProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,14 +79,14 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
       if (res.success && res.data) {
         setData(res.data);
       } else {
-        setError(res.error || 'تعذر تحميل بيانات تقدم الدورة للطالب');
+        setError(res.error || t('course_progress.error_load'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحميل البيانات');
+      setError(err instanceof Error ? err.message : t('course_progress.error_load'));
     } finally {
       setLoading(false);
     }
-  }, [studentId, courseId]);
+  }, [studentId, courseId, t]);
 
   useEffect(() => {
     fetchData();
@@ -97,31 +104,35 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
     return (
       <Box sx={{ py: 4 }}>
         <Breadcrumbs
-          separator={<Iconify icon="solar:alt-arrow-left-linear" width={14} sx={{ color: '#94A3B8' }} />}
+          separator={<Iconify icon={locale === 'ar' ? 'solar:alt-arrow-left-linear' : 'solar:alt-arrow-right-linear'} width={14} sx={{ color: '#94A3B8' }} />}
           sx={{ mb: 3, '& a': { color: '#64748B', textDecoration: 'none', fontWeight: 600, fontSize: 13 } }}
         >
-          <Link href="/students">إدارة الطلاب</Link>
-          <Link href={`/students/${studentId}`}>تفاصيل الطالب</Link>
-          <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>تقدم الدورة</Typography>
+          <Link href="/students">{t('details.breadcrumb_students')}</Link>
+          <Link href={`/students/${studentId}`}>{t('details.details_title')}</Link>
+          <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>{t('course_progress.breadcrumb_progress')}</Typography>
         </Breadcrumbs>
 
         <Alert
           severity="error"
           action={
             <Button color="inherit" size="small" onClick={fetchData}>
-              إعادة المحاولة
+              {t('course_progress.retry')}
             </Button>
           }
           sx={{ borderRadius: 2 }}
         >
-          {error || 'لا توجد بيانات متاحة لهذه الدورة'}
+          {error || t('course_progress.error_load')}
         </Alert>
       </Box>
     );
   }
 
   const isCompleted = data.progressPercent >= 100 || !!data.completedAt;
-  const statusText = isCompleted ? 'مكتملة' : data.progressPercent > 0 ? 'قيد الدراسة حالياً' : 'لم تبدأ بعد';
+  const statusText = isCompleted
+    ? t('course_progress.status.completed')
+    : data.progressPercent > 0
+    ? t('course_progress.status.in_progress')
+    : t('course_progress.status.not_started');
   const remainingLessons = Math.max(0, (data.totalLessons || 0) - (data.completedLessons || 0));
 
   return (
@@ -129,13 +140,13 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
       {/* Breadcrumbs & Title */}
       <Box sx={{ mb: 3 }}>
         <Breadcrumbs
-          separator={<Iconify icon="solar:alt-arrow-left-linear" width={14} sx={{ color: '#94A3B8' }} />}
+          separator={<Iconify icon={locale === 'ar' ? 'solar:alt-arrow-left-linear' : 'solar:alt-arrow-right-linear'} width={14} sx={{ color: '#94A3B8' }} />}
           sx={{ mb: 1, '& a': { color: '#64748B', textDecoration: 'none', fontWeight: 600, fontSize: 13 } }}
         >
-          <Link href="/students">إدارة الطلاب</Link>
-          <Link href={`/students/${studentId}`}>{data.studentName || 'تفاصيل الطالب'}</Link>
+          <Link href="/students">{t('details.breadcrumb_students')}</Link>
+          <Link href={`/students/${studentId}`}>{data.studentName || t('details.details_title')}</Link>
           <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>
-            تقدم الدورة
+            {t('course_progress.breadcrumb_progress')}
           </Typography>
         </Breadcrumbs>
 
@@ -147,7 +158,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
             fontSize: { xs: 22, md: 26 },
           }}
         >
-          إدارة الطلاب
+          {t('title')}
         </Typography>
       </Box>
 
@@ -240,7 +251,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                   <Iconify icon="solar:user-bold" width={15} sx={{ color: '#94A3B8' }} />
                   <span>
-                    الطالب: <strong style={{ color: '#1E293B' }}>{data.studentName}</strong>
+                    {t('course_progress.student_prefix')} <strong style={{ color: '#1E293B' }}>{data.studentName}</strong>
                   </span>
                 </Stack>
 
@@ -250,7 +261,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                       <Iconify icon="solar:square-academic-cap-2-bold" width={15} sx={{ color: '#94A3B8' }} />
                       <span>
-                        المحاضر المسؤول: <strong style={{ color: '#1E293B' }}>{data.instructorName}</strong>
+                        {t('course_progress.instructor_prefix')} <strong style={{ color: '#1E293B' }}>{data.instructorName}</strong>
                       </span>
                     </Stack>
                   </>
@@ -261,7 +272,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                     <span>•</span>
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                       <Iconify icon="solar:calendar-date-bold" width={15} sx={{ color: '#94A3B8' }} />
-                      <span>تاريخ التسجيل: {formatDate(data.enrolledAt)}</span>
+                      <span>{t('course_progress.enrolled_prefix')} {formatDate(data.enrolledAt, locale)}</span>
                     </Stack>
                   </>
                 )}
@@ -290,7 +301,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                نسبة التقدم الإجمالية
+                {t('course_progress.progress_metrics.total_progress')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:chart-2-bold" width={18} />
@@ -303,7 +314,11 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                   {Math.round(data.progressPercent)}%
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748B', fontSize: 12, fontWeight: 600 }}>
-                  {data.progressPercent >= 100 ? 'مكتمل بنجاح' : data.progressPercent > 50 ? 'مستوى متقدم' : 'قيد الإنجاز'}
+                  {data.progressPercent >= 100
+                    ? t('course_progress.progress_metrics.completed_level')
+                    : data.progressPercent > 50
+                    ? t('course_progress.progress_metrics.advanced_level')
+                    : t('course_progress.progress_metrics.in_progress_level')}
                 </Typography>
               </Stack>
 
@@ -341,7 +356,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                الدروس المكتملة
+                {t('course_progress.progress_metrics.completed_lessons')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#ECFDF5', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:check-circle-bold" width={18} />
@@ -353,7 +368,9 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                 {data.completedLessons} / {data.totalLessons}
               </Typography>
               <Typography variant="caption" sx={{ color: '#10B981', fontSize: 12, fontWeight: 600 }}>
-                {remainingLessons === 0 ? 'تم إكمال جميع الوحدات' : `متبقي ${remainingLessons} درس`}
+                {remainingLessons === 0
+                  ? t('course_progress.progress_metrics.all_lessons_completed')
+                  : t('course_progress.progress_metrics.remaining_lessons', { count: remainingLessons })}
               </Typography>
             </Box>
           </Card>
@@ -376,7 +393,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                إجمالي وقت المشاهدة
+                {t('course_progress.progress_metrics.recorded_watch_time')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#F0F9FF', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:clock-circle-bold" width={18} />
@@ -389,11 +406,11 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                   {formatDurationHours(data.totalDurationInSeconds)}
                 </Typography>
                 <Typography variant="h6" sx={{ color: '#64748B', fontSize: 16, fontWeight: 600 }}>
-                  ساعة
+                  {t('course_progress.progress_metrics.hours_unit')}
                 </Typography>
               </Stack>
               <Typography variant="caption" sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}>
-                ساعات تدريبية للمادة
+                {t('course_progress.progress_metrics.watch_time_sub')}
               </Typography>
             </Box>
           </Card>
@@ -404,7 +421,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
       {(!data.chapters || data.chapters.length === 0) ? (
         <Card sx={{ p: 4, textAlign: 'center', borderRadius: 3, border: '1px solid #F1F5F9' }}>
           <Typography sx={{ color: '#64748B', fontWeight: 600 }}>
-            لا توجد فصول أو دروس متاحة لهذه الدورة حالياً
+            {t('course_progress.chapters.empty')}
           </Typography>
         </Card>
       ) : (
@@ -464,7 +481,10 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                           {chapter.title}
                         </Typography>
                         <Typography variant="caption" sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}>
-                          {chapter.completedLessons} من {chapter.totalLessons} درس مكتمل
+                          {t('course_progress.chapters.lessons_completed_count', {
+                            completed: chapter.completedLessons,
+                            total: chapter.totalLessons,
+                          })}
                         </Typography>
                       </Box>
                     </Stack>
@@ -472,10 +492,10 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                     <Chip
                       label={
                         isChapterCompleted
-                          ? 'مكتمل 100% ✓'
+                          ? t('course_progress.chapters.chapter_completed_badge')
                           : chapter.progressPercent > 0
-                          ? `قيد الدراسة (${Math.round(chapter.progressPercent)}%)`
-                          : 'لم يبدأ'
+                          ? t('course_progress.chapters.chapter_in_progress_badge', { percent: Math.round(chapter.progressPercent) })
+                          : t('course_progress.chapters.chapter_not_started_badge')
                       }
                       size="small"
                       sx={{
@@ -509,7 +529,7 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                           '&:hover': { bgcolor: '#F8FAFC' },
                         }}
                       >
-                        {/* Right in RTL: Icon + Info */}
+                        {/* Right in RTL / Left in LTR: Icon + Info */}
                         <Stack direction="row" spacing={2} sx={{ alignItems: 'center', gap: 2, minWidth: 0 }}>
                           <Box
                             sx={{
@@ -536,22 +556,22 @@ export default function StudentCourseProgressView({ studentId, courseId }: Props
                               {lesson.title}
                             </Typography>
                             <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 500 }}>
-                              {formatSecondsToMinutes(lesson.durationInSeconds)}
-                              {stoppedPosition && ` • توقف عند الدقيقة ${formatTimePosition(lesson.lastPositionInSeconds || 0)}`}
-                              {lesson.hasTest && ' • يحتوي على اختبار'}
+                              {formatSecondsToMinutes(lesson.durationInSeconds, locale)}
+                              {stoppedPosition && ` • ${t('course_progress.chapters.stopped_at', { time: formatTimePosition(lesson.lastPositionInSeconds || 0) })}`}
+                              {lesson.hasTest && ` • ${t('course_progress.chapters.has_test')}`}
                             </Typography>
                           </Box>
                         </Stack>
 
-                        {/* Left in RTL: Status Badge */}
+                        {/* Status Badge */}
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
                           <Chip
                             label={
                               lessonCompleted
-                                ? 'تمت المشاهدة'
+                                ? t('course_progress.chapters.lesson_completed')
                                 : stoppedPosition
-                                ? 'قيد المشاهدة'
-                                : 'لم يبدأ'
+                                ? t('course_progress.chapters.lesson_in_progress')
+                                : t('course_progress.chapters.lesson_not_started')
                             }
                             size="small"
                             sx={{

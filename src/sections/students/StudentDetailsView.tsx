@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -34,12 +35,12 @@ interface Props {
   studentId: string;
 }
 
-function formatDate(dateStr?: string): string {
+function formatDate(dateStr?: string | null, locale: string = 'ar'): string {
   if (!dateStr) return '-';
   try {
     const d = new Date(dateStr);
     if (Number.isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('ar-EG', {
+    return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -49,7 +50,7 @@ function formatDate(dateStr?: string): string {
   }
 }
 
-function getOrderStatusInfo(status: unknown) {
+function getOrderStatusInfo(status: unknown, t: (key: string) => string) {
   const str = String(status ?? '').trim().toLowerCase();
   const isPending = str === 'pending' || str === '0' || str === 'under_review';
   const isPaid = str === 'paid' || str === '1' || str === 'paid_active';
@@ -57,7 +58,7 @@ function getOrderStatusInfo(status: unknown) {
 
   if (isPending) {
     return {
-      label: 'قيد المراجعة',
+      label: t('details.orders_table.status_pending'),
       color: '#B45309',
       bgcolor: '#FEF3C7',
       isPending: true,
@@ -67,7 +68,7 @@ function getOrderStatusInfo(status: unknown) {
   }
   if (isPaid) {
     return {
-      label: 'تم الدفع والتفعيل',
+      label: t('details.orders_table.status_paid'),
       color: '#059669',
       bgcolor: '#ECFDF5',
       isPending: false,
@@ -77,7 +78,7 @@ function getOrderStatusInfo(status: unknown) {
   }
   if (isCancelled) {
     return {
-      label: 'ملغي',
+      label: t('details.orders_table.status_cancelled'),
       color: '#DC2626',
       bgcolor: '#FEE2E2',
       isPending: false,
@@ -87,7 +88,7 @@ function getOrderStatusInfo(status: unknown) {
   }
 
   return {
-    label: String(status || 'غير محدد'),
+    label: String(status || '-'),
     color: '#64748B',
     bgcolor: '#F1F5F9',
     isPending: false,
@@ -100,6 +101,8 @@ function getOrderStatusInfo(status: unknown) {
 export default function StudentDetailsView({ studentId }: Props) {
   const router = useRouter();
   const toast = useToast();
+  const t = useTranslations('Students');
+  const locale = useLocale();
 
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState<StudentItem | null>(null);
@@ -182,13 +185,13 @@ export default function StudentDetailsView({ studentId }: Props) {
       const res = nextStatus ? await activateStudent(student.id) : await deactivateStudent(student.id);
       if (res.success) {
         setStudent((prev) => (prev ? { ...prev, isActive: nextStatus } : prev));
-        toast.success(nextStatus ? 'تم تفعيل حساب الطالب بنجاح' : 'تم إيقاف حساب الطالب مؤقتاً');
+        toast.success(nextStatus ? t('messages.activate_success') : t('messages.deactivate_success'));
       } else {
         setStudent((prev) => (prev ? { ...prev, isActive: nextStatus } : prev));
-        toast.success(nextStatus ? 'تم تفعيل حساب الطالب' : 'تم إيقاف حساب الطالب');
+        toast.success(nextStatus ? t('messages.activate_success') : t('messages.deactivate_success'));
       }
     } catch {
-      toast.error('حدث خطأ أثناء تعديل حالة الحساب');
+      toast.error(t('messages.status_error'));
     }
   };
 
@@ -207,7 +210,7 @@ export default function StudentDetailsView({ studentId }: Props) {
         )
       );
     }
-    toast.success('تم قبول إيصال الدفع وتفعيل الاشتراك بنجاح');
+    toast.success(t('details.receipt_accept_toast'));
   };
 
   const handleRejectReceipt = () => {
@@ -220,7 +223,7 @@ export default function StudentDetailsView({ studentId }: Props) {
         )
       );
     }
-    toast.error('تم رفض إيصال التحويل المصرفي');
+    toast.error(t('details.receipt_reject_toast'));
   };
 
 
@@ -240,12 +243,12 @@ export default function StudentDetailsView({ studentId }: Props) {
       {/* Title & Breadcrumbs */}
       <Box sx={{ mb: 3 }}>
         <Breadcrumbs
-          separator={<Iconify icon="solar:alt-arrow-left-linear" width={14} sx={{ color: '#94A3B8' }} />}
+          separator={<Iconify icon={locale === 'ar' ? 'solar:alt-arrow-left-linear' : 'solar:alt-arrow-right-linear'} width={14} sx={{ color: '#94A3B8' }} />}
           sx={{ mb: 1, '& a': { color: '#64748B', textDecoration: 'none', fontWeight: 600, fontSize: 13 } }}
         >
-          <Link href="/students">إدارة الطلاب</Link>
+          <Link href="/students">{t('details.breadcrumb_students')}</Link>
           <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>
-            {currentStudent.name || 'تفاصيل الطالب'}
+            {currentStudent.name || t('details.details_title')}
           </Typography>
         </Breadcrumbs>
 
@@ -257,7 +260,7 @@ export default function StudentDetailsView({ studentId }: Props) {
             fontSize: { xs: 22, md: 26 },
           }}
         >
-          إدارة الطلاب
+          {t('title')}
         </Typography>
       </Box>
 
@@ -280,7 +283,7 @@ export default function StudentDetailsView({ studentId }: Props) {
             alignItems: { xs: 'flex-start', md: 'center' },
           }}
         >
-          {/* Right in RTL: Avatar + Name + Badges + Meta Info */}
+          {/* Avatar + Name + Badges + Meta Info */}
           <Stack direction="row" spacing={2.5} sx={{ alignItems: 'flex-start', gap: 2 }}>
             <Box sx={{ position: 'relative' }}>
               <Avatar
@@ -296,7 +299,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   fontWeight: 800,
                 }}
               >
-                {currentStudent.name ? currentStudent.name.slice(0, 2) : 'ط'}
+                {currentStudent.name ? currentStudent.name.slice(0, 2) : (locale === 'ar' ? 'ط' : 'S')}
               </Avatar>
               <Box
                 sx={{
@@ -318,7 +321,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   variant="h5"
                   sx={{ fontWeight: 800, color: '#0F172A', fontSize: { xs: 18, md: 22 } }}
                 >
-                  {currentStudent.name}
+                  {currentStudent.name || t('details.unnamed')}
                 </Typography>
 
                 {/* ID Copy Chip */}
@@ -326,7 +329,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   label={
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                       <Iconify icon={copied ? 'solar:check-circle-bold' : 'solar:copy-linear'} width={14} />
-                      <span>{copied ? 'تم النسخ' : `ID: ${currentStudent.id.slice(0, 8)}...`}</span>
+                      <span>{copied ? t('details.copied') : t('details.copy_id', { id: `${currentStudent.id.slice(0, 8)}...` })}</span>
                     </Stack>
                   }
                   onClick={handleCopyId}
@@ -347,7 +350,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   label={
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                       <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: currentStudent.isActive ? '#10B981' : '#94A3B8' }} />
-                      <span>{currentStudent.isActive ? 'نشط' : 'معطل'}</span>
+                      <span>{currentStudent.isActive ? t('active') : t('inactive')}</span>
                     </Stack>
                   }
                   size="small"
@@ -377,7 +380,7 @@ export default function StudentDetailsView({ studentId }: Props) {
               >
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                   <Iconify icon="solar:calendar-date-bold" width={15} sx={{ color: '#94A3B8' }} />
-                  <span>تاريخ التسجيل: {formatDate(currentStudent.creationTime)}</span>
+                  <span>{t('details.academic_card.registration_date')} {formatDate(currentStudent.creationTime, locale)}</span>
                 </Stack>
 
                 {currentStudent.country?.name && (
@@ -395,7 +398,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                     <span>•</span>
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.5 }}>
                       <Iconify icon="solar:diploma-bold" width={15} sx={{ color: '#94A3B8' }} />
-                      <span>سنة التخرج: {currentStudent.graduationYear}</span>
+                      <span>{t('details.academic_card.grad_year')} {t('details.academic_card.grad_batch', { year: currentStudent.graduationYear })}</span>
                     </Stack>
                   </>
                 ) : null}
@@ -403,7 +406,7 @@ export default function StudentDetailsView({ studentId }: Props) {
             </Box>
           </Stack>
 
-          {/* Left in RTL: Action Button (Toggle Account) */}
+          {/* Action Button (Toggle Account) */}
           <Button
             variant="outlined"
             onClick={handleToggleStatus}
@@ -427,7 +430,7 @@ export default function StudentDetailsView({ studentId }: Props) {
               },
             }}
           >
-            {currentStudent.isActive ? 'إيقاف الحساب مؤقتاً' : 'تفعيل الحساب'}
+            {currentStudent.isActive ? t('details.toggle_deactivate') : t('details.toggle_activate')}
           </Button>
         </Stack>
       </Card>
@@ -451,7 +454,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                إجمالي الدورات
+                {t('details.kpi.total_courses')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:book-bookmark-bold" width={18} />
@@ -463,7 +466,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {currentStudent.enrollmentsCount ?? 0}
               </Typography>
               <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 11.5, fontWeight: 500 }}>
-                مسجل بها بالكامل
+                {t('details.kpi.total_courses_sub')}
               </Typography>
             </Box>
           </Card>
@@ -486,7 +489,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                الدورات المكتملة
+                {t('details.kpi.completed_courses')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#ECFDF5', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:check-circle-bold" width={18} />
@@ -498,7 +501,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {currentStudent.completedCoursesCount ?? 0}
               </Typography>
               <Typography variant="caption" sx={{ color: '#10B981', fontSize: 11.5, fontWeight: 600 }}>
-                أنهى كافة متطلباتها
+                {t('details.kpi.completed_courses_sub')}
               </Typography>
             </Box>
           </Card>
@@ -521,7 +524,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                قيد الدراسة
+                {t('details.kpi.in_progress_courses')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#F0FDF4', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:clock-circle-bold" width={18} />
@@ -533,7 +536,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {currentStudent.inProgressCoursesCount ?? 0}
               </Typography>
               <Typography variant="caption" sx={{ color: '#64748B', fontSize: 11.5, fontWeight: 500 }}>
-                دورات مستمرة حالياً
+                {t('details.kpi.in_progress_courses_sub')}
               </Typography>
             </Box>
           </Card>
@@ -556,7 +559,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
-                إجمالي المدفوعات
+                {t('details.kpi.total_payments')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#F5F3FF', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:card-bold" width={18} />
@@ -568,7 +571,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {currentStudent.totalPayments != null ? `${currentStudent.totalPayments.toLocaleString()} ${currencySymbol}` : `0 ${currencySymbol}`}
               </Typography>
               <Typography variant="caption" sx={{ color: '#10B981', fontSize: 11.5, fontWeight: 600 }}>
-                مدفوعة بالكامل
+                {t('details.kpi.total_payments_sub')}
               </Typography>
             </Box>
           </Card>
@@ -591,7 +594,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           >
             <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
               <Typography variant="body2" sx={{ color: '#B45309', fontSize: 13, fontWeight: 700 }}>
-                الطلبات المعلقة
+                {t('details.kpi.pending_orders')}
               </Typography>
               <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Iconify icon="solar:bell-bold" width={18} />
@@ -603,7 +606,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {currentStudent.pendingOrdersCount ?? 0}
               </Typography>
               <Typography variant="caption" sx={{ color: '#D97706', fontSize: 11.5, fontWeight: 700 }}>
-                • طلبات قيد المراجعة
+                {t('details.kpi.pending_orders_sub')}
               </Typography>
             </Box>
           </Card>
@@ -640,19 +643,19 @@ export default function StudentDetailsView({ studentId }: Props) {
         >
           <Tab
             value="overview"
-            label="نظرة عامة"
+            label={t('details.tabs.overview')}
             sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
           <Tab
             value="academic"
-            label="البيانات الأكاديمية"
+            label={t('details.tabs.academic')}
             sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
           <Tab
             value="courses"
             label={
               <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
-                <span>الدورات</span>
+                <span>{t('details.tabs.courses')}</span>
                 <Box
                   sx={{
                     px: 1.25,
@@ -674,7 +677,7 @@ export default function StudentDetailsView({ studentId }: Props) {
             value="orders"
             label={
               <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
-                <span>الطلبات والمدفوعات</span>
+                <span>{t('details.tabs.orders')}</span>
                 <Box
                   sx={{
                     px: 1.25,
@@ -687,9 +690,9 @@ export default function StudentDetailsView({ studentId }: Props) {
                   }}
                 >
                   {orders.length > 0
-                    ? orders.filter((o) => getOrderStatusInfo(o.status).isPending).length
+                    ? orders.filter((o) => getOrderStatusInfo(o.status, t).isPending).length
                     : (currentStudent.pendingOrdersCount ?? 0)}{' '}
-                  معلق
+                  {t('details.tabs.pending_badge')}
                 </Box>
               </Stack>
             }
@@ -701,7 +704,7 @@ export default function StudentDetailsView({ studentId }: Props) {
       {/* 4. Tab Content: Overview & Academic Cards */}
       {(currentTab === 'overview' || currentTab === 'academic') && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          {/* Right Card: Personal Info */}
+          {/* Personal Info Card */}
           <Grid size={{ xs: 12, md: 7 }}>
             <Card
               sx={{
@@ -729,7 +732,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   <Iconify icon="solar:user-bold" width={20} />
                 </Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16.5 }}>
-                  البيانات الشخصية والاتصال
+                  {t('details.personal_info.title')}
                 </Typography>
               </Stack>
 
@@ -737,7 +740,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {/* Row 1: Name + Email */}
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
-                    الاسم بالكامل
+                    {t('details.personal_info.fullname')}
                   </Typography>
                   <Typography sx={{ color: '#0F172A', fontSize: 15, fontWeight: 700 }}>
                     {currentStudent.name || '-'}
@@ -746,9 +749,9 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
-                    البريد الإلكتروني
+                    {t('details.personal_info.email')}
                   </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 600, direction: 'ltr', textAlign: 'right' }}>
+                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 600, direction: 'ltr', textAlign: locale === 'ar' ? 'right' : 'left' }}>
                     {currentStudent.email || '-'}
                   </Typography>
                 </Grid>
@@ -756,26 +759,26 @@ export default function StudentDetailsView({ studentId }: Props) {
                 {/* Row 2: Phone + Birth Date / Academic Year */}
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
-                    رقم الهاتف
+                    {t('details.personal_info.phone')}
                   </Typography>
-                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 700, direction: 'ltr', textAlign: 'right' }}>
+                  <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 700, direction: 'ltr', textAlign: locale === 'ar' ? 'right' : 'left' }}>
                     {currentStudent.phoneNumber || '-'}
                   </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
-                    تاريخ الميلاد
+                    {t('details.personal_info.birth_date')}
                   </Typography>
                   <Typography sx={{ color: '#0F172A', fontSize: 14.5, fontWeight: 600 }}>
-                    {(currentStudent as any).birthDate || (currentStudent.graduationYear ? `دفعة ${currentStudent.graduationYear}` : '-')}
+                    {(currentStudent as any).birthDate || (currentStudent.graduationYear ? t('details.academic_card.grad_batch', { year: currentStudent.graduationYear }) : '-')}
                   </Typography>
                 </Grid>
 
                 {/* Row 3: Account Status */}
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: 13, fontWeight: 600, display: 'block', mb: 0.75 }}>
-                    حالة الحساب
+                    {t('details.personal_info.account_status')}
                   </Typography>
                   <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
                     <Box
@@ -793,7 +796,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                         fontWeight: 700,
                       }}
                     >
-                      {currentStudent.isActive ? 'مفعل' : 'معطل'}
+                      {currentStudent.isActive ? t('active') : t('inactive')}
                     </Typography>
                   </Stack>
                 </Grid>
@@ -801,7 +804,7 @@ export default function StudentDetailsView({ studentId }: Props) {
             </Card>
           </Grid>
 
-          {/* Left Card: Academic Registration */}
+          {/* Academic Registration Card */}
           <Grid size={{ xs: 12, md: 5 }}>
             <Card
               sx={{
@@ -829,14 +832,14 @@ export default function StudentDetailsView({ studentId }: Props) {
                   <Iconify icon="solar:square-academic-cap-2-bold" width={20} />
                 </Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16.5 }}>
-                  التسجيل والتدرج الأكاديمي
+                  {t('details.academic_card.title')}
                 </Typography>
               </Stack>
 
               <Stack spacing={2}>
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
-                    الدولة:
+                    {t('details.academic_card.country')}
                   </Typography>
                   <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
                     {currentStudent.country?.name || '-'}
@@ -845,28 +848,28 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
-                    سنة التخرج:
+                    {t('details.academic_card.grad_year')}
                   </Typography>
                   <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-                    {currentStudent.graduationYear ? `دفعة ${currentStudent.graduationYear}` : '-'}
+                    {currentStudent.graduationYear ? t('details.academic_card.grad_batch', { year: currentStudent.graduationYear }) : '-'}
                   </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
-                    تاريخ التسجيل:
+                    {t('details.academic_card.registration_date')}
                   </Typography>
                   <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-                    {formatDate(currentStudent.creationTime)}
+                    {formatDate(currentStudent.creationTime, locale)}
                   </Typography>
                 </Box>
 
                 <Box sx={{ p: 1.75, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600 }}>
-                    آخر نشاط على المنصة:
+                    {t('details.academic_card.last_activity')}
                   </Typography>
                   <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-                    {formatDate(currentStudent.lastActiveAt) || '-'}
+                    {formatDate(currentStudent.lastActiveAt, locale)}
                   </Typography>
                 </Box>
               </Stack>
@@ -888,10 +891,10 @@ export default function StudentDetailsView({ studentId }: Props) {
         >
           <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17, mb: 0.25 }}>
-              سجل الدورات التدريبية والتقدم
+              {t('details.courses_table.title')}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: 12.5, fontWeight: 500 }}>
-              الدورات التي التحق بها الطالب ومستوى التقدم الخاص بكل دورة على حدة.
+              {t('details.courses_table.subtitle')}
             </Typography>
           </Box>
 
@@ -904,7 +907,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           {!coursesLoading && courses.length === 0 && (
             <Box sx={{ py: 6, textAlign: 'center', color: '#64748B' }}>
               <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                لا توجد دورات مسجلة لهذا الطالب حالياً.
+                {t('details.courses_table.empty')}
               </Typography>
             </Box>
           )}
@@ -914,14 +917,16 @@ export default function StudentDetailsView({ studentId }: Props) {
               <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
                 <Box component="thead">
                   <Box component="tr" sx={{ bgcolor: '#F8FAFC', '& th': { p: 1.75, color: '#64748B', fontSize: 12.5, fontWeight: 700, textAlign: 'center' } }}>
-                    <Box component="th" sx={{ textAlign: 'right !important', pr: 3 }}>الدورة التدريبية</Box>
-                    <Box component="th">التخصص</Box>
-                    <Box component="th">المحاضر المسؤول</Box>
-                    <Box component="th">تاريخ التسجيل</Box>
-                    <Box component="th">نسبة التقدم بالدورة</Box>
-                    <Box component="th">آخر نشاط</Box>
-                    <Box component="th">الحالة</Box>
-                    <Box component="th">الإجراء</Box>
+                    <Box component="th" sx={{ textAlign: `${locale === 'ar' ? 'right' : 'left'} !important`, pr: 3 }}>
+                      {t('details.courses_table.col_course')}
+                    </Box>
+                    <Box component="th">{t('details.courses_table.col_specialization')}</Box>
+                    <Box component="th">{t('details.courses_table.col_instructor')}</Box>
+                    <Box component="th">{t('details.courses_table.col_enrolled_date')}</Box>
+                    <Box component="th">{t('details.courses_table.col_progress')}</Box>
+                    <Box component="th">{t('details.courses_table.col_last_activity')}</Box>
+                    <Box component="th">{t('details.courses_table.col_status')}</Box>
+                    <Box component="th">{t('details.courses_table.col_action')}</Box>
                   </Box>
                 </Box>
 
@@ -940,7 +945,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                         }}
                       >
                         {/* Course Title + Image */}
-                        <Box component="td" sx={{ textAlign: 'right !important', pr: 3 }}>
+                        <Box component="td" sx={{ textAlign: `${locale === 'ar' ? 'right' : 'left'} !important`, pr: 3 }}>
                           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
                             <Avatar
                               src={course.courseImageUrl}
@@ -963,7 +968,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                                 {course.courseTitle}
                               </Typography>
                               <Typography sx={{ fontSize: 11.5, color: '#94A3B8', mt: 0.25 }}>
-                                {course.specializationName || 'عام'}
+                                {course.specializationName || (locale === 'ar' ? 'عام' : 'General')}
                               </Typography>
                             </Box>
                           </Stack>
@@ -981,7 +986,7 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                         {/* Date */}
                         <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>
-                          {formatDate(course.enrolledAt)}
+                          {formatDate(course.enrolledAt, locale)}
                         </Box>
 
                         {/* Progress */}
@@ -989,7 +994,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                           <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
                             <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', width: '100%', fontSize: 12 }}>
                               <span style={{ color: isCompleted ? '#059669' : '#2563EB', fontWeight: 700 }}>
-                                {isCompleted ? 'مكتملة' : 'قيد الدراسة'}
+                                {isCompleted ? t('details.courses_table.status_completed') : t('details.courses_table.status_in_progress')}
                               </span>
                               <span style={{ color: '#0F172A', fontWeight: 800 }}>{course.progressPercent}%</span>
                             </Stack>
@@ -1012,13 +1017,13 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                         {/* Last Activity */}
                         <Box component="td" sx={{ color: '#64748B', fontSize: 12 }}>
-                          {formatDate(course.lastActivityAt)}
+                          {formatDate(course.lastActivityAt, locale)}
                         </Box>
 
                         {/* Status */}
                         <Box component="td">
                           <Chip
-                            label={isCompleted ? 'مكتملة' : 'مستمرة'}
+                            label={isCompleted ? t('details.courses_table.status_completed') : t('details.courses_table.status_in_progress')}
                             size="small"
                             sx={{
                               bgcolor: isCompleted ? '#ECFDF5' : '#EFF6FF',
@@ -1048,7 +1053,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                               '&:hover': { bgcolor: '#EFF6FF', borderColor: '#BFDBFE' },
                             }}
                           >
-                            عرض التقدم
+                            {t('details.courses_table.btn_view_progress')}
                           </Button>
                         </Box>
                       </Box>
@@ -1073,10 +1078,10 @@ export default function StudentDetailsView({ studentId }: Props) {
         >
           <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17, mb: 0.25 }}>
-              سجل الطلبات والتحويلات المالية الأخيرة
+              {t('details.orders_table.title')}
             </Typography>
             <Typography variant="caption" sx={{ color: '#64748B', fontSize: 12.5, fontWeight: 500 }}>
-              تفاصيل المدفوعات، إيصالات التحويل البنكي، والطلبات المعلقة.
+              {t('details.orders_table.subtitle')}
             </Typography>
           </Box>
 
@@ -1089,7 +1094,7 @@ export default function StudentDetailsView({ studentId }: Props) {
           {!ordersLoading && orders.length === 0 && (
             <Box sx={{ py: 6, textAlign: 'center', color: '#64748B' }}>
               <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                لا توجد طلبات أو تحويلات مسجلة لهذا الطالب حالياً.
+                {t('details.orders_table.empty')}
               </Typography>
             </Box>
           )}
@@ -1099,21 +1104,23 @@ export default function StudentDetailsView({ studentId }: Props) {
               <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
                 <Box component="thead">
                   <Box component="tr" sx={{ bgcolor: '#F8FAFC', '& th': { p: 1.75, color: '#64748B', fontSize: 12.5, fontWeight: 700, textAlign: 'center' } }}>
-                    <Box component="th" sx={{ textAlign: 'right !important', pr: 3 }}>رقم الطلب</Box>
-                    <Box component="th">تفاصيل البند / الدورة</Box>
-                    <Box component="th">المبلغ</Box>
-                    <Box component="th">تاريخ الطلب</Box>
-                    <Box component="th">حالة الدفع</Box>
-                    <Box component="th">إجراءات</Box>
+                    <Box component="th" sx={{ textAlign: `${locale === 'ar' ? 'right' : 'left'} !important`, pr: 3 }}>
+                      {t('details.orders_table.col_order_num')}
+                    </Box>
+                    <Box component="th">{t('details.orders_table.col_items')}</Box>
+                    <Box component="th">{t('details.orders_table.col_amount')}</Box>
+                    <Box component="th">{t('details.orders_table.col_date')}</Box>
+                    <Box component="th">{t('details.orders_table.col_status')}</Box>
+                    <Box component="th">{t('details.orders_table.col_actions')}</Box>
                   </Box>
                 </Box>
 
                 <Box component="tbody">
                   {orders.map((order) => {
-                    const statusInfo = getOrderStatusInfo(order.status);
+                    const statusInfo = getOrderStatusInfo(order.status, t);
                     const orderTitle =
                       order.items?.map((i) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') ||
-                      'طلب دورة تدريبية';
+                      t('details.orders_table.default_order_title');
 
                     return (
                       <Box
@@ -1126,7 +1133,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                         }}
                       >
                         {/* Order Number */}
-                        <Box component="td" sx={{ textAlign: 'right !important', pr: 3, fontWeight: 800, color: statusInfo.isPending ? '#B45309' : '#0F172A' }}>
+                        <Box component="td" sx={{ textAlign: `${locale === 'ar' ? 'right' : 'left'} !important`, pr: 3, fontWeight: 800, color: statusInfo.isPending ? '#B45309' : '#0F172A' }}>
                           #ORD-{order.id.slice(0, 8).toUpperCase()}
                         </Box>
 
@@ -1142,7 +1149,7 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                         {/* Date */}
                         <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>
-                          {formatDate(order.creationTime)}
+                          {formatDate(order.creationTime, locale)}
                         </Box>
 
                         {/* Status */}
@@ -1179,7 +1186,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                                 '&:hover': { bgcolor: '#B45309' },
                               }}
                             >
-                              فحص الإيصال
+                              {t('details.orders_table.btn_inspect_receipt')}
                             </Button>
                           ) : (
                             <Button
@@ -1196,7 +1203,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                                 '&:hover': { bgcolor: '#F8FAFC' },
                               }}
                             >
-                              عرض الإيصال
+                              {t('details.orders_table.btn_view_receipt')}
                             </Button>
                           )}
                         </Box>
