@@ -156,7 +156,16 @@ export default function MinutesManagementView() {
     { id: 'verified', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
 
+  const handleOpenDetails = (row: FormattedInstructor) => {
+    router.push(`/${locale}/instructors/${row.id}`);
+  };
+
   const actions = [
+    {
+      label: 'عرض الملف الشخصي',
+      icon: <Iconify icon="solar:user-bold" />,
+      onClick: (row: FormattedInstructor) => handleOpenDetails(row),
+    },
     {
       label: t('actions.edit'),
       icon: <Iconify icon="solar:pen-bold" />,
@@ -193,14 +202,24 @@ export default function MinutesManagementView() {
 
   const customRender = {
     name: (row: FormattedInstructor) => (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
+        onClick={() => handleOpenDetails(row)}
+      >
         <Avatar
           src={row.imageUrl}
           alt={row.name}
           sx={{ width: 40, height: 40, bgcolor: '#E2F0D9' }}
         />
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: isRtl ? 'flex-end' : 'flex-start' }}>
-          <Typography variant="body2" sx={{ fontWeight: 700, color: '#1C252E' }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+              color: '#1C252E',
+              '&:hover': { color: '#008767', textDecoration: 'underline' },
+            }}
+          >
             {row.name}
           </Typography>
           <Typography variant="caption" sx={{ color: '#919EAB', fontSize: '12px' }}>
