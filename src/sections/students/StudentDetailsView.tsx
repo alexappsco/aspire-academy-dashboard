@@ -618,7 +618,18 @@ export default function StudentDetailsView({ studentId }: Props) {
           sx={{
             borderBottom: '1px solid #E2E8F0',
             '& .MuiTabs-flexContainer': {
-              gap: { xs: 2, sm: 4 },
+              gap: { xs: 3, sm: 4.5, md: 6 },
+            },
+            '& .MuiTab-root': {
+              minWidth: 'auto',
+              px: 0.5,
+              py: 1.5,
+              color: '#64748B',
+              fontSize: 15,
+              fontWeight: 700,
+              '&.Mui-selected': {
+                color: '#2563EB',
+              },
             },
             '& .MuiTabs-indicator': {
               bgcolor: '#2563EB',
@@ -630,47 +641,48 @@ export default function StudentDetailsView({ studentId }: Props) {
           <Tab
             value="overview"
             label="نظرة عامة"
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
           <Tab
             value="academic"
             label="البيانات الأكاديمية"
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
           <Tab
             value="courses"
             label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
+                <span>الدورات</span>
                 <Box
                   sx={{
-                    px: 1,
+                    px: 1.25,
                     py: 0.25,
-                    borderRadius: 1,
+                    borderRadius: 1.5,
                     bgcolor: currentTab === 'courses' ? '#EFF6FF' : '#F1F5F9',
                     color: currentTab === 'courses' ? '#2563EB' : '#64748B',
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: 700,
                   }}
                 >
                   {courses.length || currentStudent.enrollmentsCount || 0}
                 </Box>
-                <span>الدورات المسجلة</span>
               </Stack>
             }
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
           <Tab
             value="orders"
             label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1.25 }}>
+                <span>الطلبات والمدفوعات</span>
                 <Box
                   sx={{
-                    px: 1,
+                    px: 1.25,
                     py: 0.25,
-                    borderRadius: 1,
+                    borderRadius: 1.5,
                     bgcolor: '#FEF3C7',
                     color: '#B45309',
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: 700,
                   }}
                 >
@@ -679,10 +691,9 @@ export default function StudentDetailsView({ studentId }: Props) {
                     : (currentStudent.pendingOrdersCount ?? 0)}{' '}
                   معلق
                 </Box>
-                <span>الطلبات والمدفوعات</span>
               </Stack>
             }
-            sx={{ fontWeight: 700, fontSize: 14.5, minHeight: 48 }}
+            sx={{ fontWeight: 700, fontSize: 15, minHeight: 48 }}
           />
         </Tabs>
       </Box>
