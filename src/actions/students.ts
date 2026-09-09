@@ -9,6 +9,7 @@ import type {
   GetStudentsParams,
   StudentCourseListResponse,
   GetStudentCoursesParams,
+  StudentCourseProgressResponse,
 } from 'src/types/student';
 
 function buildQueryString(params: Record<string, unknown>): string {
@@ -156,3 +157,30 @@ export async function deactivateStudent(
     };
   }
 }
+
+// ── Student Course Progress ────────────────────────────────
+
+export async function getStudentCourseProgress(
+  id: string,
+  courseId: string
+): Promise<ApiSingleResponse<StudentCourseProgressResponse>> {
+  try {
+    const res = await getData<StudentCourseProgressResponse>(
+      endpoints.students.courseProgress(id, courseId)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data as StudentCourseProgressResponse };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to load student course progress';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load student course progress',
+    };
+  }
+}
+

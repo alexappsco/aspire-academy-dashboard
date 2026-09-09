@@ -66,6 +66,47 @@ export interface StudentCourseListResponse {
   totalCount: number;
 }
 
+export interface StudentCourseProgressLesson {
+  id: string;
+  title: string;
+  order: number;
+  durationInSeconds: number;
+  hasTest: boolean;
+  isCompleted: boolean;
+  completedAt?: string | null;
+  lastPositionInSeconds?: number;
+  isInProgress?: boolean;
+}
+
+export interface StudentCourseProgressChapter {
+  id: string;
+  title: string;
+  order: number;
+  progressPercent: number;
+  completedLessons: number;
+  totalLessons: number;
+  lessons: StudentCourseProgressLesson[];
+}
+
+export interface StudentCourseProgressResponse {
+  enrollmentId: string;
+  studentId: string;
+  studentName: string;
+  courseId: string;
+  courseTitle: string;
+  courseImageUrl?: string | null;
+  instructorName?: string | null;
+  enrolledAt?: string | null;
+  expiresAt?: string | null;
+  completedAt?: string | null;
+  progressPercent: number;
+  completedLessons: number;
+  totalLessons: number;
+  totalDurationInSeconds: number;
+  lastActivityAt?: string | null;
+  chapters: StudentCourseProgressChapter[];
+}
+
 export interface GetStudentCoursesParams {
   SkipCount?: number;
   MaxResultCount?: number;
