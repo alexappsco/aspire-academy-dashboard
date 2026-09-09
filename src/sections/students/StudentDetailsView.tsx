@@ -49,6 +49,54 @@ function formatDate(dateStr?: string): string {
   }
 }
 
+function getOrderStatusInfo(status: unknown) {
+  const str = String(status ?? '').trim().toLowerCase();
+  const isPending = str === 'pending' || str === '0' || str === 'under_review';
+  const isPaid = str === 'paid' || str === '1' || str === 'paid_active';
+  const isCancelled = str === 'cancelled' || str === 'canceled' || str === '2';
+
+  if (isPending) {
+    return {
+      label: 'قيد المراجعة',
+      color: '#B45309',
+      bgcolor: '#FEF3C7',
+      isPending: true,
+      isPaid: false,
+      isCancelled: false,
+    };
+  }
+  if (isPaid) {
+    return {
+      label: 'تم الدفع والتفعيل',
+      color: '#059669',
+      bgcolor: '#ECFDF5',
+      isPending: false,
+      isPaid: true,
+      isCancelled: false,
+    };
+  }
+  if (isCancelled) {
+    return {
+      label: 'ملغي',
+      color: '#DC2626',
+      bgcolor: '#FEE2E2',
+      isPending: false,
+      isPaid: false,
+      isCancelled: true,
+    };
+  }
+
+  return {
+    label: String(status || 'غير محدد'),
+    color: '#64748B',
+    bgcolor: '#F1F5F9',
+    isPending: false,
+    isPaid: false,
+    isCancelled: false,
+  };
+}
+
+
 export default function StudentDetailsView({ studentId }: Props) {
   const router = useRouter();
   const toast = useToast();
@@ -627,7 +675,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                   }}
                 >
                   {orders.length > 0
-                    ? orders.filter((o) => o.status?.toLowerCase() === 'pending').length
+                    ? orders.filter((o) => getOrderStatusInfo(o.status).isPending).length
                     : (currentStudent.pendingOrdersCount ?? 0)}{' '}
                   معلق
                 </Box>
@@ -1051,9 +1099,7 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                 <Box component="tbody">
                   {orders.map((order) => {
-                    const isPending = order.status?.toLowerCase() === 'pending';
-                    const isPaid = order.status?.toLowerCase() === 'paid';
-                    const isCancelled = order.status?.toLowerCase() === 'cancelled';
+                    const statusInfo = getOrderStatusInfo(order.status);
                     const orderTitle =
                       order.items?.map((i) => i.courseTitle || i.packageName).filter(Boolean).join(' ، ') ||
                       'طلب دورة تدريبية';
@@ -1069,7 +1115,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                         }}
                       >
                         {/* Order Number */}
-                        <Box component="td" sx={{ textAlign: 'right !important', pr: 3, fontWeight: 800, color: isPending ? '#B45309' : '#0F172A' }}>
+                        <Box component="td" sx={{ textAlign: 'right !important', pr: 3, fontWeight: 800, color: statusInfo.isPending ? '#B45309' : '#0F172A' }}>
                           #ORD-{order.id.slice(0, 8).toUpperCase()}
                         </Box>
 
@@ -1091,11 +1137,11 @@ export default function StudentDetailsView({ studentId }: Props) {
                         {/* Status */}
                         <Box component="td">
                           <Chip
-                            label={isPending ? 'قيد المراجعة' : isPaid ? 'تم الدفع والتفعيل' : isCancelled ? 'ملغي' : order.status}
+                            label={statusInfo.label}
                             size="small"
                             sx={{
-                              bgcolor: isPending ? '#FEF3C7' : isPaid ? '#ECFDF5' : '#FEE2E2',
-                              color: isPending ? '#B45309' : isPaid ? '#059669' : '#DC2626',
+                              bgcolor: statusInfo.bgcolor,
+                              color: statusInfo.color,
                               fontWeight: 700,
                               fontSize: 11.5,
                               height: 24,
@@ -1106,7 +1152,7 @@ export default function StudentDetailsView({ studentId }: Props) {
 
                         {/* Actions */}
                         <Box component="td">
-                          {isPending || order.receiptUrl ? (
+                          {statusInfo.isPending || order.receiptUrl ? (
                             <Button
                               size="small"
                               variant="contained"
