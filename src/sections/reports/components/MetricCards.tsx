@@ -10,13 +10,19 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 
 import Iconify from 'src/components/iconify';
+import type { DashboardStatCards } from 'src/types/dashboard';
 
 const PRIMARY = '#00A980';
-const PAGE_BG = '#F8F9FA';
 const CARD_BORDER = '#E0E0E0';
 
-export default function MetricCards() {
+interface Props {
+  statCards?: DashboardStatCards;
+}
+
+export default function MetricCards({ statCards }: Props) {
   const t = useTranslations('Reports.metrics');
+
+  const hasData = statCards !== undefined;
 
   const items = [
     {
@@ -25,10 +31,10 @@ export default function MetricCards() {
       iconBg: '#E6F7F2',
       iconColor: PRIMARY,
       title: t('total_students'),
-      value: '12,450',
-      change: '+8.5%',
+      value: hasData ? statCards.totalStudents.toLocaleString() : '—',
+      change: hasData ? `${statCards.studentsGrowthPercent >= 0 ? '+' : ''}${statCards.studentsGrowthPercent}%` : undefined,
       changeLabel: t('vs_previous'),
-      isPositive: true,
+      isPositive: (statCards?.studentsGrowthPercent ?? 0) >= 0,
     },
     {
       id: 'instructors',
@@ -36,10 +42,10 @@ export default function MetricCards() {
       iconBg: '#E6F7F2',
       iconColor: PRIMARY,
       title: t('total_instructors'),
-      value: '320',
-      change: '+4.2%',
+      value: hasData ? statCards.totalInstructors.toLocaleString() : '—',
+      change: hasData && statCards.instructorsGrowthPercent != null ? `${statCards.instructorsGrowthPercent >= 0 ? '+' : ''}${statCards.instructorsGrowthPercent}%` : undefined,
       changeLabel: t('vs_previous'),
-      isPositive: true,
+      isPositive: (statCards?.instructorsGrowthPercent ?? 0) >= 0,
     },
     {
       id: 'courses',
@@ -47,10 +53,10 @@ export default function MetricCards() {
       iconBg: '#FFF4E6',
       iconColor: '#FF9F1C',
       title: t('total_courses'),
-      value: '856',
-      change: '+6.8%',
+      value: hasData ? statCards.totalCourses.toLocaleString() : '—',
+      change: hasData && statCards.coursesGrowthPercent != null ? `${statCards.coursesGrowthPercent >= 0 ? '+' : ''}${statCards.coursesGrowthPercent}%` : undefined,
       changeLabel: t('vs_previous'),
-      isPositive: true,
+      isPositive: (statCards?.coursesGrowthPercent ?? 0) >= 0,
     },
     {
       id: 'published',
@@ -58,8 +64,8 @@ export default function MetricCards() {
       iconBg: '#E6F7F2',
       iconColor: PRIMARY,
       title: t('published_courses'),
-      value: '742',
-      subBadge: t('published_of', { total: '856', percent: '86.7' }),
+      value: hasData ? statCards.publishedCourses.toLocaleString() : '—',
+      subBadge: hasData ? t('published_of', { total: String(statCards.totalCourses), percent: statCards.totalCourses > 0 ? ((statCards.publishedCourses / statCards.totalCourses) * 100).toFixed(1) : '0' }) : undefined,
       subBadgeBg: '#E6F7F2',
       subBadgeColor: PRIMARY,
     },
@@ -69,8 +75,8 @@ export default function MetricCards() {
       iconBg: '#EDE7F6',
       iconColor: '#7C3AED',
       title: t('enrollment_requests'),
-      value: '2,840',
-      change: '+12.4%',
+      value: hasData ? statCards.pendingCourses.toLocaleString() : '—',
+      change: hasData && statCards.pendingCourses > 0 ? `${statCards.pendingCourses}` : undefined,
       changeLabel: t('within_year'),
       isPositive: true,
     },
@@ -80,8 +86,8 @@ export default function MetricCards() {
       iconBg: '#FFF4E6',
       iconColor: '#FF9F1C',
       title: t('accepted_revenue'),
-      value: '485,000',
-      change: '+9.2%',
+      value: hasData ? statCards.rejectedCourses.toLocaleString() : '—',
+      change: undefined,
       changeLabel: t('within_year'),
       isPositive: true,
     },
@@ -163,7 +169,7 @@ export default function MetricCards() {
                     borderRadius: 1,
                   }}
                 />
-              ) : (
+              ) : item.change ? (
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                   <Stack
                     direction="row"
@@ -180,6 +186,10 @@ export default function MetricCards() {
                     {item.changeLabel}
                   </Typography>
                 </Stack>
+              ) : (
+                <Typography sx={{ color: '#9CA3AF', fontSize: 10, fontWeight: 500 }}>
+                  {item.changeLabel}
+                </Typography>
               )}
             </Box>
           </Card>

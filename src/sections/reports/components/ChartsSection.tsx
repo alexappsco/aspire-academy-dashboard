@@ -10,17 +10,31 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
 import Chart, { type ApexChartProps } from 'src/components/chart';
+import type { DashboardStudentsOverview, DashboardCourseStatusItem } from 'src/types/dashboard';
 
 const PRIMARY = '#00A980';
 const ORANGE = '#FF9F1C';
 const RED = '#E63946';
 const CARD_BORDER = '#E0E0E0';
 
-export default function ChartsSection() {
+interface Props {
+  studentsOverview?: DashboardStudentsOverview;
+  courseStatusDistribution?: DashboardCourseStatusItem[];
+}
+
+export default function ChartsSection({ studentsOverview, courseStatusDistribution }: Props) {
   const tGrowth = useTranslations('Reports.analytics.student_growth');
   const tStatus = useTranslations('Reports.analytics.course_status');
 
-  const donutSeries = [742, 24, 21];
+  const hasOverview = studentsOverview !== undefined;
+  const hasDistribution = courseStatusDistribution !== undefined && courseStatusDistribution.length > 0;
+
+  const published = hasDistribution ? courseStatusDistribution.find((s) => s.status === 2)?.count ?? 0 : 0;
+  const pending = hasDistribution ? courseStatusDistribution.find((s) => s.status === 1)?.count ?? 0 : 0;
+  const rejected = hasDistribution ? courseStatusDistribution.find((s) => s.status === 3)?.count ?? 0 : 0;
+  const totalCourses = published + pending + rejected;
+
+  const donutSeries = [published || 0, pending || 0, rejected || 0];
   const donutOptions: ApexChartProps['options'] = {
     chart: { type: 'donut', fontFamily: 'Cairo, sans-serif' },
     colors: [PRIMARY, ORANGE, RED],
@@ -36,7 +50,7 @@ export default function ChartsSection() {
               fontSize: '24px',
               fontWeight: 700,
               color: '#1A1A1A',
-              formatter: () => '856',
+              formatter: () => String(totalCourses),
             },
           },
         },
@@ -49,11 +63,15 @@ export default function ChartsSection() {
     states: { hover: { filter: { type: 'none' } } },
   };
 
+  const monthlyLabels = hasOverview
+    ? studentsOverview.monthlyNewStudents.map((m) => m.label)
+    : [];
+  const monthlyData = hasOverview
+    ? studentsOverview.monthlyNewStudents.map((m) => m.count)
+    : [];
+
   const areaSeries: ApexChartProps['series'] = [
-    {
-      name: 'students',
-      data: [420, 512, 610, 720, 885, 970, 1040, 1140],
-    },
+    { name: 'students', data: monthlyData },
   ];
 
   const areaOptions: ApexChartProps['options'] = {
@@ -75,7 +93,7 @@ export default function ChartsSection() {
       },
     },
     xaxis: {
-      categories: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس'],
+      categories: monthlyLabels,
       labels: { style: { fontSize: '10px', colors: '#9CA3AF' } },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -93,9 +111,9 @@ export default function ChartsSection() {
   };
 
   const legendItems = [
-    { color: PRIMARY, label: tStatus('legend.published'), count: '742', pct: '86.7%' },
-    { color: ORANGE, label: tStatus('legend.under_review'), count: '24', pct: '2.8%' },
-    { color: RED, label: tStatus('legend.rejected'), count: '21', pct: '2.5%' },
+    { color: PRIMARY, label: tStatus('legend.published'), count: String(published), pct: totalCourses > 0 ? `${((published / totalCourses) * 100).toFixed(1)}%` : '0%' },
+    { color: ORANGE, label: tStatus('legend.under_review'), count: String(pending), pct: totalCourses > 0 ? `${((pending / totalCourses) * 100).toFixed(1)}%` : '0%' },
+    { color: RED, label: tStatus('legend.rejected'), count: String(rejected), pct: totalCourses > 0 ? `${((rejected / totalCourses) * 100).toFixed(1)}%` : '0%' },
   ];
 
   return (
@@ -122,7 +140,7 @@ export default function ChartsSection() {
               {tStatus('title')}
             </Typography>
             <Typography variant="body2" sx={{ color: '#6B7280', fontSize: 11.5 }}>
-              {tStatus('subtitle', { total: '856' })}
+              {tStatus('subtitle', { total: String(totalCourses) })}
             </Typography>
           </Box>
 
@@ -192,10 +210,12 @@ export default function ChartsSection() {
                 {tGrowth('title')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#6B7280', fontSize: 11.5 }}>
-                {tGrowth('subtitle', { count: '1140' })}{' '}
-                <Box component="span" sx={{ color: PRIMARY, fontWeight: 700 }}>
-                  {tGrowth('growth', { percent: '8.5' })}
-                </Box>
+                {tGrowth('subtitle', { count: String(hasOverview ? studentsOverview.newStudentsThisMonth : 0) })}{' '}
+                {hasOverview && studentsOverview.newStudentsGrowthPercent != null && (
+                  <Box component="span" sx={{ color: PRIMARY, fontWeight: 700 }}>
+                    {tGrowth('growth', { percent: String(Math.abs(studentsOverview.newStudentsGrowthPercent)) })}
+                  </Box>
+                )}
               </Typography>
             </Box>
             <Button

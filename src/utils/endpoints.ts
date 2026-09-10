@@ -96,4 +96,7 @@ export const endpoints = {
   dashboard: {
     get: '/admin/dashboard',
   },
+  reports: {
+    get: '/admin/reports',
+  },
 };

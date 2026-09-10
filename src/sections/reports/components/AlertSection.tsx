@@ -9,18 +9,25 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
+import type { DashboardPendingTasks } from 'src/types/dashboard';
+
 const PRIMARY = '#00A980';
 const ORANGE = '#FF9F1C';
 const RED = '#E63946';
 const CARD_BORDER = '#E0E0E0';
 
-export default function AlertSection() {
+interface Props {
+  pendingTasks?: DashboardPendingTasks;
+}
+
+export default function AlertSection({ pendingTasks }: Props) {
   const t = useTranslations('Reports.attention');
+  const hasData = pendingTasks !== undefined;
 
   const alerts = [
     {
       id: 'courses_pending',
-      count: t('courses_pending.count'),
+      count: hasData ? pendingTasks.coursesPendingReview : 0,
       title: t('courses_pending.title'),
       description: t('courses_pending.description'),
       action: t('courses_pending.action'),
@@ -30,7 +37,7 @@ export default function AlertSection() {
     },
     {
       id: 'enrollments_pending',
-      count: t('enrollments_pending.count'),
+      count: hasData ? pendingTasks.newInstructorsPendingVerification : 0,
       title: t('enrollments_pending.title'),
       description: t('enrollments_pending.description'),
       action: t('enrollments_pending.action'),
@@ -40,7 +47,7 @@ export default function AlertSection() {
     },
     {
       id: 'rejected_courses',
-      count: t('rejected_courses.count'),
+      count: hasData ? pendingTasks.rejectedCourses : 0,
       title: t('rejected_courses.title'),
       description: t('rejected_courses.description'),
       action: t('rejected_courses.action'),
@@ -50,6 +57,10 @@ export default function AlertSection() {
       btnBorder: CARD_BORDER,
     },
   ];
+
+  const totalPending = hasData
+    ? pendingTasks.coursesPendingReview + pendingTasks.newInstructorsPendingVerification + pendingTasks.rejectedCourses
+    : 0;
 
   return (
     <Card
@@ -97,7 +108,7 @@ export default function AlertSection() {
           </Typography>
         </Box>
         <Typography sx={{ color: '#6B7280', fontSize: 12, fontWeight: 500 }}>
-          {t('pending_tasks', { count: '3' })}
+          {t('pending_tasks', { count: String(totalPending) })}
         </Typography>
       </Stack>
 

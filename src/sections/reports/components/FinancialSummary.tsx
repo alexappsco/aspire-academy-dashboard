@@ -9,21 +9,24 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 
+import type { ReceiptFinancials, WeeklyCollection } from 'src/types/reports';
+
 const PRIMARY = '#00A980';
 const ORANGE = '#FF9F1C';
 const RED = '#E63946';
 const CARD_BORDER = '#E0E0E0';
 
-export default function FinancialSummary() {
-  const t = useTranslations('Reports.financial');
+interface Props {
+  receiptFinancials?: ReceiptFinancials;
+  weeklyCollections?: WeeklyCollection[];
+}
 
-  const weeklyData = [
-    { week: 'الأسبوع 1', amount: 112000 },
-    { week: 'الأسبوع 2', amount: 128500 },
-    { week: 'الأسبوع 3', amount: 119000 },
-    { week: 'الأسبوع الحالي', amount: 125500 },
-  ];
-  const maxAmount = Math.max(...weeklyData.map((d) => d.amount));
+export default function FinancialSummary({ receiptFinancials, weeklyCollections }: Props) {
+  const t = useTranslations('Reports.financial');
+  const hasFinancials = receiptFinancials !== undefined;
+  const hasWeekly = weeklyCollections !== undefined && weeklyCollections.length > 0;
+
+  const maxAmount = hasWeekly ? Math.max(...weeklyCollections.map((d) => d.amount), 1) : 1;
 
   return (
     <Card
@@ -63,10 +66,12 @@ export default function FinancialSummary() {
               {t('total_requests')}
             </Typography>
             <Typography variant="h5" sx={{ fontWeight: 700, color: '#1A1A1A', fontSize: 22, mb: 0.5 }}>
-              2,840
+              {hasFinancials ? receiptFinancials.totalOrders.toLocaleString() : '—'}
             </Typography>
             <Typography sx={{ fontSize: 11, color: '#6B7280', fontWeight: 500 }}>
-              2,540 مقبولة • 18 مراجعة • 282 مرفوضة
+              {hasFinancials
+                ? `${receiptFinancials.approvedOrders.toLocaleString()} مقبولة • ${receiptFinancials.pendingOrders.toLocaleString()} مراجعة • ${receiptFinancials.rejectedOrders.toLocaleString()} مرفوضة`
+                : '—'}
             </Typography>
           </Box>
         </Grid>
@@ -86,7 +91,7 @@ export default function FinancialSummary() {
               {t('accepted_amount')}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 700, color: PRIMARY, fontSize: 18, mb: 0.25 }}>
-              485,000 {t('currency')}
+              {hasFinancials ? receiptFinancials.approvedAmount.toLocaleString() : '—'} {t('currency')}
             </Typography>
             <Typography sx={{ fontSize: 10.5, color: '#6B7280' }}>{t('accepted_sub')}</Typography>
           </Box>
@@ -107,9 +112,9 @@ export default function FinancialSummary() {
               {t('review_amount')}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 700, color: ORANGE, fontSize: 18, mb: 0.25 }}>
-              8,200 {t('currency')}
+              {hasFinancials ? receiptFinancials.pendingAmount.toLocaleString() : '—'} {t('currency')}
             </Typography>
-            <Typography sx={{ fontSize: 10.5, color: '#6B7280' }}>{t('review_sub', { count: '18' })}</Typography>
+            <Typography sx={{ fontSize: 10.5, color: '#6B7280' }}>{t('review_sub', { count: String(hasFinancials ? receiptFinancials.pendingReceiptsCount : 0) })}</Typography>
           </Box>
         </Grid>
 
@@ -128,7 +133,7 @@ export default function FinancialSummary() {
               {t('rejected_amount')}
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 700, color: RED, fontSize: 18, mb: 0.25 }}>
-              41,500 {t('currency')}
+              {hasFinancials ? receiptFinancials.rejectedAmount.toLocaleString() : '—'} {t('currency')}
             </Typography>
             <Typography sx={{ fontSize: 10.5, color: '#6B7280' }}>{t('rejected_sub')}</Typography>
           </Box>
@@ -149,37 +154,58 @@ export default function FinancialSummary() {
             {t('weekly_collections')}
           </Typography>
           <Typography sx={{ fontSize: 11, fontWeight: 600, color: PRIMARY }}>
-            98% {t('accuracy')}
+            {hasFinancials ? receiptFinancials.verificationAccuracy : 0}% {t('accuracy')}
           </Typography>
         </Stack>
 
         <Grid container spacing={1.5}>
-          {weeklyData.map((item) => (
-            <Grid key={item.week} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.375 }}>
-                <Typography sx={{ fontSize: 10, color: '#6B7280', fontWeight: 500 }}>
-                  {item.week}
-                </Typography>
-                <Typography sx={{ fontSize: 10, color: '#1A1A1A', fontWeight: 600 }}>
-                  {item.amount.toLocaleString()} {t('currency')}
-                </Typography>
-              </Stack>
-              <LinearProgress
-                variant="determinate"
-                value={(item.amount / maxAmount) * 100}
-                sx={{
-                  height: 7,
-                  borderRadius: 4,
-                  bgcolor: '#E0E0E0',
-                  '& .MuiLinearProgress-bar': {
-                    borderRadius: 4,
-                    bgcolor: item.week === 'الأسبوع الحالي' ? PRIMARY : PRIMARY,
-                    opacity: item.week === 'الأسبوع الحالي' ? 1 : 0.55,
-                  },
-                }}
-              />
-            </Grid>
-          ))}
+          {hasWeekly
+            ? weeklyCollections.map((item) => (
+                <Grid key={item.weekNumber} size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.375 }}>
+                    <Typography sx={{ fontSize: 10, color: '#6B7280', fontWeight: 500 }}>
+                      الأسبوع {item.weekNumber}
+                    </Typography>
+                    <Typography sx={{ fontSize: 10, color: '#1A1A1A', fontWeight: 600 }}>
+                      {item.amount.toLocaleString()} {t('currency')}
+                    </Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={maxAmount > 0 ? (item.amount / maxAmount) * 100 : 0}
+                    sx={{
+                      height: 7,
+                      borderRadius: 4,
+                      bgcolor: '#E0E0E0',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 4,
+                        bgcolor: PRIMARY,
+                        opacity: item.isCurrentWeek ? 1 : 0.55,
+                      },
+                    }}
+                  />
+                </Grid>
+              ))
+            : [1, 2, 3, 4].map((w) => (
+                <Grid key={w} size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.375 }}>
+                    <Typography sx={{ fontSize: 10, color: '#6B7280', fontWeight: 500 }}>
+                      الأسبوع {w}
+                    </Typography>
+                    <Typography sx={{ fontSize: 10, color: '#1A1A1A', fontWeight: 600 }}>0 {t('currency')}</Typography>
+                  </Stack>
+                  <LinearProgress
+                    variant="determinate"
+                    value={0}
+                    sx={{
+                      height: 7,
+                      borderRadius: 4,
+                      bgcolor: '#E0E0E0',
+                      '& .MuiLinearProgress-bar': { borderRadius: 4, bgcolor: PRIMARY },
+                    }}
+                  />
+                </Grid>
+              ))}
         </Grid>
       </Box>
     </Card>

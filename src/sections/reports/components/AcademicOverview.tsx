@@ -11,19 +11,25 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
+import type { DashboardAcademicStructure } from 'src/types/dashboard';
 
 const PRIMARY = '#00A980';
 const CARD_BORDER = '#E0E0E0';
 
-export default function AcademicOverview() {
+interface Props {
+  academicStructure?: DashboardAcademicStructure;
+}
+
+export default function AcademicOverview({ academicStructure }: Props) {
   const t = useTranslations('Reports.academic');
   const router = useRouter();
+  const hasData = academicStructure !== undefined;
 
   const stats = [
-    { key: 'countries', value: '12', label: t('countries'), sub: t('countries_sub'), icon: 'solar:globe-bold', iconBg: '#E6F7F2', iconColor: PRIMARY },
-    { key: 'universities', value: '48', label: t('universities'), sub: t('universities_sub'), icon: 'solar:buildings-bold', iconBg: '#EDE7F6', iconColor: '#7C3AED' },
-    { key: 'subjects', value: '214', label: t('subjects'), sub: t('subjects_sub'), icon: 'solar:book-bookmark-bold', iconBg: '#FFF4E6', iconColor: '#FF9F1C' },
-    { key: 'colleges', value: '86', label: t('colleges'), sub: t('colleges_sub'), icon: 'solar:square-academic-cap-2-bold', iconBg: '#E3F2FD', iconColor: '#1976D2' },
+    { key: 'countries', value: hasData ? academicStructure.countriesCount : 0, label: t('countries'), sub: t('countries_sub'), icon: 'solar:globe-bold', iconBg: '#E6F7F2', iconColor: PRIMARY },
+    { key: 'universities', value: hasData ? academicStructure.universitiesCount : 0, label: t('universities'), sub: t('universities_sub'), icon: 'solar:buildings-bold', iconBg: '#EDE7F6', iconColor: '#7C3AED' },
+    { key: 'subjects', value: hasData ? academicStructure.studyMaterialsCount : 0, label: t('subjects'), sub: t('subjects_sub'), icon: 'solar:book-bookmark-bold', iconBg: '#FFF4E6', iconColor: '#FF9F1C' },
+    { key: 'colleges', value: hasData ? academicStructure.facultiesCount : 0, label: t('colleges'), sub: t('colleges_sub'), icon: 'solar:square-academic-cap-2-bold', iconBg: '#E3F2FD', iconColor: '#1976D2' },
   ];
 
   return (
@@ -104,7 +110,7 @@ export default function AcademicOverview() {
               </Box>
               <Box>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#1A1A1A', fontSize: 24, lineHeight: 1.2 }}>
-                  {item.value}
+                  {item.value.toLocaleString()}
                 </Typography>
                 <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#1A1A1A', mb: 0.125 }}>
                   {item.label}
