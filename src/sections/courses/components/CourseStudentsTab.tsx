@@ -1,336 +1,342 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
-import LinearProgress from '@mui/material/LinearProgress';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
-import Grid from '@mui/material/Grid';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import Iconify from 'src/components/iconify';
-import { EnrollmentItem } from '../types';
+import { useToast } from 'src/components/toast';
+import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
+import { ORDER_STATUS, isPendingOrder, OrderDto } from 'src/types/order';
+import PaymentReceiptDialog, { PaymentReceiptData } from './dialog-paid-resit';
 
 interface CourseStudentsTabProps {
-  enrollments: EnrollmentItem[];
+  courseId: string;
 }
 
-const FULL_ENROLLMENTS: EnrollmentItem[] = [
-  {
-    id: 'enr-1',
-    name: 'أحمد محمد علي',
-    email: 'ahmed.ali@example.com',
-    avatarUrl: '/avatars/avatar_1.jpg',
-    joinDate: '05-08-2026',
-    progress: 45,
-    status: 'in_progress',
-  },
-  {
-    id: 'enr-2',
-    name: 'سارة خالد المنصور',
-    email: 'sara.k@example.com',
-    avatarUrl: '/avatars/avatar_2.jpg',
-    joinDate: '05-08-2026',
-    progress: 100,
-    status: 'completed',
-  },
-  {
-    id: 'enr-3',
-    name: 'محمد إبراهيم يوسف',
-    email: 'm.ibrahim@example.com',
-    avatarUrl: '/avatars/avatar_3.jpg',
-    joinDate: '05-08-2026',
-    progress: 100,
-    status: 'completed',
-  },
-  {
-    id: 'enr-4',
-    name: 'فاطمة الزهراء حسن',
-    email: 'fatima.z@example.com',
-    avatarUrl: '/avatars/avatar_4.jpg',
-    joinDate: '04-08-2026',
-    progress: 60,
-    status: 'in_progress',
-  },
-  {
-    id: 'enr-5',
-    name: 'عبدالله ناصر العتيبي',
-    email: 'abdullah.n@example.com',
-    avatarUrl: '/avatars/avatar_5.jpg',
-    joinDate: '03-08-2026',
-    progress: 80,
-    status: 'in_progress',
-  },
-  {
-    id: 'enr-6',
-    name: 'نورة سعد المطيري',
-    email: 'noura.s@example.com',
-    avatarUrl: '/avatars/avatar_6.jpg',
-    joinDate: '01-08-2026',
-    progress: 100,
-    status: 'completed',
-  },
-  {
-    id: 'enr-7',
-    name: 'يوسف جمال الدين',
-    email: 'youssef.g@example.com',
-    avatarUrl: '/avatars/avatar_7.jpg',
-    joinDate: '28-07-2026',
-    progress: 20,
-    status: 'in_progress',
-  },
-];
+type StatusFilterValue = 'all' | '0' | '1' | '2';
 
-export default function CourseStudentsTab({ enrollments }: CourseStudentsTabProps) {
-  const [data] = useState<EnrollmentItem[]>(
-    enrollments && enrollments.length > 0 ? enrollments : FULL_ENROLLMENTS
-  );
+const TABLE_HEAD_ALIGN: { [key: string]: cellAlignment } = {
+  student: cellAlignment.right,
+  phone: cellAlignment.center,
+  price: cellAlignment.center,
+  order_date: cellAlignment.center,
+  status: cellAlignment.center,
+  actions: cellAlignment.center,
+};
+
+export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) {
+  const t = useTranslations('CourseStudentsTab');
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
+  const toast = useToast();
+
+  const [orders, setOrders] = useState<OrderDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'in_progress' | 'completed'>('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
 
-  const filteredData = data.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<OrderDto | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectLoading, setRejectLoading] = useState(false);
+  const [receiptOrder, setReceiptOrder] = useState<OrderDto | null>(null);
 
-  const totalCount = data.length;
-  const completedCount = data.filter((d) => d.status === 'completed').length;
-  const inProgressCount = data.filter((d) => d.status === 'in_progress').length;
+  const fetchOrders = useCallback(async () => {
+    const res = await getOrders({
+      CourseId: courseId,
+      Filter: debouncedSearch.trim() || undefined,
+      Status: statusFilter === 'all' ? undefined : statusFilter,
+      SkipCount: 0,
+      MaxResultCount: 1000,
+    });
+    if (res.success && res.data) {
+      setOrders(res.data.items);
+    } else {
+      toast.error(res.error || t('messages.load_failed'));
+    }
+    setLoading(false);
+  }, [courseId, debouncedSearch, statusFilter, t, toast]);
+
+  // Debounce search input to avoid spamming the backend
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch orders on mount & when filters change
+  useEffect(() => {
+    let active = true;
+    const run = async () => {
+      const res = await getOrders({
+        CourseId: courseId,
+        Filter: debouncedSearch.trim() || undefined,
+        Status: statusFilter === 'all' ? undefined : statusFilter,
+        SkipCount: 0,
+        MaxResultCount: 1000,
+      });
+      if (!active) return;
+      if (res.success && res.data) {
+        setOrders(res.data.items);
+      } else {
+        toast.error(res.error || t('messages.load_failed'));
+      }
+      setLoading(false);
+    };
+    run();
+    return () => {
+      active = false;
+    };
+  }, [courseId, debouncedSearch, statusFilter, t, toast]);
+
+  const handleApprove = async (order: OrderDto) => {
+    setActionLoadingId(order.id);
+    const res = await approveOrder(order.id);
+    if (res.success) {
+      toast.success(t('messages.approved'));
+      fetchOrders();
+    } else {
+      toast.error(
+        res.error === 'OrderNotPending' ? t('messages.order_not_pending') : res.error || t('messages.approve_failed')
+      );
+    }
+    setActionLoadingId(null);
+  };
+
+  const openRejectDialog = (order: OrderDto) => {
+    setRejectTarget(order);
+    setRejectReason('');
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    setRejectLoading(true);
+    const res = await rejectOrder(rejectTarget.id, rejectReason.trim());
+    if (res.success) {
+      toast.success(t('messages.rejected'));
+      setRejectTarget(null);
+      setRejectReason('');
+      fetchOrders();
+    } else {
+      toast.error(
+        res.error === 'OrderNotPending' ? t('messages.order_not_pending') : res.error || t('messages.reject_failed')
+      );
+    }
+    setRejectLoading(false);
+  };
+
+  const buildReceiptData = (order: OrderDto): PaymentReceiptData => {
+    const item = order.items?.find((i) => i.courseId) ?? order.items?.[0];
+    return {
+      refNumber: order.id,
+      bankName: 'بنك مصر • Banque Misr',
+      bankSubtext: 'إشعار تحويل مصرفي إلكتروني رسمي',
+      amount: order.total ?? 0,
+      currency: 'جنيه مصري (EGP)',
+      amountInWords: 'فقط ' + (order.total ?? 0).toLocaleString('ar-EG') + ' جنيهاً مصرياً لا غير',
+      transactionTime: order.creationTime
+        ? new Date(order.creationTime).toLocaleString(isRtl ? 'ar-KW' : 'en-US')
+        : '—',
+      senderName: order.buyerName || '—',
+      receiverName: 'أكاديمية أسباير للتعليم الطبي (Aspire)',
+      iban: 'EG3400020001000000284918234',
+      purpose: item?.courseTitle ? `رسوم دورة ${item.courseTitle}` : 'رسوم دورة',
+    };
+  };
+
+  const handleReceiptAccept = () => {
+    if (!receiptOrder) return;
+    const order = receiptOrder;
+    setReceiptOrder(null);
+    void handleApprove(order);
+  };
+
+  const handleReceiptReject = () => {
+    if (!receiptOrder) return;
+    const order = receiptOrder;
+    setReceiptOrder(null);
+    openRejectDialog(order);
+  };
+
+  const statusConfig = (order: OrderDto) => {
+    if (Number(order.status) === ORDER_STATUS.APPROVED) {
+      return { label: t('statuses.approved'), bg: '#D1FAE5', color: '#059669' };
+    }
+    if (Number(order.status) === ORDER_STATUS.REJECTED) {
+      return { label: t('statuses.rejected'), bg: '#FEE2E2', color: '#DC2626' };
+    }
+    return { label: t('statuses.pending'), bg: '#FEF3C7', color: '#D97706' };
+  };
+
+  const formatDate = (value: string): string => {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString(isRtl ? 'ar-KW' : 'en-US');
+  };
+
+  const formatPrice = (value: number): string =>
+    value != null ? value.toLocaleString(isRtl ? 'ar-KW' : 'en-US') : '—';
 
   const tableHead = [
-    {
-      id: 'name',
-      label: 'الطالب',
-      align: 'right' as cellAlignment,
-    },
-    {
-      id: 'joinDate',
-      label: 'تاريخ الانضمام',
-      align: 'center' as cellAlignment,
-    },
-    {
-      id: 'progress',
-      label: 'نسبة الإنجاز',
-      align: 'center' as cellAlignment,
-    },
-    {
-      id: 'status',
-      label: 'الحالة',
-      align: 'center' as cellAlignment,
-    },
-    {
-      id: 'actions',
-      label: 'الإجراءات',
-      align: 'center' as cellAlignment,
-    },
+    { id: 'student', label: t('columns.student'), align: TABLE_HEAD_ALIGN.student },
+    { id: 'phone', label: t('columns.phone'), align: TABLE_HEAD_ALIGN.phone },
+    { id: 'price', label: t('columns.price'), align: TABLE_HEAD_ALIGN.price },
+    { id: 'order_date', label: t('columns.order_date'), align: TABLE_HEAD_ALIGN.order_date },
+    { id: 'status', label: t('columns.status'), align: TABLE_HEAD_ALIGN.status },
+    { id: 'actions', label: t('columns.actions'), align: TABLE_HEAD_ALIGN.actions },
   ];
 
   const customRender = {
-    name: (row: EnrollmentItem) => (
+    student: (row: OrderDto) => (
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
         <Avatar
-          src={row.avatarUrl}
           sx={{
-            width: 38,
-            height: 38,
+            width: 36,
+            height: 36,
             bgcolor: '#EFF6FF',
             color: '#0284C7',
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 700,
           }}
         >
-          {row.name.charAt(0)}
+          {(row.buyerName || '?').charAt(0)}
         </Avatar>
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-            {row.name}
+            {row.buyerName || '—'}
           </Typography>
-          <Typography sx={{ fontSize: 12, color: '#94A3B8' }}>{row.email}</Typography>
+          <Typography
+            sx={{
+              fontSize: 12,
+              color: '#64748B',
+              maxWidth: 220,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {row.buyerEmail || ''}
+          </Typography>
         </Box>
       </Stack>
     ),
-    joinDate: (row: EnrollmentItem) => (
-      <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500 }}>
-        {row.joinDate}
+    phone: (row: OrderDto) => (
+      <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
+        {row.buyerPhone || '—'}
       </Typography>
     ),
-    progress: (row: EnrollmentItem) => {
-      const isCompleted = row.progress === 100;
+    price: (row: OrderDto) => (
+      <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 700 }}>
+        {formatPrice(row.total)}
+      </Typography>
+    ),
+    order_date: (row: OrderDto) => (
+      <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
+        {formatDate(row.creationTime)}
+      </Typography>
+    ),
+    status: (row: OrderDto) => {
+      const cfg = statusConfig(row);
       return (
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#475569', minWidth: 35 }}>
-            {row.progress}%
-          </Typography>
-          <Box sx={{ width: 80 }}>
-            <LinearProgress
-              variant="determinate"
-              value={row.progress}
-              sx={{
-                height: 6,
-                borderRadius: 3,
-                bgcolor: '#E2E8F0',
-                '& .MuiLinearProgress-bar': {
-                  bgcolor: isCompleted ? '#10B981' : '#0284C7',
-                  borderRadius: 3,
-                },
-              }}
-            />
-          </Box>
+        <Chip
+          label={cfg.label}
+          size="small"
+          sx={{ bgcolor: cfg.bg, color: cfg.color, fontWeight: 700, fontSize: 12, borderRadius: 1.5 }}
+        />
+      );
+    },
+    actions: (row: OrderDto) => {
+      const pending = isPendingOrder(row.status);
+      const busy = actionLoadingId === row.id;
+      return (
+        <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setReceiptOrder(row)}
+            startIcon={<Iconify icon="solar:receipt-2-bold" width={15} />}
+            sx={{
+              borderRadius: 1.5,
+              borderColor: '#BFDBFE',
+              color: '#2563EB',
+              fontSize: 11.5,
+              px: 1.2,
+              fontWeight: 700,
+              height: 30,
+              textTransform: 'none',
+              whiteSpace: 'nowrap',
+              '&:hover': { borderColor: '#93C5FD', bgcolor: '#EFF6FF' },
+            }}
+          >
+            {t('actions.view_receipt')}
+          </Button>
+          {pending ? (
+            <>
+              <IconButton
+                size="small"
+                disabled={busy}
+                onClick={() => handleApprove(row)}
+                title={t('actions.approve')}
+                sx={{
+                  bgcolor: '#E6F4EA',
+                  color: '#10B981',
+                  borderRadius: 1.5,
+                  width: 30,
+                  height: 30,
+                  '&:hover': { bgcolor: '#C6F6D5' },
+                }}
+              >
+                {busy ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="eva:checkmark-fill" width={18} />
+                )}
+              </IconButton>
+              <IconButton
+                size="small"
+                disabled={busy}
+                onClick={() => openRejectDialog(row)}
+                title={t('actions.reject')}
+                sx={{
+                  bgcolor: '#FCE8E6',
+                  color: '#EF4444',
+                  borderRadius: 1.5,
+                  width: 30,
+                  height: 30,
+                  '&:hover': { bgcolor: '#FEE2E2' },
+                }}
+              >
+                <Iconify icon="eva:close-fill" width={18} />
+              </IconButton>
+            </>
+          ) : (
+            <Typography sx={{ fontSize: 11.5, color: '#CBD5E1', fontWeight: 600 }}>—</Typography>
+          )}
         </Stack>
       );
     },
-    status: (row: EnrollmentItem) => {
-      const isCompleted = row.status === 'completed';
-      return (
-        <Box
-          sx={{
-            display: 'inline-block',
-            px: 1.5,
-            py: 0.4,
-            borderRadius: 1.5,
-            fontSize: 12,
-            fontWeight: 700,
-            bgcolor: isCompleted ? '#ECFDF5' : '#EFF6FF',
-            color: isCompleted ? '#10B981' : '#0284C7',
-          }}
-        >
-          {isCompleted ? 'مكتمل' : 'قيد التقدم'}
-        </Box>
-      );
-    },
-    actions: () => (
-      <IconButton size="small" sx={{ color: '#64748B' }}>
-        <Iconify icon="eva:more-vertical-fill" width={18} />
-      </IconButton>
-    ),
   };
 
   return (
     <Stack spacing={3}>
-      {/* 1. Summary Cards */}
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            sx={{
-              p: 2.5,
-              borderRadius: 2.5,
-              bgcolor: '#FFFFFF',
-              border: '1px solid #F1F3F5',
-              boxShadow: '0px 2px 8px rgba(0,0,0,0.02)',
-            }}
-          >
-            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-              <Box
-                sx={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 2,
-                  bgcolor: '#EFF6FF',
-                  color: '#0284C7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Iconify icon="solar:users-group-two-rounded-bold" width={24} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-                  إجمالي المسجلين
-                </Typography>
-                <Typography sx={{ fontSize: 20, fontWeight: 800, color: '#1E293B' }}>
-                  8,543 طالب
-                </Typography>
-              </Box>
-            </Stack>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            sx={{
-              p: 2.5,
-              borderRadius: 2.5,
-              bgcolor: '#FFFFFF',
-              border: '1px solid #F1F3F5',
-              boxShadow: '0px 2px 8px rgba(0,0,0,0.02)',
-            }}
-          >
-            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-              <Box
-                sx={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 2,
-                  bgcolor: '#ECFDF5',
-                  color: '#10B981',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Iconify icon="solar:check-circle-bold" width={24} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-                  أتموا الكورس
-                </Typography>
-                <Typography sx={{ fontSize: 20, fontWeight: 800, color: '#1E293B' }}>
-                  6,150 طالب
-                </Typography>
-              </Box>
-            </Stack>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <Card
-            sx={{
-              p: 2.5,
-              borderRadius: 2.5,
-              bgcolor: '#FFFFFF',
-              border: '1px solid #F1F3F5',
-              boxShadow: '0px 2px 8px rgba(0,0,0,0.02)',
-            }}
-          >
-            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-              <Box
-                sx={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 2,
-                  bgcolor: '#FFF7ED',
-                  color: '#EA580C',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Iconify icon="solar:chart-2-bold" width={24} />
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-                  معدل الإكمال العام
-                </Typography>
-                <Typography sx={{ fontSize: 20, fontWeight: 800, color: '#1E293B' }}>
-                  72%
-                </Typography>
-              </Box>
-            </Stack>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* 2. Main Students Table Card */}
       <Card
         sx={{
           borderRadius: 3,
@@ -340,7 +346,7 @@ export default function CourseStudentsTab({ enrollments }: CourseStudentsTabProp
           boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.02)',
         }}
       >
-        {/* Table Filter Bar */}
+        {/* Filter Bar */}
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
@@ -351,8 +357,25 @@ export default function CourseStudentsTab({ enrollments }: CourseStudentsTabProp
           }}
         >
           <TextField
+            select
             size="small"
-            placeholder="بحث بالاسم أو البريد الإلكتروني..."
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilterValue)}
+            sx={{
+              width: 150,
+              bgcolor: '#F8FAFC',
+              '& .MuiOutlinedInput-root': { borderRadius: 2 },
+            }}
+          >
+            <MenuItem value="all">{t('filters.all')}</MenuItem>
+            <MenuItem value={String(ORDER_STATUS.PENDING)}>{t('statuses.pending')}</MenuItem>
+            <MenuItem value={String(ORDER_STATUS.APPROVED)}>{t('statuses.approved')}</MenuItem>
+            <MenuItem value={String(ORDER_STATUS.REJECTED)}>{t('statuses.rejected')}</MenuItem>
+          </TextField>
+
+          <TextField
+            size="small"
+            placeholder={t('search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             slotProps={{
@@ -365,40 +388,89 @@ export default function CourseStudentsTab({ enrollments }: CourseStudentsTabProp
               },
             }}
             sx={{
-              width: { xs: '100%', sm: 320 },
+              width: { xs: '100%', sm: 340 },
               bgcolor: '#F8FAFC',
               '& .MuiOutlinedInput-root': { borderRadius: 2 },
             }}
           />
-
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-            <TextField
-              select
-              size="small"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              sx={{
-                width: 160,
-                bgcolor: '#F8FAFC',
-                '& .MuiOutlinedInput-root': { borderRadius: 2 },
-              }}
-            >
-              <MenuItem value="all">كل الحالات ({totalCount})</MenuItem>
-              <MenuItem value="in_progress">قيد التقدم ({inProgressCount})</MenuItem>
-              <MenuItem value="completed">مكتمل ({completedCount})</MenuItem>
-            </TextField>
-          </Stack>
         </Stack>
 
-        {/* SharedTable */}
-        <SharedTable<EnrollmentItem>
-          data={filteredData}
-          count={filteredData.length}
-          tableHead={tableHead}
-          customRender={customRender}
-          disablePagination
-        />
+        {/* Orders Table */}
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+            <CircularProgress size={32} sx={{ color: '#0284C7' }} />
+          </Box>
+        ) : (
+          <SharedTable<OrderDto>
+            data={orders}
+            count={orders.length}
+            tableHead={tableHead}
+            customRender={customRender}
+          />
+        )}
       </Card>
+
+      {/* Reject Order Dialog */}
+      <Dialog
+        open={Boolean(rejectTarget)}
+        onClose={() => setRejectTarget(null)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B', fontSize: 17, pb: 1 }}>
+          {t('reject_dialog.title')}
+        </DialogTitle>
+        <DialogContent sx={{ pt: '8px !important' }}>
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            size="small"
+            label={t('reject_dialog.reason_label')}
+            placeholder={t('reject_dialog.reason_placeholder')}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setRejectTarget(null)}
+            sx={{ borderRadius: 2, color: '#475569', borderColor: '#E2E8F0', fontWeight: 600 }}
+          >
+            {t('reject_dialog.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!rejectReason.trim() || rejectLoading}
+            startIcon={rejectLoading && <CircularProgress size={16} color="inherit" />}
+            onClick={handleReject}
+            sx={{
+              bgcolor: '#E11D48',
+              color: '#FFFFFF',
+              borderRadius: 2,
+              fontWeight: 700,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#BE123C' },
+            }}
+          >
+            {t('reject_dialog.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Payment Receipt Dialog */}
+      {receiptOrder && (
+        <PaymentReceiptDialog
+          open
+          onClose={() => setReceiptOrder(null)}
+          onAccept={handleReceiptAccept}
+          onReject={handleReceiptReject}
+          data={buildReceiptData(receiptOrder)}
+        />
+      )}
     </Stack>
   );
 }

@@ -90,6 +90,9 @@
     "subtitle": "Create a new educational course by adding its basic information.",
     "breadcrumb_courses": "Training Courses",
     "breadcrumb_add": "Add New Course",
+    "title_edit": "Edit Course",
+    "subtitle_edit": "Update the course details and curriculum, then save your changes.",
+    "breadcrumb_edit": "Edit Course",
     "stepper": {
       "basic_info": "Basic Information",
       "add_chapters": "Add Chapters"
@@ -108,14 +111,23 @@
       "lecturer_placeholder": "Select lecturer...",
       "college_label": "College",
       "college_placeholder": "Select college",
-      "subject_label": "Subject",
-      "subject_placeholder": "Select subject...",
+      "subject_label": "Study Material",
+      "subject_placeholder": "Select study material...",
       "specialty_label": "Specialization",
       "specialty_placeholder": "Select specialization...",
-      "duration_label": "Course Duration",
-      "duration_placeholder": "Course duration...",
       "type_label": "Course Type",
-      "type_placeholder": "Course type...",
+      "type_placeholder": "Select course type...",
+      "currency_label": "Currency",
+      "currency_placeholder": "Select currency...",
+      "access_duration_label": "Access Duration (Days)",
+      "access_duration_placeholder": "e.g. 365",
+      "university_label": "University",
+      "university_placeholder": "Select university...",
+      "academic_year_label": "Academic Year",
+      "academic_year_placeholder": "Select academic year...",
+      "semester_label": "Semester",
+      "semester_placeholder": "Select semester...",
+      "loading": "Loading...",
       "description_label": "Course Description",
       "description_placeholder": "Write a detailed description for the course..."
     },
@@ -125,6 +137,8 @@
       "dialog_add_title": "Add New Learning Objective",
       "dialog_edit_title": "Edit Learning Objective",
       "objective_placeholder": "Enter learning objective here...",
+      "objective_placeholder_ar": "Objective (Arabic)...",
+      "objective_placeholder_en": "Objective (English)...",
       "save_btn": "Save",
       "add_btn": "Add",
       "cancel_btn": "Cancel",
@@ -153,11 +167,13 @@
       "cancel": "Cancel",
       "save_draft": "Save as Draft",
       "continue": "Continue",
-      "create_course": "Create Course"
+      "create_course": "Create Course",
+      "save_changes": "Save Changes"
     },
     "messages": {
       "draft_saved": "Course saved as draft successfully",
       "course_created": "Course created successfully",
+      "course_updated": "Course updated successfully",
       "validation_required": "Please fill in the required fields"
     }
   },
@@ -191,14 +207,34 @@
     "tabs": {
       "overview": "Overview",
       "content": "Content",
-      "students": "Students",
+      "students": "Student subscriptions",
       "reviews": "Reviews",
       "analytics": "Analytics"
     },
     "course_info": {
       "title": "Course Information",
+      "type": "Course Type",
+      "price": "Price",
+      "faculty": "Faculty",
+      "field": "Field",
+      "specialization": "Specialization",
+      "study_material": "Study Material",
+      "access_duration": "Access Duration",
+      "days": "{count} days",
+      "last_updated": "Last Updated",
+      "learning_objectives": "Learning Objectives",
+      "types": {
+        "full": "Full Course",
+        "midterm": "Midterm",
+        "final": "Final"
+      },
       "paragraph_1": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions.",
       "paragraph_2": "Comprehensive overview of cardiovascular medicine designed for medical students and junior resident physicians. Covers pathophysiology, diagnostic modalities, and contemporary management strategies for common and complex cardiac conditions."
+    },
+    "errors": {
+      "load_failed": "Failed to load course details.",
+      "not_found": "Course not found.",
+      "back_to_courses": "Back to Courses"
     },
     "content_summary": {
       "title": "Content Summary",
@@ -225,6 +261,45 @@
         "in_progress": "In Progress",
         "completed": "Completed"
       }
+    }
+  },
+  "CourseStudentsTab": {
+    "search_placeholder": "Search by name, email or phone...",
+    "filters": {
+      "all": "All Statuses"
+    },
+    "columns": {
+      "student": "Student",
+      "phone": "Phone",
+      "price": "Price",
+      "order_date": "Order Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "view_receipt": "View Receipt"
+    },
+    "reject_dialog": {
+      "title": "Reject Order",
+      "reason_label": "Rejection Reason",
+      "reason_placeholder": "Enter the reason for rejection (required)",
+      "cancel": "Cancel",
+      "confirm": "Reject"
+    },
+    "messages": {
+      "load_failed": "Failed to load orders.",
+      "approved": "Order approved successfully",
+      "rejected": "Order rejected successfully",
+      "approve_failed": "Failed to approve the order",
+      "reject_failed": "Failed to reject the order",
+      "order_not_pending": "This order is no longer pending"
     }
   },
   "Banners": {

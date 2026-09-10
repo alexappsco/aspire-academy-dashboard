@@ -18,13 +18,14 @@ export interface CourseFaculty {
 export interface CourseField {
   id: string;
   name: string;
+  imageUrl?: string;
 }
 
 export interface CourseInstructor {
   id: string;
-  name: string;
-  title?: string;
-  imageUrl?: string;
+  name?: string | null;
+  title?: string | null;
+  imageUrl?: string | null;
   avatarUrl?: string;
   ratingAverage?: number;
   ratingCount?: number;
@@ -75,6 +76,12 @@ export interface CourseChapter {
   lessons: CourseLesson[];
 }
 
+export interface CourseObjective {
+  id?: string;
+  text: string;
+  order: number;
+}
+
 export interface CourseCurriculum {
   chapters: CourseChapter[];
 }
@@ -102,14 +109,18 @@ export interface CourseDto {
   fieldId?: string;
   field?: CourseField;
   curriculum?: CourseCurriculum;
+  objectives?: CourseObjective[];
+  lessonCount?: number;
+  totalDurationInSeconds?: number;
+  accessDurationInDays?: number;
   studentsCount?: number;
   rating?: number;
   ratingAverage?: number;
   ratingCount?: number;
   isActive?: boolean;
-  status?: string;
-  rejectionReason?: string;
-  reviewedAt?: string;
+  status?: string | number;
+  rejectionReason?: string | null;
+  reviewedAt?: string | null;
   lastUpdatedAt?: string;
   creationTime?: string;
   lastModificationTime?: string;

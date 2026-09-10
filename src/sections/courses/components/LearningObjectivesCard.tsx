@@ -39,45 +39,57 @@ export default function LearningObjectivesCard({
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<LearningObjective | null>(null);
-  const [inputText, setInputText] = useState('');
+  const [textAr, setTextAr] = useState('');
+  const [textEn, setTextEn] = useState('');
 
   const handleOpenAdd = () => {
     setEditingObj(null);
-    setInputText('');
+    setTextAr('');
+    setTextEn('');
     setDialogOpen(true);
   };
 
   const handleOpenEdit = (obj: LearningObjective) => {
     setEditingObj(obj);
-    setInputText(obj.title);
+    setTextAr(obj.textAr);
+    setTextEn(obj.textEn);
     setDialogOpen(true);
   };
 
   const handleSave = () => {
-    if (!inputText.trim()) return;
+    if (!textAr.trim() && !textEn.trim()) return;
 
     if (editingObj) {
       onChange(
         objectives.map((o) =>
-          o.id === editingObj.id ? { ...o, title: inputText.trim() } : o
+          o.id === editingObj.id ? { ...o, textAr: textAr.trim(), textEn: textEn.trim() } : o
         )
       );
     } else {
       const newObj: LearningObjective = {
         id: `obj-${Date.now()}`,
-        title: inputText.trim(),
+        textAr: textAr.trim(),
+        textEn: textEn.trim(),
+        order: objectives.length + 1,
       };
       onChange([...objectives, newObj]);
     }
 
     setDialogOpen(false);
-    setInputText('');
+    setTextAr('');
+    setTextEn('');
     setEditingObj(null);
   };
 
   const handleDelete = (id: string) => {
-    onChange(objectives.filter((o) => o.id !== id));
+    onChange(
+      objectives
+        .filter((o) => o.id !== id)
+        .map((o, i) => ({ ...o, order: i + 1 }))
+    );
   };
+
+  const displayText = (obj: LearningObjective) => obj.textAr || obj.textEn;
 
   return (
     <Card
@@ -89,7 +101,6 @@ export default function LearningObjectivesCard({
         boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.02)',
       }}
     >
-      {/* Card Header */}
       <Box
         sx={{
           display: 'flex',
@@ -99,15 +110,8 @@ export default function LearningObjectivesCard({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Iconify
-            icon="solar:clipboard-list-bold"
-            width={24}
-            sx={{ color: '#1C252E' }}
-          />
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 700, color: '#1C252E', fontSize: 18 }}
-          >
+          <Iconify icon="solar:clipboard-list-bold" width={24} sx={{ color: '#1C252E' }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1C252E', fontSize: 18 }}>
             {t('card_title')}
           </Typography>
         </Box>
@@ -128,7 +132,6 @@ export default function LearningObjectivesCard({
         </Button>
       </Box>
 
-      {/* Objectives List */}
       <Stack spacing={1.5}>
         {objectives.map((item) => (
           <Box
@@ -143,12 +146,9 @@ export default function LearningObjectivesCard({
               alignItems: 'center',
               justifyContent: 'space-between',
               transition: 'all 0.2s ease',
-              '&:hover': {
-                bgcolor: '#F1F5F9',
-              },
+              '&:hover': { bgcolor: '#F1F5F9' },
             }}
           >
-            {/* Objective Badge & Text */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
@@ -164,36 +164,23 @@ export default function LearningObjectivesCard({
               >
                 <Iconify icon="solar:check-circle-bold" width={18} />
               </Box>
-              <Typography
-                sx={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  color: '#1E293B',
-                }}
-              >
-                {item.title}
+              <Typography sx={{ fontWeight: 600, fontSize: 14, color: '#1E293B' }}>
+                {displayText(item)}
               </Typography>
             </Box>
 
-            {/* Actions (Edit & Delete) */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <IconButton
                 size="small"
                 onClick={() => handleOpenEdit(item)}
-                sx={{
-                  color: '#64748B',
-                  '&:hover': { color: '#1E293B', bgcolor: 'rgba(0,0,0,0.04)' },
-                }}
+                sx={{ color: '#64748B', '&:hover': { color: '#1E293B', bgcolor: 'rgba(0,0,0,0.04)' } }}
               >
                 <Iconify icon="solar:pen-bold" width={18} />
               </IconButton>
               <IconButton
                 size="small"
                 onClick={() => handleDelete(item.id)}
-                sx={{
-                  color: '#EF4444',
-                  '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' },
-                }}
+                sx={{ color: '#EF4444', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' } }}
               >
                 <Iconify icon="solar:trash-bin-trash-bold" width={18} />
               </IconButton>
@@ -202,20 +189,12 @@ export default function LearningObjectivesCard({
         ))}
       </Stack>
 
-      {/* Add / Edit Objective Dialog */}
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         fullWidth
         maxWidth="xs"
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 3,
-              p: 1.5,
-            },
-          },
-        }}
+        slotProps={{ paper: { sx: { borderRadius: 3, p: 1.5 } } }}
       >
         <Box
           sx={{
@@ -227,18 +206,10 @@ export default function LearningObjectivesCard({
             pb: 1.5,
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 700, color: '#1E293B', fontSize: 18 }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', fontSize: 18 }}>
             {editingObj ? t('dialog_edit_title') : t('dialog_add_title')}
           </Typography>
-
-          <IconButton
-            onClick={() => setDialogOpen(false)}
-            size="small"
-            sx={{ color: '#919EAB' }}
-          >
+          <IconButton onClick={() => setDialogOpen(false)} size="small" sx={{ color: '#919EAB' }}>
             <Iconify icon="mingcute:close-line" width={20} />
           </IconButton>
         </Box>
@@ -249,9 +220,18 @@ export default function LearningObjectivesCard({
               fullWidth
               multiline
               rows={3}
-              placeholder={t('objective_placeholder')}
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              placeholder={t('objective_placeholder_ar')}
+              value={textAr}
+              onChange={(e) => setTextAr(e.target.value)}
+              sx={inputRootSx}
+            />
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              placeholder={t('objective_placeholder_en')}
+              value={textEn}
+              onChange={(e) => setTextEn(e.target.value)}
               sx={inputRootSx}
             />
 
@@ -259,7 +239,7 @@ export default function LearningObjectivesCard({
               <Button
                 variant="contained"
                 onClick={handleSave}
-                disabled={!inputText.trim()}
+                disabled={!textAr.trim() && !textEn.trim()}
                 sx={{
                   bgcolor: '#1C252E',
                   color: '#FFFFFF',
@@ -274,7 +254,6 @@ export default function LearningObjectivesCard({
               >
                 {editingObj ? t('save_btn') : t('add_btn')}
               </Button>
-
               <Button
                 variant="outlined"
                 onClick={() => setDialogOpen(false)}
@@ -286,10 +265,7 @@ export default function LearningObjectivesCard({
                   py: 1,
                   fontWeight: 600,
                   fontSize: 14,
-                  '&:hover': {
-                    borderColor: '#CBD5E1',
-                    bgcolor: '#F8FAFC',
-                  },
+                  '&:hover': { borderColor: '#CBD5E1', bgcolor: '#F8FAFC' },
                 }}
               >
                 {t('cancel_btn')}

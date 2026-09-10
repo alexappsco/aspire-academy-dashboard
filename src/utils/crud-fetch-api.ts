@@ -74,6 +74,26 @@ async function apiRequest<TResponse, TBody = undefined>(
     }
 
     if (commonErrorStatus.has(response.status)) {
+      try {
+        const body = await response.json();
+        if (body && typeof body === 'object') {
+          const msg = Array.isArray(body.message)
+            ? body.message.join(' | ')
+            : body.message;
+          if (msg) {
+            return errorObject(
+              msg,
+              response.status,
+              body.code ?? null,
+              body.details ?? null,
+              body.data ?? {},
+              body.validationErrors ?? null
+            );
+          }
+        }
+      } catch {
+        // body is not JSON (e.g. plain text 500); fall back to generic message
+      }
       const errMsg = t(commonErrorMessages.get(response.status.toString()) ?? 'unexpected_error');
       return errorObject(errMsg, response.status);
     }
