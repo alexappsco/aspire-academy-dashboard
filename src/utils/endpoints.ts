@@ -86,6 +86,12 @@ export const endpoints = {
     delete: (id: string) => `/admin/contact-us-messages/${id}`,
     updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
   },
+  orders: {
+    list: '/admin/orders',
+    details: (id: string) => `/admin/orders/${id}`,
+    approve: (id: string) => `/admin/orders/${id}/approve`,
+    reject: (id: string) => `/admin/orders/${id}/reject`,
+  },
   students: {
     list: '/admin/students',
     details: (id: string) => `/admin/students/${id}`,

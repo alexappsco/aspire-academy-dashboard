@@ -44,7 +44,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Stack spacing={0.4}>
       <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>{label}</Typography>
-      <Typography sx={{ fontSize: 14, color: '#1E293B', fontWeight: 600 }}>{value}</Typography>
+      <Typography component="div" sx={{ fontSize: 14, color: '#1E293B', fontWeight: 600 }}>{value}</Typography>
     </Stack>
   );
 }
@@ -543,7 +543,7 @@ export default function CourseDetailsView({ id }: CourseDetailsViewProps) {
 
       {/* 5.3 Students Tab */}
       {currentTab === 'students' && (
-        <CourseStudentsTab enrollments={course.recentEnrollments} />
+        <CourseStudentsTab courseId={course.id} />
       )}
     </Box>
   );

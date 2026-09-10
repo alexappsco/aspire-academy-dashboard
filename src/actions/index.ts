@@ -13,4 +13,5 @@ export * from './academic-years';
 export * from './banners';
 export * from './support';
 export * from './dashboard';
+export * from './orders';
 export * from './students';

@@ -211,7 +211,7 @@
     "tabs": {
       "overview": "نظرة عامة",
       "content": "المحتوى",
-      "students": "الطلاب",
+      "students": "اشتراكات الطلاب",
       "reviews": "المراجعات",
       "analytics": "التحليلات"
     },
@@ -265,6 +265,45 @@
         "in_progress": "قيد التنفيذ",
         "completed": "مكتمل"
       }
+    }
+  },
+  "CourseStudentsTab": {
+    "search_placeholder": "البحث بالاسم أو البريد أو رقم الهاتف...",
+    "filters": {
+      "all": "كل الحالات"
+    },
+    "columns": {
+      "student": "الطالب",
+      "phone": "رقم الهاتف",
+      "price": "السعر",
+      "order_date": "تاريخ الطلب",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "statuses": {
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "actions": {
+      "approve": "قبول",
+      "reject": "رفض",
+      "view_receipt": "عرض الإيصال"
+    },
+    "reject_dialog": {
+      "title": "رفض الطلب",
+      "reason_label": "سبب الرفض",
+      "reason_placeholder": "أدخل سبب الرفض (مطلوب)",
+      "cancel": "إلغاء",
+      "confirm": "رفض"
+    },
+    "messages": {
+      "load_failed": "تعذر تحميل الطلبات.",
+      "approved": "تم قبول الطلب بنجاح",
+      "rejected": "تم رفض الطلب بنجاح",
+      "approve_failed": "فشل قبول الطلب",
+      "reject_failed": "فشل رفض الطلب",
+      "order_not_pending": "هذا الطلب لم يعد قيد الانتظار"
     }
   },
   "Banners": {

@@ -207,7 +207,7 @@
     "tabs": {
       "overview": "Overview",
       "content": "Content",
-      "students": "Students",
+      "students": "Student subscriptions",
       "reviews": "Reviews",
       "analytics": "Analytics"
     },
@@ -261,6 +261,45 @@
         "in_progress": "In Progress",
         "completed": "Completed"
       }
+    }
+  },
+  "CourseStudentsTab": {
+    "search_placeholder": "Search by name, email or phone...",
+    "filters": {
+      "all": "All Statuses"
+    },
+    "columns": {
+      "student": "Student",
+      "phone": "Phone",
+      "price": "Price",
+      "order_date": "Order Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "view_receipt": "View Receipt"
+    },
+    "reject_dialog": {
+      "title": "Reject Order",
+      "reason_label": "Rejection Reason",
+      "reason_placeholder": "Enter the reason for rejection (required)",
+      "cancel": "Cancel",
+      "confirm": "Reject"
+    },
+    "messages": {
+      "load_failed": "Failed to load orders.",
+      "approved": "Order approved successfully",
+      "rejected": "Order rejected successfully",
+      "approve_failed": "Failed to approve the order",
+      "reject_failed": "Failed to reject the order",
+      "order_not_pending": "This order is no longer pending"
     }
   },
   "Banners": {
