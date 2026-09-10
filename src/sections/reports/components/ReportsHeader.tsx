@@ -65,7 +65,7 @@ export default function ReportsHeader() {
         </Typography>
       </Box>
 
-      <Button
+      {/* <Button
         variant="outlined"
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon sx={{ fontSize: 18 }} />}
@@ -122,7 +122,8 @@ export default function ReportsHeader() {
             {option}
           </MenuItem>
         ))}
-      </Menu>
+      </Menu> */}
+
     </Stack>
   );
 }

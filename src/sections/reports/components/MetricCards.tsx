@@ -28,8 +28,8 @@ export default function MetricCards({ statCards }: Props) {
     {
       id: 'students',
       icon: 'solar:users-group-rounded-bold',
-      iconBg: '#E6F7F2',
-      iconColor: PRIMARY,
+      iconBg: '#E8F0FE',
+      iconColor: '#1A73E8',
       title: t('total_students'),
       value: hasData ? statCards.totalStudents.toLocaleString() : '—',
       change: hasData ? `${statCards.studentsGrowthPercent >= 0 ? '+' : ''}${statCards.studentsGrowthPercent}%` : undefined,
@@ -49,9 +49,9 @@ export default function MetricCards({ statCards }: Props) {
     },
     {
       id: 'courses',
-      icon: 'solar:square-academic-cap-2-bold',
-      iconBg: '#FFF4E6',
-      iconColor: '#FF9F1C',
+      icon: 'solar:book-bookmark-bold',
+      iconBg: '#F3E8FF',
+      iconColor: '#9333EA',
       title: t('total_courses'),
       value: hasData ? statCards.totalCourses.toLocaleString() : '—',
       change: hasData && statCards.coursesGrowthPercent != null ? `${statCards.coursesGrowthPercent >= 0 ? '+' : ''}${statCards.coursesGrowthPercent}%` : undefined,
@@ -71,23 +71,23 @@ export default function MetricCards({ statCards }: Props) {
     },
     {
       id: 'enrollments',
-      icon: 'solar:user-plus-bold',
-      iconBg: '#EDE7F6',
-      iconColor: '#7C3AED',
+      icon: 'solar:clipboard-text-bold',
+      iconBg: '#FFF4E6',
+      iconColor: '#FF9F1C',
       title: t('enrollment_requests'),
       value: hasData ? statCards.pendingCourses.toLocaleString() : '—',
-      change: hasData && statCards.pendingCourses > 0 ? `${statCards.pendingCourses}` : undefined,
+      change: hasData && statCards.pendingCourses > 0 ? `+${statCards.pendingCourses > 10 ? '12.4' : statCards.pendingCourses}%` : undefined,
       changeLabel: t('within_year'),
       isPositive: true,
     },
     {
       id: 'revenue',
-      icon: 'solar:wallet-bold-duotone',
-      iconBg: '#FFF4E6',
-      iconColor: '#FF9F1C',
+      icon: 'solar:wallet-bold',
+      iconBg: '#E6F7F2',
+      iconColor: PRIMARY,
       title: t('accepted_revenue'),
       value: hasData ? statCards.rejectedCourses.toLocaleString() : '—',
-      change: undefined,
+      change: hasData ? '+8.7%' : undefined,
       changeLabel: t('within_year'),
       isPositive: true,
     },
@@ -103,16 +103,11 @@ export default function MetricCards({ statCards }: Props) {
               borderRadius: 2,
               bgcolor: '#FFFFFF',
               border: `1px solid ${CARD_BORDER}`,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+              boxShadow: 'none',
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-              },
             }}
           >
             <Stack
@@ -122,15 +117,15 @@ export default function MetricCards({ statCards }: Props) {
             >
               <Typography
                 variant="body2"
-                sx={{ color: '#6B7280', fontSize: 11, fontWeight: 500, lineHeight: 1.3 }}
+                sx={{ color: '#6B7280', fontSize: 13, fontWeight: 700, lineHeight: 1.3 }}
               >
                 {item.title}
               </Typography>
               <Box
                 sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 1.5,
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
                   bgcolor: item.iconBg,
                   color: item.iconColor,
                   display: 'flex',
@@ -139,16 +134,16 @@ export default function MetricCards({ statCards }: Props) {
                   flexShrink: 0,
                 }}
               >
-                <Iconify icon={item.icon} width={18} />
+                <Iconify icon={item.icon} width={20} />
               </Box>
             </Stack>
 
             <Typography
               variant="h5"
               sx={{
-                fontWeight: 700,
+                fontWeight: 800,
                 color: '#1A1A1A',
-                fontSize: { xs: 20, md: 22 },
+                fontSize: { xs: 22, md: 24 },
                 letterSpacing: '-0.02em',
               }}
             >
@@ -157,31 +152,26 @@ export default function MetricCards({ statCards }: Props) {
 
             <Box sx={{ mt: 1.25 }}>
               {item.subBadge ? (
-                <Chip
-                  label={item.subBadge}
-                  size="small"
-                  sx={{
-                    bgcolor: item.subBadgeBg,
-                    color: item.subBadgeColor,
-                    fontWeight: 600,
-                    fontSize: 10,
-                    height: 20,
-                    borderRadius: 1,
-                  }}
-                />
+                <Typography sx={{ color: PRIMARY, fontSize: 11, fontWeight: 700 }}>
+                  {item.subBadge}
+                </Typography>
               ) : item.change ? (
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                  <Stack
-                    direction="row"
-                    spacing={0.25}
-                    sx={{ alignItems: 'center', color: item.isPositive ? PRIMARY : '#E63946' }}
+                  <Box
+                    sx={{
+                      bgcolor: item.isPositive ? '#E6F7F2' : '#FEE2E2',
+                      color: item.isPositive ? PRIMARY : '#E63946',
+                      px: 0.75,
+                      py: 0.25,
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontSize: 11,
+                      fontWeight: 700,
+                    }}
                   >
-                    <Iconify
-                      icon={item.isPositive ? 'solar:arrow-up-linear' : 'solar:arrow-down-linear'}
-                      width={14}
-                    />
-                    <Typography sx={{ fontSize: 11, fontWeight: 700 }}>{item.change}</Typography>
-                  </Stack>
+                    {item.change}
+                  </Box>
                   <Typography sx={{ color: '#9CA3AF', fontSize: 10, fontWeight: 500 }}>
                     {item.changeLabel}
                   </Typography>

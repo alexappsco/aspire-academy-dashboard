@@ -218,7 +218,7 @@ export default function ChartsSection({ studentsOverview, courseStatusDistributi
                 )}
               </Typography>
             </Box>
-            <Button
+            {/* <Button
               variant="outlined"
               size="small"
               sx={{
@@ -233,7 +233,7 @@ export default function ChartsSection({ studentsOverview, courseStatusDistributi
               }}
             >
               {tGrowth('filter')}
-            </Button>
+            </Button> */}
           </Stack>
 
           <Box sx={{ height: 220, mt: 1 }}>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'src/i18n/routing';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -22,6 +23,7 @@ interface Props {
 
 export default function AlertSection({ pendingTasks }: Props) {
   const t = useTranslations('Reports.attention');
+  const router = useRouter();
   const hasData = pendingTasks !== undefined;
 
   const alerts = [
@@ -52,9 +54,9 @@ export default function AlertSection({ pendingTasks }: Props) {
       description: t('rejected_courses.description'),
       action: t('rejected_courses.action'),
       accentColor: RED,
-      btnBg: '#FFFFFF',
+      btnBg: '#F3F4F6',
       btnColor: '#475569',
-      btnBorder: CARD_BORDER,
+      btnBorder: 'transparent',
     },
   ];
 
@@ -67,14 +69,18 @@ export default function AlertSection({ pendingTasks }: Props) {
       sx={{
         p: 2.5,
         borderRadius: 2,
-        bgcolor: '#FFFFFF',
-        border: `1px solid ${CARD_BORDER}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        bgcolor: '#FFFDF5',
+        border: `1px solid #FFE0B2`,
+        boxShadow: 'none',
         mb: 2.5,
       }}
     >
       {/* Header Badge */}
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, color: '#1A1A1A', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: ORANGE, ml: 1 }} />
+          تحتاج إلى انتباهك
+        </Typography>
         <Box
           sx={{
             px: 1.5,
@@ -87,29 +93,10 @@ export default function AlertSection({ pendingTasks }: Props) {
             gap: 0.75,
           }}
         >
-          <Box
-            sx={{
-              width: 18,
-              height: 18,
-              borderRadius: '50%',
-              bgcolor: ORANGE,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#FFFFFF',
-              fontSize: 11,
-              fontWeight: 800,
-            }}
-          >
-            !
-          </Box>
           <Typography sx={{ color: '#E65100', fontSize: 12, fontWeight: 700 }}>
-            {t('badge')}
+            {t('pending_tasks', { count: String(totalPending) })}
           </Typography>
         </Box>
-        <Typography sx={{ color: '#6B7280', fontSize: 12, fontWeight: 500 }}>
-          {t('pending_tasks', { count: String(totalPending) })}
-        </Typography>
       </Stack>
 
       {/* Alert Cards */}
@@ -122,49 +109,52 @@ export default function AlertSection({ pendingTasks }: Props) {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',
                 border: `1px solid ${CARD_BORDER}`,
-                borderRight: `4px solid ${alert.accentColor}`,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
               }}
             >
-              <Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ fontWeight: 800, color: '#1A1A1A', fontSize: 14, mb: 0.5 }}
+                  >
+                    {alert.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: '#6B7280', fontSize: 12, lineHeight: 1.5, mb: 2, maxWidth: '90%' }}
+                  >
+                    {alert.description}
+                  </Typography>
+                </Box>
                 <Typography
                   variant="h4"
-                  sx={{ fontWeight: 800, color: alert.accentColor, fontSize: 28, mb: 0.5 }}
+                  sx={{ fontWeight: 800, color: alert.accentColor, fontSize: 24, lineHeight: 1 }}
                 >
                   {alert.count}
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: 700, color: '#1A1A1A', fontSize: 13, mb: 0.75 }}
-                >
-                  {alert.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: '#6B7280', fontSize: 11.5, lineHeight: 1.5, mb: 2 }}
-                >
-                  {alert.description}
                 </Typography>
               </Box>
 
               <Button
                 fullWidth
+                onClick={() => router.push('/courses')}
                 sx={{
                   bgcolor: alert.btnBg,
                   color: alert.btnColor,
-                  border: alert.btnBorder ? `1px solid ${alert.btnBorder}` : 'none',
+                  border: alert.btnBorder && alert.btnBorder !== 'transparent' ? `1px solid ${alert.btnBorder}` : 'none',
                   borderRadius: 1.5,
                   fontWeight: 700,
-                  fontSize: 12,
-                  py: 0.85,
+                  fontSize: 14,
+                  py: 1,
                   textTransform: 'none',
                   boxShadow: 'none',
                   '&:hover': {
                     opacity: 0.9,
                     boxShadow: 'none',
+                    bgcolor: alert.btnBg,
                   },
                 }}
               >
