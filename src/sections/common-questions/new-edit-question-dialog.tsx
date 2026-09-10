@@ -6,50 +6,59 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormLabel from '@mui/material/FormLabel';
 import IconButton from '@mui/material/IconButton';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
-
-import { QuestionItem } from './_mock';
+import { useToast } from 'src/components/toast';
+import { createFaq, updateFaq } from 'src/actions/faqs';
+import type { FaqItem } from 'src/types/faq';
 
 interface QuestionFormDialogProps {
   open: boolean;
   onClose: () => void;
-  initialData?: QuestionItem | null;
-  onSave: (data: Partial<QuestionItem>) => void;
+  initialData?: FaqItem | null;
+  onSaved?: () => void;
 }
 
 export default function QuestionFormDialog({
   open,
   onClose,
   initialData,
-  onSave,
+  onSaved,
 }: QuestionFormDialogProps) {
   const t = useTranslations('CommonQuestions');
+  const toast = useToast();
   const isEdit = !!initialData;
 
-  const [questionAr, setQuestionAr] = useState(initialData?.question_ar ?? '');
-  const [questionEn, setQuestionEn] = useState(initialData?.question_en ?? '');
-  const [answerAr, setAnswerAr] = useState(initialData?.answer_ar ?? '');
-  const [answerEn, setAnswerEn] = useState(initialData?.answer_en ?? '');
-  const [active, setActive] = useState(initialData?.active ?? true);
+  const [questionAr, setQuestionAr] = useState(initialData?.questionAr ?? '');
+  const [questionEn, setQuestionEn] = useState(initialData?.questionEn ?? '');
+  const [answerAr, setAnswerAr] = useState(initialData?.answerAr ?? '');
+  const [answerEn, setAnswerEn] = useState(initialData?.answerEn ?? '');
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = () => {
-    onSave({
-      question_ar: questionAr,
-      question_en: questionEn,
-      answer_ar: answerAr,
-      answer_en: answerEn,
-      active,
-    });
-    onClose();
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      const payload = { questionAr, questionEn, answerAr, answerEn };
+
+      const res = isEdit && initialData
+        ? await updateFaq(initialData.id, payload)
+        : await createFaq(payload);
+
+      if (res.success) {
+        toast.success(isEdit ? t('messages.updated') : t('messages.created'));
+        onSaved?.();
+        onClose();
+      } else {
+        toast.error(res.error || 'Failed to save');
+      }
+    } catch {
+      toast.error('Failed to save');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -58,11 +67,8 @@ export default function QuestionFormDialog({
       onClose={onClose}
       fullWidth
       maxWidth="md"
-      slotProps={{
-        paper: { sx: { borderRadius: 3, p: 1 } },
-      }}
+      slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
     >
-      {/* Header with close button */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
         <IconButton onClick={onClose} size="small">
           <Iconify icon="ic:round-close" sx={{ color: '#64748B', width: 20, height: 20 }} />
@@ -70,14 +76,11 @@ export default function QuestionFormDialog({
       </Box>
 
       <DialogContent sx={{ pt: 0, px: 3, pb: 3 }}>
-        {/* Title */}
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', mb: 4, fontSize: 22 }}>
           {isEdit ? t('dialog.edit_title') : t('dialog.add_title')}
         </Typography>
 
-        {/* Form Inputs Grid */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, mb: 4 }}>
-          {/* Question Arabic */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 4 }}>
           <TextField
             fullWidth
             label={t('dialog.question_ar')}
@@ -85,12 +88,9 @@ export default function QuestionFormDialog({
             value={questionAr}
             onChange={(e) => setQuestionAr(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 2, height: '56px' },
-            }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, height: '56px' } }}
           />
 
-          {/* Question English */}
           <TextField
             fullWidth
             label={t('dialog.question_en')}
@@ -98,12 +98,9 @@ export default function QuestionFormDialog({
             value={questionEn}
             onChange={(e) => setQuestionEn(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 2, height: '56px' },
-            }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, height: '56px' } }}
           />
 
-          {/* Answer Arabic */}
           <TextField
             fullWidth
             multiline
@@ -113,12 +110,9 @@ export default function QuestionFormDialog({
             value={answerAr}
             onChange={(e) => setAnswerAr(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-            }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
           />
 
-          {/* Answer English */}
           <TextField
             fullWidth
             multiline
@@ -128,46 +122,15 @@ export default function QuestionFormDialog({
             value={answerEn}
             onChange={(e) => setAnswerEn(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-            }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
           />
         </Box>
 
-        {/* Radio Status Row */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 4 }}>
-          <FormControl component="fieldset">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <FormLabel component="legend" sx={{ fontWeight: 700, color: '#1E293B', fontSize: 15 }}>
-                {t('dialog.status')}
-              </FormLabel>
-              <RadioGroup
-                row
-                value={active ? 'active' : 'inactive'}
-                onChange={(e) => setActive(e.target.value === 'active')}
-              >
-                <FormControlLabel
-                  value="active"
-                  control={<Radio sx={{ color: '#94A3B8', '&.Mui-checked': { color: '#00A76F' } }} />}
-                  label={t('status.active')}
-                  sx={{ color: '#1E293B', fontWeight: 600 }}
-                />
-                <FormControlLabel
-                  value="inactive"
-                  control={<Radio sx={{ color: '#94A3B8', '&.Mui-checked': { color: '#00A76F' } }} />}
-                  label={t('status.inactive')}
-                  sx={{ color: '#1E293B', fontWeight: 600 }}
-                />
-              </RadioGroup>
-            </Box>
-          </FormControl>
-        </Box>
-
-        {/* Action Buttons */}
         <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-start' }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
+            disabled={saving}
             sx={{
               bgcolor: '#1E293B',
               color: '#FFFFFF',
@@ -179,7 +142,7 @@ export default function QuestionFormDialog({
               '&:hover': { bgcolor: '#0F172A' },
             }}
           >
-            {t('dialog.save')}
+            {saving ? t('dialog.saving') : t('dialog.save')}
           </Button>
 
           <Button

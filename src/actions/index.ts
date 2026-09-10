@@ -16,3 +16,4 @@ export * from './dashboard';
 export * from './orders';
 export * from './reports';
 export * from './students';
+export * from './faqs';
