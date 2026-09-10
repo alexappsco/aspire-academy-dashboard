@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'src/i18n/routing';
 import Box from '@mui/material/Box';
@@ -12,16 +13,43 @@ import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
+import { getCourseById } from 'src/actions/courses';
+import type { CourseDto } from 'src/types/course';
 import { useCourseForm } from './use-course-form';
 import CourseStepper from './components/CourseStepper';
 import BasicInfoStep from './components/BasicInfoStep';
 import ChaptersStep from './components/ChaptersStep';
+import { mapCurriculumToRichChapters } from './edit-course-data';
 
-export default function CreateCourseView() {
+export default function EditCourseView({ id }: { id: string }) {
   const t = useTranslations('CreateCourse');
+  const tDetails = useTranslations('CourseDetails');
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const router = useRouter();
+
+  const [course, setCourse] = useState<CourseDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getCourseById(id)
+      .then((res) => {
+        if (!active) return;
+        if (res.success && res.data) setCourse(res.data);
+        else setLoadError(true);
+      })
+      .catch(() => {
+        if (active) setLoadError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const {
     activeStep,
@@ -47,7 +75,39 @@ export default function CreateCourseView() {
     handleContinue,
     handleSubmit,
     handleSaveDraft,
-  } = useCourseForm();
+  } = useCourseForm({ course });
+
+  const initialRichChapters = useMemo(
+    () => mapCurriculumToRichChapters(course?.curriculum),
+    [course]
+  );
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (loadError || !course) {
+    return (
+      <Box sx={{ py: 2, pb: 6 }}>
+        <Stack spacing={2} sx={{ alignItems: 'flex-start' }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
+            {tDetails('errors.not_found')}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => router.push('/courses')}
+            sx={{ bgcolor: '#1C252E', borderRadius: 1.5, px: 3, '&:hover': { bgcolor: '#2C353E' } }}
+          >
+            {t('breadcrumb_courses')}
+          </Button>
+        </Stack>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 2, pb: 6 }}>
@@ -75,15 +135,15 @@ export default function CreateCourseView() {
               {t('breadcrumb_courses')}
             </Link>
             <Typography sx={{ fontSize: 13, color: '#1E293B', fontWeight: 600 }}>
-              {t('breadcrumb_add')}
+              {t('breadcrumb_edit')}
             </Typography>
           </Breadcrumbs>
 
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E', mb: 0.5 }}>
-            {t('title')}
+            {t('title_edit')}
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748B' }}>
-            {t('subtitle')}
+            {t('subtitle_edit')}
           </Typography>
         </Box>
       </Stack>
@@ -108,10 +168,12 @@ export default function CreateCourseView() {
           loadingFaculties={loadingFaculties}
           loadingSpecializations={loadingSpecializations}
           loadingStudyMaterials={loadingStudyMaterials}
+          imageRequired={false}
         />
       ) : (
         <ChaptersStep
           chapters={formValues.chapters}
+          initialChapters={initialRichChapters}
           onChaptersChange={handleChaptersChange}
         />
       )}
@@ -133,7 +195,7 @@ export default function CreateCourseView() {
       >
         <Button
           variant="outlined"
-          onClick={() => router.push('/courses')}
+          onClick={() => router.push(`/courses/${id}`)}
           sx={{
             borderColor: '#E2E8F0',
             color: '#1E293B',
@@ -226,9 +288,9 @@ export default function CreateCourseView() {
               {isSubmitting ? (
                 <CircularProgress size={20} sx={{ color: '#FFFFFF' }} />
               ) : (
-                <Iconify icon="mingcute:add-line" width={18} />
+                <Iconify icon="solar:disk-check-bold" width={18} />
               )}
-              <span>{t('actions.create_course')}</span>
+              <span>{t('actions.save_changes')}</span>
             </Button>
           )}
         </Stack>

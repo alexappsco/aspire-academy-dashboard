@@ -5,7 +5,6 @@ import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
   Specialization,
   SpecializationListResponse,
-  Field,
   FieldListResponse,
 } from 'src/types/specialization';
 
@@ -15,6 +14,7 @@ export type GetSpecializationsParams = {
   Sorting?: string;
   SkipCount?: number;
   MaxResultCount?: number;
+  FieldId?: string;
 };
 
 export type CreateSpecializationPayload = {

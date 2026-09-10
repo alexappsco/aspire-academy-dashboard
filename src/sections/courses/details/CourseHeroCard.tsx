@@ -54,13 +54,27 @@ export default function CourseHeroCard({ course }: CourseHeroCardProps) {
               'linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.3)), radial-gradient(circle at center, #1E293B 0%, #0F172A 100%)',
           }}
         >
-          {/* Medical / Cardiology stylized visual placeholder */}
-          <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
-            <Iconify icon="solar:heart-pulse-bold" width={44} sx={{ color: '#38BDF8' }} />
-            <Typography sx={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>
-              CARDIOVASCULAR
-            </Typography>
-          </Stack>
+          {course.imageUrl ? (
+            <Box
+              component="img"
+              src={course.imageUrl}
+              alt={isRtl ? course.title_ar : course.title_en}
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          ) : (
+            <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+              <Iconify icon="solar:heart-pulse-bold" width={44} sx={{ color: '#38BDF8' }} />
+              <Typography sx={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>
+                COURSE
+              </Typography>
+            </Stack>
+          )}
         </Box>
 
         {/* Left Side in RTL / Right in LTR: Stats & Published Date */}
@@ -141,9 +155,16 @@ export default function CourseHeroCard({ course }: CourseHeroCardProps) {
               <Typography sx={{ fontSize: 13, color: '#64748B', mb: 0.5 }}>
                 {t('price')}
               </Typography>
-              <Typography sx={{ fontSize: 18, fontWeight: 700, color: '#0284C7' }}>
-                {course.price}
-              </Typography>
+              <Stack direction="row" spacing={0.8} sx={{ alignItems: 'baseline', justifyContent: 'center' }}>
+                <Typography sx={{ fontSize: 18, fontWeight: 700, color: '#0284C7' }}>
+                  {course.price}
+                </Typography>
+                {course.oldPrice && (
+                  <Typography sx={{ fontSize: 12, color: '#94A3B8', textDecoration: 'line-through' }}>
+                    {course.oldPrice}
+                  </Typography>
+                )}
+              </Stack>
             </Box>
           </Stack>
 
