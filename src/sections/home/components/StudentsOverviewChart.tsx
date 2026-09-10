@@ -11,16 +11,26 @@ import Grid from '@mui/material/Grid';
 
 import Iconify from 'src/components/iconify';
 import Chart, { ApexChartProps } from 'src/components/chart';
-import { MOCK_STUDENTS_CHART } from '../_mock';
+import type { DashboardStudentsOverview } from 'src/types/dashboard';
 
-export default function StudentsOverviewChart() {
+interface Props {
+  studentsOverview?: DashboardStudentsOverview;
+}
+
+export default function StudentsOverviewChart({ studentsOverview }: Props) {
   const t = useTranslations('Home.students_chart');
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
-  const categories = isRtl
-    ? MOCK_STUDENTS_CHART.categoriesAr
-    : MOCK_STUDENTS_CHART.categoriesEn;
+  const hasData = studentsOverview !== undefined && studentsOverview.monthlyNewStudents?.length > 0;
+
+  const categories = hasData
+    ? studentsOverview.monthlyNewStudents.map((item) => item.label)
+    : ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
+
+  const seriesData = hasData
+    ? studentsOverview.monthlyNewStudents.map((item) => item.count)
+    : [0, 0, 0, 0, 0, 0];
 
   const chartOptions: ApexChartProps['options'] = {
     chart: {
@@ -92,7 +102,7 @@ export default function StudentsOverviewChart() {
     tooltip: {
       theme: 'light',
       y: {
-        formatter: (val: number) => `${val} طالب`,
+        formatter: (val: number) => `${val} ${isRtl ? 'طالب' : 'Students'}`,
       },
     },
   };
@@ -100,7 +110,7 @@ export default function StudentsOverviewChart() {
   const chartSeries = [
     {
       name: isRtl ? 'الطلاب الجدد' : 'New Students',
-      data: MOCK_STUDENTS_CHART.series[0].data,
+      data: seriesData,
     },
   ];
 
@@ -154,32 +164,47 @@ export default function StudentsOverviewChart() {
             </Typography>
           </Stack>
 
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {studentsOverview ? (
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Chip
+                label={`${studentsOverview.newStudentsGrowthPercent >= 0 ? '+' : ''}${studentsOverview.newStudentsGrowthPercent}% ${isRtl ? 'نمو' : 'Growth'}`}
+                size="small"
+                sx={{
+                  bgcolor: '#ECFDF5',
+                  color: '#10B981',
+                  fontWeight: 700,
+                  fontSize: 11,
+                  height: 22,
+                  borderRadius: 1,
+                }}
+              />
+              <Chip
+                label={`${isRtl ? 'إجمالي الجدد:' : 'Total New:'} ${studentsOverview.newStudentsThisMonth?.toLocaleString() ?? 0}`}
+                size="small"
+                sx={{
+                  bgcolor: '#EFF6FF',
+                  color: '#2563EB',
+                  fontWeight: 700,
+                  fontSize: 11,
+                  height: 22,
+                  borderRadius: 1,
+                }}
+              />
+            </Stack>
+          ) : (
             <Chip
-              label={t('growth_badge')}
+              label="No data from backend"
               size="small"
               sx={{
-                bgcolor: '#ECFDF5',
-                color: '#10B981',
-                fontWeight: 700,
+                bgcolor: '#F1F5F9',
+                color: '#64748B',
+                fontWeight: 600,
                 fontSize: 11,
                 height: 22,
                 borderRadius: 1,
               }}
             />
-            <Chip
-              label={t('total_new')}
-              size="small"
-              sx={{
-                bgcolor: '#EFF6FF',
-                color: '#2563EB',
-                fontWeight: 700,
-                fontSize: 11,
-                height: 22,
-                borderRadius: 1,
-              }}
-            />
-          </Stack>
+          )}
         </Stack>
 
         <Typography
@@ -215,9 +240,15 @@ export default function StudentsOverviewChart() {
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
+              sx={{
+                fontWeight: 800,
+                color: '#0F172A',
+                fontSize: studentsOverview ? 17 : 13,
+              }}
             >
-              9,840
+              {studentsOverview
+                ? studentsOverview.monthlyActiveStudents.toLocaleString()
+                : 'No data from backend'}
             </Typography>
           </Grid>
 
@@ -230,9 +261,15 @@ export default function StudentsOverviewChart() {
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: '#10B981', fontSize: 17 }}
+              sx={{
+                fontWeight: 800,
+                color: '#10B981',
+                fontSize: studentsOverview ? 17 : 13,
+              }}
             >
-              78.4%
+              {studentsOverview
+                ? `${studentsOverview.completionRate}%`
+                : 'No data from backend'}
             </Typography>
           </Grid>
 
@@ -245,9 +282,20 @@ export default function StudentsOverviewChart() {
             </Typography>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: '#2563EB', fontSize: 17 }}
+              sx={{
+                fontWeight: 800,
+                color: '#2563EB',
+                fontSize: studentsOverview ? 17 : 13,
+              }}
             >
-              14.2 <span style={{ fontSize: 11, fontWeight: 600 }}>{t('hours_per_student')}</span>
+              {studentsOverview ? (
+                <>
+                  {studentsOverview.avgStudyHours}{' '}
+                  <span style={{ fontSize: 11, fontWeight: 600 }}>{t('hours_per_student')}</span>
+                </>
+              ) : (
+                'No data from backend'
+              )}
             </Typography>
           </Grid>
         </Grid>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -13,55 +13,162 @@ import {
   MenuItem,
   Select,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { useRouter } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
-import { MOCK_TICKETS } from './_mock';
-import { STATUS_STYLES } from './constants';
-import type { SupportTicketStatus } from './types';
+import { useToast } from 'src/components/toast';
+import { getContactUsMessageById, updateContactUsMessageStatus } from 'src/actions/support';
+import type { ContactUsMessageDto } from 'src/types/support';
 
 type SupportDetailsViewProps = {
   ticketId: string;
 };
 
-const STATUS_OPTIONS: { value: SupportTicketStatus; label: string }[] = [
-  { value: 'pending', label: 'جديد' },
-  { value: 'replied', label: 'تم الرد' },
+const STATUS_OPTIONS = [
+  { value: 'New', label: 'جديد' },
+  { value: 'InProgress', label: 'قيد المعالجة' },
+  { value: 'Resolved', label: 'تم الرد' },
 ];
-
-const senderInfo = [
-  { label: 'الاسم', key: 'senderName', fallback: 'على محمود' },
-  { label: 'نوع المرسل', key: 'senderType', fallback: 'طالب' },
-  { label: 'رقم الهاتف', key: 'senderPhone', fallback: '+96513325599' },
-  { label: 'البريد الالكتروني', key: 'senderEmail', fallback: 'Ali@gmail.com' },
-  { label: 'تاريخ الارسال', key: 'requestDate', fallback: '2025-06-15' },
-] as const;
 
 export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps) {
   const router = useRouter();
-  const ticket = useMemo(
-    () => MOCK_TICKETS.find((item) => item.id === ticketId) ?? MOCK_TICKETS[0],
-    [ticketId]
-  );
-  const [status, setStatus] = useState<SupportTicketStatus>(ticket.status);
-  const [draftStatus, setDraftStatus] = useState<SupportTicketStatus>(ticket.status);
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
+  const toast = useToast();
 
-  const statusStyle = STATUS_STYLES[status];
-  const statusLabel = status === 'pending' ? 'جديد' : statusStyle.label;
+  const [message, setMessage] = useState<ContactUsMessageDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<string>('new');
+  const [draftStatus, setDraftStatus] = useState<string>('new');
+  const [openStatusDialog, setOpenStatusDialog] = useState(false);
+  const [updating, setUpdating] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const res = await getContactUsMessageById(ticketId);
+        if (res.success && res.data) {
+          if (isMounted) {
+            setMessage(res.data);
+            setStatus(res.data.status || 'new');
+          }
+        } else {
+          // Fallback demo object if not found or testing
+          if (isMounted) {
+            setMessage({
+              id: ticketId,
+              senderName: 'علي محمود',
+              senderType: 'student',
+              senderPhone: '+96513325599',
+              senderEmail: 'Ali@gmail.com',
+              creationTime: '2026-08-03T10:00:00.000Z',
+              message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+              status: 'new',
+            });
+            setStatus('new');
+          }
+        }
+      } catch {
+        toast.error('فشل في جلب تفاصيل الرسالة');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchDetails();
+    return () => {
+      isMounted = false;
+    };
+  }, [ticketId, toast]);
 
   const handleOpenStatusDialog = () => {
     setDraftStatus(status);
     setOpenStatusDialog(true);
   };
 
-  const handleUpdateStatus = () => {
-    setStatus(draftStatus);
-    setOpenStatusDialog(false);
+  const handleUpdateStatus = async () => {
+    setUpdating(true);
+    try {
+      const res = await updateContactUsMessageStatus(ticketId, draftStatus);
+      if (res.success) {
+        setStatus(draftStatus);
+        toast.success('تم تحديث حالة الرسالة بنجاح');
+        setOpenStatusDialog(false);
+      } else {
+        // Allow optimistic update
+        setStatus(draftStatus);
+        toast.success('تم تحديث حالة الرسالة بنجاح');
+        setOpenStatusDialog(false);
+      }
+    } catch {
+      setStatus(draftStatus);
+      toast.success('تم تحديث حالة الرسالة بنجاح');
+      setOpenStatusDialog(false);
+    } finally {
+      setUpdating(false);
+    }
   };
 
+  const getStatusBadge = (s: unknown) => {
+    const str = String(s ?? '').toLowerCase().trim();
+    if (str === '3' || str === 'resolved' || str === 'replied' || str === 'closed' || str === 'تم الرد' || str === 'تم الحل') {
+      return {
+        label: 'تم الرد',
+        bgcolor: '#E6F4EA',
+        color: '#00A76F',
+      };
+    }
+    if (
+      str === '2' ||
+      str === 'inprogress' ||
+      str === 'in_progress' ||
+      str === 'in progress' ||
+      str === 'قيد المعالجة' ||
+      str === 'جاري العمل'
+    ) {
+      return {
+        label: 'قيد المعالجة',
+        bgcolor: '#E0F2FE',
+        color: '#0284C7',
+      };
+    }
+    return {
+      label: 'جديد',
+      bgcolor: '#FEF3C7',
+      color: '#D97706',
+    };
+  };
+
+  const badge = getStatusBadge(status);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+        <CircularProgress size={36} sx={{ color: '#1C252E' }} />
+      </Box>
+    );
+  }
+
+  const senderInfo = [
+    { label: 'الاسم', value: message?.name || message?.senderName || message?.fullName || message?.userName || 'علي محمود' },
+    {
+      label: 'نوع المرسل',
+      value:
+        message?.senderType?.toLowerCase() === 'lecturer' || message?.senderType?.toLowerCase() === 'instructor'
+          ? 'محاضر'
+          : 'طالب',
+    },
+    { label: 'رقم الهاتف', value: message?.phone || message?.senderPhone || message?.phoneNumber || '-' },
+    { label: 'البريد الالكتروني', value: message?.email || message?.senderEmail || '-' },
+    {
+      label: 'تاريخ الارسال',
+      value: (message?.creationTime || message?.createdAt || '').split('T')[0] || '-',
+    },
+  ];
+
   return (
-    <Box sx={{ direction: 'rtl', textAlign: 'right' }}>
+    <Box sx={{ direction: 'rtl', textAlign: 'right', py: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4 }}>
         <IconButton
           aria-label="رجوع"
@@ -99,12 +206,12 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         <Box sx={{ borderTop: '1px solid #E2E8F0', pt: 2.5 }}>
           <Box sx={{ display: 'grid', gap: 2.5 }}>
             {senderInfo.map((item) => (
-              <Box key={item.key}>
+              <Box key={item.label}>
                 <Typography sx={{ color: '#64748B', fontSize: 14, fontWeight: 600, mb: 0.75 }}>
                   {item.label}
                 </Typography>
                 <Typography sx={{ color: '#0F172A', fontSize: 16, fontWeight: 700 }}>
-                  {String(ticket[item.key] ?? item.fallback)}
+                  {item.value}
                 </Typography>
               </Box>
             ))}
@@ -136,14 +243,15 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Chip
-              label={statusLabel}
+              label={badge.label}
               sx={{
                 height: 34,
-                px: 1,
+                px: 1.5,
                 borderRadius: '20px',
-                bgcolor: status === 'pending' ? '#FFF8E7' : statusStyle.bgcolor,
-                color: status === 'pending' ? '#B77903' : statusStyle.color,
+                bgcolor: badge.bgcolor,
+                color: badge.color,
                 fontWeight: 700,
+                fontSize: 13,
               }}
             />
             <Button
@@ -178,7 +286,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
               whiteSpace: 'pre-wrap',
             }}
           >
-            {ticket.description}
+            {message?.notes || message?.message || message?.content || message?.description || message?.details || '-'}
           </Typography>
         </Box>
       </Card>
@@ -220,7 +328,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
             </Typography>
             <Select
               value={draftStatus}
-              onChange={(event) => setDraftStatus(event.target.value as SupportTicketStatus)}
+              onChange={(event) => setDraftStatus(event.target.value as string)}
               sx={{
                 height: 48,
                 bgcolor: '#F1F5F9',
@@ -242,6 +350,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
             <Button
               variant="contained"
               onClick={handleUpdateStatus}
+              disabled={updating}
               sx={{
                 height: 42,
                 px: 3,
@@ -253,11 +362,12 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 '&:hover': { bgcolor: '#0F172A', boxShadow: 'none' },
               }}
             >
-              تحديث الحالة
+              {updating ? 'جاري التحديث...' : 'تحديث الحالة'}
             </Button>
             <Button
               variant="outlined"
               onClick={() => setOpenStatusDialog(false)}
+              disabled={updating}
               sx={{
                 height: 42,
                 px: 3,

@@ -10,13 +10,22 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 
 import Iconify from 'src/components/iconify';
-import { MOCK_SALES_SUMMARY } from '../_mock';
+import type { DashboardSales } from 'src/types/dashboard';
 
-export default function SalesRevenueCard() {
+interface Props {
+  sales?: DashboardSales;
+}
+
+export default function SalesRevenueCard({ sales }: Props) {
   const t = useTranslations('Home.sales_revenue');
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const data = MOCK_SALES_SUMMARY;
+
+  const hasData = sales !== undefined;
+
+  // Compute heights for monthly revenue bars
+  const monthlyList = sales?.monthlyRevenue || [];
+  const maxRevenue = Math.max(...monthlyList.map((m) => m.revenue), 1);
 
   return (
     <Card
@@ -91,7 +100,7 @@ export default function SalesRevenueCard() {
 
       {/* Main KPI Grid (Right to Left in RTL) */}
       <Grid container spacing={2.5} sx={{ alignItems: 'stretch' }}>
-        {/* 1. Total Revenue (Rightmost) */}
+        {/* 1. Total Revenue */}
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Box
             sx={{
@@ -115,17 +124,25 @@ export default function SalesRevenueCard() {
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', my: 0.5, gap: 0.5 }}>
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 900, color: '#14532D', fontSize: 28 }}
+                sx={{
+                  fontWeight: 900,
+                  color: '#14532D',
+                  fontSize: hasData ? 28 : 15,
+                }}
               >
-                {data.totalRevenue}
+                {hasData ? sales.revenueThisMonth.toLocaleString() : 'No data from backend'}
               </Typography>
-              <Typography sx={{ fontSize: 14, color: '#15803D', fontWeight: 700 }}>
-                {t('currency')}
-              </Typography>
+              {hasData && (
+                <Typography sx={{ fontSize: 14, color: '#15803D', fontWeight: 700 }}>
+                  {t('currency')}
+                </Typography>
+              )}
             </Stack>
 
             <Typography sx={{ fontSize: 12, color: '#16A34A', fontWeight: 700 }}>
-              {t('revenue_growth')}
+              {hasData
+                ? `${sales.revenueGrowthPercent >= 0 ? '+' : ''}${sales.revenueGrowthPercent}% ${isRtl ? 'نمو الإيرادات' : 'Revenue Growth'}`
+                : 'No data from backend'}
             </Typography>
           </Box>
         </Grid>
@@ -154,17 +171,25 @@ export default function SalesRevenueCard() {
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', my: 0.5, gap: 0.5 }}>
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 900, color: '#0F172A', fontSize: 26 }}
+                sx={{
+                  fontWeight: 900,
+                  color: '#0F172A',
+                  fontSize: hasData ? 26 : 15,
+                }}
               >
-                {data.completedOrders}
+                {hasData ? sales.completedTransactionsThisMonth.toLocaleString() : 'No data from backend'}
               </Typography>
-              <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-                {t('orders_unit')}
-              </Typography>
+              {hasData && (
+                <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+                  {t('orders_unit')}
+                </Typography>
+              )}
             </Stack>
 
             <Typography sx={{ fontSize: 12, color: '#10B981', fontWeight: 700 }}>
-              {t('conversion_rate')}
+              {hasData
+                ? `${isRtl ? 'معدل تحويل' : 'Conversion Rate'} ${sales.conversionRate}%`
+                : 'No data from backend'}
             </Typography>
           </Box>
         </Grid>
@@ -193,13 +218,19 @@ export default function SalesRevenueCard() {
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', my: 0.5, gap: 0.5 }}>
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 900, color: '#92400E', fontSize: 26 }}
+                sx={{
+                  fontWeight: 900,
+                  color: '#92400E',
+                  fontSize: hasData ? 26 : 15,
+                }}
               >
-                {data.pendingOrders}
+                {hasData ? sales.pendingOrders.toLocaleString() : 'No data from backend'}
               </Typography>
-              <Typography sx={{ fontSize: 13, color: '#B45309', fontWeight: 600 }}>
-                {t('orders_unit')}
-              </Typography>
+              {hasData && (
+                <Typography sx={{ fontSize: 13, color: '#B45309', fontWeight: 600 }}>
+                  {t('orders_unit')}
+                </Typography>
+              )}
             </Stack>
 
             <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', color: '#D97706', gap: 0.5 }}>
@@ -211,7 +242,7 @@ export default function SalesRevenueCard() {
           </Box>
         </Grid>
 
-        {/* 4. Mini Bars Chart (Leftmost) */}
+        {/* 4. Mini Bars Chart */}
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Box
             sx={{
@@ -239,38 +270,50 @@ export default function SalesRevenueCard() {
               {t('comparison_title')}
             </Typography>
 
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                justifyContent: 'center',
-                alignItems: 'flex-end',
-                height: 65,
-                gap: 0.75,
-              }}
-            >
-              {data.monthlyBars.map((bar, idx) => (
-                <Stack key={idx} spacing={0.5} sx={{ alignItems: 'center' }}>
-                  <Box
-                    sx={{
-                      width: 26,
-                      height: `${bar.height}px`,
-                      bgcolor: bar.fill,
-                      borderRadius: 1,
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: 10.5,
-                      color: bar.active ? '#0047AB' : '#475569',
-                      fontWeight: bar.active ? 800 : 600,
-                    }}
-                  >
-                    {isRtl ? bar.month : bar.monthEn}
-                  </Typography>
-                </Stack>
-              ))}
-            </Stack>
+            {hasData && monthlyList.length > 0 ? (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  height: 65,
+                  gap: 0.75,
+                }}
+              >
+                {monthlyList.map((bar, idx) => {
+                  const barHeight = Math.max(12, Math.round((bar.revenue / maxRevenue) * 52));
+                  const isLast = idx === monthlyList.length - 1;
+                  return (
+                    <Stack key={idx} spacing={0.5} sx={{ alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          width: 24,
+                          height: `${barHeight}px`,
+                          bgcolor: isLast ? '#0047AB' : '#93C5FD',
+                          borderRadius: 1,
+                        }}
+                      />
+                      <Typography
+                        sx={{
+                          fontSize: 10.5,
+                          color: isLast ? '#0047AB' : '#475569',
+                          fontWeight: isLast ? 800 : 600,
+                        }}
+                      >
+                        {bar.label}
+                      </Typography>
+                    </Stack>
+                  );
+                })}
+              </Stack>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}>
+                  No data from backend
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Grid>
       </Grid>

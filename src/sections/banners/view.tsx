@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'src/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -13,38 +15,166 @@ import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
+import DateInput from 'src/components/DateInput';
 import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { useToast } from 'src/components/toast';
 
-import { MOCK_BANNERS, BannerItem } from './_mock';
+import { getBanners, deleteBanner, updateBanner } from 'src/actions/banners';
+import type { BannerDto, GetBannersParams } from 'src/types/banner';
 import BannerFormDialog from './new-edit-banner-dialog';
 import DeleteConfirmDialog from './delete-confirm-dialog';
 
 interface FormattedBanner {
   id: string;
-  title: string;
+  nameAr: string;
+  nameEn: string;
   image: string;
+  order: number;
+  externalUrl: string;
   startDate: string;
   endDate: string;
   active: boolean;
+  raw: BannerDto;
 }
 
 export default function BannersView() {
   const t = useTranslations('Banners');
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const toast = useToast();
 
-  const [banners, setBanners] = useState<BannerItem[]>(MOCK_BANNERS);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlIsActive = searchParams.get('IsActive');
+  const initialStatus =
+    urlIsActive === 'true' ? 'active' : urlIsActive === 'false' ? 'inactive' : 'all';
+  const urlStartDate = searchParams.get('StartDate') || '';
+  const urlEndDate = searchParams.get('EndDate') || '';
+
+  const [banners, setBanners] = useState<BannerDto[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [startDate, setStartDate] = useState(urlStartDate);
+  const [endDate, setEndDate] = useState(urlEndDate);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingBanner, setEditingBanner] = useState<BannerItem | null>(null);
+  const [editingBanner, setEditingBanner] = useState<BannerDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchQuery]);
+
+  // Sync browser URL parameters with current active filters
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    } else {
+      params.delete('Filter');
+    }
+
+    if (statusFilter === 'active') {
+      params.set('IsActive', 'true');
+    } else if (statusFilter === 'inactive') {
+      params.set('IsActive', 'false');
+    } else {
+      params.delete('IsActive');
+    }
+
+    if (startDate) {
+      params.set('StartDate', startDate);
+    } else {
+      params.delete('StartDate');
+    }
+
+    if (endDate) {
+      params.set('EndDate', endDate);
+    } else {
+      params.delete('EndDate');
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, statusFilter, startDate, endDate, pathname, router, searchParams]);
+
+  // Fetch banners from API
+  const fetchBannersData = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) setLoading(true);
+      try {
+        const params: GetBannersParams = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+
+        if (debouncedSearch.trim()) {
+          params.Filter = debouncedSearch.trim();
+        }
+
+        if (statusFilter === 'active') {
+          params.IsActive = true;
+        } else if (statusFilter === 'inactive') {
+          params.IsActive = false;
+        }
+
+        if (startDate) {
+          params.StartDate = startDate;
+        }
+
+        if (endDate) {
+          params.EndDate = endDate;
+        }
+
+        const res = await getBanners(params);
+
+        if (res.success && res.data) {
+          setBanners(res.data.items || []);
+          setTotalCount(res.data.totalCount || 0);
+        } else {
+          toast.error(res.error || 'Failed to load banners');
+        }
+      } catch (err) {
+        toast.error('Failed to load banners');
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    [debouncedSearch, statusFilter, startDate, endDate, toast]
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    const load = async () => {
+      if (isMounted) await fetchBannersData(true);
+    };
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchBannersData]);
 
   const handleOpenAdd = () => {
     setEditingBanner(null);
@@ -52,11 +182,8 @@ export default function BannersView() {
   };
 
   const handleOpenEdit = (row: FormattedBanner) => {
-    const banner = banners.find((b) => b.id === row.id);
-    if (banner) {
-      setEditingBanner(banner);
-      setDialogOpen(true);
-    }
+    setEditingBanner(row.raw);
+    setDialogOpen(true);
   };
 
   const handleOpenDelete = (row: FormattedBanner) => {
@@ -64,72 +191,107 @@ export default function BannersView() {
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (deletingId) {
-      setBanners((prev) => prev.filter((b) => b.id !== deletingId));
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      const res = await deleteBanner(deletingId);
+      if (res.success) {
+        toast.success('تم حذف البنر بنجاح');
+        fetchBannersData(false);
+      } else {
+        toast.error(res.error || 'فشل في حذف البنر');
+      }
+    } catch {
+      toast.error('فشل في حذف البنر');
+    } finally {
       setDeletingId(null);
+      setDeleteDialogOpen(false);
     }
   };
 
-  const handleSaveBanner = (data: Partial<BannerItem>) => {
-    if (editingBanner) {
+  const handleToggleStatus = async (banner: BannerDto) => {
+    try {
+      const newStatus = !banner.isActive;
+      // Optimistic update
       setBanners((prev) =>
-        prev.map((b) => (b.id === editingBanner.id ? { ...b, ...data } : b))
+        prev.map((b) => (b.id === banner.id ? { ...b, isActive: newStatus } : b))
       );
-    } else {
-      const newBanner: BannerItem = {
-        id: Date.now().toString(),
-        title_ar: data.title_ar ?? '',
-        title_en: data.title_en ?? '',
-        image: data.image ?? '/icons/package.svg',
-        startDate: data.startDate ?? '',
-        endDate: data.endDate ?? '',
-        createdDate_ar: new Date().toLocaleDateString('ar-EG'),
-        createdDate_en: new Date().toLocaleDateString('en-US'),
-        active: data.active ?? true,
-      };
-      setBanners((prev) => [newBanner, ...prev]);
+      const res = await updateBanner(banner.id, {
+        nameAr: banner.nameAr,
+        nameEn: banner.nameEn,
+        isActive: newStatus,
+        order: banner.order,
+        startAt: banner.startAt,
+        endAt: banner.endAt,
+        externalUrl: banner.externalUrl,
+      });
+
+      if (res.success) {
+        toast.success('تم تحديث حالة البنر بنجاح');
+      } else {
+        toast.error(res.error || 'فشل في تحديث حالة البنر');
+        fetchBannersData(false);
+      }
+    } catch {
+      toast.error('فشل في تحديث حالة البنر');
+      fetchBannersData(false);
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setBanners((prev) =>
-      prev.map((banner) =>
-        banner.id === id ? { ...banner, active: !banner.active } : banner
-      )
-    );
+  const formatDateDDMMYYYY = (dateStr?: string | null) => {
+    if (!dateStr) return '-';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '-';
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return '-';
+    }
   };
 
-  const formattedBanners: FormattedBanner[] = banners.map((item) => ({
-    id: item.id,
-    title: isRtl ? item.title_ar : item.title_en,
-    image: item.image,
-    startDate: item.startDate,
-    endDate: item.endDate,
-    active: item.active,
-  }));
+  const formattedBanners: FormattedBanner[] = banners.map((item) => {
+    return {
+      id: item.id,
+      nameAr: item.nameAr || '',
+      nameEn: item.nameEn || '',
+      image: item.imageUrl || '/icons/package.svg',
+      order: item.order ?? 0,
+      externalUrl: item.externalUrl || '',
+      startDate: formatDateDDMMYYYY(item.startAt),
+      endDate: formatDateDDMMYYYY(item.endAt),
+      active: item.isActive,
+      raw: item,
+    };
+  });
 
   const filteredBanners = formattedBanners.filter((item) => {
-    const matchesSearch = item.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const rawStart = item.raw.startAt ? item.raw.startAt.split('T')[0] : '';
+    const rawEnd = item.raw.endAt ? item.raw.endAt.split('T')[0] : '';
 
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && item.active) ||
-      (statusFilter === 'inactive' && !item.active);
+    const matchesSearch =
+      !searchQuery.trim() ||
+      item.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.externalUrl.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStartDate = !startDate || item.startDate >= startDate;
-    const matchesEndDate = !endDate || item.endDate <= endDate;
+    const matchesStartDate = !startDate || rawStart >= startDate;
+    const matchesEndDate = !endDate || rawEnd <= endDate;
 
-    return matchesSearch && matchesStatus && matchesStartDate && matchesEndDate;
+    return matchesSearch && matchesStartDate && matchesEndDate;
   });
 
   const tableHead = [
-    { id: 'image', label: t('columns.image'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'startDate', label: t('columns.start_date'), align: 'center' as cellAlignment },
-    { id: 'endDate', label: t('columns.end_date'), align: 'center' as cellAlignment },
-    { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
+    { id: 'image', label: isRtl ? 'الصورة' : 'Image', align: (isRtl ? 'right' : 'left') as cellAlignment },
+    { id: 'nameAr', label: isRtl ? 'الاسم (عربي)' : 'Name (Arabic)', align: (isRtl ? 'right' : 'left') as cellAlignment },
+    { id: 'nameEn', label: isRtl ? 'الاسم (إنجليزي)' : 'Name (English)', align: (isRtl ? 'right' : 'left') as cellAlignment },
+    { id: 'order', label: isRtl ? 'الترتيب' : 'Order', align: 'center' as cellAlignment },
+    { id: 'externalUrl', label: isRtl ? 'الرابط الخارجي' : 'External Link', align: (isRtl ? 'right' : 'left') as cellAlignment },
+    { id: 'startDate', label: isRtl ? 'تاريخ البدء' : 'Start Date', align: 'center' as cellAlignment },
+    { id: 'endDate', label: isRtl ? 'تاريخ الانتهاء' : 'End Date', align: 'center' as cellAlignment },
+    { id: 'active', label: isRtl ? 'الحالة' : 'Status', align: 'center' as cellAlignment },
   ];
 
   const actions = [
@@ -151,34 +313,76 @@ export default function BannersView() {
       <Box
         sx={{
           display: 'inline-flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 110,
-          height: 90,
+          width: 80,
+          height: 48,
           border: '1px solid #E2E8F0',
-          borderRadius: '20px',
-          p: 1,
+          borderRadius: 1.5,
+          p: 0.5,
           bgcolor: '#FFFFFF',
+          overflow: 'hidden',
         }}
       >
-        <Box sx={{ width: 32, height: 32, mb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src={row.image}
-            alt={row.title}
-            width={32}
-            height={32}
-            style={{ objectFit: 'contain' }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/icons/package.svg';
-            }}
-          />
-        </Box>
-        <Typography variant="caption" sx={{ fontWeight: 700, color: '#1E293B', fontSize: 13 }}>
-          {row.title}
-        </Typography>
+        <img
+          src={row.image}
+          alt={row.nameAr}
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 4 }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/icons/package.svg';
+          }}
+        />
       </Box>
     ),
+    nameAr: (row: FormattedBanner) => (
+      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+        {row.nameAr || '-'}
+      </Typography>
+    ),
+    nameEn: (row: FormattedBanner) => (
+      <Typography variant="body2" sx={{ fontWeight: 500, color: '#64748B' }}>
+        {row.nameEn || '-'}
+      </Typography>
+    ),
+    order: (row: FormattedBanner) => (
+      <Typography variant="body2" sx={{ fontWeight: 700, color: '#1E293B' }}>
+        {row.order ?? 0}
+      </Typography>
+    ),
+    externalUrl: (row: FormattedBanner) => {
+      if (!row.externalUrl) {
+        return (
+          <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+            -
+          </Typography>
+        );
+      }
+      return (
+        <Box
+          component="a"
+          href={row.externalUrl.startsWith('http') ? row.externalUrl : `https://${row.externalUrl}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            color: '#0284C7',
+            textDecoration: 'none',
+            fontSize: 13,
+            fontWeight: 600,
+            maxWidth: 160,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+        >
+          <Iconify icon="eva:external-link-outline" width={16} sx={{ flexShrink: 0 }} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.externalUrl}</span>
+        </Box>
+      );
+    },
     startDate: (row: FormattedBanner) => (
       <Typography variant="body2" sx={{ color: '#1E293B', fontWeight: 500 }}>
         {row.startDate}
@@ -195,14 +399,14 @@ export default function BannersView() {
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
           <Switch
             checked={isActive}
-            onChange={() => handleToggleStatus(row.id)}
+            onChange={() => handleToggleStatus(row.raw)}
             sx={{
               '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
               '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#00A76F' },
             }}
           />
           <Typography variant="body2" sx={{ fontWeight: 600, color: isActive ? '#1E293B' : '#94A3B8' }}>
-            {isActive ? t('status.active') : t('status.inactive')}
+            {isActive ? (isRtl ? 'نشط' : 'Active') : (isRtl ? 'معطل' : 'Inactive')}
           </Typography>
         </Box>
       );
@@ -288,56 +492,20 @@ export default function BannersView() {
           />
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ minWidth: { md: 500 } }}>
-            <TextField
+            <DateInput
               fullWidth
               size="small"
               placeholder={t('start_date')}
-              type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Iconify icon="eva:calendar-outline" sx={{ color: '#919EAB', width: 20, height: 20 }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': { borderColor: '#E5E7EB' },
-                },
-              }}
+              onChange={setStartDate}
             />
 
-            <TextField
+            <DateInput
               fullWidth
               size="small"
               placeholder={t('end_date')}
-              type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              slotProps={{
-                inputLabel: { shrink: true },
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Iconify icon="eva:calendar-outline" sx={{ color: '#919EAB', width: 20, height: 20 }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': { borderColor: '#E5E7EB' },
-                },
-              }}
+              onChange={setEndDate}
             />
 
             <SelectField
@@ -367,7 +535,7 @@ export default function BannersView() {
         <Box sx={{ px: 1 }}>
           <SharedTable<FormattedBanner>
             data={filteredBanners}
-            count={filteredBanners.length}
+            count={totalCount || filteredBanners.length}
             tableHead={tableHead}
             actions={actions}
             customRender={customRender}
@@ -381,7 +549,7 @@ export default function BannersView() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         initialData={editingBanner}
-        onSave={handleSaveBanner}
+        onSuccess={() => fetchBannersData(false)}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -393,3 +561,4 @@ export default function BannersView() {
     </Box>
   );
 }
+

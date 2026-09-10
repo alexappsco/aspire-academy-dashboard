@@ -742,23 +742,37 @@
   },
   "Support": {
     "title": "Technical Support",
+    "search_placeholder": "Search by sender name..",
+    "send_date": "Sent Date",
+    "status": "Status",
+    "columns": {
+      "sender_name": "Sender Name",
+      "send_date": "Sent Date",
+      "sender_type": "Sender Type",
+      "complaint_content": "Complaint Content",
+      "status": "Status"
+    },
+    "statuses": {
+      "all": "Status",
+      "all_label": "All",
+      "new": "New",
+      "in_progress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "user_types": {
+      "student": "Student",
+      "lecturer": "Lecturer",
+      "instructor": "Instructor",
+      "admin": "Admin"
+    },
+    "actions": {
+      "view": "View"
+    },
     "send_ticket": "Send Ticket",
-    "search_placeholder": "Search tickets..",
     "all": "All",
-    "replied": "Replied",
-    "pending": "Pending",
+    "replied": "Resolved",
+    "pending": "New",
     "view": "View",
-    "create_title": "Create New Ticket",
-    "create_complaint_title": "Complaint Title",
-    "create_complaint_placeholder": "Enter ticket title",
-    "create_description": "Issue Description",
-    "create_description_placeholder": "Describe the issue in detail...",
-    "send": "Send",
-    "sending": "Sending...",
-    "create_success": "Ticket sent successfully",
-    "error_create": "An error occurred while creating the ticket",
-    "error_fetch": "An error occurred while loading the ticket",
-    "error_unexpected": "An unexpected error occurred",
     "details_title": "Ticket Details",
     "details_ticket_number": "Ticket Number",
     "details_complaint_title": "Complaint Title",
@@ -1207,5 +1221,193 @@
       "fetch_error": "An error occurred while fetching currencies",
       "operation_error": "An error occurred while processing the request"
     }
+  },
+  "Students": {
+    "title": "Students Management",
+    "subtitle": "View and manage registered student data and academic accounts",
+    "search_placeholder": "Search by student name, email, or phone...",
+    "status_all": "Status (All)",
+    "status_active": "Active Account",
+    "status_inactive": "Inactive Account",
+    "country_all": "All Countries",
+    "country_filter": "Country",
+    "status_filter": "Status",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "status": "Status",
+    "empty": "No students match your search criteria.",
+    "columns": {
+      "student_name": "Name & Email",
+      "registration_date": "Joined Date",
+      "phone": "Phone Number",
+      "enrolled_courses": "Enrolled Courses",
+      "completed_courses": "Completed",
+      "total_payments": "Total Payments",
+      "country": "Country",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view_details": "View Profile",
+      "deactivate": "Deactivate Account",
+      "activate": "Activate Account",
+      "delete": "Delete Student"
+    },
+    "delete_dialog": {
+      "title": "Confirm Student Deletion",
+      "content": "Are you sure you want to delete this student? This action cannot be undone.",
+      "content_named": "Are you sure you want to delete student ({name})? The student will lose access to their enrolled courses after deletion.",
+      "cancel": "Cancel",
+      "confirm": "Delete Student",
+      "deleting": "Deleting..."
+    },
+    "messages": {
+      "activate_success": "Student account activated successfully",
+      "deactivate_success": "Student account deactivated successfully",
+      "status_error": "An error occurred while updating account status",
+      "delete_success": "Student deleted successfully",
+      "delete_error": "An error occurred while deleting student"
+    },
+    "details": {
+      "breadcrumb_students": "Students Management",
+      "details_title": "Student Details",
+      "unnamed": "Unnamed",
+      "no_email": "No email",
+      "copy_id": "ID: {id}",
+      "copied": "Copied",
+      "toggle_activate": "Activate Account",
+      "toggle_deactivate": "Deactivate Account",
+      "receipt_accept_toast": "Payment receipt accepted and subscription activated successfully",
+      "receipt_reject_toast": "Bank transfer receipt has been rejected",
+      "kpi": {
+        "total_courses": "Total Courses",
+        "total_courses_sub": "Fully enrolled",
+        "completed_courses": "Completed Courses",
+        "completed_courses_sub": "Completed all requirements",
+        "in_progress_courses": "In Progress",
+        "in_progress_courses_sub": "Currently ongoing",
+        "total_payments": "Total Payments",
+        "total_payments_sub": "Fully paid",
+        "pending_orders": "Pending Orders",
+        "pending_orders_sub": "• Orders under review"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "academic": "Academic Details",
+        "courses": "Courses",
+        "orders": "Orders & Payments",
+        "pending_badge": "Pending"
+      },
+      "personal_info": {
+        "title": "Personal & Contact Details",
+        "fullname": "Full Name",
+        "email": "Email",
+        "phone": "Phone Number",
+        "birth_date": "Birth Date",
+        "account_status": "Account Status"
+      },
+      "academic_card": {
+        "title": "Academic Registration & Status",
+        "country": "Country:",
+        "grad_year": "Graduation Year:",
+        "grad_batch": "Class of {year}",
+        "registration_date": "Registration Date:",
+        "last_activity": "Last Activity on Platform:"
+      },
+      "courses_table": {
+        "title": "Enrolled Courses & Progress History",
+        "subtitle": "Courses the student enrolled in and individual progress.",
+        "empty": "No courses enrolled for this student currently.",
+        "col_course": "Course",
+        "col_specialization": "Specialization",
+        "col_instructor": "Assigned Instructor",
+        "col_enrolled_date": "Enrollment Date",
+        "col_progress": "Course Progress",
+        "col_last_activity": "Last Activity",
+        "col_status": "Status",
+        "col_action": "Action",
+        "status_completed": "Completed",
+        "status_in_progress": "In Progress",
+        "btn_view_progress": "View Progress"
+      },
+      "orders_table": {
+        "title": "Recent Orders & Payment History",
+        "subtitle": "Details of payments, bank transfer receipts, and pending orders.",
+        "empty": "No orders or transfers registered for this student currently.",
+        "default_order_title": "Course Order",
+        "col_order_num": "Order Number",
+        "col_items": "Item / Course Details",
+        "col_amount": "Amount",
+        "col_date": "Order Date",
+        "col_status": "Payment Status",
+        "col_actions": "Actions",
+        "btn_inspect_receipt": "Inspect Receipt",
+        "btn_view_receipt": "View Receipt",
+        "status_pending": "Under Review",
+        "status_paid": "Paid & Activated",
+        "status_cancelled": "Cancelled"
+      }
+    },
+    "course_progress": {
+      "breadcrumb_progress": "Course Progress",
+      "retry": "Retry",
+      "error_load": "Failed to load student course progress",
+      "student_prefix": "Student:",
+      "instructor_prefix": "Assigned Instructor:",
+      "enrolled_prefix": "Enrollment Date:",
+      "progress_metrics": {
+        "total_progress": "Total Progress Percentage",
+        "completed_level": "Completed successfully",
+        "advanced_level": "Advanced level",
+        "in_progress_level": "In progress",
+        "completed_lessons": "Completed Lessons",
+        "all_lessons_completed": "All lessons completed",
+        "remaining_lessons": "{count} lessons remaining",
+        "recorded_watch_time": "Total Watch Time",
+        "hours_unit": "Hours",
+        "watch_time_sub": "Training hours for subject"
+      },
+      "chapters": {
+        "empty": "No chapters or lessons available for this course currently",
+        "chapter_completed_badge": "Completed 100% ✓",
+        "chapter_in_progress_badge": "In Progress ({percent}%)",
+        "chapter_not_started_badge": "Not Started",
+        "lessons_completed_count": "{completed} of {total} lessons completed",
+        "lesson_completed": "Watched",
+        "lesson_in_progress": "Watching",
+        "lesson_not_started": "Not Started",
+        "stopped_at": "Stopped at {time}",
+        "has_test": "Includes test"
+      },
+      "status": {
+        "completed": "Completed",
+        "in_progress": "Currently Studying",
+        "not_started": "Not Started Yet"
+      }
+    },
+    "receipt_dialog": {
+      "dialog_title": "Payment Receipt Inspection",
+      "bank_title": "Banque Misr",
+      "receipt_subtitle": "Official Electronic Bank Transfer Notice",
+      "transfer_success": "Successful Transfer",
+      "transferred_amount": "Transferred Amount",
+      "amount_tafqeet": "Four hundred fifty Egyptian pounds only",
+      "ref_code_label": "Bank Reference Number",
+      "tx_time_label": "Transaction Date & Time",
+      "sender_label": "Sender Name",
+      "beneficiary_label": "Beneficiary Name",
+      "beneficiary_name": "Aspire Medical Academy",
+      "iban_label": "Beneficiary Account (IBAN)",
+      "purpose_label": "Transfer Purpose",
+      "stamp_authorized": "Authorized",
+      "stamp_notice": "Electronic Receipt Issued & Certified",
+      "stamp_no_sign": "Does not require handwritten bank signature",
+      "preview_attached_receipt": "Preview Attached Receipt Image",
+      "btn_accept": "Accept",
+      "btn_reject": "Reject"
+    }
   }
 }
+
+

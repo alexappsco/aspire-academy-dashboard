@@ -9,151 +9,230 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
 
 import Iconify from 'src/components/iconify';
+import SharedTable from 'src/components/SharedTable/SharedTable';
+import { cellAlignment } from 'src/components/SharedTable/types';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_LATEST_USERS } from '../_mock';
+import type { DashboardRecentAccount } from 'src/types/dashboard';
 
-export default function LatestUsersList() {
+interface Props {
+  recentAccounts?: DashboardRecentAccount[];
+}
+
+type FormattedRecentAccount = DashboardRecentAccount & { id: string };
+
+export default function LatestUsersList({ recentAccounts }: Props) {
   const t = useTranslations('Home.latest_users');
   const router = useRouter();
-  const users = MOCK_LATEST_USERS;
+
+  const formattedData: FormattedRecentAccount[] = (recentAccounts || []).map((account, index) => ({
+    ...account,
+    id: account.userId || `user-${index}`,
+  }));
+
+  const hasData = formattedData.length > 0;
+
+  const getRoleLabel = (role: string | number | undefined | null) => {
+    const r = String(role || '').toLowerCase();
+    if (r.includes('lectur') || r.includes('instruct') || r.includes('محاضر')) return 'محاضر';
+    if (r.includes('stud') || r.includes('طالب')) return 'طالب';
+    if (r.includes('admin') || r.includes('مسؤول')) return 'مسؤول';
+    return String(role || '-');
+  };
+
+  const tableHead = [
+    { id: 'user', label: 'المستخدم', align: cellAlignment.right },
+    { id: 'role', label: 'نوع الحساب', align: cellAlignment.center, width: 130 },
+    { id: 'affiliation', label: 'الجامعة / الكلية', align: cellAlignment.center },
+    { id: 'created_at', label: 'تاريخ الانضمام', align: cellAlignment.center, width: 140 },
+    { id: 'status', label: 'الحالة', align: cellAlignment.center, width: 120 },
+    { id: 'actions', label: '', align: cellAlignment.center, width: 60 },
+  ];
+
+  const customRender = {
+    user: (row: FormattedRecentAccount) => (
+      <Stack
+        direction="row"
+        spacing={1.5}
+        sx={{
+          alignItems: 'center',
+          gap: 1.5,
+        }}
+      >
+        <Avatar
+          src={row.imageUrl || undefined}
+          alt={row.name}
+          sx={{ width: 38, height: 38, borderRadius: 2 }}
+        />
+        <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+          {row.name}
+        </Typography>
+      </Stack>
+    ),
+    role: (row: FormattedRecentAccount) => {
+      const roleLabel = getRoleLabel(row.role);
+      const isLecturer = roleLabel === 'محاضر';
+      return (
+        <Chip
+          label={roleLabel}
+          size="small"
+          sx={{
+            bgcolor: isLecturer ? '#1E293B' : '#EFF6FF',
+            color: isLecturer ? '#FFFFFF' : '#2563EB',
+            fontWeight: 700,
+            fontSize: 11.5,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    },
+    affiliation: (row: FormattedRecentAccount) => (
+      <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>
+        {row.affiliation || '-'}
+      </Typography>
+    ),
+    created_at: (row: FormattedRecentAccount) => (
+      <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 500 }}>
+        {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}
+      </Typography>
+    ),
+    status: (row: FormattedRecentAccount) => {
+      const statusStr = String(row.status || '');
+      const isActive = statusStr.toLowerCase().includes('act') || statusStr === '1' || !row.status;
+      return (
+        <Chip
+          label={statusStr || (isActive ? 'Active' : 'Pending')}
+          size="small"
+          sx={{
+            bgcolor: isActive ? '#ECFDF5' : '#F1F5F9',
+            color: isActive ? '#059669' : '#64748B',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1,
+          }}
+        />
+      );
+    },
+    actions: () => (
+      <IconButton
+        size="small"
+        sx={{ color: '#94A3B8' }}
+        onClick={() => router.push('/instructors')}
+      >
+        <Iconify icon="solar:menu-dots-bold" width={18} />
+      </IconButton>
+    ),
+  };
 
   return (
     <Card
       sx={{
-        p: 2.5,
         borderRadius: 3,
         bgcolor: '#FFFFFF',
         border: '1px solid #F1F5F9',
         boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2 }}>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          {/* Right in RTL: Icon & Title */}
-          <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center', gap: 1 }}>
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: 2,
-                bgcolor: '#EFF6FF',
-                color: '#2563EB',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Iconify icon="solar:users-group-two-rounded-bold" width={18} />
-            </Box>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        sx={{
+          p: 2.5,
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          borderBottom: '1px solid #F1F5F9',
+        }}
+      >
+        {/* Right in RTL: Icon & Title */}
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: 2,
+              bgcolor: '#EFF6FF',
+              color: '#2563EB',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Iconify icon="solar:users-group-two-rounded-bold" width={22} />
+          </Box>
+
+          <Box>
             <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}
+              variant="h6"
+              sx={{ fontWeight: 800, color: '#0F172A', fontSize: 17 }}
             >
               {t('title')}
             </Typography>
-          </Stack>
-
-          {/* Left in RTL: View Accounts */}
-          <Button
-            size="small"
-            onClick={() => router.push('/profile')}
-            sx={{ color: '#2563EB', fontWeight: 700, fontSize: 13, p: 0, minWidth: 'auto' }}
-          >
-            {t('view_accounts')}
-          </Button>
-        </Stack>
-      </Box>
-
-      {/* Users List */}
-      <Stack spacing={2} sx={{ my: 1 }}>
-        {users.map((user) => (
-          <Stack
-            key={user.id}
-            direction="row"
-            spacing={1.5}
-            sx={{
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            {/* Right in RTL: Avatar + Info */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-              <Avatar
-                src={user.avatar}
-                alt={user.name}
-                sx={{ width: 42, height: 42, borderRadius: 2 }}
-              />
-
-              <Box sx={{ textAlign: 'start' }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                    {user.name}
-                  </Typography>
-                  <Chip
-                    label={t(`roles.${user.role}`)}
-                    size="small"
-                    sx={{
-                      bgcolor: user.role === 'lecturer' ? '#1E293B' : '#EFF6FF',
-                      color: user.role === 'lecturer' ? '#FFFFFF' : '#2563EB',
-                      fontWeight: 700,
-                      fontSize: 10.5,
-                      height: 20,
-                      borderRadius: 1,
-                    }}
-                  />
-                </Stack>
-
-                <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
-                  {user.university}
-                </Typography>
-              </Box>
-            </Stack>
-
-            {/* Left in RTL: Status Text */}
             <Typography
-              sx={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: user.isActiveStatus ? '#10B981' : '#94A3B8',
-                minWidth: 50,
-                textAlign: 'end',
-              }}
+              variant="caption"
+              sx={{ color: '#64748B', fontSize: 12, fontWeight: 500 }}
             >
-              {user.statusText}
+              {hasData
+                ? `عرض أحدث ${formattedData.length} حسابات تم تسجيلها في المنصة`
+                : 'قائمة المستخدمين الجدد'}
             </Typography>
-          </Stack>
-        ))}
+          </Box>
+        </Stack>
+
+        {/* Left in RTL: View Accounts */}
+        <Button
+          variant="outlined"
+          onClick={() => router.push('/instructors')}
+          endIcon={<Iconify icon="solar:arrow-left-linear" width={16} sx={{ ml: 0.5 }} />}
+          sx={{
+            borderRadius: 2,
+            borderColor: '#E2E8F0',
+            color: '#2563EB',
+            fontWeight: 700,
+            fontSize: 13,
+            px: 2,
+            py: 0.75,
+            gap: 1,
+            '&:hover': {
+              borderColor: '#BFDBFE',
+              bgcolor: '#EFF6FF',
+            },
+          }}
+        >
+          {t('view_accounts')}
+        </Button>
       </Stack>
 
-      {/* Footer */}
-      <Box
-        sx={{
-          pt: 2,
-          mt: 2,
-          borderTop: '1px solid #F1F5F9',
-          textAlign: 'center',
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ color: '#64748B', fontSize: 12.5, fontWeight: 600 }}
-        >
-          {t('active_today_total')}
-        </Typography>
+      {/* Table Section */}
+      <Box sx={{ p: 1 }}>
+        {hasData ? (
+          <SharedTable<FormattedRecentAccount>
+            data={formattedData}
+            count={formattedData.length}
+            tableHead={tableHead}
+            customRender={customRender}
+            disablePagination={true}
+          />
+        ) : (
+          <Box
+            sx={{
+              py: 6,
+              textAlign: 'center',
+              bgcolor: '#F8FAFC',
+              borderRadius: 2,
+              m: 1,
+            }}
+          >
+            <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+              No data from backend
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Card>
   );

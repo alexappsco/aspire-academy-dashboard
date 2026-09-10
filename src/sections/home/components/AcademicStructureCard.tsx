@@ -10,12 +10,17 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_ACADEMIC_STRUCTURE } from '../_mock';
+import type { DashboardAcademicStructure } from 'src/types/dashboard';
 
-export default function AcademicStructureCard() {
+interface Props {
+  academicStructure?: DashboardAcademicStructure;
+}
+
+export default function AcademicStructureCard({ academicStructure }: Props) {
   const t = useTranslations('Home.academic_structure');
   const router = useRouter();
-  const data = MOCK_ACADEMIC_STRUCTURE;
+
+  const hasData = academicStructure !== undefined;
 
   return (
     <Card
@@ -37,7 +42,11 @@ export default function AcademicStructureCard() {
         }}
       >
         {/* Right side in RTL (Icon + Title + Hierarchy Flow) */}
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.75 }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.75 }}
+        >
           <Box
             sx={{
               width: 44,
@@ -66,28 +75,44 @@ export default function AcademicStructureCard() {
               {t('title')}
             </Typography>
 
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 0.75,
-                color: '#2563EB',
-                fontWeight: 700,
-                fontSize: 13,
-              }}
-            >
-              <span>{t('countries')} ({data.countries})</span>
-              <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
-              <span>{t('universities')} ({data.universities})</span>
-              <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
-              <span>{t('colleges')} ({data.colleges})</span>
-              <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
-              <span>{t('subjects')} ({data.subjects})</span>
-              <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
-              <span style={{ color: '#1E40AF', fontWeight: 800 }}>{t('active_courses')} ({data.activeCourses})</span>
-            </Stack>
+            {hasData ? (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 0.75,
+                  color: '#2563EB',
+                  fontWeight: 700,
+                  fontSize: 13,
+                }}
+              >
+                <span>
+                  {t('countries')} ({academicStructure.countriesCount})
+                </span>
+                <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
+                <span>
+                  {t('universities')} ({academicStructure.universitiesCount})
+                </span>
+                <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
+                <span>
+                  {t('colleges')} ({academicStructure.facultiesCount})
+                </span>
+                <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
+                <span>
+                  {t('subjects')} ({academicStructure.studyMaterialsCount})
+                </span>
+                <Iconify icon="solar:arrow-left-linear" width={14} sx={{ color: '#93C5FD' }} />
+                <span style={{ color: '#1E40AF', fontWeight: 800 }}>
+                  {t('active_courses')} ({academicStructure.activeCoursesCount})
+                </span>
+              </Stack>
+            ) : (
+              <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 500 }}>
+                No data from backend
+              </Typography>
+            )}
           </Box>
         </Stack>
 

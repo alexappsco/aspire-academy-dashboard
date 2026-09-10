@@ -10,3 +10,7 @@ export * from './courses';
 export * from './faculties';
 export * from './semesters';
 export * from './academic-years';
+export * from './banners';
+export * from './support';
+export * from './dashboard';
+export * from './students';

@@ -10,14 +10,100 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 
 import Iconify from 'src/components/iconify';
-import { MOCK_KPIS } from '../_mock';
+import type { DashboardStatCards } from 'src/types/dashboard';
 
-export default function KpiStatsGrid() {
+interface Props {
+  statCards?: DashboardStatCards;
+}
+
+export default function KpiStatsGrid({ statCards }: Props) {
   const t = useTranslations('Home.kpi');
+
+  const items = [
+    {
+      id: 'total_students',
+      title: t('total_students'),
+      value: statCards ? statCards.totalStudents.toLocaleString() : 'No data from backend',
+      change:
+        statCards !== undefined
+          ? `${statCards.studentsGrowthPercent >= 0 ? '+' : ''}${statCards.studentsGrowthPercent}%`
+          : undefined,
+      isPositive: (statCards?.studentsGrowthPercent ?? 0) >= 0,
+      subtitle: t('vs_last_month'),
+      icon: 'solar:users-group-rounded-bold',
+      iconBg: '#EFF6FF',
+      iconColor: '#2563EB',
+    },
+    {
+      id: 'total_lecturers',
+      title: t('total_lecturers'),
+      value: statCards ? statCards.totalInstructors.toLocaleString() : 'No data from backend',
+      change:
+        statCards !== undefined
+          ? `${statCards.instructorsGrowthPercent >= 0 ? '+' : ''}${statCards.instructorsGrowthPercent}%`
+          : undefined,
+      isPositive: (statCards?.instructorsGrowthPercent ?? 0) >= 0,
+      subtitle: t('vs_last_month'),
+      icon: 'solar:user-bold',
+      iconBg: '#ECFDF5',
+      iconColor: '#10B981',
+    },
+    {
+      id: 'total_courses',
+      title: t('total_courses'),
+      value: statCards ? statCards.totalCourses.toLocaleString() : 'No data from backend',
+      change:
+        statCards !== undefined
+          ? `${statCards.coursesGrowthPercent >= 0 ? '+' : ''}${statCards.coursesGrowthPercent}%`
+          : undefined,
+      isPositive: (statCards?.coursesGrowthPercent ?? 0) >= 0,
+      subtitle: t('vs_last_month'),
+      icon: 'solar:square-academic-cap-2-bold',
+      iconBg: '#FFFBEB',
+      iconColor: '#D97706',
+    },
+    {
+      id: 'published_courses',
+      title: t('published_courses'),
+      value: statCards ? statCards.publishedCourses.toLocaleString() : 'No data from backend',
+      subBadge: t('active_now_for_students'),
+      subBadgeBg: '#ECFDF5',
+      subBadgeColor: '#059669',
+      icon: 'solar:book-bookmark-bold',
+      iconBg: '#F0FDF4',
+      iconColor: '#16A34A',
+    },
+    {
+      id: 'under_review',
+      title: t('under_review_courses'),
+      value: statCards ? statCards.pendingCourses.toLocaleString() : 'No data from backend',
+      badge: statCards ? t('needs_audit') : undefined,
+      badgeColor: '#DC2626',
+      valueColor: '#DC2626',
+      subBadge: t('action_required'),
+      subBadgeBg: '#991B1B',
+      subBadgeColor: '#FFFFFF',
+      icon: 'solar:alarm-bold',
+      iconBg: '#FEE2E2',
+      iconColor: '#DC2626',
+    },
+    {
+      id: 'rejected_courses',
+      title: 'الدورات المرفوضة',
+      value: statCards ? statCards.rejectedCourses.toLocaleString() : 'No data from backend',
+      badge: statCards && statCards.rejectedCourses > 0 ? 'مرفوضة' : undefined,
+      badgeColor: '#DC2626',
+      valueColor: statCards && statCards.rejectedCourses > 0 ? '#DC2626' : '#0F172A',
+      subtitle: t('vs_last_month'),
+      icon: 'solar:close-circle-bold',
+      iconBg: '#FEF2F2',
+      iconColor: '#EF4444',
+    },
+  ];
 
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
-      {MOCK_KPIS.map((item) => (
+      {items.map((item) => (
         <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
           <Card
             sx={{
@@ -59,7 +145,7 @@ export default function KpiStatsGrid() {
                   lineHeight: 1.3,
                 }}
               >
-                {t(item.titleKey)}
+                {item.title}
               </Typography>
 
               <Box
@@ -87,7 +173,7 @@ export default function KpiStatsGrid() {
                   sx={{
                     fontWeight: 800,
                     color: item.valueColor || '#0F172A',
-                    fontSize: { xs: 24, md: 28 },
+                    fontSize: item.value === 'No data from backend' ? 14 : { xs: 24, md: 28 },
                     letterSpacing: '-0.02em',
                   }}
                 >
@@ -102,7 +188,7 @@ export default function KpiStatsGrid() {
                       color: item.badgeColor || '#DC2626',
                     }}
                   >
-                    {t(item.badge)}
+                    {item.badge}
                   </Typography>
                 )}
               </Stack>
@@ -110,9 +196,9 @@ export default function KpiStatsGrid() {
 
             {/* Footer Subtitle / Change */}
             <Box sx={{ mt: 1 }}>
-              {item.subBadge ? (
+              {item.subBadge && statCards ? (
                 <Chip
-                  label={t(item.subBadge)}
+                  label={item.subBadge}
                   size="small"
                   sx={{
                     bgcolor: item.subBadgeBg || '#991B1B',
@@ -147,12 +233,12 @@ export default function KpiStatsGrid() {
                     </Stack>
                   )}
 
-                  {item.subtitleKey && (
+                  {item.subtitle && statCards && (
                     <Typography
                       variant="caption"
                       sx={{ color: '#94A3B8', fontSize: 11, fontWeight: 500 }}
                     >
-                      {t(item.subtitleKey)}
+                      {item.subtitle}
                     </Typography>
                   )}
                 </Stack>

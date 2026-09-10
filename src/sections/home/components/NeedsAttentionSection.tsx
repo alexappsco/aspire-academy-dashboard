@@ -11,11 +11,71 @@ import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_NEEDS_ATTENTION } from '../_mock';
+import type { DashboardPendingTasks } from 'src/types/dashboard';
 
-export default function NeedsAttentionSection() {
+interface Props {
+  pendingTasks?: DashboardPendingTasks;
+}
+
+export default function NeedsAttentionSection({ pendingTasks }: Props) {
   const t = useTranslations('Home.needs_attention');
   const router = useRouter();
+
+  const hasData = pendingTasks !== undefined;
+
+  const cards = [
+    {
+      id: 'pending_courses',
+      count: hasData ? pendingTasks.coursesPendingReview : 0,
+      circleBg: '#EFF6FF',
+      circleColor: '#2563EB',
+      title: t('card_1.title'),
+      desc: hasData
+        ? `${pendingTasks.coursesPendingReview} دورة تم إرسالها من المحاضرين وتحتاج إلى مراجعة وتدقيق المحتوى الطبي.`
+        : 'No data from backend',
+      action: t('card_1.action'),
+      actionHref: '/courses?status=pending',
+      badge: t('card_1.badge'),
+      badgeColor: '#2563EB',
+      btnBg: '#2563EB',
+      btnColor: '#FFFFFF',
+      btnHoverBg: '#1D4ED8',
+    },
+    {
+      id: 'new_lecturers',
+      count: hasData ? pendingTasks.newInstructorsPendingVerification : 0,
+      circleBg: '#FFFBEB',
+      circleColor: '#D97706',
+      title: t('card_2.title'),
+      desc: hasData
+        ? `${pendingTasks.newInstructorsPendingVerification} محاضر تم إنشاء حساباتهم مؤخراً وبانتظار اعتماد التخصص والجامعة.`
+        : 'No data from backend',
+      action: t('card_2.action'),
+      actionHref: '/instructors',
+      badge: t('card_2.badge'),
+      badgeColor: '#D97706',
+      btnBg: '#FEF3C7',
+      btnColor: '#B45309',
+      btnHoverBg: '#FDE68A',
+    },
+    {
+      id: 'rejected_courses',
+      count: hasData ? pendingTasks.rejectedCourses : 0,
+      circleBg: '#FEF2F2',
+      circleColor: '#DC2626',
+      title: t('card_3.title'),
+      desc: hasData
+        ? `${pendingTasks.rejectedCourses} دورات تحتاج إلى متابعة مع المحاضرين لتعديل ملاحظات الرفض الأكاديمية.`
+        : 'No data from backend',
+      action: t('card_3.action'),
+      actionHref: '/courses?status=rejected',
+      badge: t('card_3.badge'),
+      badgeColor: '#DC2626',
+      btnBg: '#FEE2E2',
+      btnColor: '#B91C1C',
+      btnHoverBg: '#FECACA',
+    },
+  ];
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -66,7 +126,7 @@ export default function NeedsAttentionSection() {
 
       {/* 3 Action Cards */}
       <Grid container spacing={2}>
-        {MOCK_NEEDS_ATTENTION.map((card) => (
+        {cards.map((card) => (
           <Grid key={card.id} size={{ xs: 12, md: 4 }}>
             <Card
               sx={{
@@ -108,14 +168,14 @@ export default function NeedsAttentionSection() {
                       flexShrink: 0,
                     }}
                   >
-                    {card.count}
+                    {hasData ? card.count : '!'}
                   </Box>
 
                   <Typography
                     variant="subtitle1"
                     sx={{ fontWeight: 800, color: '#0F172A', fontSize: 16 }}
                   >
-                    {t(card.titleKey)}
+                    {card.title}
                   </Typography>
                 </Stack>
 
@@ -129,7 +189,7 @@ export default function NeedsAttentionSection() {
                     minHeight: 40,
                   }}
                 >
-                  {t(card.descKey)}
+                  {card.desc}
                 </Typography>
               </Box>
 
@@ -161,7 +221,7 @@ export default function NeedsAttentionSection() {
                       color: card.badgeColor,
                     }}
                   >
-                    {t(card.badgeKey)}
+                    {card.badge}
                   </Typography>
                 </Stack>
 
@@ -191,7 +251,7 @@ export default function NeedsAttentionSection() {
                     },
                   }}
                 >
-                  {t(card.actionKey)}
+                  {card.action}
                 </Button>
               </Stack>
             </Card>

@@ -14,13 +14,18 @@ import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useRouter } from 'src/i18n/routing';
-import { MOCK_TOP_COURSES } from '../_mock';
-import { TopCourseItem } from '../types';
+import type { DashboardTopCourse } from 'src/types/dashboard';
 
-export default function TopCoursesTable() {
+interface Props {
+  topCourses?: DashboardTopCourse[];
+}
+
+export default function TopCoursesTable({ topCourses }: Props) {
   const t = useTranslations('Home.top_courses');
   const router = useRouter();
-  const data = MOCK_TOP_COURSES;
+
+  const data = topCourses || [];
+  const hasData = topCourses !== undefined && topCourses.length > 0;
 
   const tableHead = [
     { id: 'course_name', label: t('columns.course_name'), align: cellAlignment.center },
@@ -35,60 +40,68 @@ export default function TopCoursesTable() {
   ];
 
   const customRender = {
-    course_name: (row: TopCourseItem) => (
+    course_name: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-        {row.course_name}
+        {row.title}
       </Typography>
     ),
-    lecturer: (row: TopCourseItem) => (
+    lecturer: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>
-        {row.lecturer}
+        {row.instructorName || '-'}
       </Typography>
     ),
-    specialty: (row: TopCourseItem) => (
+    specialty: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 13, color: '#64748B' }}>
-        {row.specialty}
+        {row.specializationName || '-'}
       </Typography>
     ),
-    students: (row: TopCourseItem) => (
+    students: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-        {row.students.toLocaleString()}
+        {row.studentsCount?.toLocaleString() ?? 0}
       </Typography>
     ),
-    rating: (row: TopCourseItem) => (
+    rating: (row: DashboardTopCourse) => (
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
         <Iconify icon="solar:star-bold" width={16} sx={{ color: '#F59E0B' }} />
         <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-          {row.rating}
+          {row.ratingAverage || 0}
         </Typography>
       </Stack>
     ),
-    price: (row: TopCourseItem) => (
+    price: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-        {row.price}
+        {row.price || 0}
       </Typography>
     ),
-    status: (row: TopCourseItem) => (
-      <Chip
-        label={row.status ? t('active') : t('inactive')}
-        size="small"
-        sx={{
-          bgcolor: row.status ? '#ECFDF5' : '#F1F5F9',
-          color: row.status ? '#059669' : '#64748B',
-          fontWeight: 700,
-          fontSize: 12,
-          height: 24,
-          borderRadius: 1,
-        }}
-      />
-    ),
-    last_update: (row: TopCourseItem) => (
+    status: (row: DashboardTopCourse) => {
+      const statusStr = String(row.status || '');
+      const isPublished = statusStr.toLowerCase().includes('publish') || statusStr === '2';
+      return (
+        <Chip
+          label={statusStr || (isPublished ? t('active') : t('inactive'))}
+          size="small"
+          sx={{
+            bgcolor: isPublished ? '#ECFDF5' : '#F1F5F9',
+            color: isPublished ? '#059669' : '#64748B',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1,
+          }}
+        />
+      );
+    },
+    last_update: (row: DashboardTopCourse) => (
       <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 500 }}>
-        {row.last_update}
+        {row.lastUpdatedAt ? new Date(row.lastUpdatedAt).toLocaleDateString() : '-'}
       </Typography>
     ),
-    actions: () => (
-      <IconButton size="small" sx={{ color: '#94A3B8' }} onClick={() => router.push('/courses')}>
+    actions: (row: DashboardTopCourse) => (
+      <IconButton
+        size="small"
+        sx={{ color: '#94A3B8' }}
+        onClick={() => router.push(`/courses`)}
+      >
         <Iconify icon="solar:menu-dots-bold" width={18} />
       </IconButton>
     ),
@@ -173,15 +186,31 @@ export default function TopCoursesTable() {
         </Button>
       </Stack>
 
-      {/* SharedTable Integration */}
+      {/* Table Section */}
       <Box sx={{ p: 1 }}>
-        <SharedTable<TopCourseItem>
-          data={data}
-          count={data.length}
-          tableHead={tableHead}
-          customRender={customRender}
-          disablePagination={true}
-        />
+        {hasData ? (
+          <SharedTable<DashboardTopCourse>
+            data={data}
+            count={data.length}
+            tableHead={tableHead}
+            customRender={customRender}
+            disablePagination={true}
+          />
+        ) : (
+          <Box
+            sx={{
+              py: 6,
+              textAlign: 'center',
+              bgcolor: '#F8FAFC',
+              borderRadius: 2,
+              m: 1,
+            }}
+          >
+            <Typography sx={{ color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+              No data from backend
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Card>
   );

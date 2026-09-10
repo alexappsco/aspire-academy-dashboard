@@ -73,4 +73,30 @@ export const endpoints = {
   uploads: {
     upload: '/admin/uploads',
   },
+  banners: {
+    list: '/admin/banners',
+    details: (id: string) => `/admin/banners/${id}`,
+    create: '/admin/banners',
+    update: (id: string) => `/admin/banners/${id}`,
+    delete: (id: string) => `/admin/banners/${id}`,
+  },
+  contactUsMessages: {
+    list: '/admin/contact-us-messages',
+    details: (id: string) => `/admin/contact-us-messages/${id}`,
+    delete: (id: string) => `/admin/contact-us-messages/${id}`,
+    updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
+  },
+  students: {
+    list: '/admin/students',
+    details: (id: string) => `/admin/students/${id}`,
+    delete: (id: string) => `/admin/students/${id}`,
+    courses: (id: string) => `/admin/students/${id}/courses`,
+    orders: (id: string) => `/admin/students/${id}/orders`,
+    courseProgress: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}`,
+    activate: (id: string) => `/admin/students/${id}/activate`,
+    deactivate: (id: string) => `/admin/students/${id}/deactivate`,
+  },
+  dashboard: {
+    get: '/admin/dashboard',
+  },
 };
