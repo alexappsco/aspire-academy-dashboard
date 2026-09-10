@@ -370,6 +370,11 @@
       "edit": "تعديل",
       "delete": "حذف"
     },
+    "messages": {
+      "delete_success": "تم حذف السؤال بنجاح",
+      "created": "تم إضافة السؤال بنجاح",
+      "updated": "تم تحديث السؤال بنجاح"
+    },
     "dialog": {
       "add_title": "إضافة سؤال شائع",
       "edit_title": "تعديل سؤال شائع",
@@ -383,6 +388,7 @@
       "answer_en_placeholder": "الإجابة بالإنجليزية..",
       "status": "الحالة",
       "save": "حفظ",
+      "saving": "جارٍ الحفظ...",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
       "delete": "حذف"

@@ -111,4 +111,11 @@ export const endpoints = {
   reports: {
     get: '/admin/reports',
   },
+  faqs: {
+    list: '/admin/faqs',
+    details: (id: string) => `/admin/faqs/${id}`,
+    create: '/admin/faqs',
+    update: (id: string) => `/admin/faqs/${id}`,
+    delete: (id: string) => `/admin/faqs/${id}`,
+  },
 };
