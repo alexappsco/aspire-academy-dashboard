@@ -9,7 +9,6 @@ import { localesSettings } from "src/i18n/config-locale";
 import type { LocaleType } from "src/i18n/config-locale";
 import { notFound } from "next/navigation";
 import { routing } from "src/i18n/routing";
-import { plexArabic } from "src/theme/typography";
 import { AuthProvider } from "src/contexts/AuthContext";
 
 export const metadata: Metadata = {
@@ -48,29 +47,25 @@ export default async function LocaleLayout({
   const themeDirection = dir as "rtl" | "ltr";
 
   return (
-    <html lang={locale} dir={dir} className={`${plexArabic.className} antialiased`}>
-      <body>
-        <SettingsProvider
-          defaultSettings={{
-            themeStretch: false,
-            themeMode: "light",
-            themeDirection,
-            themeContrast: "default",
-            themeLayout: "vertical",
-            themeColorPresets: "default",
-          }}
-        >
-          <ThemeProvider>
-            <ToastProvider>
-              <NextIntlClientProvider messages={messages}>
-                <AuthProvider>
-                  {children}
-                </AuthProvider>
-              </NextIntlClientProvider>
-            </ToastProvider>
-          </ThemeProvider>
-        </SettingsProvider>
-      </body>
-    </html>
+    <SettingsProvider
+      defaultSettings={{
+        themeStretch: false,
+        themeMode: "light",
+        themeDirection,
+        themeContrast: "default",
+        themeLayout: "vertical",
+        themeColorPresets: "default",
+      }}
+    >
+      <ThemeProvider>
+        <ToastProvider>
+          <NextIntlClientProvider messages={messages}>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </NextIntlClientProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </SettingsProvider>
   );
 }
