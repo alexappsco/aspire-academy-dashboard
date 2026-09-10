@@ -1,23 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
-import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { useToast } from 'src/components/toast';
+import { getFaqs, deleteFaq } from 'src/actions/faqs';
+import type { FaqItem } from 'src/types/faq';
 
-import { MOCK_QUESTIONS, QuestionItem } from './_mock';
 import QuestionFormDialog from './new-edit-question-dialog';
 import DeleteConfirmDialog from './delete-confirm-dialog';
 
@@ -25,22 +24,67 @@ interface FormattedQuestion {
   id: string;
   question: string;
   answer: string;
-  active: boolean;
 }
 
 export default function CommonQuestionsView() {
   const t = useTranslations('CommonQuestions');
+  const toast = useToast();
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
-  const [questions, setQuestions] = useState<QuestionItem[]>(MOCK_QUESTIONS);
+  const [items, setItems] = useState<FaqItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState<QuestionItem | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<FaqItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(debounceTimer.current);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFaqs() {
+      try {
+        const params: Record<string, unknown> = {
+          SkipCount: 0,
+          MaxResultCount: 1000,
+        };
+        if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
+
+        const res = await getFaqs(params as { Filter?: string; SkipCount?: number; MaxResultCount?: number });
+
+        if (!isMounted) return;
+
+        if (res.success && res.data) {
+          setItems(res.data.items);
+          setTotalCount(res.data.totalCount);
+        } else {
+          toast.error(res.error || 'Failed to load');
+        }
+      } catch {
+        if (isMounted) {
+          toast.error('Failed to load');
+        }
+      }
+    }
+
+    loadFaqs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedSearch, toast, refreshKey]);
 
   const handleOpenAdd = () => {
     setEditingQuestion(null);
@@ -48,7 +92,7 @@ export default function CommonQuestionsView() {
   };
 
   const handleOpenEdit = (row: FormattedQuestion) => {
-    const question = questions.find((q) => q.id === row.id);
+    const question = items.find((q) => q.id === row.id);
     if (question) {
       setEditingQuestion(question);
       setFormDialogOpen(true);
@@ -60,61 +104,29 @@ export default function CommonQuestionsView() {
     setDeleteDialogOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (deletingId) {
-      setQuestions((prev) => prev.filter((q) => q.id !== deletingId));
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+
+    try {
+      const res = await deleteFaq(deletingId);
+
+      if (res.success) {
+        toast.success(t('messages.delete_success'));
+        setItems((prev) => prev.filter((q) => q.id !== deletingId));
+        setTotalCount((prev) => prev - 1);
+      } else {
+        toast.error(res.error || 'Failed to delete');
+      }
+    } catch {
+      toast.error('Failed to delete');
+    } finally {
       setDeletingId(null);
     }
   };
 
-  const handleSaveQuestion = (data: Partial<QuestionItem>) => {
-    if (editingQuestion) {
-      setQuestions((prev) =>
-        prev.map((q) => (q.id === editingQuestion.id ? { ...q, ...data } : q))
-      );
-    } else {
-      const newQuestion: QuestionItem = {
-        id: Date.now().toString(),
-        question_ar: data.question_ar ?? '',
-        question_en: data.question_en ?? '',
-        answer_ar: data.answer_ar ?? '',
-        answer_en: data.answer_en ?? '',
-        active: data.active ?? true,
-      };
-      setQuestions((prev) => [newQuestion, ...prev]);
-    }
-  };
-
-  const handleToggleStatus = (id: string) => {
-    setQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, active: !q.active } : q))
-    );
-  };
-
-  const formattedQuestions: FormattedQuestion[] = questions.map((item) => ({
-    id: item.id,
-    question: isRtl ? item.question_ar : item.question_en,
-    answer: isRtl ? item.answer_ar : item.answer_en,
-    active: item.active,
-  }));
-
-  const filteredQuestions = formattedQuestions.filter((item) => {
-    const matchesSearch =
-      item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && item.active) ||
-      (statusFilter === 'inactive' && !item.active);
-
-    return matchesSearch && matchesStatus;
-  });
-
   const tableHead = [
     { id: 'question', label: t('columns.question'), align: (isRtl ? 'right' : 'left') as cellAlignment },
     { id: 'answer', label: t('columns.answer'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
 
   const actions = [
@@ -131,38 +143,18 @@ export default function CommonQuestionsView() {
     },
   ];
 
-  const customRender = {
-    active: (row: FormattedQuestion) => {
-      const isActive = row.active;
-      return (
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-          <Switch
-            checked={isActive}
-            onChange={() => handleToggleStatus(row.id)}
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': { color: '#00A76F' },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#00A76F' },
-            }}
-          />
-          <Typography variant="body2" sx={{ fontWeight: 600, color: isActive ? '#1E293B' : '#94A3B8' }}>
-            {isActive ? t('status.active') : t('status.inactive')}
-          </Typography>
-        </Box>
-      );
-    },
-  };
+  const tableData: FormattedQuestion[] = items.map((item) => ({
+    id: item.id,
+    question: isRtl ? item.questionAr : item.questionEn,
+    answer: isRtl ? item.answerAr : item.answerEn,
+  }));
 
   return (
     <Box sx={{ py: 2 }}>
-      {/* Header section */}
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
-        sx={{
-          mb: 4,
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-        }}
+        sx={{ mb: 4, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}
       >
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E', mb: 0.5 }}>
@@ -192,7 +184,6 @@ export default function CommonQuestionsView() {
         </Button>
       </Stack>
 
-      {/* Main card containing filter row and table */}
       <Card
         sx={{
           borderRadius: 3,
@@ -202,12 +193,7 @@ export default function CommonQuestionsView() {
           bgcolor: '#FFFFFF',
         }}
       >
-        {/* Filters and search row */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          sx={{ p: 2.5, borderBottom: '1px dashed #F1F3F5' }}
-        >
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ p: 2.5, borderBottom: '1px dashed #F1F3F5' }}>
           <TextField
             fullWidth
             size="small"
@@ -231,52 +217,26 @@ export default function CommonQuestionsView() {
               },
             }}
           />
-
-          <SelectField
-            fullWidth
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            slotProps={{
-              select: { displayEmpty: true },
-            }}
-            sx={{
-              maxWidth: 200,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                '& fieldset': { borderColor: '#E5E7EB' },
-              },
-            }}
-          >
-            <MenuItem value="all">{t('statuses.all')}</MenuItem>
-            <MenuItem value="active">{t('status.active')}</MenuItem>
-            <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
-          </SelectField>
         </Stack>
 
-        {/* Table list */}
         <Box sx={{ px: 1 }}>
           <SharedTable<FormattedQuestion>
-            data={filteredQuestions}
-            count={filteredQuestions.length}
+            data={tableData}
+            count={totalCount}
             tableHead={tableHead}
             actions={actions}
-            customRender={customRender}
           />
         </Box>
       </Card>
 
-      {/* Add / Edit Dialog */}
       <QuestionFormDialog
         key={editingQuestion?.id ?? 'new'}
         open={formDialogOpen}
         onClose={() => setFormDialogOpen(false)}
         initialData={editingQuestion}
-        onSave={handleSaveQuestion}
+        onSaved={() => setRefreshKey((k) => k + 1)}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
