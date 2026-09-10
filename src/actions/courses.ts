@@ -1,6 +1,6 @@
 'use server';
 
-import { getData, deleteData } from 'src/utils/crud-fetch-api';
+import { getData, postData, editData, deleteData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type { CoursesListResponse, GetCoursesParams, CourseDto } from 'src/types/course';
@@ -12,47 +12,20 @@ export async function getCourses(
     let endpoint = endpoints.courses.list;
     if (params) {
       const searchParams = new URLSearchParams();
-
-      if (params.Filter && params.Filter.trim() !== '') {
-        searchParams.append('Filter', params.Filter.trim());
-      }
-
-      if (typeof params.IsActive === 'boolean') {
-        searchParams.append('IsActive', String(params.IsActive));
-      }
-
-      if (params.SpecializationId && params.SpecializationId.trim() !== '') {
-        searchParams.append('SpecializationId', params.SpecializationId.trim());
-      }
-
-      if (params.InstructorId && params.InstructorId.trim() !== '') {
-        searchParams.append('InstructorId', params.InstructorId.trim());
-      }
-
-      if (params.Sorting) {
-        searchParams.append('Sorting', params.Sorting);
-      }
-
-      if (typeof params.SkipCount === 'number') {
-        searchParams.append('SkipCount', String(params.SkipCount));
-      }
-
-      if (typeof params.MaxResultCount === 'number') {
-        searchParams.append('MaxResultCount', String(params.MaxResultCount));
-      }
-
+      if (params.Filter && params.Filter.trim() !== '') searchParams.append('Filter', params.Filter.trim());
+      if (typeof params.IsActive === 'boolean') searchParams.append('IsActive', String(params.IsActive));
+      if (params.SpecializationId) searchParams.append('SpecializationId', params.SpecializationId.trim());
+      if (params.InstructorId) searchParams.append('InstructorId', params.InstructorId.trim());
+      if (params.Sorting) searchParams.append('Sorting', params.Sorting);
+      if (typeof params.SkipCount === 'number') searchParams.append('SkipCount', String(params.SkipCount));
+      if (typeof params.MaxResultCount === 'number') searchParams.append('MaxResultCount', String(params.MaxResultCount));
       const query = searchParams.toString();
-      if (query) {
-        endpoint += `?${query}`;
-      }
+      if (query) endpoint += `?${query}`;
     }
-
     const res = await getData<CoursesListResponse>(endpoint);
-
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
-
     const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to fetch courses';
     return { success: false, error: errorMsg };
   } catch (error) {
@@ -79,6 +52,43 @@ export async function getCourseById(id: string): Promise<ApiSingleResponse<Cours
   }
 }
 
+export async function createCourse(
+  formData: FormData
+): Promise<ApiSingleResponse<CourseDto>> {
+  try {
+    const res = await postData<CourseDto, FormData>(endpoints.courses.create, formData);
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to create course';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create course',
+    };
+  }
+}
+
+export async function updateCourse(
+  id: string,
+  formData: FormData
+): Promise<ApiSingleResponse<CourseDto>> {
+  try {
+    const res = await editData<CourseDto, FormData>(endpoints.courses.update(id), 'PUT', formData);
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to update course';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update course',
+    };
+  }
+}
+
 export async function deleteCourse(id: string): Promise<ApiSingleResponse<void>> {
   try {
     const res = await deleteData<void>(endpoints.courses.delete(id));
@@ -91,6 +101,28 @@ export async function deleteCourse(id: string): Promise<ApiSingleResponse<void>>
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete course',
+    };
+  }
+}
+
+export async function uploadFile(
+  file: File,
+  folder: string = 'courses'
+): Promise<ApiSingleResponse<{ url: string }>> {
+  try {
+    const formData = new FormData();
+    formData.append('File', file);
+    formData.append('Folder', folder);
+    const res = await postData<{ url: string }, FormData>(endpoints.uploads.upload, formData);
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to upload file';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to upload file',
     };
   }
 }

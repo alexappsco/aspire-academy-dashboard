@@ -376,7 +376,9 @@ export default function CourseStudentsTab({ enrollments }: CourseStudentsTabProp
               select
               size="small"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as 'all' | 'in_progress' | 'completed')
+              }
               sx={{
                 width: 160,
                 bgcolor: '#F8FAFC',

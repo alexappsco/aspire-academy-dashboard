@@ -94,6 +94,9 @@
     "subtitle": "قم بإنشاء كورس تعليمي جديد عن طريق إضافة معلوماته الأساسية.",
     "breadcrumb_courses": "الدورات التدريبية",
     "breadcrumb_add": "إضافة كورس جديد",
+    "title_edit": "تعديل الكورس",
+    "subtitle_edit": "قم بتحديث تفاصيل الكورس ومحتواه ثم احفظ التغييرات.",
+    "breadcrumb_edit": "تعديل الكورس",
     "stepper": {
       "basic_info": "المعلومات الأساسية",
       "add_chapters": "إضافة الفصول"
@@ -116,10 +119,19 @@
       "subject_placeholder": "اختر المادة الدراسية...",
       "specialty_label": "التخصص",
       "specialty_placeholder": "اختر التخصص...",
-      "duration_label": "مدة الكورس",
-      "duration_placeholder": "مدة الكورس...",
       "type_label": "نوع الكورس",
-      "type_placeholder": "نوع الكورس...",
+      "type_placeholder": "اختر نوع الكورس...",
+      "currency_label": "العملة",
+      "currency_placeholder": "اختر العملة...",
+      "access_duration_label": "مدة الوصول (بالأيام)",
+      "access_duration_placeholder": "مثال: 365",
+      "university_label": "الجامعة",
+      "university_placeholder": "اختر الجامعة...",
+      "academic_year_label": "الفرقة الدراسية",
+      "academic_year_placeholder": "اختر الفرقة الدراسية...",
+      "semester_label": "الفصل الدراسي",
+      "semester_placeholder": "اختر الفصل الدراسي...",
+      "loading": "جارٍ التحميل...",
       "description_label": "وصف الكورس",
       "description_placeholder": "اكتب وصفاً تفصيلياً للكورس..."
     },
@@ -129,6 +141,8 @@
       "dialog_add_title": "إضافة هدف تعليمي جديد",
       "dialog_edit_title": "تعديل الهدف التعليمي",
       "objective_placeholder": "أدخل الهدف التعليمي هنا...",
+      "objective_placeholder_ar": "الهدف (بالعربية)...",
+      "objective_placeholder_en": "الهدف (بالإنجليزية)...",
       "save_btn": "حفظ",
       "add_btn": "إضافة",
       "cancel_btn": "إلغاء",
@@ -157,11 +171,13 @@
       "cancel": "إلغاء",
       "save_draft": "حفظ كمسودة",
       "continue": "متابعة",
-      "create_course": "انشاء كورس"
+      "create_course": "انشاء كورس",
+      "save_changes": "حفظ التغييرات"
     },
     "messages": {
       "draft_saved": "تم حفظ الكورس كمسودة بنجاح",
       "course_created": "تم إنشاء الكورس بنجاح",
+      "course_updated": "تم تحديث الكورس بنجاح",
       "validation_required": "يرجى تعبئة الحقول المطلوبة"
     }
   },
@@ -201,8 +217,28 @@
     },
     "course_info": {
       "title": "معلومات الكورس",
+      "type": "نوع الكورس",
+      "price": "السعر",
+      "faculty": "الكلية",
+      "field": "المجال",
+      "specialization": "التخصص",
+      "study_material": "المادة الدراسية",
+      "access_duration": "مدة الوصول",
+      "days": "{count} يوم",
+      "last_updated": "آخر تحديث",
+      "learning_objectives": "أهداف التعلم",
+      "types": {
+        "full": "كورس كامل",
+        "midterm": "منتصف الفصل",
+        "final": "نهائي"
+      },
       "paragraph_1": "نظرة شاملة على أمراض القلب والأوعية الدموية مصممة لطلاب الطب والأطباء المقيمين المبتدئين. يغطي هذا الكورس الفيزيولوجيا المرضية، وطرائق التشخيص، واستراتيجيات الإدارة المعاصرة لحالات القلب الشائعة والمعقدة.",
       "paragraph_2": "نظرة شاملة على أمراض القلب والأوعية الدموية مصممة لطلاب الطب والأطباء المقيمين المبتدئين. يغطي هذا الكورس الفيزيولوجيا المرضية، وطرائق التشخيص، واستراتيجيات الإدارة المعاصرة لحالات القلب الشائعة والمعقدة."
+    },
+    "errors": {
+      "load_failed": "تعذر تحميل تفاصيل الكورس.",
+      "not_found": "الكورس غير موجود.",
+      "back_to_courses": "العودة إلى الكورسات"
     },
     "content_summary": {
       "title": "ملخص المحتوى",

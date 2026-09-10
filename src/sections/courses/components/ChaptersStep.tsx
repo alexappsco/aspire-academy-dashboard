@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -18,104 +18,16 @@ import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
+import { uploadFile } from 'src/actions/courses';
 import QuizDialog from './QuizDialog';
-import { Chapter } from '../types';
-
-export interface AttachmentItem {
-  id: string;
-  type: 'video' | 'pdf' | 'quiz';
-  title: string;
-  badgeText: string;
-  metaText: string;
-  questionsCount?: number;
-}
-
-export interface RichLesson {
-  id: string;
-  number: number;
-  title: string;
-  subtitle?: string;
-  isCompleted?: boolean;
-  attachments: AttachmentItem[];
-}
-
-export interface RichChapter {
-  id: string;
-  number: number;
-  title: string;
-  isExpanded: boolean;
-  lessons: RichLesson[];
-}
+import { EMPTY_RICH_CHAPTERS, mapRichToFormChapters } from '../sample-curriculum';
+import type { AttachmentItem, RichChapter, LessonQuiz, Chapter } from '../types';
 
 interface ChaptersStepProps {
   chapters?: Chapter[];
+  initialChapters?: RichChapter[];
   onChaptersChange?: (chapters: Chapter[]) => void;
 }
-
-const INITIAL_RICH_CHAPTERS: RichChapter[] = [
-  {
-    id: 'ch-1',
-    number: 1,
-    title: 'الفصل الأول - مقدمة',
-    isExpanded: true,
-    lessons: [
-      {
-        id: 'les-1',
-        number: 1,
-        title: 'الدرس الاول',
-        attachments: [],
-      },
-      {
-        id: 'les-2',
-        number: 2,
-        title: 'الدرس الثاني',
-        attachments: [],
-      },
-      {
-        id: 'les-3',
-        number: 3,
-        title: 'الدرس الثالث: تشريح عضلة القلب والدورة الدموية',
-        subtitle: 'تم إرفاق فيديو، ملخص ومستند، وبنك أسئلة تقييمية لهذا الدرس',
-        isCompleted: true,
-        attachments: [
-          {
-            id: 'att-1',
-            type: 'video',
-            title: 'فيديو المحاضرة: مدخل إلى تشريح عضلة القلب.mp4',
-            badgeText: 'تم المعالجة والرفع بنجاح',
-            metaText: 'الجودة: 1080p Full HD • الحجم: 340 MB • المدة: 24:15 دقيقة',
-          },
-          {
-            id: 'att-2',
-            type: 'pdf',
-            title: 'الملخص والمذكرة التوضيحية — تشريح القلب.pdf',
-            badgeText: 'جاهز للتحميل للطلاب',
-            metaText: 'الحجم: 4.8 MB • 32 صفحة • ملف PDF إلكتروني',
-          },
-          {
-            id: 'att-3',
-            type: 'quiz',
-            title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
-            badgeText: 'مفعل بعد انتهاء الفيديو',
-            metaText: 'درجة الاجتياز: 60% • 5 أسئلة تدريبية تفاعلية (MCQ)',
-            questionsCount: 5,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ch-2',
-    number: 2,
-    title: 'الفصل الأول - أساسيات',
-    isExpanded: false,
-    lessons: [
-      { id: 'les-2-1', number: 1, title: 'الدرس الأول', attachments: [] },
-      { id: 'les-2-2', number: 2, title: 'الدرس الثاني', attachments: [] },
-      { id: 'les-2-3', number: 3, title: 'الدرس الثالث', attachments: [] },
-    ],
-  },
-];
 
 const inputRootSx = {
   '& .MuiOutlinedInput-root': {
@@ -130,18 +42,23 @@ const inputRootSx = {
 
 export default function ChaptersStep({
   chapters: _chapters,
-  onChaptersChange: _onChaptersChange,
+  initialChapters,
+  onChaptersChange,
 }: ChaptersStepProps) {
   const t = useTranslations('CreateCourse.chapters');
   const toast = useToast();
 
-  const [richChapters, setRichChapters] = useState<RichChapter[]>(INITIAL_RICH_CHAPTERS);
+  const [richChapters, setRichChapters] = useState<RichChapter[]>(
+    initialChapters && initialChapters.length > 0 ? initialChapters : EMPTY_RICH_CHAPTERS
+  );
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [lessonTitles, setLessonTitles] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState(false);
 
   // Dialog states
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
   const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('الفصل الأول - مقدمة');
+  const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [previewVideoTitle, setPreviewVideoTitle] = useState('');
 
@@ -156,6 +73,22 @@ export default function ChaptersStep({
     lessonId: string;
   } | null>(null);
 
+  // Apply a rich-chapters update and reflect it to the parent form state
+  const commitChapters = useCallback(
+    (next: RichChapter[]) => {
+      setRichChapters(next);
+      onChaptersChange?.(mapRichToFormChapters(next));
+    },
+    [onChaptersChange]
+  );
+
+  useEffect(() => {
+    if (initialChapters && initialChapters.length > 0) {
+      onChaptersChange?.(mapRichToFormChapters(initialChapters));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 1. Add new chapter
   const handleAddChapter = () => {
     if (!newChapterTitle.trim()) {
@@ -169,7 +102,7 @@ export default function ChaptersStep({
       isExpanded: true,
       lessons: [],
     };
-    setRichChapters([...richChapters, newChapter]);
+    commitChapters([...richChapters, newChapter]);
     setNewChapterTitle('');
     toast.success('تمت إضافة الفصل بنجاح');
   };
@@ -177,7 +110,7 @@ export default function ChaptersStep({
   // 2. Delete chapter
   const handleDeleteChapter = (chapterId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setRichChapters(
+    commitChapters(
       richChapters
         .filter((ch) => ch.id !== chapterId)
         .map((ch, idx) => ({ ...ch, number: idx + 1 }))
@@ -187,7 +120,7 @@ export default function ChaptersStep({
 
   // 3. Toggle chapter accordion
   const handleToggleChapter = (chapterId: string) => {
-    setRichChapters(
+    commitChapters(
       richChapters.map((ch) =>
         ch.id === chapterId ? { ...ch, isExpanded: !ch.isExpanded } : ch
       )
@@ -202,7 +135,7 @@ export default function ChaptersStep({
       return;
     }
 
-    setRichChapters(
+    commitChapters(
       richChapters.map((ch) => {
         if (ch.id !== chapterId) return ch;
         return {
@@ -226,7 +159,7 @@ export default function ChaptersStep({
 
   // 5. Delete lesson
   const handleDeleteLesson = (chapterId: string, lessonId: string) => {
-    setRichChapters(
+    commitChapters(
       richChapters.map((ch) => {
         if (ch.id !== chapterId) return ch;
         return {
@@ -246,7 +179,7 @@ export default function ChaptersStep({
     lessonId: string,
     attachmentId: string
   ) => {
-    setRichChapters(
+    commitChapters(
       richChapters.map((ch) => {
         if (ch.id !== chapterId) return ch;
         return {
@@ -267,10 +200,49 @@ export default function ChaptersStep({
   };
 
   // 7. Open Quiz Dialog
-  const handleOpenQuizDialog = (chapterTitle: string) => {
+  const handleOpenQuizDialog = (
+    chapterId: string,
+    lessonId: string,
+    chapterTitle: string
+  ) => {
     setActiveChapterForQuiz(chapterTitle);
+    setQuizLessonId(lessonId);
     setQuizDialogOpen(true);
   };
+
+  // Save the quiz config back onto the target lesson
+  const handleSaveQuiz = useCallback(
+    (config: LessonQuiz) => {
+      if (!quizLessonId) return;
+
+      const quizAtt: AttachmentItem = {
+        id: `att-${Date.now()}`,
+        type: 'quiz',
+        title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
+        badgeText: 'مفعل بعد انتهاء الفيديو',
+        metaText: `${config.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        questionsCount: config.questions.length,
+        quiz: config,
+      };
+
+      commitChapters(
+        richChapters.map((ch) => ({
+          ...ch,
+          lessons: ch.lessons.map((les) => {
+            if (les.id !== quizLessonId) return les;
+            return {
+              ...les,
+              isCompleted: true,
+              subtitle: les.subtitle || 'تم إرفاق اختبار تقييمي لهذا الدرس',
+              attachments: [...les.attachments.filter((a) => a.type !== 'quiz'), quizAtt],
+            };
+          }),
+        }))
+      );
+      setQuizLessonId(null);
+    },
+    [quizLessonId, richChapters, commitChapters]
+  );
 
   // 8. Handle video upload
   const handleTriggerVideoUpload = (chapterId: string, lessonId: string) => {
@@ -281,36 +253,50 @@ export default function ChaptersStep({
     }
   };
 
-  const handleVideoFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload) return;
+    if (!file || !targetLessonForUpload || uploading) return;
 
-    const newAtt: AttachmentItem = {
-      id: `att-${Date.now()}`,
-      type: 'video',
-      title: `فيديو المحاضرة: ${file.name}`,
-      badgeText: 'تم المعالجة والرفع بنجاح',
-      metaText: `الجودة: 1080p Full HD • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • المدة: 25:00 دقيقة`,
-    };
+    setUploading(true);
+    try {
+      const res = await uploadFile(file, 'videos');
+      if (!res.success || !res.data) {
+        toast.error(res.error || 'فشل رفع الفيديو');
+        return;
+      }
 
-    setRichChapters((prev) =>
-      prev.map((ch) => {
-        if (ch.id !== targetLessonForUpload.chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== targetLessonForUpload.lessonId) return les;
-            return {
-              ...les,
-              isCompleted: true,
-              subtitle: les.subtitle || 'تم إرفاق محتوى تعليمي لهذا الدرس',
-              attachments: [...les.attachments, newAtt],
-            };
-          }),
-        };
-      })
-    );
-    toast.success('تم رفع الفيديو بنجاح');
+      const newAtt: AttachmentItem = {
+        id: `att-${Date.now()}`,
+        type: 'video',
+        title: `فيديو المحاضرة: ${file.name}`,
+        badgeText: 'تم المعالجة والرفع بنجاح',
+        metaText: `الجودة: 1080p Full HD • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        url: res.data.url,
+      };
+
+      commitChapters(
+        richChapters.map((ch) => {
+          if (ch.id !== targetLessonForUpload.chapterId) return ch;
+          return {
+            ...ch,
+            lessons: ch.lessons.map((les) => {
+              if (les.id !== targetLessonForUpload.lessonId) return les;
+              return {
+                ...les,
+                isCompleted: true,
+                subtitle: les.subtitle || 'تم إرفاق محتوى تعليمي لهذا الدرس',
+                attachments: [...les.attachments, newAtt],
+              };
+            }),
+          };
+        })
+      );
+      toast.success('تم رفع الفيديو بنجاح');
+    } catch {
+      toast.error('فشل رفع الفيديو');
+    } finally {
+      setUploading(false);
+    }
   };
 
   // 9. Handle doc upload
@@ -322,35 +308,49 @@ export default function ChaptersStep({
     }
   };
 
-  const handleDocFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload) return;
+    if (!file || !targetLessonForUpload || uploading) return;
 
-    const newAtt: AttachmentItem = {
-      id: `att-${Date.now()}`,
-      type: 'pdf',
-      title: file.name,
-      badgeText: 'جاهز للتحميل للطلاب',
-      metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
-    };
+    setUploading(true);
+    try {
+      const res = await uploadFile(file, 'documents');
+      if (!res.success || !res.data) {
+        toast.error(res.error || 'فشل رفع المستند');
+        return;
+      }
 
-    setRichChapters((prev) =>
-      prev.map((ch) => {
-        if (ch.id !== targetLessonForUpload.chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== targetLessonForUpload.lessonId) return les;
-            return {
-              ...les,
-              isCompleted: true,
-              attachments: [...les.attachments, newAtt],
-            };
-          }),
-        };
-      })
-    );
-    toast.success('تم إرفاق المستند بنجاح');
+      const newAtt: AttachmentItem = {
+        id: `att-${Date.now()}`,
+        type: 'pdf',
+        title: file.name,
+        badgeText: 'جاهز للتحميل للطلاب',
+        metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
+        url: res.data.url,
+      };
+
+      commitChapters(
+        richChapters.map((ch) => {
+          if (ch.id !== targetLessonForUpload.chapterId) return ch;
+          return {
+            ...ch,
+            lessons: ch.lessons.map((les) => {
+              if (les.id !== targetLessonForUpload.lessonId) return les;
+              return {
+                ...les,
+                isCompleted: true,
+                attachments: [...les.attachments, newAtt],
+              };
+            }),
+          };
+        })
+      );
+      toast.success('تم إرفاق المستند بنجاح');
+    } catch {
+      toast.error('فشل رفع المستند');
+    } finally {
+      setUploading(false);
+    }
   };
 
   // 10. Edit lesson title
@@ -361,8 +361,8 @@ export default function ChaptersStep({
 
   const handleSaveLessonTitle = (chapterId: string, lessonId: string) => {
     if (!editingLessonTitle.trim()) return;
-    setRichChapters((prev) =>
-      prev.map((ch) => {
+    commitChapters(
+      richChapters.map((ch) => {
         if (ch.id !== chapterId) return ch;
         return {
           ...ch,
@@ -861,7 +861,7 @@ export default function ChaptersStep({
                                           <Button
                                             size="small"
                                             variant="contained"
-                                            onClick={() => handleOpenQuizDialog(chapter.title)}
+                                            onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                                             sx={{
                                               bgcolor: '#1C252E',
                                               color: '#FFFFFF',
@@ -884,7 +884,7 @@ export default function ChaptersStep({
                                           <Button
                                             size="small"
                                             variant="outlined"
-                                            onClick={() => handleOpenQuizDialog(chapter.title)}
+                                            onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                                             sx={{
                                               borderColor: '#10B981',
                                               color: '#10B981',
@@ -1022,7 +1022,7 @@ export default function ChaptersStep({
                             <Button
                               size="small"
                               variant={hasAttachments ? 'outlined' : 'contained'}
-                              onClick={() => handleOpenQuizDialog(chapter.title)}
+                              onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                               sx={{
                                 bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
                                 color: hasAttachments ? '#16A34A' : '#FFFFFF',
@@ -1066,9 +1066,22 @@ export default function ChaptersStep({
 
       {/* 3. Quiz Dialog Modal */}
       <QuizDialog
+        key={quizLessonId ?? 'closed'}
         open={quizDialogOpen}
-        onClose={() => setQuizDialogOpen(false)}
+        onClose={() => {
+          setQuizDialogOpen(false);
+          setQuizLessonId(null);
+        }}
         chapterTitle={activeChapterForQuiz}
+        initialQuiz={
+          quizLessonId
+            ? richChapters
+                .flatMap((ch) => ch.lessons)
+                .find((l) => l.id === quizLessonId)
+                ?.attachments.find((a) => a.type === 'quiz')?.quiz ?? null
+            : null
+        }
+        onSave={handleSaveQuiz}
       />
 
       {/* 4. Video Preview Dialog Modal */}

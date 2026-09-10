@@ -43,87 +43,28 @@ interface QuizDialogProps {
   open: boolean;
   onClose: () => void;
   chapterTitle?: string;
+  initialQuiz?: QuizConfig | null;
   onSave?: (config: QuizConfig) => void;
 }
 
-const INITIAL_QUIZ: QuizConfig = {
-  title: 'اختبار تقييم المفاهيم الأساسية لتشريح القلب',
-  questions: [
-    {
-      id: 'q-1',
-      number: 1,
-      title: 'ما هو المعدل الطبيعي لضربات القلب في الدقيقة للبالغين أثناء الراحة؟',
-      points: 10,
-      options: [
-        {
-          id: 'opt-1',
-          letter: 'أ',
-          text: '60 - 100 ضربة في الدقيقة',
-          isCorrect: true,
-        },
-        {
-          id: 'opt-2',
-          letter: 'ب',
-          text: '40 - 60 ضربة في الدقيقة',
-          isCorrect: false,
-        },
-        {
-          id: 'opt-3',
-          letter: 'ج',
-          text: '100 - 120 ضربة في الدقيقة',
-          isCorrect: false,
-        },
-        {
-          id: 'opt-4',
-          letter: 'د',
-          text: '120 - 140 ضربة في الدقيقة',
-          isCorrect: false,
-        },
-      ],
-      explanation:
-        'المعدل الطبيعي لنبضات القلب للبالغين الأصحاء أثناء الراحة يتراوح بين 60 إلى 100 ضربة في الدقيقة. أقل من 60 يعتبر بطء نبض (Bradycardia) وأعلى من 100 يعتبر تسارع (Tachycardia).',
-    },
-    {
-      id: 'q-2',
-      number: 2,
-      title: 'ما هو الشريان الرئيسي المسؤول عن تغذية الجدار الخلفي للبطين الأيسر؟',
-      points: 10,
-      options: [
-        { id: 'opt-2-1', letter: 'أ', text: 'الشريان التاجي الأيسر النازل الأمامي (LAD)', isCorrect: false },
-        { id: 'opt-2-2', letter: 'ب', text: 'الشريان التاجي الأيمن (RCA) عبر الشريان بين البطينين الخلفي', isCorrect: true },
-        { id: 'opt-2-3', letter: 'ج', text: 'الشريان المنعطف الأيسر (LCx)', isCorrect: false },
-        { id: 'opt-2-4', letter: 'د', text: 'الشريان الهامشي الحاد (Marginal Artery)', isCorrect: false },
-      ],
-      explanation:
-        'في 85% - 90% من البشر (Right Dominant Circulation)، ينشأ الشريان بين البطينين الخلفي (PDA) من الشريان التاجي الأيمن (RCA).',
-    },
-    {
-      id: 'q-3',
-      number: 3,
-      title: 'أي من الصمامات التالية يفصل بين الأذين الأيسر والبطين الأيسر؟',
-      points: 10,
-      options: [
-        { id: 'opt-3-1', letter: 'أ', text: 'الصمام ثلاثي الشرفات (Tricuspid)', isCorrect: false },
-        { id: 'opt-3-2', letter: 'ب', text: 'الصمام الميترالي / التاجي (Mitral)', isCorrect: true },
-        { id: 'opt-3-3', letter: 'ج', text: 'الصمام الأبهري (Aortic)', isCorrect: false },
-        { id: 'opt-3-4', letter: 'د', text: 'الصمام الرئوي (Pulmonary)', isCorrect: false },
-      ],
-      explanation:
-        'الصمام الميترالي (Mitral Valve) هو صمام ثنائي الشرف يفصل بين الأذين الأيسر والبطين الأيسر وينظم تدفق الدم المؤكسج.',
-    },
-  ],
-};
-
 const ARABIC_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
+
+const EMPTY_QUIZ: QuizConfig = {
+  title: '',
+  questions: [],
+};
 
 export default function QuizDialog({
   open,
   onClose,
-  chapterTitle = 'الفصل الأول: أساسيات وأمراض القلب والأوعية الدموية',
+  chapterTitle = '',
+  initialQuiz = null,
   onSave,
 }: QuizDialogProps) {
   const toast = useToast();
-  const [quiz, setQuiz] = useState<QuizConfig>(INITIAL_QUIZ);
+  const [quiz, setQuiz] = useState<QuizConfig>(
+    initialQuiz && initialQuiz.questions.length ? initialQuiz : EMPTY_QUIZ
+  );
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
 
   const currentQuestion = quiz.questions[activeQuestionIndex] || quiz.questions[0];
@@ -768,39 +709,41 @@ export default function QuizDialog({
           </Box>
 
           {/* Section 3: تفسير الإجابة وملاحظات الدكتور التي تظهر للطالب */}
-          <Card
-            variant="outlined"
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: '#FFFFFF',
-              borderColor: '#E2E8F0',
-            }}
-          >
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.2 }}>
-              <Iconify icon="solar:document-text-bold" width={18} sx={{ color: '#1E293B' }} />
-              <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-                تفسير الإجابة وملاحظات الدكتور التي تظهر للطالب
-              </Typography>
-            </Stack>
-
-            <TextField
-              fullWidth
-              multiline
-              minRows={2.5}
-              placeholder="اكتب التفسير الطبي والملاحظات التوضيحية للطالب عند مراجعة إجاباته..."
-              value={currentQuestion.explanation}
-              onChange={(e) => handleExplanationChange(e.target.value)}
+          {currentQuestion && (
+            <Card
+              variant="outlined"
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1.5,
-                  fontSize: 12.5,
-                  lineHeight: 1.7,
-                  bgcolor: '#FFFFFF',
-                },
+                p: 2,
+                borderRadius: 2,
+                bgcolor: '#FFFFFF',
+                borderColor: '#E2E8F0',
               }}
-            />
-          </Card>
+            >
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.2 }}>
+                <Iconify icon="solar:document-text-bold" width={18} sx={{ color: '#1E293B' }} />
+                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+                  تفسير الإجابة وملاحظات الدكتور التي تظهر للطالب
+                </Typography>
+              </Stack>
+
+              <TextField
+                fullWidth
+                multiline
+                minRows={2.5}
+                placeholder="اكتب التفسير الطبي والملاحظات التوضيحية للطالب عند مراجعة إجاباته..."
+                value={currentQuestion.explanation}
+                onChange={(e) => handleExplanationChange(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5,
+                    fontSize: 12.5,
+                    lineHeight: 1.7,
+                    bgcolor: '#FFFFFF',
+                  },
+                }}
+              />
+            </Card>
+          )}
         </Stack>
       </DialogContent>
 

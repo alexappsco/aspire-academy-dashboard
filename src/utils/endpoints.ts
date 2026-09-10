@@ -70,4 +70,7 @@ export const endpoints = {
     update: (id: string) => `/admin/courses/${id}`,
     delete: (id: string) => `/admin/courses/${id}`,
   },
+  uploads: {
+    upload: '/admin/uploads',
+  },
 };

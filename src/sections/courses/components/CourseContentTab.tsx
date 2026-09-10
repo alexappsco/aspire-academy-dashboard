@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -18,7 +18,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import QuizDialog from './QuizDialog';
+import QuizDialog, { type QuizConfig } from './QuizDialog';
+import type { CourseCurriculum, LessonTest } from 'src/types/course';
 
 interface AttachmentItem {
   id: string;
@@ -32,6 +33,8 @@ interface AttachmentItem {
   quality?: string;
   questionsCount?: number;
   passingScore?: string;
+  url?: string;
+  quizConfig?: QuizConfig;
 }
 
 interface LessonItem {
@@ -51,98 +54,111 @@ interface ChapterItem {
   isExpanded: boolean;
 }
 
-const INITIAL_CHAPTERS_DATA: ChapterItem[] = [
-  {
-    id: 'ch-1',
-    number: 1,
-    title: 'الفصل الأول - مقدمة',
-    isExpanded: true,
-    lessons: [
-      {
-        id: 'les-1',
-        number: 1,
-        title: 'الدرس الاول',
-        attachments: [],
-      },
-      {
-        id: 'les-2',
-        number: 2,
-        title: 'الدرس الثاني',
-        attachments: [],
-      },
-      {
-        id: 'les-3',
-        number: 3,
-        title: 'الدرس الثالث: تشريح عضلة القلب والدورة الدموية',
-        subtitle: 'تم إرفاق فيديو، ملخص ومستند، وبنك أسئلة تقييمية لهذا الدرس',
-        isCompleted: true,
-        attachments: [
-          {
-            id: 'att-3-1',
-            type: 'video',
-            title: 'فيديو المحاضرة: مدخل إلى تشريح عضلة القلب.mp4',
-            badgeText: 'تم المعالجة والرفع بنجاح',
-            badgeColor: 'success',
-            metaText: 'الجودة: 1080p Full HD • الحجم: 340 MB • المدة: 24:15 دقيقة',
-          },
-          {
-            id: 'att-3-2',
-            type: 'pdf',
-            title: 'الملخص والمذكرة التوضيحية — تشريح القلب.pdf',
-            badgeText: 'جاهز للتحميل للطلاب',
-            badgeColor: 'info',
-            metaText: 'الحجم: 4.8 MB • 32 صفحة • ملف PDF إلكتروني',
-          },
-          {
-            id: 'att-3-3',
-            type: 'quiz',
-            title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
-            badgeText: 'مفعل بعد انتهاء الفيديو',
-            badgeColor: 'success',
-            metaText: 'درجة الاجتياز: 60% • 5 أسئلة تدريبية تفاعلية (MCQ)',
-            questionsCount: 5,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ch-2',
-    number: 2,
-    title: 'الفصل الأول - أساسيات',
-    isExpanded: false,
-    lessons: [
-      { id: 'les-2-1', number: 1, title: 'الدرس الأول: تخطيط القلب الكهربائي ECG', attachments: [] },
-      { id: 'les-2-2', number: 2, title: 'الدرس الثاني: أصوات القلب واللغط', attachments: [] },
-      { id: 'les-2-3', number: 3, title: 'الدرس الثالث: ضغط الدم وتنظيم الدورة', attachments: [] },
-    ],
-  },
-  {
-    id: 'ch-3',
-    number: 3,
-    title: 'الفصل الثالث: أمراض الشرايين التاجية',
-    isExpanded: false,
-    lessons: [
-      { id: 'les-3-1', number: 1, title: 'الدرس الأول: الذبحة الصدرية المستقرة وغير المستقرة', attachments: [] },
-      { id: 'les-3-2', number: 2, title: 'الدرس الثاني: احتشاء عضلة القلب الحاد STEMI', attachments: [] },
-    ],
-  },
-  {
-    id: 'ch-4',
-    number: 4,
-    title: 'الفصل الرابع: الجراحة والعناية المركزة',
-    isExpanded: false,
-    lessons: [
-      { id: 'les-4-1', number: 1, title: 'الدرس الأول: جراحة المجازة التاجية CABG', attachments: [] },
-      { id: 'les-4-2', number: 2, title: 'الدرس الثاني: بروتوكول العناية المركزة القلبية CCU', attachments: [] },
-    ],
-  },
-];
+function formatDurationSeconds(totalSeconds: number): string {
+  if (!totalSeconds) return '';
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours) return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+  if (minutes) return `${minutes}:${String(seconds).padStart(2, '0')}m`;
+  return `${seconds}s`;
+}
 
-export default function CourseContentTab() {
+const QUIZ_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
+
+let localAttachmentSeq = 0;
+function newLocalAttachmentId(prefix: string): string {
+  localAttachmentSeq += 1;
+  return `${prefix}-${Date.now()}-${localAttachmentSeq}`;
+}
+
+function mapLessonTestToQuizConfig(chapterTitle: string, test?: LessonTest): QuizConfig | undefined {
+  if (!test?.questions?.length) return undefined;
+  return {
+    title: `${chapterTitle} — ${test.id ? 'اختبار الدرس' : 'اختبار'}`,
+    questions: test.questions.map((q, qi) => ({
+      id: q.id ?? `q-${qi}`,
+      number: qi + 1,
+      title: q.text,
+      points: 10,
+      explanation: q.explanation ?? '',
+      options: (q.choices ?? []).map((c, ci) => ({
+        id: c.id ?? `opt-${qi}-${ci}`,
+        letter: QUIZ_LETTERS[ci] ?? String(ci + 1),
+        text: c.title,
+        isCorrect: !!c.isRight,
+      })),
+    })),
+  };
+}
+
+function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undefined): ChapterItem[] {
+  if (!curriculum?.chapters?.length) return [];
+  return curriculum.chapters.map((chapter, chIndex) => ({
+    id: chapter.id ?? `ch-${chapter.order}`,
+    number: chapter.order,
+    title: chapter.title,
+    isExpanded: chIndex === 0,
+    lessons: chapter.lessons.map((lesson, lsIndex) => {
+      const attachments: AttachmentItem[] = [];
+
+      if (lesson.videoUrl) {
+        attachments.push({
+          id: `video-${lesson.id ?? lsIndex}`,
+          type: 'video',
+          title: lesson.title,
+          badgeText: 'تم المعالجة والرفع بنجاح',
+          badgeColor: 'success',
+          metaText: `المدة: ${formatDurationSeconds(lesson.durationInSeconds ?? 0)}`,
+          url: lesson.videoUrl,
+        });
+      }
+
+      const questionsCount = lesson.test?.questions?.length ?? 0;
+      if (questionsCount > 0) {
+        attachments.push({
+          id: `quiz-${lesson.id ?? lsIndex}`,
+          type: 'quiz',
+          title: 'بنك أسئلة وتدريبات الدرس',
+          badgeText: 'مفعل بعد انتهاء الفيديو',
+          badgeColor: 'success',
+          metaText: `${questionsCount} أسئلة`,
+          questionsCount,
+          quizConfig: mapLessonTestToQuizConfig(chapter.title, lesson.test),
+        });
+      }
+
+      (lesson.attachmentIds ?? []).forEach((url, attIndex) => {
+        attachments.push({
+          id: `pdf-${lesson.id ?? lsIndex}-${attIndex}`,
+          type: 'pdf',
+          title: url.split('/').pop() || url,
+          badgeText: 'جاهز للتحميل',
+          badgeColor: 'info',
+          metaText: 'ملف PDF',
+        });
+      });
+
+      return {
+        id: lesson.id ?? `les-${lsIndex}`,
+        number: lesson.order,
+        title: lesson.title,
+        isCompleted: attachments.length > 0,
+        attachments,
+      };
+    }),
+  }));
+}
+
+interface CourseContentTabProps {
+  curriculum?: CourseCurriculum | null;
+}
+
+export default function CourseContentTab({ curriculum }: CourseContentTabProps) {
   const toast = useToast();
 
-  const [chapters, setChapters] = useState<ChapterItem[]>(INITIAL_CHAPTERS_DATA);
+  const initialChapters = useMemo(() => mapCurriculumToChapterItems(curriculum ?? null), [curriculum]);
+  const [chapters, setChapters] = useState<ChapterItem[]>(initialChapters);
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [newLessonTitles, setNewLessonTitles] = useState<Record<string, string>>({});
   const [allExpanded, setAllExpanded] = useState<boolean>(false);
@@ -150,8 +166,10 @@ export default function CourseContentTab() {
   // Dialogs
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
   const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('الفصل الأول - مقدمة');
+  const [activeQuizConfig, setActiveQuizConfig] = useState<QuizConfig | null>(null);
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [previewVideoTitle, setPreviewVideoTitle] = useState('');
+  const [previewVideoUrl, setPreviewVideoUrl] = useState('');
 
   // Editing lesson title state
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
@@ -159,9 +177,23 @@ export default function CourseContentTab() {
 
   // Total stats calculations
   const totalChapters = chapters.length;
-  const totalLessons = chapters.reduce((acc, ch) => acc + ch.lessons.length, 0);
-  const totalQuizzes = 8;
-  const totalFiles = 12;
+  const totalVideoLessons = chapters.reduce(
+    (acc, ch) => acc + ch.lessons.filter((l) => l.attachments.some((att) => att.type === 'video')).length,
+    0
+  );
+  const totalQuizzes = chapters.reduce(
+    (acc, ch) => acc + ch.lessons.filter((l) => l.attachments.some((att) => att.type === 'quiz')).length,
+    0
+  );
+  const totalFiles = chapters.reduce(
+    (acc, ch) => acc + ch.lessons.filter((l) => l.attachments.some((att) => att.type === 'pdf')).length,
+    0
+  );
+  const totalDurationSeconds = (curriculum?.chapters ?? []).reduce(
+    (acc, ch) => acc + (ch.lessons ?? []).reduce((sum, l) => sum + (l.durationInSeconds ?? 0), 0),
+    0
+  );
+  const totalDurationText = formatDurationSeconds(totalDurationSeconds);
 
   // Toggle expand all
   const handleToggleExpandAll = () => {
@@ -276,15 +308,14 @@ export default function CourseContentTab() {
   ) => {
     if (type === 'quiz') {
       const chapter = chapters.find((c) => c.id === chapterId);
-      setActiveChapterForQuiz(chapter ? chapter.title : 'الفصل الأول');
-      setQuizDialogOpen(true);
+      handleOpenQuiz(chapter ? chapter.title : 'الفصل الأول');
       return;
     }
 
     const newAtt: AttachmentItem =
       type === 'video'
         ? {
-            id: `att-${Date.now()}`,
+            id: newLocalAttachmentId('video'),
             type: 'video',
             title: 'فيديو المحاضرة: شرح تفصيلي.mp4',
             badgeText: 'تم المعالجة والرفع بنجاح',
@@ -292,7 +323,7 @@ export default function CourseContentTab() {
             metaText: 'الجودة: 1080p Full HD • الحجم: 340 MB • المدة: 24:15 دقيقة',
           }
         : {
-            id: `att-${Date.now()}`,
+            id: newLocalAttachmentId('pdf'),
             type: 'pdf',
             title: 'المستند التوضيحي والملخص.pdf',
             badgeText: 'جاهز للتحميل للطلاب',
@@ -318,9 +349,16 @@ export default function CourseContentTab() {
     toast.success(`تمت إضافة ${type === 'video' ? 'الفيديو' : 'المستند'} بنجاح`);
   };
 
-  const handleOpenVideoPreview = (title: string) => {
+  const handleOpenVideoPreview = (title: string, url?: string) => {
     setPreviewVideoTitle(title);
+    setPreviewVideoUrl(url ?? '');
     setVideoPreviewOpen(true);
+  };
+
+  const handleOpenQuiz = (chapterTitle: string, quizConfig?: QuizConfig) => {
+    setActiveChapterForQuiz(chapterTitle);
+    setActiveQuizConfig(quizConfig ?? null);
+    setQuizDialogOpen(true);
   };
 
   return (
@@ -381,7 +419,7 @@ export default function CourseContentTab() {
           >
             <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 18, height: 18 }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-              {totalLessons > 0 ? 24 : 0} درس فيديو
+              {totalVideoLessons} درس فيديو
             </Typography>
           </Box>
 
@@ -441,7 +479,7 @@ export default function CourseContentTab() {
           >
             <Iconify icon="solar:clock-circle-bold" width={18} sx={{ color: '#64748B' }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: '#475569' }}>
-              إجمالي المدة: 18 ساعة و45 دقيقة
+              إجمالي المدة: {totalDurationText || '0:00'}
             </Typography>
           </Box>
         </Stack>
@@ -627,6 +665,7 @@ export default function CourseContentTab() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <IconButton
+                      component="span"
                       size="small"
                       onClick={(e) => handleDeleteChapter(chapter.id, e)}
                       sx={{
@@ -920,7 +959,7 @@ export default function CourseContentTab() {
                                             <Button
                                               size="small"
                                               variant="contained"
-                                              onClick={() => handleOpenVideoPreview(att.title)}
+                                              onClick={() => handleOpenVideoPreview(att.title, att.url)}
                                               sx={{
                                                 bgcolor: '#1C252E',
                                                 color: '#FFFFFF',
@@ -970,10 +1009,7 @@ export default function CourseContentTab() {
                                               <Button
                                                 size="small"
                                                 variant="contained"
-                                                onClick={() => {
-                                                  setActiveChapterForQuiz(chapter.title);
-                                                  setQuizDialogOpen(true);
-                                                }}
+                                                onClick={() => handleOpenQuiz(chapter.title, att.quizConfig)}
                                                 sx={{
                                                   bgcolor: '#1C252E',
                                                   color: '#FFFFFF',
@@ -995,10 +1031,7 @@ export default function CourseContentTab() {
                                               <Button
                                                 size="small"
                                                 variant="outlined"
-                                                onClick={() => {
-                                                  setActiveChapterForQuiz(chapter.title);
-                                                  setQuizDialogOpen(true);
-                                                }}
+                                                onClick={() => handleOpenQuiz(chapter.title, att.quizConfig)}
                                                 sx={{
                                                   borderColor: '#10B981',
                                                   color: '#10B981',
@@ -1178,11 +1211,14 @@ export default function CourseContentTab() {
       </Card>
 
       {/* 4. Quiz Dialog Modal */}
-      <QuizDialog
-        open={quizDialogOpen}
-        onClose={() => setQuizDialogOpen(false)}
-        chapterTitle={activeChapterForQuiz}
-      />
+      {quizDialogOpen && (
+        <QuizDialog
+          open={quizDialogOpen}
+          onClose={() => setQuizDialogOpen(false)}
+          chapterTitle={activeChapterForQuiz}
+          initialQuiz={activeQuizConfig}
+        />
+      )}
 
       {/* 5. Video Preview Dialog Modal */}
       <Dialog
@@ -1203,36 +1239,52 @@ export default function CourseContentTab() {
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ px: 2.5, py: 2 }}>
-          <Box
-            sx={{
-              height: 380,
-              bgcolor: '#1E293B',
-              borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2,
-            }}
-          >
+          {previewVideoUrl ? (
+            <Box
+              component="video"
+              src={previewVideoUrl}
+              controls
+              autoPlay
+              sx={{
+                width: '100%',
+                height: 380,
+                borderRadius: 2,
+                bgcolor: '#000000',
+                display: 'block',
+              }}
+            />
+          ) : (
             <Box
               sx={{
-                width: 68,
-                height: 68,
-                borderRadius: '50%',
-                bgcolor: '#0284C7',
+                height: 380,
+                bgcolor: '#1E293B',
+                borderRadius: 2,
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 0 24px rgba(2, 132, 199, 0.5)',
+                gap: 2,
               }}
             >
-              <Iconify icon="solar:play-bold" width={34} sx={{ color: '#FFFFFF' }} />
+              <Box
+                sx={{
+                  width: 68,
+                  height: 68,
+                  borderRadius: '50%',
+                  bgcolor: '#0284C7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 24px rgba(2, 132, 199, 0.5)',
+                }}
+              >
+                <Iconify icon="solar:play-bold" width={34} sx={{ color: '#FFFFFF' }} />
+              </Box>
+              <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
+                معاينة تشغيل الفيديو (1080p Full HD)
+              </Typography>
             </Box>
-            <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
-              معاينة تشغيل الفيديو (1080p Full HD)
-            </Typography>
-          </Box>
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 2.5, pb: 2 }}>
           <Button
