@@ -1446,6 +1446,116 @@
       "btn_accept": "Accept",
       "btn_reject": "Reject"
     }
+  },
+  "Reports": {
+    "title": "Reports",
+    "subtitle": "Comprehensive overview of platform, student, instructor, course, enrollment, and payment performance.",
+    "filter": "Last 30 Days",
+    "metrics": {
+      "total_students": "Total Students",
+      "total_instructors": "Total Instructors",
+      "total_courses": "Total Courses",
+      "published_courses": "Published Courses",
+      "enrollment_requests": "Enrollment Requests",
+      "accepted_revenue": "Accepted Revenue",
+      "vs_previous": "vs previous period",
+      "within_year": "Within the year",
+      "published_of": "of {total} courses ({percent}%)"
+    },
+    "attention": {
+      "badge": "Needs Your Attention",
+      "pending_tasks": "{count} Pending Tasks",
+      "courses_pending": {
+        "count": "24",
+        "title": "Courses Pending Review",
+        "description": "Courses submitted by lecturers requiring content review before publishing to students.",
+        "action": "Review Courses"
+      },
+      "enrollments_pending": {
+        "count": "18",
+        "title": "Enrollment Requests Under Review",
+        "description": "Enrollment requests awaiting bank transfer receipt review and confirmation.",
+        "action": "Review Requests"
+      },
+      "rejected_courses": {
+        "count": "7",
+        "title": "Rejected Courses",
+        "description": "Courses requiring follow-up with lecturers to complete approvals.",
+        "action": "View Courses"
+      }
+    },
+    "analytics": {
+      "student_growth": {
+        "title": "Student Registration Growth",
+        "subtitle": "{count} new students during the selected period",
+        "growth": "+{percent}% vs previous period",
+        "filter": "Last 30 Days"
+      },
+      "course_status": {
+        "title": "Training Courses Status",
+        "subtitle": "Total Courses: {total} courses",
+        "center_label": "{total} Recorded Courses",
+        "legend": {
+          "published": "Published",
+          "under_review": "Under Admin Review",
+          "rejected": "Rejected / Needs Edit"
+        }
+      }
+    },
+    "financial": {
+      "title": "Enrollment Requests & Financial Collections",
+      "subtitle": "Summary of bank transfer receipt review and direct unencrypted bank transfer operations.",
+      "total_requests": "Total Received Requests",
+      "accepted_amount": "Total Accepted & Due Amount",
+      "accepted_sub": "Bank receipts approved successfully",
+      "rejected_amount": "Rejected / Mismatched Receipts",
+      "rejected_sub": "Duplicate or incomplete receipts",
+      "review_amount": "Amounts Under Audit Review",
+      "review_sub": "{count} receipts awaiting account matching",
+      "weekly_collections": "Weekly Collections (Last 4 Weeks)",
+      "accuracy": "Verification Accuracy",
+      "currency": "EGP"
+    },
+    "performance": {
+      "top_courses": {
+        "title": "Top Performing Courses",
+        "subtitle": "Ranked by number of enrolled students and completion rate",
+        "view_report": "View Report",
+        "columns": {
+          "rank": "#",
+          "course_and_professor": "Course & Professor",
+          "instructor": "Instructor",
+          "students": "Students",
+          "completion": "Completion Rate",
+          "rating": "Rating"
+        }
+      },
+      "instructors": {
+        "title": "Instructor Performance",
+        "subtitle": "Most enrolled and reviewed instructors",
+        "columns": {
+          "instructor": "Instructor",
+          "courses_count": "Courses",
+          "students": "Students",
+          "rating": "Rating",
+          "status": "Status"
+        },
+        "published_count": "{count} Published"
+      }
+    },
+    "academic": {
+      "title": "Comprehensive Academic Structure",
+      "subtitle": "Automatic Updates",
+      "universities": "Universities",
+      "universities_sub": "Local Universities",
+      "countries": "Certified Countries",
+      "countries_sub": "Regional Countries",
+      "subjects": "Academic Subjects",
+      "subjects_sub": "Specialized Courses",
+      "colleges": "Registered Colleges",
+      "colleges_sub": "Medicine & Pharmacy",
+      "manage_btn": "Manage & Edit Academic Structure"
+    }
   }
 }
 

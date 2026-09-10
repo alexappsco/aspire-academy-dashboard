@@ -14,4 +14,5 @@ export * from './banners';
 export * from './support';
 export * from './dashboard';
 export * from './orders';
+export * from './reports';
 export * from './students';
