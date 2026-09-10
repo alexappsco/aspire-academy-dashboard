@@ -57,6 +57,12 @@ export type Instructor = {
   university?: University | null;
   verifiedAt?: string | null;
   rejectedAt?: string | null;
+  ratingAverage?: number;
+  ratingCount?: number;
+  coursesCount?: number;
+  activeCoursesCount?: number;
+  studentsCount?: number;
+  totalSales?: number;
 };
 
 export type InstructorListResponse = {
@@ -171,6 +177,107 @@ export interface InstructorSubscriptionRequest {
   orderNumber: string;
   amount: string;
 }
+
+// ==========================================
+// API Response Types (matching backend)
+// ==========================================
+
+export type InstructorCourseApiResponse = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  type: string;
+  price: number;
+  oldPrice: number;
+  currencyId: string;
+  currency: Currency | null;
+  specializationId: string;
+  specialization: { id: string; name: string } | null;
+  facultyId: string;
+  faculty: { id: string; name: string } | null;
+  studyMaterialId: string;
+  studyMaterial: { id: string; name: string } | null;
+  instructorId: string;
+  instructor: { id: string; name: string; title: string; imageUrl: string | null } | null;
+  fieldId: string;
+  field: { id: string; name: string; imageUrl: string } | null;
+  status: string;
+  rejectionReason: string | null;
+  accessDurationInDays: number;
+  reviewedAt: string | null;
+  lastUpdatedAt: string;
+  ratingAverage: number;
+  ratingCount: number;
+  studentsCount: number;
+  lessonCount: number;
+  totalDurationInSeconds: number;
+  objectives: { id: string; text: string; order: number }[];
+  curriculum: unknown;
+};
+
+export type InstructorCourseListResponse = {
+  totalCount: number;
+  items: InstructorCourseApiResponse[];
+};
+
+export type InstructorOrderApiResponse = {
+  id: string;
+  userId: string;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  status: string;
+  subtotal: number;
+  vatAmount: number;
+  discountAmount: number;
+  total: number;
+  appliedCouponCode: string | null;
+  receiptUrl: string | null;
+  receiptVerified: boolean;
+  items: {
+    id: string;
+    price: number;
+    courseId: string;
+    courseTitle: string;
+    packageId: string | null;
+    packageName: string | null;
+  }[];
+  creationTime: string;
+};
+
+export type InstructorOrderListResponse = {
+  totalCount: number;
+  items: InstructorOrderApiResponse[];
+};
+
+export type InstructorReviewApiResponse = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentImageUrl: string | null;
+  courseId: string;
+  courseTitle: string;
+  instructorRate: number;
+  instructorComment: string;
+  courseRate: number;
+  courseComment: string;
+  createdAt: string;
+};
+
+export type InstructorReviewListResponse = {
+  totalCount: number;
+  items: InstructorReviewApiResponse[];
+};
+
+export type GetInstructorSubDataParams = {
+  SkipCount?: number;
+  MaxResultCount?: number;
+};
+
+// ==========================================
+// Legacy UI Types (kept for compatibility)
+// ==========================================
 
 export interface InstructorReviewItem {
   id: string;

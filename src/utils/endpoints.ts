@@ -21,6 +21,9 @@ export const endpoints = {
     delete: (id: string) => `/admin/instructors/${id}`,
     verify: (id: string) => `/admin/instructors/${id}/verify`,
     reject: (id: string) => `/admin/instructors/${id}/reject`,
+    reviews: (id: string) => `/admin/instructors/${id}/reviews`,
+    orders: (id: string) => `/admin/instructors/${id}/orders`,
+    courses: (id: string) => `/admin/instructors/${id}/courses`,
   },
   universities: {
     list: '/admin/universities',

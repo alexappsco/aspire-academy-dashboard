@@ -11,6 +11,10 @@ import type {
   UniversityListResponse,
   CreateInstructorPayload,
   UpdateInstructorPayload,
+  InstructorReviewListResponse,
+  InstructorOrderListResponse,
+  InstructorCourseListResponse,
+  GetInstructorSubDataParams,
 } from 'src/types/instructor';
 
 function buildQueryString(params: Record<string, unknown>): string {
@@ -205,6 +209,74 @@ export async function rejectInstructor(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to reject instructor',
+    };
+  }
+}
+
+// ── Instructor Sub-resources (reviews, orders, courses) ─────
+
+export async function getInstructorReviews(
+  id: string,
+  params: GetInstructorSubDataParams = {}
+): Promise<ApiSingleResponse<InstructorReviewListResponse>> {
+  try {
+    const qs = buildQueryString(params as Record<string, unknown>);
+    const res = await getData<InstructorReviewListResponse>(`${endpoints.instructors.reviews(id)}${qs}`);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data as InstructorReviewListResponse };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to load reviews';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load reviews',
+    };
+  }
+}
+
+export async function getInstructorOrders(
+  id: string,
+  params: GetInstructorSubDataParams = {}
+): Promise<ApiSingleResponse<InstructorOrderListResponse>> {
+  try {
+    const qs = buildQueryString(params as Record<string, unknown>);
+    const res = await getData<InstructorOrderListResponse>(`${endpoints.instructors.orders(id)}${qs}`);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data as InstructorOrderListResponse };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to load orders';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load orders',
+    };
+  }
+}
+
+export async function getInstructorCourses(
+  id: string,
+  params: GetInstructorSubDataParams = {}
+): Promise<ApiSingleResponse<InstructorCourseListResponse>> {
+  try {
+    const qs = buildQueryString(params as Record<string, unknown>);
+    const res = await getData<InstructorCourseListResponse>(`${endpoints.instructors.courses(id)}${qs}`);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data as InstructorCourseListResponse };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to load courses';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load courses',
     };
   }
 }
