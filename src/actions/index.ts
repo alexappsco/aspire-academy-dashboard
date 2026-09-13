@@ -17,3 +17,4 @@ export * from './orders';
 export * from './reports';
 export * from './students';
 export * from './faqs';
+export * from './pages';

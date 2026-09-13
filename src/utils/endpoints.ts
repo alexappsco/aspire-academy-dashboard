@@ -118,4 +118,11 @@ export const endpoints = {
     update: (id: string) => `/admin/faqs/${id}`,
     delete: (id: string) => `/admin/faqs/${id}`,
   },
+  pages: {
+    list: '/admin/pages',
+    details: (slug: string) => `/admin/pages/${slug}`,
+    create: '/admin/pages',
+    update: (slug: string) => `/admin/pages/${slug}`,
+    delete: (slug: string) => `/admin/pages/${slug}`,
+  },
 };
