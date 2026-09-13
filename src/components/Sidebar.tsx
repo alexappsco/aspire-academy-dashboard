@@ -166,6 +166,10 @@ const sidebarItems: SidebarItem[] = [
         path: "/about-us",
       },
       {
+        key: "privacy_policy",
+        path: "/privacy-policy",
+      },
+      {
         key: "common_questions",
         path: "/common-questions",
       },
@@ -230,18 +234,15 @@ function SidebarItemButton({
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
 
-  const isCurrentActive = (
-    hasChildren
-      ? item.children!.some((child) => checkIsActive(child.path, currentPathname))
-      : checkIsActive(item.path, currentPathname)
-  );
+  const isCurrentActive = hasChildren
+    ? item.children!.some((child) => checkIsActive(child.path, currentPathname))
+    : checkIsActive(item.path, currentPathname);
 
   const isCurrentActiveLeaf = isCurrentActive && !hasChildren;
   const isActiveGroup = isCurrentActive && hasChildren;
 
-  const itemColor = isCurrentActiveLeaf || isActiveGroup
-    ? COLORS.activeIcon
-    : COLORS.text;
+  const itemColor =
+    isCurrentActiveLeaf || isActiveGroup ? COLORS.activeIcon : COLORS.text;
 
   const handleClick = () => {
     if (isExpandable) {
@@ -263,7 +264,9 @@ function SidebarItemButton({
         px: 1.5,
         alignItems: "center",
         bgcolor: isActiveGroup ? COLORS.activeBgSoft : "transparent",
-        boxShadow: isCurrentActiveLeaf ? "0 8px 18px rgba(27, 131, 84, 0.12)" : "none",
+        boxShadow: isCurrentActiveLeaf
+          ? "0 8px 18px rgba(27, 131, 84, 0.12)"
+          : "none",
         transition: "background-color 0.2s ease, box-shadow 0.2s ease",
         "&::before": {
           content: '""',
@@ -302,8 +305,11 @@ function SidebarItemButton({
               height: 5,
               borderRadius: "50%",
               bgcolor: isCurrentActiveLeaf ? COLORS.activeIcon : "#94A3B8",
-              boxShadow: isCurrentActiveLeaf ? "0 0 0 4px rgba(27, 131, 84, 0.14)" : "none",
-              transition: "transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
+              boxShadow: isCurrentActiveLeaf
+                ? "0 0 0 4px rgba(27, 131, 84, 0.14)"
+                : "none",
+              transition:
+                "transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
               transform: isCurrentActiveLeaf ? "scale(1.45)" : "scale(1)",
             }}
           />
@@ -376,7 +382,10 @@ function SidebarItemButton({
   return (
     <>
       {item.path && !hasChildren ? (
-        <Link href={item.path} style={{ textDecoration: "none", color: "inherit" }}>
+        <Link
+          href={item.path}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
           {buttonContent}
         </Link>
       ) : (
@@ -420,7 +429,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   const toggleExpand = useCallback((key: string) => {
     setExpandedItems((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
     );
   }, []);
 
@@ -463,7 +472,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           })}
         </List>
       </Box>
-
     </Box>
   );
 

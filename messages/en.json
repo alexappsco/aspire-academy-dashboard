@@ -1,5 +1,5 @@
 {
-   "Metadata": {
+  "Metadata": {
     "login": "Login"
   },
   "Sidebar": {
@@ -13,6 +13,7 @@
     "notifications": "Notifications",
     "banners": "Banners",
     "common_questions": "Common Questions",
+    "privacy_policy": "Privacy Policy",
     "categories": "Fields Management",
     "universities": "Universities",
     "college": "College",
@@ -875,7 +876,9 @@
     "save_changes": "Save Changes",
     "arabic_text": "Arabic Text",
     "english_text": "English Text",
-    "save_success": "Changes saved successfully"
+    "save_success": "Changes saved successfully",
+    "fetch_error": "Failed to load page",
+    "save_error": "Failed to save changes"
   },
   "TermsConditions": {
     "title": "Terms & Conditions",
@@ -889,7 +892,18 @@
     "save_changes": "Save Changes",
     "arabic_text": "Arabic Text",
     "english_text": "English Text",
-    "save_success": "Changes saved successfully"
+    "save_success": "Changes saved successfully",
+    "fetch_error": "Failed to load page",
+    "save_error": "Failed to save changes"
+  },
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "save_changes": "Save Changes",
+    "arabic_text": "Arabic Text",
+    "english_text": "English Text",
+    "save_success": "Changes saved successfully",
+    "fetch_error": "Failed to load page",
+    "save_error": "Failed to save changes"
   },
   "Countries": {
     "title": "Countries",
@@ -1558,5 +1572,3 @@
     }
   }
 }
-
-

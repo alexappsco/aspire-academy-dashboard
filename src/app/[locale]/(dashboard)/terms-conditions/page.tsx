@@ -1,5 +1,10 @@
-import ContentPageView from '@/sections/ContentPages/ContentPageView';
+import ContentPageView from "@/sections/ContentPages/ContentPageView";
 
 export default function TermsConditionsPage() {
-  return <ContentPageView namespace="TermsAndConditions" />;
+  return (
+    <ContentPageView
+      namespace="TermsAndConditions"
+      slug="terms_and_conditions"
+    />
+  );
 }

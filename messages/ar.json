@@ -21,6 +21,7 @@
     "notifications": "الإشعارات",
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
+    "privacy_policy": "سياسة الخصوصية",
     "categories": "ادارة المجالات",
     "universities": "الجامعات",
     "college": "الكليات",
@@ -878,7 +879,9 @@
     "save_changes": "حفظ التغييرات",
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
-    "save_success": "تم حفظ التغييرات بنجاح"
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "fetch_error": "فشل تحميل الصفحة",
+    "save_error": "فشل حفظ التغييرات"
   },
   "TermsConditions": {
     "title": "الشروط والأحكام",
@@ -892,7 +895,18 @@
     "save_changes": "حفظ التغييرات",
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
-    "save_success": "تم حفظ التغييرات بنجاح"
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "fetch_error": "فشل تحميل الصفحة",
+    "save_error": "فشل حفظ التغييرات"
+  },
+  "PrivacyPolicy": {
+    "title": "سياسة الخصوصية",
+    "save_changes": "حفظ التغييرات",
+    "arabic_text": "النص بالعربي",
+    "english_text": "النص بالانجليزي",
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "fetch_error": "فشل تحميل الصفحة",
+    "save_error": "فشل حفظ التغييرات"
   },
   "Countries": {
     "title": "الدول",
@@ -1561,5 +1575,3 @@
     }
   }
 }
-
-
