@@ -884,21 +884,27 @@
     "save_changes": "حفظ التغييرات",
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
-    "save_success": "تم حفظ التغييرات بنجاح"
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "save_error": "حدث خطأ أثناء حفظ التغييرات",
+    "fetch_error": "حدث خطأ أثناء تحميل البيانات"
   },
   "TermsConditions": {
     "title": "الشروط والأحكام",
     "save_changes": "حفظ التغييرات",
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
-    "save_success": "تم حفظ التغييرات بنجاح"
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "save_error": "حدث خطأ أثناء حفظ التغييرات",
+    "fetch_error": "حدث خطأ أثناء تحميل البيانات"
   },
   "AboutUs": {
     "title": "من نحن",
     "save_changes": "حفظ التغييرات",
     "arabic_text": "النص بالعربي",
     "english_text": "النص بالانجليزي",
-    "save_success": "تم حفظ التغييرات بنجاح"
+    "save_success": "تم حفظ التغييرات بنجاح",
+    "save_error": "حدث خطأ أثناء حفظ التغييرات",
+    "fetch_error": "حدث خطأ أثناء تحميل البيانات"
   },
   "Countries": {
     "title": "الدول",
