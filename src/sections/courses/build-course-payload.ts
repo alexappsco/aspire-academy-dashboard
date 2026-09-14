@@ -1,5 +1,13 @@
 import { COURSE_TYPE_MAP } from './types';
-import type { Chapter, CourseFormValues, CoursePayloadMode } from './types';
+import type { Chapter, CourseFormValues, CoursePayloadMode, LessonDoc } from './types';
+
+const GUID_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function normalizeAttachmentIds(documents: LessonDoc[]): string[] {
+  return documents
+    .map((doc) => doc.attachmentId || doc.url)
+    .filter((value): value is string => typeof value === 'string' && GUID_UUID_PATTERN.test(value));
+}
 
 function buildObjectives(objectives: CourseFormValues['learningObjectives']) {
   return objectives.map((objective, index) => ({
@@ -43,7 +51,7 @@ function buildCurriculum(chapters: Chapter[]) {
           durationInSeconds: videoUrl ? 600 : 0,
           videoUrl,
           isFreePreview: false,
-          attachmentIds: lesson.documents.map((doc) => doc.url),
+          attachmentIds: normalizeAttachmentIds(lesson.documents),
           test,
         };
       }),

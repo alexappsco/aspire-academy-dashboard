@@ -242,6 +242,11 @@ export default function CoursesView() {
       onClick: (row: FormattedCourse) => router.push(`/courses/${row.id}`),
     },
     {
+      label: t('actions.edit'),
+      icon: <Iconify icon="solar:pen-bold" />,
+      onClick: (row: FormattedCourse) => router.push(`/courses/${row.id}/edit`),
+    },
+    {
       label: t('actions.delete'),
       icon: <Iconify icon="solar:trash-bin-trash-bold" />,
       sx: { color: 'error.main' },

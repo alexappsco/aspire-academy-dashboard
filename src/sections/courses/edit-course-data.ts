@@ -37,7 +37,12 @@ export function mapLessonTestToLessonQuiz(test: LessonTest, fallbackTitle = 'ب�
   };
 }
 
-export function mapCurriculumToFormChapters(curriculum: CourseCurriculum | null | undefined): Chapter[] {
+export type ResolvedAttachment = { name: string; url: string };
+
+export function mapCurriculumToFormChapters(
+  curriculum: CourseCurriculum | null | undefined,
+  resolvedAttachments: Record<string, ResolvedAttachment> = {}
+): Chapter[] {
   return (curriculum?.chapters ?? []).map((chapter, chapterIndex) => ({
     id: chapter.id ?? `ch-${chapterIndex}`,
     title: chapter.title,
@@ -49,16 +54,23 @@ export function mapCurriculumToFormChapters(curriculum: CourseCurriculum | null 
       videoUrl: lesson.videoUrl,
       videoName: lesson.videoUrl ? lesson.title : undefined,
       quiz: lesson.test?.questions?.length ? mapLessonTestToLessonQuiz(lesson.test) : null,
-      documents: (lesson.attachmentIds ?? []).map((url, docIndex) => ({
-        id: `doc-${lesson.id ?? lessonIndex}-${docIndex}`,
-        name: url.split('/').pop() || url,
-        url,
-      })),
+      documents: (lesson.attachmentIds ?? []).map((attId, docIndex) => {
+        const resolved = resolvedAttachments[attId];
+        return {
+          id: `doc-${lesson.id ?? lessonIndex}-${docIndex}`,
+          attachmentId: attId,
+          name: resolved?.name || attId,
+          url: resolved?.url || attId,
+        };
+      }),
     })),
   }));
 }
 
-export function mapCurriculumToRichChapters(curriculum: CourseCurriculum | null | undefined): RichChapter[] {
+export function mapCurriculumToRichChapters(
+  curriculum: CourseCurriculum | null | undefined,
+  resolvedAttachments: Record<string, ResolvedAttachment> = {}
+): RichChapter[] {
   return (curriculum?.chapters ?? []).map((chapter, chapterIndex) => ({
     id: chapter.id ?? `ch-${chapterIndex}`,
     number: chapter.order ?? chapterIndex + 1,
@@ -92,14 +104,16 @@ export function mapCurriculumToRichChapters(curriculum: CourseCurriculum | null 
         });
       }
 
-      (lesson.attachmentIds ?? []).forEach((url, attIndex) => {
+      (lesson.attachmentIds ?? []).forEach((attId, attIndex) => {
+        const resolved = resolvedAttachments[attId];
         attachments.push({
           id: `pdf-${lesson.id ?? lessonIndex}-${attIndex}`,
           type: 'pdf',
-          title: url.split('/').pop() || url,
+          attachmentId: attId,
+          title: resolved?.name || attId,
           badgeText: 'جاهز للتحميل',
           metaText: 'ملف PDF',
-          url,
+          url: resolved?.url || attId,
           isUploading: false,
         });
       });

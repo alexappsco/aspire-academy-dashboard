@@ -219,6 +219,7 @@ export interface LessonDoc {
   id: string;
   name: string;
   url: string;
+  attachmentId?: string;
 }
 
 export interface LessonQuizOption {
@@ -263,6 +264,7 @@ export interface AttachmentItem {
   metaText: string;
   questionsCount?: number;
   url?: string;
+  attachmentId?: string;
   isUploading?: boolean;
   quiz?: LessonQuiz;
 }
