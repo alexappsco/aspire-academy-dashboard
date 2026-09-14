@@ -76,6 +76,10 @@ export const endpoints = {
   uploads: {
     upload: '/admin/uploads',
   },
+  attachments: {
+    upload: '/admin/attachments',
+    details: (id: string) => `/admin/attachments/${id}`,
+  },
   banners: {
     list: '/admin/banners',
     details: (id: string) => `/admin/banners/${id}`,

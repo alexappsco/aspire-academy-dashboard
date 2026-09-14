@@ -19,7 +19,12 @@ export function mapRichToFormChapters(rich: RichChapter[]): Chapter[] {
         videoName: video?.title,
         documents: les.attachments
           .filter((a) => a.type === 'pdf' && a.url)
-          .map((a) => ({ id: a.id, name: a.title, url: a.url as string })),
+          .map((a) => ({
+            id: a.id,
+            name: a.title,
+            url: a.url as string,
+            attachmentId: a.attachmentId,
+          })),
         quiz,
       };
     }),
