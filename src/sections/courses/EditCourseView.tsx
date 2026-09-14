@@ -13,13 +13,16 @@ import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
-import { getCourseById } from 'src/actions/courses';
+import { getCourseById, getAttachment } from 'src/actions/courses';
 import type { CourseDto } from 'src/types/course';
 import { useCourseForm } from './use-course-form';
 import CourseStepper from './components/CourseStepper';
 import BasicInfoStep from './components/BasicInfoStep';
 import ChaptersStep from './components/ChaptersStep';
-import { mapCurriculumToRichChapters } from './edit-course-data';
+import {
+  mapCurriculumToRichChapters,
+  type ResolvedAttachment,
+} from './edit-course-data';
 
 export default function EditCourseView({ id }: { id: string }) {
   const t = useTranslations('CreateCourse');
@@ -29,6 +32,11 @@ export default function EditCourseView({ id }: { id: string }) {
   const router = useRouter();
 
   const [course, setCourse] = useState<CourseDto | null>(null);
+  const [resolvedAttachments, setResolvedAttachments] = useState<Record<
+    string,
+    ResolvedAttachment
+  >>({});
+  const [attachmentsReady, setAttachmentsReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -50,6 +58,47 @@ export default function EditCourseView({ id }: { id: string }) {
       active = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!course) return;
+
+    const ids = new Set<string>();
+    course.curriculum?.chapters?.forEach((ch) =>
+      (ch.lessons ?? []).forEach((l) =>
+        (l.attachmentIds ?? []).forEach((attId) => ids.add(attId))
+      )
+    );
+    const idList = [...ids];
+
+    let active = true;
+    (async () => {
+      const entries = idList.length
+        ? await Promise.all(
+            idList.map((attId) =>
+              Promise.race<Record<string, ResolvedAttachment>>([
+                getAttachment(attId)
+                  .then((r) =>
+                    r.success && r.data
+                      ? { [attId]: { name: r.data.name, url: r.data.url } }
+                      : {}
+                  )
+                  .catch(() => ({})),
+                new Promise<Record<string, ResolvedAttachment>>((resolve) =>
+                  setTimeout(() => resolve({}), 5000)
+                ),
+              ])
+            )
+          )
+        : [];
+      if (!active) return;
+      setResolvedAttachments(Object.assign({}, ...entries));
+      setAttachmentsReady(true);
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [course]);
 
   const {
     activeStep,
@@ -78,8 +127,8 @@ export default function EditCourseView({ id }: { id: string }) {
   } = useCourseForm({ course });
 
   const initialRichChapters = useMemo(
-    () => mapCurriculumToRichChapters(course?.curriculum),
-    [course]
+    () => mapCurriculumToRichChapters(course?.curriculum, resolvedAttachments),
+    [course, resolvedAttachments]
   );
 
   if (loading) {
@@ -170,12 +219,26 @@ export default function EditCourseView({ id }: { id: string }) {
           loadingStudyMaterials={loadingStudyMaterials}
           imageRequired={false}
         />
-      ) : (
+      ) : attachmentsReady ? (
         <ChaptersStep
           chapters={formValues.chapters}
           initialChapters={initialRichChapters}
           onChaptersChange={handleChaptersChange}
         />
+      ) : (
+        <Card
+          sx={{
+            borderRadius: 2.5,
+            p: 4,
+            bgcolor: '#FFFFFF',
+            border: '1px solid #F1F3F5',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <CircularProgress />
+        </Card>
       )}
 
       <Card

@@ -4,6 +4,7 @@ import { getData, postData, editData, deleteData } from 'src/utils/crud-fetch-ap
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type { CoursesListResponse, GetCoursesParams, CourseDto } from 'src/types/course';
+import type { AttachmentDto } from 'src/types/attachment';
 
 export async function getCourses(
   params?: GetCoursesParams
@@ -74,6 +75,20 @@ export async function updateCourse(
   id: string,
   formData: FormData
 ): Promise<ApiSingleResponse<CourseDto>> {
+  const curriculumJson = formData.get('CurriculumJson');
+  if (typeof curriculumJson === 'string') {
+    try {
+      JSON.parse(curriculumJson);
+      console.log('[updateCourse] CurriculumJson OK, length:', curriculumJson.length);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      console.error('[updateCourse] CurriculumJson INVALID JSON:', reason);
+      return {
+        success: false,
+        error: `curriculum is not valid JSON before sending: ${reason}`,
+      };
+    }
+  }
   try {
     const res = await editData<CourseDto, FormData>(endpoints.courses.update(id), 'PUT', formData);
     if ('success' in res && res.success) {
@@ -123,6 +138,45 @@ export async function uploadFile(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to upload file',
+    };
+  }
+}
+
+export async function uploadAttachment(
+  file: File,
+  name: string
+): Promise<ApiSingleResponse<AttachmentDto>> {
+  try {
+    const formData = new FormData();
+    formData.append('File', file);
+    formData.append('Name', name);
+    formData.append('Type', 'Document');
+    const res = await postData<AttachmentDto, FormData>(endpoints.attachments.upload, formData);
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to upload attachment';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to upload attachment',
+    };
+  }
+}
+
+export async function getAttachment(id: string): Promise<ApiSingleResponse<AttachmentDto>> {
+  try {
+    const res = await getData<AttachmentDto>(endpoints.attachments.details(id));
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to load attachment';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load attachment',
     };
   }
 }

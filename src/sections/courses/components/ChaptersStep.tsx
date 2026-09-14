@@ -18,7 +18,7 @@ import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { uploadFile } from 'src/actions/courses';
+import { uploadFile, uploadAttachment } from 'src/actions/courses';
 import QuizDialog from './QuizDialog';
 import { EMPTY_RICH_CHAPTERS, mapRichToFormChapters } from '../sample-curriculum';
 import type { AttachmentItem, RichChapter, LessonQuiz, Chapter } from '../types';
@@ -314,7 +314,7 @@ export default function ChaptersStep({
 
     setUploading(true);
     try {
-      const res = await uploadFile(file, 'documents');
+      const res = await uploadAttachment(file, file.name);
       if (!res.success || !res.data) {
         toast.error(res.error || 'فشل رفع المستند');
         return;
@@ -323,7 +323,8 @@ export default function ChaptersStep({
       const newAtt: AttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'pdf',
-        title: file.name,
+        attachmentId: res.data.id,
+        title: res.data.name || file.name,
         badgeText: 'جاهز للتحميل للطلاب',
         metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
         url: res.data.url,
@@ -836,7 +837,13 @@ export default function ChaptersStep({
                                         <Button
                                           size="small"
                                           variant="outlined"
-                                          onClick={() => toast.success('جاري تجهيز وعرض ملف PDF...')}
+                                          onClick={() => {
+                                            if (att.url) {
+                                              window.open(att.url, '_blank', 'noopener,noreferrer');
+                                            } else {
+                                              toast.warning('لا يوجد رابط للمرفق');
+                                            }
+                                          }}
                                           sx={{
                                             borderColor: '#E2E8F0',
                                             color: '#1C252E',
