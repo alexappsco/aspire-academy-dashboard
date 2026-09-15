@@ -1,6 +1,7 @@
 'use server';
 
 import { postData } from 'src/utils/crud-fetch-api';
+import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse, LoginResponse } from 'src/types/crud-types';
 
 export type LoginPayload = {
@@ -13,7 +14,7 @@ export async function loginAction(
 ): Promise<ApiSingleResponse<LoginResponse>> {
   try {
     const res = await postData<LoginResponse, LoginPayload>(
-      '/admin/auth/login',
+      endpoints.auth.login,
       data,
       { skipAuth: true }
     );

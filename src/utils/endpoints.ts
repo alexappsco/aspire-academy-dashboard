@@ -1,4 +1,7 @@
 export const endpoints = {
+  auth: {
+    login: '/admin/auth/login',
+  },
   countries: {
     list: '/admin/countries',
     details: (id: string) => `/admin/countries/${id}`,
