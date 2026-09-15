@@ -4,11 +4,14 @@ import { createContext, useContext, useState, useCallback, ReactNode } from "rea
 import type { LoginResponse } from "src/types/crud-types";
 import { COOKIES_KEYS } from "src/config-global";
 
-type User = Omit<LoginResponse, "accessToken" | "refreshToken" | "accessTokenExpireAt" | "refreshTokenExpireAt">;
+export type AuthUser = Omit<LoginResponse, "accessToken" | "refreshToken" | "accessTokenExpireAt" | "refreshTokenExpireAt">;
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
+  role: string | null;
+  isAdmin: boolean;
+  isInstructor: boolean;
   login: (data: LoginResponse) => void;
   logout: () => void;
 }
@@ -16,6 +19,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
+  role: null,
+  isAdmin: false,
+  isInstructor: false,
   login: () => {},
   logout: () => {},
 });
@@ -31,11 +37,11 @@ function removeCookie(name: string) {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
 }
 
-function getInitialUser(): User | null {
+function getInitialUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
   try {
     const saved = localStorage.getItem(STORAGE_KEY_USER);
-    if (saved) return JSON.parse(saved) as User;
+    if (saved) return JSON.parse(saved) as AuthUser;
   } catch {
     localStorage.removeItem(STORAGE_KEY_USER);
   }
@@ -43,14 +49,16 @@ function getInitialUser(): User | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(getInitialUser);
+  const [user, setUser] = useState<AuthUser | null>(getInitialUser);
 
   const login = useCallback((data: LoginResponse) => {
     const { accessToken, refreshToken, accessTokenExpireAt, refreshTokenExpireAt, ...userData } = data;
 
-    // Store tokens in cookies (server-side reads accessToken from cookies)
+    // Store tokens and user in cookies (server-side reads from cookies)
     setCookie(COOKIES_KEYS.session, accessToken, 10);
     setCookie("refreshToken", refreshToken, 10);
+    setCookie(COOKIES_KEYS.user, JSON.stringify(userData), 10);
+    setCookie("userRole", userData.role || "", 10);
 
     // Store user in localStorage
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
@@ -61,12 +69,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     removeCookie(COOKIES_KEYS.session);
     removeCookie("refreshToken");
+    removeCookie(COOKIES_KEYS.user);
+    removeCookie("userRole");
     localStorage.removeItem(STORAGE_KEY_USER);
     setUser(null);
   }, []);
 
+  const role = user?.role ?? null;
+  const normalizedRole = role ? role.toLowerCase() : "";
+  const isAdmin = normalizedRole === "admin";
+  const isInstructor = normalizedRole === "instructor" || normalizedRole === "teacher";
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        role,
+        isAdmin,
+        isInstructor,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
