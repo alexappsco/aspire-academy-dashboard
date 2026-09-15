@@ -93,7 +93,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Box
             component="img"
             src="/logo.svg"
-            alt="Trade Global"
+            alt="ASPIRE ACADEMY"
             sx={{ height: 54, marginInlineStart: { xs: 0, md: "60px" } }}
           />
         </Box>

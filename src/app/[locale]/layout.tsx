@@ -12,8 +12,8 @@ import { routing } from "src/i18n/routing";
 import { AuthProvider } from "src/contexts/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Trade Global",
-  description: "Trade Global Dashboard",
+  title: "ASPIRE ACADEMY",
+  description: "ASPIRE ACADEMY Dashboard",
   manifest: "/favicon/manifest.webmanifest",
   icons: {
     icon: [

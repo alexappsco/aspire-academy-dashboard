@@ -11,12 +11,13 @@ import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
+import Switch from '@mui/material/Switch';
 
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
-import { getInstructors, deleteInstructor } from 'src/actions/instructors';
+import { getInstructors, deleteInstructor, verifyInstructor, rejectInstructor } from 'src/actions/instructors';
 import type { Instructor } from 'src/types/instructor';
 
 import DeleteConfirmDialog from './delete-confirm-dialog';
@@ -143,8 +144,8 @@ export default function MinutesManagementView() {
     }
   };
 
-  const verifiedCount = items.filter((i) => i.verifiedAt).length;
-  const rejectedCount = items.filter((i) => i.rejectedAt && !i.verifiedAt).length;
+  const verifiedCount = items.filter((i) => !!i.verifiedAt).length;
+  const inactiveCount = items.filter((i) => !i.verifiedAt).length;
 
   const tableHead = [
     { id: 'name', label: t('columns.name'), align: (isRtl ? 'right' : 'left') as cellAlignment },
@@ -199,6 +200,65 @@ export default function MinutesManagementView() {
       raw: item,
     };
   });
+
+  const handleToggleStatus = async (row: FormattedInstructor) => {
+    const isCurrentlyVerified = row.verified;
+    const instructorId = row.id;
+
+    // Optimistic UI update
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === instructorId
+          ? {
+              ...item,
+              verifiedAt: isCurrentlyVerified ? null : new Date().toISOString(),
+              rejectedAt: isCurrentlyVerified ? new Date().toISOString() : null,
+            }
+          : item
+      )
+    );
+
+    try {
+      const res = isCurrentlyVerified
+        ? await rejectInstructor(instructorId)
+        : await verifyInstructor(instructorId);
+
+      if (res.success && res.data) {
+        toast.success(t('toast.status_updated'));
+        setItems((prev) =>
+          prev.map((item) => (item.id === instructorId ? { ...item, ...res.data } : item))
+        );
+      } else {
+        // Revert on error
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === instructorId
+              ? {
+                  ...item,
+                  verifiedAt: isCurrentlyVerified ? (item.verifiedAt || new Date().toISOString()) : null,
+                  rejectedAt: isCurrentlyVerified ? null : (item.rejectedAt || new Date().toISOString()),
+                }
+              : item
+          )
+        );
+        toast.error(res.error || 'فشل تحديث الحالة');
+      }
+    } catch (error) {
+      // Revert on error
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === instructorId
+            ? {
+                ...item,
+                verifiedAt: isCurrentlyVerified ? (item.verifiedAt || new Date().toISOString()) : null,
+                rejectedAt: isCurrentlyVerified ? null : (item.rejectedAt || new Date().toISOString()),
+              }
+            : item
+        )
+      );
+      toast.error(error instanceof Error ? error.message : 'فشل تحديث الحالة');
+    }
+  };
 
   const customRender = {
     name: (row: FormattedInstructor) => (
@@ -256,17 +316,30 @@ export default function MinutesManagementView() {
     verified: (row: FormattedInstructor) => {
       const isVerified = row.verified;
       return (
-        <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-          <Chip
+        <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
+          <Switch
+            checked={isVerified}
+            onChange={() => handleToggleStatus(row)}
             size="small"
-            label={isVerified ? t('status.active') : t('status.inactive')}
             sx={{
-              bgcolor: isVerified ? '#D2F9E5' : '#EDF2F7',
-              color: isVerified ? '#118D57' : '#637381',
-              fontWeight: 600,
-              fontSize: '12px',
+              '& .MuiSwitch-switchBase.Mui-checked': {
+                color: '#00A76F',
+              },
+              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                backgroundColor: '#00A76F',
+              },
             }}
           />
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              fontSize: 13,
+              color: isVerified ? '#00A76F' : '#64748B',
+            }}
+          >
+            {isVerified ? t('status.active') : t('status.inactive')}
+          </Typography>
         </Box>
       );
     },
@@ -385,7 +458,7 @@ export default function MinutesManagementView() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <span>{t('status.inactive')}</span>
                 <Chip
-                  label={rejectedCount}
+                  label={inactiveCount}
                   size="small"
                   sx={{
                     bgcolor: '#EDF2F7',
