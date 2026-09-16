@@ -42,6 +42,13 @@ export const endpoints = {
     update: (id: string) => `/admin/coupons/${id}`,
     delete: (id: string) => `/admin/coupons/${id}`,
   },
+  instructorCoupons: {
+    list: '/instructor/coupons',
+    details: (id: string) => `/instructor/coupons/${id}`,
+    create: '/instructor/coupons',
+    update: (id: string) => `/instructor/coupons/${id}`,
+    delete: (id: string) => `/instructor/coupons/${id}`,
+  },
   studyMaterials: {
     list: '/admin/study-materials',
     details: (id: string) => `/admin/study-materials/${id}`,
