@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -15,10 +16,12 @@ interface Props {
 }
 
 export default function InstructorKpiCards({ stats }: Props) {
+  const t = useTranslations('InstructorHome.kpis');
+
   const cards = [
     {
       id: 'active_courses',
-      title: 'الدورات النشطة',
+      title: t('active_courses'),
       value: stats.activeCourses,
       icon: 'solar:square-academic-cap-bold',
       iconBg: '#EFF6FF',
@@ -34,14 +37,14 @@ export default function InstructorKpiCards({ stats }: Props) {
             }}
           />
           <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#D97706' }}>
-            {stats.pendingReviewCourses} بانتظار مراجعة الإدارة
+            {t('pending_review', { count: stats.pendingReviewCourses })}
           </Typography>
         </Stack>
       ),
     },
     {
       id: 'students',
-      title: 'طلابي المسجلون',
+      title: t('enrolled_students'),
       value: stats.enrolledStudents,
       icon: 'solar:users-group-rounded-bold',
       iconBg: '#ECFDF5',
@@ -50,21 +53,21 @@ export default function InstructorKpiCards({ stats }: Props) {
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.75 }}>
           <Iconify icon="solar:chart-2-bold" width={16} sx={{ color: '#059669' }} />
           <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#059669' }}>
-            +{stats.monthlyStudentsGrowth} طالب مسجل هذا الشهر
+            {t('monthly_growth', { count: stats.monthlyStudentsGrowth })}
           </Typography>
         </Stack>
       ),
     },
     {
       id: 'upcoming_lessons',
-      title: 'الدروس القادمة',
+      title: t('upcoming_lessons'),
       value: stats.upcomingLessons,
       icon: 'solar:videocamera-record-bold',
       iconBg: '#EEF2FF',
       iconColor: '#4F46E5',
       footer: (
         <Chip
-          label={`${stats.todayLessonsCount} دروس مجدولة اليوم`}
+          label={t('today_lessons', { count: stats.todayLessonsCount })}
           size="small"
           sx={{
             bgcolor: '#EFF6FF',
@@ -79,14 +82,14 @@ export default function InstructorKpiCards({ stats }: Props) {
     },
     {
       id: 'monthly_earnings',
-      title: 'أرباحك هذا الشهر',
+      title: t('monthly_earnings'),
       value: `$${stats.monthlyEarnings.toLocaleString()}`,
       icon: 'solar:wallet-2-bold',
       iconBg: '#FAF5FF',
       iconColor: '#9333EA',
       footer: (
         <Typography sx={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 500 }}>
-          صافي أرباح الشهر (حصتك {stats.instructorSharePercentage}%)
+          {t('instructor_share', { share: stats.instructorSharePercentage })}
         </Typography>
       ),
     },

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export default function InstructorHeaderBanner({ instructorName = 'د. أحمد', onManageSlots }: Props) {
+  const t = useTranslations('InstructorHome.banner');
+
   return (
     <Box
       sx={{
@@ -64,7 +67,7 @@ export default function InstructorHeaderBanner({ instructorName = 'د. أحمد'
               gap: 1,
             }}
           >
-            صباح الخير، {instructorName} 👋
+            {t('greeting', { name: instructorName })}
           </Typography>
           <Typography
             variant="body2"
@@ -75,7 +78,7 @@ export default function InstructorHeaderBanner({ instructorName = 'د. أحمد'
               maxWidth: 650,
             }}
           >
-            إليك نظرة عامة على أنشطتك التعليمية وحجوزات دروس الطلاب وأداء دوراتك.
+            {t('subtitle')}
           </Typography>
         </Box>
 
@@ -104,7 +107,7 @@ export default function InstructorHeaderBanner({ instructorName = 'د. أحمد'
             },
           }}
         >
-          إدارة المواعيد المتاحة
+          {t('manage_slots')}
         </Button>
       </Stack>
     </Box>

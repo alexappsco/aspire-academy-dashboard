@@ -1572,6 +1572,82 @@
       "colleges_sub": "بشري وصيدلة",
       "manage_btn": "إدارة وتعديل الهيكل الأكاديمي"
     }
+  },
+  "InstructorHome": {
+    "banner": {
+      "greeting": "صباح الخير، {name} 👋",
+      "subtitle": "إليك نظرة عامة على أنشطتك التعليمية وحجوزات دروس الطلاب وأداء دوراتك.",
+      "manage_slots": "إدارة المواعيد المتاحة"
+    },
+    "kpis": {
+      "active_courses": "الدورات النشطة",
+      "pending_review": "{count} بانتظار مراجعة الإدارة",
+      "enrolled_students": "طلابي المسجلون",
+      "monthly_growth": "+{count} طالب مسجل هذا الشهر",
+      "upcoming_lessons": "الدروس القادمة",
+      "today_lessons": "{count} دروس مجدولة اليوم",
+      "monthly_earnings": "أرباحك هذا الشهر",
+      "instructor_share": "صافي أرباح الشهر (حصتك {share}%)"
+    },
+    "upcoming_lessons": {
+      "title": "الدروس القادمة عبر الإنترنت",
+      "subtitle": "جلسات فردية مباشرة (1-on-1) محجوزة من قبل الطلاب عبر التطبيق",
+      "view_all": "عرض كافة الدروس",
+      "col_student": "الطالب",
+      "col_subject": "المادة",
+      "col_date_time": "التاريخ والوقت",
+      "col_duration": "المدة",
+      "col_status": "الحالة",
+      "col_action": "الإجراء",
+      "status_upcoming": "قادم",
+      "join_lesson": "انضم للدرس",
+      "view_details": "عرض التفاصيل",
+      "scheduled_today": "3 دروس مجدولة لهذا اليوم",
+      "room_notice": "تفتح غرفة الجلسة المباشرة قبل 10 دقائق من موعد الدرس المحدد."
+    },
+    "today_schedule": {
+      "title": "جدول اليوم",
+      "subtitle": "الفترات الزمنية المتاحة والمحجوزة",
+      "available": "متاح",
+      "booked": "محجوز",
+      "available_slot_text": "فترة متاحة للحجز",
+      "manage_availability": "إدارة التوافر",
+      "update_weekly_schedule": "تحديث الجدول الأسبوعي"
+    },
+    "courses": {
+      "title": "دوراتي التدريبية",
+      "count_badge": "3 من أصل {total}",
+      "subtitle": "الكورسات والمناهج التي تم إعدادها بواسطتك (النشر والتسجيل خاضع لاعتماد الإدارة)",
+      "view_all": "عرض جميع الدورات ({total})",
+      "col_title": "اسم الدورة",
+      "col_specialization": "التخصص",
+      "col_students": "الطلاب",
+      "col_rating": "التقييم",
+      "col_price": "السعر",
+      "col_status": "الحالة",
+      "col_last_updated": "اخر تحديث",
+      "status_active": "نشط",
+      "status_pending": "قيد المراجعة",
+      "status_rejected": "مرفوض",
+      "rows_per_page": "Rows per page: 6",
+      "pagination_info": "1-6 of 12"
+    },
+    "earnings": {
+      "title": "نظرة عامة على الأرباح",
+      "subtitle": "توزيع الإيرادات بحسب اتفاقية المشاركة",
+      "total_sales": "إجمالي المبيعات",
+      "instructor_share": "أرباحك المستحقة ({percent}%)",
+      "platform_fee": "رسوم المنصة ({percent}%)",
+      "distribution_ratio": "نسبة التوزيع المتفق عليها",
+      "ratio_summary": "70% لك / 30% للمنصة",
+      "view_reports": "عرض التقارير المالية المفصلة"
+    },
+    "availability": {
+      "title": "التوافر الأسبوعي",
+      "subtitle": "فترات حجز الطلاب خلال الأسبوع",
+      "not_available": "غير متاح",
+      "manage_slots": "إدارة فترات الحجز المتاحة"
+    }
   }
 }
 

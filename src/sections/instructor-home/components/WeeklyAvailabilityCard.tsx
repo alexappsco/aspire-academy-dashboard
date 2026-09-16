@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
+  const t = useTranslations('InstructorHome.availability');
+
   return (
     <Card
       sx={{
@@ -35,10 +38,10 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
         <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
-              التوافر الأسبوعي
+              {t('title')}
             </Typography>
             <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
-              فترات حجز الطلاب خلال الأسبوع
+              {t('subtitle')}
             </Typography>
           </Box>
 
@@ -83,7 +86,7 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
               {/* Time or unavailable badge */}
               {day.isUnavailable ? (
                 <Chip
-                  label="غير متاح"
+                  label={t('not_available')}
                   size="small"
                   sx={{
                     bgcolor: '#FEE2E2',
@@ -116,6 +119,7 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
             borderColor: '#E2E8F0',
             borderRadius: '10px',
             py: 1.2,
+            gap: 1,
             fontWeight: 700,
             fontSize: '0.875rem',
             textTransform: 'none',
@@ -125,7 +129,7 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
             },
           }}
         >
-          إدارة فترات المواعيد المتاحة
+          {t('manage_slots')}
         </Button>
       </Box>
     </Card>

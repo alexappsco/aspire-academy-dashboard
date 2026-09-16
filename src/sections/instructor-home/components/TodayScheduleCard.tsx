@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -23,6 +24,8 @@ export default function TodayScheduleCard({
   onManageAvailability,
   onUpdateWeeklySchedule,
 }: Props) {
+  const t = useTranslations('InstructorHome.today_schedule');
+
   return (
     <Card
       sx={{
@@ -42,7 +45,7 @@ export default function TodayScheduleCard({
         <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '1.2rem', lineHeight: 1.3 }}>
-              جدول اليوم الزمني
+              {t('title')}
             </Typography>
             <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem', mt: 0.5, fontWeight: 500 }}>
               {date}
@@ -60,7 +63,7 @@ export default function TodayScheduleCard({
               '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
             }}
           >
-            إدارة التوافر
+            {t('manage_availability')}
           </Button>
         </Stack>
       </Box>
@@ -118,7 +121,7 @@ export default function TodayScheduleCard({
 
                 {/* Left side: Booked Badge */}
                 <Chip
-                  label="محجوز"
+                  label={t('booked')}
                   size="small"
                   sx={{
                     bgcolor: '#2563EB',
@@ -169,13 +172,13 @@ export default function TodayScheduleCard({
 
                 {/* Text */}
                 <Typography sx={{ fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>
-                  {slot.statusText}
+                  {slot.statusText || t('available_slot_text')}
                 </Typography>
               </Stack>
 
               {/* Left side: Available Badge */}
               <Chip
-                label="متاح"
+                label={t('available')}
                 size="small"
                 sx={{
                   bgcolor: '#E2E8F0',
@@ -213,7 +216,7 @@ export default function TodayScheduleCard({
           },
         }}
       >
-        تحديث الجدول الأسبوعي
+        {t('update_weekly_schedule')}
       </Button>
     </Card>
   );

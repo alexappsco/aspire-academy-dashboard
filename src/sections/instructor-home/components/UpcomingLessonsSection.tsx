@@ -1,13 +1,13 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -30,6 +30,8 @@ export default function UpcomingLessonsSection({
   onJoinLesson,
   onViewDetails,
 }: Props) {
+  const t = useTranslations('InstructorHome.upcoming_lessons');
+
   return (
     <Card
       sx={{
@@ -55,10 +57,10 @@ export default function UpcomingLessonsSection({
       >
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.1rem' }}>
-            الدروس القادمة عبر الإنترنت
+            {t('title')}
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748B', fontSize: '0.85rem', mt: 0.25 }}>
-            جلسات فردية مباشرة (1-on-1) محجوزة من قبل الطلاب عبر التطبيق
+            {t('subtitle')}
           </Typography>
         </Box>
 
@@ -75,7 +77,7 @@ export default function UpcomingLessonsSection({
             '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
           }}
         >
-          عرض كافة الدروس
+          {t('view_all')}
         </Button>
       </Stack>
 
@@ -84,12 +86,12 @@ export default function UpcomingLessonsSection({
         <Table sx={{ minWidth: 640 }}>
           <TableHead>
             <TableRow sx={{ '& th': { borderBottom: '1px solid #F1F5F9', color: '#94A3B8', fontWeight: 600, fontSize: '0.8rem', py: 1.5 } }}>
-              <TableCell align="right">الطالب</TableCell>
-              <TableCell align="center">المادة</TableCell>
-              <TableCell align="center">التاريخ والوقت</TableCell>
-              <TableCell align="center">المدة</TableCell>
-              <TableCell align="center">الحالة</TableCell>
-              <TableCell align="center">الإجراء</TableCell>
+              <TableCell align="right">{t('col_student')}</TableCell>
+              <TableCell align="center">{t('col_subject')}</TableCell>
+              <TableCell align="center">{t('col_date_time')}</TableCell>
+              <TableCell align="center">{t('col_duration')}</TableCell>
+              <TableCell align="center">{t('col_status')}</TableCell>
+              <TableCell align="center">{t('col_action')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -162,31 +164,35 @@ export default function UpcomingLessonsSection({
                   </Typography>
                 </TableCell>
 
-                {/* Status */}
+                {/* Status Badge: Matches media_1789541323398.png */}
                 <TableCell align="center">
-                  <Chip
-                    size="small"
-                    label={lesson.statusText}
-                    icon={
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: '50%',
-                          bgcolor: '#118D57',
-                          mr: 0.5,
-                        }}
-                      />
-                    }
+                  <Box
                     sx={{
-                      bgcolor: '#D2F9E5',
-                      color: '#118D57',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 0.75,
+                      bgcolor: '#D1FAE5',
+                      color: '#047857',
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: '16px',
                       fontWeight: 700,
-                      fontSize: '0.75rem',
-                      borderRadius: '8px',
-                      px: 0.5,
+                      fontSize: '0.8rem',
                     }}
-                  />
+                  >
+                    <Box
+                      sx={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        bgcolor: '#059669',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#047857' }}>
+                      {t('status_upcoming')}
+                    </Typography>
+                  </Box>
                 </TableCell>
 
                 {/* Action */}
@@ -210,7 +216,7 @@ export default function UpcomingLessonsSection({
                         '&:hover': { bgcolor: '#1D4ED8' },
                       }}
                     >
-                      انضم للدرس
+                      {t('join_lesson')}
                     </Button>
                   ) : (
                     <Button
@@ -227,7 +233,7 @@ export default function UpcomingLessonsSection({
                         '&:hover': { bgcolor: '#F1F5F9', color: '#1C252E' },
                       }}
                     >
-                      عرض التفاصيل
+                      {t('view_details')}
                     </Button>
                   )}
                 </TableCell>
@@ -253,12 +259,12 @@ export default function UpcomingLessonsSection({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
           <Iconify icon="solar:info-circle-bold" width={18} sx={{ color: '#2563EB', flexShrink: 0 }} />
           <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
-            تفتح غرفة الجلسة المباشرة قبل 10 دقائق من موعد الدرس المحدد.
+            {t('room_notice')}
           </Typography>
         </Stack>
 
         <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C252E' }}>
-          3 دروس مجدولة لهذا اليوم
+          {t('scheduled_today')}
         </Typography>
       </Box>
     </Card>

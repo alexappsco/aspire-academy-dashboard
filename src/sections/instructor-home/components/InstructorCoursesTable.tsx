@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -30,13 +31,15 @@ export default function InstructorCoursesTable({
   onViewAll,
   onCourseAction,
 }: Props) {
+  const t = useTranslations('InstructorHome.courses');
+
   const getStatusChip = (status: InstructorCourseRow['status'], label: string) => {
     switch (status) {
       case 'active':
         return (
           <Chip
             size="small"
-            label={label}
+            label={t('status_active')}
             sx={{
               bgcolor: '#D2F9E5',
               color: '#118D57',
@@ -50,7 +53,7 @@ export default function InstructorCoursesTable({
         return (
           <Chip
             size="small"
-            label={label}
+            label={t('status_pending')}
             sx={{
               bgcolor: '#FEF3C7',
               color: '#D97706',
@@ -64,7 +67,7 @@ export default function InstructorCoursesTable({
         return (
           <Chip
             size="small"
-            label={label}
+            label={t('status_rejected')}
             sx={{
               bgcolor: '#FEE2E2',
               color: '#DC2626',
@@ -103,10 +106,10 @@ export default function InstructorCoursesTable({
         <Box>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.1rem' }}>
-              دوراتي التدريبية
+              {t('title')}
             </Typography>
             <Chip
-              label={`3 من أصل ${totalCount}`}
+              label={t('count_badge', { total: totalCount })}
               size="small"
               sx={{
                 bgcolor: '#F1F5F9',
@@ -119,7 +122,7 @@ export default function InstructorCoursesTable({
             />
           </Stack>
           <Typography variant="body2" sx={{ color: '#64748B', fontSize: '0.85rem', mt: 0.5 }}>
-            الكورسات والمناهج التي تم إعدادها بواسطتك (النشر والتسجيل خاضع لاعتماد الإدارة)
+            {t('subtitle')}
           </Typography>
         </Box>
 
@@ -136,7 +139,7 @@ export default function InstructorCoursesTable({
             '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
           }}
         >
-          عرض جميع الدورات ({totalCount})
+          {t('view_all', { total: totalCount })}
         </Button>
       </Stack>
 
@@ -145,13 +148,13 @@ export default function InstructorCoursesTable({
         <Table sx={{ minWidth: 700 }}>
           <TableHead>
             <TableRow sx={{ '& th': { borderBottom: '1px solid #F1F5F9', color: '#94A3B8', fontWeight: 600, fontSize: '0.8rem', py: 1.5 } }}>
-              <TableCell align="right">اسم الدورة</TableCell>
-              <TableCell align="center">التخصص</TableCell>
-              <TableCell align="center">الطلاب</TableCell>
-              <TableCell align="center">التقييم</TableCell>
-              <TableCell align="center">السعر</TableCell>
-              <TableCell align="center">الحالة</TableCell>
-              <TableCell align="center">اخر تحديث</TableCell>
+              <TableCell align="right">{t('col_title')}</TableCell>
+              <TableCell align="center">{t('col_specialization')}</TableCell>
+              <TableCell align="center">{t('col_students')}</TableCell>
+              <TableCell align="center">{t('col_rating')}</TableCell>
+              <TableCell align="center">{t('col_price')}</TableCell>
+              <TableCell align="center">{t('col_status')}</TableCell>
+              <TableCell align="center">{t('col_last_updated')}</TableCell>
               <TableCell align="center" sx={{ width: 48 }} />
             </TableRow>
           </TableHead>
@@ -243,10 +246,10 @@ export default function InstructorCoursesTable({
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
-            Rows per page: 6
+            {t('rows_per_page')}
           </Typography>
           <Typography sx={{ fontSize: '0.8rem', color: '#64748B', ml: 2 }}>
-            1-6 of 12
+            {t('pagination_info')}
           </Typography>
         </Stack>
 

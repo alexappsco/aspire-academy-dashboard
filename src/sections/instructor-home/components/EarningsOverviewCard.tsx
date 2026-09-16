@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function EarningsOverviewCard({ earnings, onViewReports }: Props) {
+  const t = useTranslations('InstructorHome.earnings');
+
   return (
     <Card
       sx={{
@@ -34,10 +37,10 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
         <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
-              نظرة عامة على الأرباح
+              {t('title')}
             </Typography>
             <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
-              توزيع الإيرادات بحسب اتفاقية المشاركة
+              {t('subtitle')}
             </Typography>
           </Box>
 
@@ -47,14 +50,13 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
               height: 42,
               borderRadius: '10px',
               bgcolor: '#ECFDF5',
-              color: '#059669',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Iconify icon="solar:bank-bold" width={22} />
+            <Box component="img" src="/icons/bank.svg" alt="bank" sx={{ width: 22, height: 22 }} />
           </Box>
         </Stack>
 
@@ -63,7 +65,7 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
           {/* Total revenue */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748B' }}>
-              إجمالي الإيرادات المحققة:
+              {t('total_sales')}:
             </Typography>
             <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#1C252E' }}>
               ${earnings.totalRevenue.toLocaleString()}
@@ -73,7 +75,7 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
           {/* Instructor share */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
-              حصتك من الأرباح ({earnings.instructorPercentage}%):
+              {t('instructor_share', { percent: earnings.instructorPercentage })}:
             </Typography>
             <Typography sx={{ fontSize: '1.25rem', fontWeight: 800, color: '#2563EB' }}>
               ${earnings.instructorShare.toLocaleString()}
@@ -83,7 +85,7 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
           {/* Platform share */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: '#94A3B8' }}>
-              حصة المنصة ({earnings.platformPercentage}%):
+              {t('platform_fee', { percent: earnings.platformPercentage })}:
             </Typography>
             <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748B' }}>
               ${earnings.platformShare.toLocaleString()}
@@ -98,14 +100,14 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#E2E8F0' }} />
               <Typography sx={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500 }}>
-                المنصة: {earnings.platformPercentage}%
+                {earnings.platformPercentage}%
               </Typography>
             </Stack>
 
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#2563EB' }} />
               <Typography sx={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 700 }}>
-                حصتك: {earnings.instructorPercentage}%
+                {earnings.instructorPercentage}%
               </Typography>
             </Stack>
           </Stack>
@@ -132,7 +134,7 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
 
           {/* Caption */}
           <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mt: 1.5, textAlign: 'left' }}>
-            مُحدد من قبل الإدارة بناءً على عقد المحاضر الخاص بك
+            {t('ratio_summary')}
           </Typography>
         </Box>
       </Box>
@@ -148,10 +150,11 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
             fontSize: '0.875rem',
             p: 0,
             minWidth: 'auto',
+            gap: 0.75,
             '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
           }}
         >
-          عرض التقارير
+          {t('view_reports')}
         </Button>
       </Box>
     </Card>
