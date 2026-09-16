@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCookie(COOKIES_KEYS.session, accessToken, 10);
     setCookie("refreshToken", refreshToken, 10);
     setCookie(COOKIES_KEYS.user, JSON.stringify(userData), 10);
-    setCookie("userRole", userData.role || "", 10);
+    setCookie(COOKIES_KEYS.role, userData.role || "", 10);
 
     // Store user in localStorage
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userData));
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     removeCookie(COOKIES_KEYS.session);
     removeCookie("refreshToken");
     removeCookie(COOKIES_KEYS.user);
-    removeCookie("userRole");
+    removeCookie(COOKIES_KEYS.role);
     localStorage.removeItem(STORAGE_KEY_USER);
     setUser(null);
   }, []);
