@@ -12,6 +12,7 @@ export const COOKIES_KEYS = {
   lang: 'NEXT_LOCALE',
   session: 'accessToken',
   user: 'user',
+  role: 'userRole',
   cart: 'cart',
 };
 

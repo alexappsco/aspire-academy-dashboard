@@ -1569,6 +1569,82 @@
       "colleges_sub": "Medicine & Pharmacy",
       "manage_btn": "Manage & Edit Academic Structure"
     }
+  },
+  "InstructorHome": {
+    "banner": {
+      "greeting": "Good morning, {name} 👋",
+      "subtitle": "Here is an overview of your teaching activities, student lesson bookings, and course performance.",
+      "manage_slots": "Manage Available Slots"
+    },
+    "kpis": {
+      "active_courses": "Active Courses",
+      "pending_review": "{count} pending admin review",
+      "enrolled_students": "Enrolled Students",
+      "monthly_growth": "+{count} students enrolled this month",
+      "upcoming_lessons": "Upcoming Lessons",
+      "today_lessons": "{count} lessons scheduled today",
+      "monthly_earnings": "Earnings This Month",
+      "instructor_share": "Monthly net profit (your share {share}%)"
+    },
+    "upcoming_lessons": {
+      "title": "Upcoming Online Lessons",
+      "subtitle": "Direct 1-on-1 sessions booked by students via the app",
+      "view_all": "View All Lessons",
+      "col_student": "Student",
+      "col_subject": "Subject",
+      "col_date_time": "Date & Time",
+      "col_duration": "Duration",
+      "col_status": "Status",
+      "col_action": "Action",
+      "status_upcoming": "Upcoming",
+      "join_lesson": "Join Lesson",
+      "view_details": "View Details",
+      "scheduled_today": "3 lessons scheduled for today",
+      "room_notice": "The live session room opens 10 minutes before the scheduled lesson time."
+    },
+    "today_schedule": {
+      "title": "Today's Schedule",
+      "subtitle": "Available & booked time slots",
+      "available": "Available",
+      "booked": "Booked",
+      "available_slot_text": "Available booking slot",
+      "manage_availability": "Manage Availability",
+      "update_weekly_schedule": "Update Weekly Schedule"
+    },
+    "courses": {
+      "title": "My Training Courses",
+      "count_badge": "3 of {total}",
+      "subtitle": "Courses and curricula prepared by you (publishing and enrollment subject to admin approval)",
+      "view_all": "View All Courses ({total})",
+      "col_title": "Course Name",
+      "col_specialization": "Specialization",
+      "col_students": "Students",
+      "col_rating": "Rating",
+      "col_price": "Price",
+      "col_status": "Status",
+      "col_last_updated": "Last Updated",
+      "status_active": "Active",
+      "status_pending": "Under Review",
+      "status_rejected": "Rejected",
+      "rows_per_page": "Rows per page: 6",
+      "pagination_info": "1-6 of 12"
+    },
+    "earnings": {
+      "title": "Earnings Overview",
+      "subtitle": "Revenue distribution according to the partnership agreement",
+      "total_sales": "Total Sales",
+      "instructor_share": "Your Share ({percent}%)",
+      "platform_fee": "Platform Fee ({percent}%)",
+      "distribution_ratio": "Agreed Distribution Ratio",
+      "ratio_summary": "70% You / 30% Platform",
+      "view_reports": "View Detailed Financial Reports"
+    },
+    "availability": {
+      "title": "Weekly Availability",
+      "subtitle": "Student booking slots during the week",
+      "not_available": "Not Available",
+      "manage_slots": "Manage Available Booking Slots"
+    }
   }
 }
 
