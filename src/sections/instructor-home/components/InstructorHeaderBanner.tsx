@@ -92,6 +92,7 @@ export default function InstructorHeaderBanner({ instructorName = 'د. أحمد'
             borderRadius: '12px',
             px: 2.5,
             py: 1.2,
+            gap: 1,
             fontWeight: 700,
             fontSize: '0.875rem',
             textTransform: 'none',

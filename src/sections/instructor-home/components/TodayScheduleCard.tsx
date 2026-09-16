@@ -26,11 +26,11 @@ export default function TodayScheduleCard({
   return (
     <Card
       sx={{
-        borderRadius: '16px',
+        borderRadius: '20px',
         border: '1px solid #F1F5F9',
         boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
         bgcolor: '#FFFFFF',
-        p: 3,
+        p: { xs: 2.5, sm: 3 },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -38,18 +38,23 @@ export default function TodayScheduleCard({
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2.5 }}>
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.1rem' }}>
-            جدول اليوم الزمني
-          </Typography>
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '1.2rem', lineHeight: 1.3 }}>
+              جدول اليوم الزمني
+            </Typography>
+            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem', mt: 0.5, fontWeight: 500 }}>
+              {date}
+            </Typography>
+          </Box>
 
           <Button
             onClick={onManageAvailability}
             sx={{
               color: '#2563EB',
               fontWeight: 700,
-              fontSize: '0.85rem',
+              fontSize: '0.9rem',
               p: 0,
               minWidth: 'auto',
               '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
@@ -58,50 +63,60 @@ export default function TodayScheduleCard({
             إدارة التوافر
           </Button>
         </Stack>
-
-        <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.5, fontWeight: 500 }}>
-          {date}
-        </Typography>
       </Box>
 
       {/* Slots List */}
-      <Stack spacing={1.5} sx={{ mb: 3, flex: 1 }}>
+      <Stack spacing={2} sx={{ mb: 3, flex: 1 }}>
         {slots.map((slot) => {
           if (slot.isBooked) {
             return (
               <Box
                 key={slot.id}
                 sx={{
-                  p: 1.5,
-                  borderRadius: '12px',
+                  py: 1.75,
+                  px: 2,
+                  borderRadius: '14px',
                   bgcolor: '#EFF6FF',
-                  border: '1px solid #BFDBFE',
-                  borderInlineStart: '4px solid #2563EB',
+                  border: '1.5px solid #BFDBFE',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 1.5,
                 }}
               >
-                {/* Time */}
-                <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E3A8A', minWidth: 65 }}>
-                  {slot.time}
-                </Typography>
-
-                {/* Content */}
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 800, fontSize: '0.875rem', color: '#1E3A8A' }}>
-                    {slot.title}
+                {/* Right side: Time + Vertical Blue Bar + Title/Attendee */}
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flex: 1, gap: 1.5 }}>
+                  {/* Time */}
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#2563EB', minWidth: 65 }}>
+                    {slot.time}
                   </Typography>
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mt: 0.25 }}>
-                    <Iconify icon="solar:user-bold" width={14} sx={{ color: '#2563EB' }} />
-                    <Typography sx={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 600 }}>
-                      {slot.attendee} ({slot.duration})
-                    </Typography>
-                  </Stack>
-                </Box>
 
-                {/* Badge */}
+                  {/* Vertical bar */}
+                  <Box
+                    sx={{
+                      width: '3.5px',
+                      height: 28,
+                      bgcolor: '#2563EB',
+                      borderRadius: '3px',
+                      flexShrink: 0,
+                    }}
+                  />
+
+                  {/* Info */}
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: '#0F172A' }}>
+                      {slot.title}
+                    </Typography>
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75, mt: 0.5 }}>
+                      <Iconify icon="solar:user-bold" width={15} sx={{ color: '#2563EB' }} />
+                      <Typography sx={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: 600 }}>
+                        {slot.attendee} ({slot.duration})
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Stack>
+
+                {/* Left side: Booked Badge */}
                 <Chip
                   label="محجوز"
                   size="small"
@@ -109,9 +124,10 @@ export default function TodayScheduleCard({
                     bgcolor: '#2563EB',
                     color: '#FFFFFF',
                     fontWeight: 700,
-                    fontSize: '0.75rem',
-                    borderRadius: '6px',
-                    height: 22,
+                    fontSize: '0.8rem',
+                    borderRadius: '8px',
+                    height: 26,
+                    px: 1,
                   }}
                 />
               </Box>
@@ -122,37 +138,53 @@ export default function TodayScheduleCard({
             <Box
               key={slot.id}
               sx={{
-                p: 1.5,
-                borderRadius: '12px',
-                bgcolor: '#FAFAFA',
-                border: '1px solid #F1F5F9',
+                py: 1.75,
+                px: 2,
+                borderRadius: '14px',
+                bgcolor: '#FFFFFF',
+                border: '1.5px dashed #CBD5E1',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: 1.5,
               }}
             >
-              {/* Time */}
-              <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: '#64748B', minWidth: 65 }}>
-                {slot.time}
-              </Typography>
+              {/* Right side: Time + Vertical Gray Bar + Status text */}
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flex: 1, gap: 1.5 }}>
+                {/* Time */}
+                <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#334155', minWidth: 65 }}>
+                  {slot.time}
+                </Typography>
 
-              {/* Status text */}
-              <Typography sx={{ flex: 1, fontSize: '0.85rem', color: '#94A3B8', fontWeight: 500 }}>
-                {slot.statusText}
-              </Typography>
+                {/* Vertical bar */}
+                <Box
+                  sx={{
+                    width: '3px',
+                    height: 20,
+                    bgcolor: '#CBD5E1',
+                    borderRadius: '2px',
+                    flexShrink: 0,
+                  }}
+                />
 
-              {/* Badge */}
+                {/* Text */}
+                <Typography sx={{ fontSize: '0.9rem', color: '#334155', fontWeight: 600 }}>
+                  {slot.statusText}
+                </Typography>
+              </Stack>
+
+              {/* Left side: Available Badge */}
               <Chip
                 label="متاح"
                 size="small"
                 sx={{
-                  bgcolor: '#F1F5F9',
-                  color: '#64748B',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                  borderRadius: '6px',
-                  height: 22,
+                  bgcolor: '#E2E8F0',
+                  color: '#475569',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  borderRadius: '8px',
+                  height: 26,
+                  px: 1,
                 }}
               />
             </Box>
@@ -166,13 +198,15 @@ export default function TodayScheduleCard({
         fullWidth
         onClick={onUpdateWeeklySchedule}
         sx={{
-          color: '#1C252E',
+          color: '#1E293B',
           borderColor: '#E2E8F0',
-          borderRadius: '10px',
-          py: 1.2,
+          borderRadius: '12px',
+          py: 1.4,
           fontWeight: 700,
-          fontSize: '0.875rem',
+          fontSize: '0.95rem',
           textTransform: 'none',
+          bgcolor: '#FFFFFF',
+          boxShadow: 'none',
           '&:hover': {
             borderColor: '#CBD5E1',
             bgcolor: '#F8FAFC',

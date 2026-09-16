@@ -71,6 +71,7 @@ export default function UpcomingLessonsSection({
             fontSize: '0.875rem',
             p: 0,
             minWidth: 'auto',
+            gap: 0.75,
             '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
           }}
         >
@@ -204,6 +205,7 @@ export default function UpcomingLessonsSection({
                         borderRadius: '8px',
                         py: 0.75,
                         px: 1.5,
+                        gap: 0.75,
                         boxShadow: 'none',
                         '&:hover': { bgcolor: '#1D4ED8' },
                       }}
@@ -245,19 +247,19 @@ export default function UpcomingLessonsSection({
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
-          gap: 1,
+          gap: 2,
         }}
       >
-        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#1C252E' }}>
-          3 دروس مجدولة لهذا اليوم
-        </Typography>
-
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-          <Iconify icon="solar:info-circle-bold" width={16} sx={{ color: '#2563EB' }} />
-          <Typography sx={{ fontSize: '0.75rem', color: '#64748B' }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:info-circle-bold" width={18} sx={{ color: '#2563EB', flexShrink: 0 }} />
+          <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
             تفتح غرفة الجلسة المباشرة قبل 10 دقائق من موعد الدرس المحدد.
           </Typography>
         </Stack>
+
+        <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#1C252E' }}>
+          3 دروس مجدولة لهذا اليوم
+        </Typography>
       </Box>
     </Card>
   );

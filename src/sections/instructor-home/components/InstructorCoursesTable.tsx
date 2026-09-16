@@ -132,6 +132,7 @@ export default function InstructorCoursesTable({
             fontSize: '0.875rem',
             p: 0,
             minWidth: 'auto',
+            gap: 0.75,
             '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
           }}
         >
@@ -186,7 +187,7 @@ export default function InstructorCoursesTable({
 
                 {/* Rating */}
                 <TableCell align="center">
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
                     <Iconify icon="solar:star-bold" width={16} sx={{ color: '#F59E0B' }} />
                     <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
                       {course.rating}

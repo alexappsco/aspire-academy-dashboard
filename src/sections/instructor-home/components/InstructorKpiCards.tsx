@@ -24,7 +24,7 @@ export default function InstructorKpiCards({ stats }: Props) {
       iconBg: '#EFF6FF',
       iconColor: '#2563EB',
       footer: (
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 1 }}>
           <Box
             sx={{
               width: 7,
@@ -47,7 +47,7 @@ export default function InstructorKpiCards({ stats }: Props) {
       iconBg: '#ECFDF5',
       iconColor: '#059669',
       footer: (
-        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', gap: 0.75 }}>
           <Iconify icon="solar:chart-2-bold" width={16} sx={{ color: '#059669' }} />
           <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#059669' }}>
             +{stats.monthlyStudentsGrowth} طالب مسجل هذا الشهر

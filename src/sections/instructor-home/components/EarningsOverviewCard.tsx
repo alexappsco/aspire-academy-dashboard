@@ -31,7 +31,16 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
     >
       {/* Top Header */}
       <Box>
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 2 }}>
+        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
+              نظرة عامة على الأرباح
+            </Typography>
+            <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
+              توزيع الإيرادات بحسب اتفاقية المشاركة
+            </Typography>
+          </Box>
+
           <Box
             sx={{
               width: 42,
@@ -42,17 +51,10 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
             <Iconify icon="solar:bank-bold" width={22} />
-          </Box>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
-              نظرة عامة على الأرباح
-            </Typography>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
-              توزيع الإيرادات بحسب اتفاقية المشاركة
-            </Typography>
           </Box>
         </Stack>
 

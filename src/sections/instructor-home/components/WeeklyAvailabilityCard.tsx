@@ -32,7 +32,16 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
     >
       <Box>
         {/* Header */}
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
+        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
+              التوافر الأسبوعي
+            </Typography>
+            <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
+              فترات حجز الطلاب خلال الأسبوع
+            </Typography>
+          </Box>
+
           <Box
             sx={{
               width: 42,
@@ -43,17 +52,10 @@ export default function WeeklyAvailabilityCard({ days, onManageSlots }: Props) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
             <Iconify icon="solar:calendar-date-bold" width={22} />
-          </Box>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
-              التوافر الأسبوعي
-            </Typography>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
-              فترات حجز الطلاب خلال الأسبوع
-            </Typography>
           </Box>
         </Stack>
 
