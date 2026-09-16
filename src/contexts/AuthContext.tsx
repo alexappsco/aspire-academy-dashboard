@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const role = user?.role ?? null;
   const normalizedRole = role ? role.toLowerCase() : "";
   const isAdmin = normalizedRole === "admin";
-  const isInstructor = normalizedRole === "instructor" || normalizedRole === "teacher";
+  const isInstructor = normalizedRole === "instructor";
 
   return (
     <AuthContext.Provider

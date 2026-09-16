@@ -30,7 +30,11 @@ import {
   createCouponAction,
   updateCouponAction,
   deleteCouponAction,
-} from 'src/actions/coupons';
+  getInstructorCouponsAction,
+  createInstructorCouponAction,
+  updateInstructorCouponAction,
+  deleteInstructorCouponAction,
+} from 'src/actions';
 import { DISCOUNT_TYPE_LABELS, DISCOUNT_TYPE_STYLES, DEFAULT_PAGE_SIZE } from './constants';
 import DiscountCodeFormDialog from './new-edit-discount-code-dialog';
 import DeleteConfirmDialog from './delete-confirm-dialog';
@@ -104,7 +108,11 @@ function formatDate(dateStr: string): string {
   }
 }
 
-export default function DiscountCodesView() {
+interface DiscountCodesViewProps {
+  isInstructor?: boolean;
+}
+
+export default function DiscountCodesView({ isInstructor = false }: DiscountCodesViewProps) {
   const t = useTranslations('DiscountCodes');
   const locale = useLocale() as 'en' | 'ar';
   const toast = useToast();
@@ -177,7 +185,10 @@ export default function DiscountCodesView() {
         MaxResultCount: 100,
       };
 
-      const res = await getCouponsAction(apiParams);
+      const res = isInstructor
+        ? await getInstructorCouponsAction(apiParams)
+        : await getCouponsAction(apiParams);
+
       const { items, total } = extractCouponItems(res.success ? res.data : null);
       setCoupons(items);
       setTotalCount(total);
@@ -187,7 +198,7 @@ export default function DiscountCodesView() {
       setCoupons([]);
       setTotalCount(0);
     }
-  }, [debouncedSearch, statusFilter, t, toast]);
+  }, [debouncedSearch, statusFilter, isInstructor, t, toast]);
 
   useEffect(() => {
     const load = async () => {
@@ -235,7 +246,7 @@ export default function DiscountCodesView() {
     );
 
     try {
-      const res = await updateCouponAction(coupon.id, {
+      const payload = {
         code: coupon.code,
         type: COUPON_TYPE_MAP[coupon.type] || 'Fixed',
         value: coupon.value,
@@ -246,7 +257,10 @@ export default function DiscountCodesView() {
         maxRedemptions: coupon.maxRedemptions,
         maxRedemptionsPerStudent: coupon.maxRedemptionsPerStudent,
         isActive: nextStatus,
-      });
+      };
+      const res = isInstructor
+        ? await updateInstructorCouponAction(coupon.id, payload)
+        : await updateCouponAction(coupon.id, payload);
       if (!res.success) throw new Error(res.error);
       toast.success(t('messages.status_updated'));
     } catch (error: unknown) {
@@ -271,11 +285,15 @@ export default function DiscountCodesView() {
     try {
       setActionLoading(true);
       if (editingCode) {
-        const res = await updateCouponAction(editingCode.id, data);
+        const res = isInstructor
+          ? await updateInstructorCouponAction(editingCode.id, data)
+          : await updateCouponAction(editingCode.id, data);
         if (!res.success) throw new Error(res.error);
         toast.success(t('messages.edit_success'));
       } else {
-        const res = await createCouponAction(data);
+        const res = isInstructor
+          ? await createInstructorCouponAction(data)
+          : await createCouponAction(data);
         if (!res.success) throw new Error(res.error);
         toast.success(t('messages.add_success'));
       }
@@ -299,7 +317,9 @@ export default function DiscountCodesView() {
     if (!deletingId) return;
     try {
       setActionLoading(true);
-      const res = await deleteCouponAction(deletingId);
+      const res = isInstructor
+        ? await deleteInstructorCouponAction(deletingId)
+        : await deleteCouponAction(deletingId);
       if (!res.success) throw new Error(res.error);
       toast.success(t('messages.delete_success'));
       setSelectedIds((prev) => prev.filter((id) => id !== deletingId));
