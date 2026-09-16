@@ -8,7 +8,7 @@ export default async function Home() {
   const rawRole = cookieStore.get(COOKIES_KEYS.role)?.value;
   const role = rawRole ? decodeURIComponent(rawRole).trim().toLowerCase() : '';
 
-  const isInstructor = role === 'instructor' || role === 'teacher';
+  const isInstructor = role === 'instructor';
 
   if (isInstructor) {
     return <InstructorHomeView />;
