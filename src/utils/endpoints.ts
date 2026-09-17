@@ -75,6 +75,7 @@ export const endpoints = {
     create: '/admin/courses',
     update: (id: string) => `/admin/courses/${id}`,
     delete: (id: string) => `/admin/courses/${id}`,
+    review: (id: string) => `/admin/courses/${id}/review`,
   },
   uploads: {
     upload: '/admin/uploads',

@@ -20,8 +20,10 @@ import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
+import { useAuth } from 'src/contexts/AuthContext';
 import { getCourses, deleteCourse } from 'src/actions/courses';
 import type { CourseDto, GetCoursesParams } from 'src/types/course';
+import ReviewCourseDialog from './ReviewCourseDialog';
 
 interface FormattedCourse {
   id: string;
@@ -45,6 +47,7 @@ export default function CoursesView() {
   const isRtl = locale === 'ar';
   const router = useRouter();
   const toast = useToast();
+  const { isAdmin } = useAuth();
 
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -58,6 +61,9 @@ export default function CoursesView() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<CourseDto | null>(null);
+
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [courseToReview, setCourseToReview] = useState<CourseDto | null>(null);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -153,11 +159,11 @@ export default function CoursesView() {
     let statusColor = '#137333';
 
     if (rawStatus === 'pending' || rawStatus === '0') {
-      statusLabel = 'قيد المراجعة';
+      statusLabel = t('status.pending');
       statusBg = '#FFF4E5';
       statusColor = '#B76E00';
     } else if (rawStatus === 'rejected' || rawStatus === '3') {
-      statusLabel = 'مرفوض';
+      statusLabel = t('status.rejected');
       statusBg = '#FCE8E6';
       statusColor = '#C5221F';
     } else if (rawStatus === 'paused' || rawStatus === '2' || item.isActive === false) {
@@ -240,6 +246,19 @@ export default function CoursesView() {
       label: t('actions.view'),
       icon: <Iconify icon="solar:eye-bold" />,
       onClick: (row: FormattedCourse) => router.push(`/courses/${row.id}`),
+    },
+    {
+      label: t('actions.review'),
+      icon: <Iconify icon="solar:shield-check-bold" />,
+      hide: (row: FormattedCourse) => {
+        if (!isAdmin) return true;
+        const s = String(row.raw.status ?? '').trim().toLowerCase();
+        return !(s === 'pending' || s === '0');
+      },
+      onClick: (row: FormattedCourse) => {
+        setCourseToReview(row.raw);
+        setReviewDialogOpen(true);
+      },
     },
     {
       label: t('actions.edit'),
@@ -554,6 +573,13 @@ export default function CoursesView() {
           </Box>
         </DialogContent>
       </Dialog>
+
+      <ReviewCourseDialog
+        open={reviewDialogOpen}
+        course={courseToReview}
+        onClose={() => setReviewDialogOpen(false)}
+        onReviewed={() => fetchCoursesData(false)}
+      />
     </Box>
   );
 }

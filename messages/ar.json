@@ -67,6 +67,8 @@
     },
     "status": {
       "active": "نشط",
+      "pending": "قيد المراجعة",
+      "rejected": "مرفوض",
       "paused": "متوقف"
     },
     "categories": {
@@ -87,7 +89,26 @@
     "actions": {
       "view": "عرض",
       "edit": "تعديل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "review": "مراجعة"
+    },
+    "ReviewCourse": {
+      "title": "مراجعة الدورة",
+      "accept": "قبول",
+      "reject": "رفض",
+      "accept_desc": "سيتم اعتماد هذه الدورة ونشرها وإتاحتها للطلاب.",
+      "rejection_reason_label": "سبب الرفض",
+      "rejection_reason_placeholder": "اشرح سبب رفض هذه الدورة...",
+      "rejection_reason_required": "يرجى إدخال سبب الرفض",
+      "platform_percentage_label": "نسبة المنصة (%)",
+      "platform_percentage_hint": "النسبة التي تحتفظ بها المنصة من كل عملية بيع (0 - 100).",
+      "platform_percentage_invalid": "يجب أن تكون نسبة المنصة بين 0 و 100",
+      "submit": "إرسال",
+      "submitting": "جارٍ الإرسال...",
+      "cancel": "إلغاء",
+      "accepted": "تم قبول الدورة بنجاح",
+      "rejected": "تم رفض الدورة",
+      "submit_failed": "فشل إرسال المراجعة"
     }
   },
   "CreateCourse": {

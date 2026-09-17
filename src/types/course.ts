@@ -140,3 +140,9 @@ export interface GetCoursesParams {
   SpecializationId?: string;
   InstructorId?: string;
 }
+
+export interface CourseReviewPayload {
+  accept: boolean;
+  rejectionReason?: string;
+  platformPercentage?: number;
+}

@@ -9,6 +9,26 @@ import { ApiResponse, ApiErrorResponse, RequestOptions } from 'src/types/crud-ty
 // Base URL for the API
 const API_BASE_URL = HOST_API;
 
+// Endpoints that differ per role: INSTRUCTOR uses its own scoped/lookups endpoints
+const INSTRUCTOR_ENDPOINT_REWRITES: Record<string, string> = {
+  '/admin/courses': '/instructor/courses',
+  '/admin/specializations': '/instructor/lookups/specializations',
+  '/admin/faculties': '/instructor/lookups/faculties',
+  '/admin/study-materials': '/instructor/lookups/study-materials',
+  '/admin/fields': '/instructor/lookups/fields',
+  '/admin/currencies': '/instructor/lookups/currencies',
+  '/admin/universities': '/instructor/lookups/universities',
+};
+
+function resolveEndpointForRole(endpoint: string, role: string): string {
+  if (role !== 'instructor') return endpoint;
+  const matchedPrefix = Object.keys(INSTRUCTOR_ENDPOINT_REWRITES).find((prefix) =>
+    endpoint.startsWith(prefix)
+  );
+  if (!matchedPrefix) return endpoint;
+  return `${INSTRUCTOR_ENDPOINT_REWRITES[matchedPrefix]}${endpoint.slice(matchedPrefix.length)}`;
+}
+
 function isFormData(value: unknown) {
   return value instanceof FormData;
 }
@@ -36,11 +56,14 @@ async function apiRequest<TResponse, TBody = undefined>(
   options: RequestOptions = {}
 ): Promise<ApiResponse<TResponse>> {
   const t = await getTranslations('Global.Server');
-  const url = `${API_BASE_URL}${endpoint}`;
   const cookie = await cookies();
 
   const token = cookie.get(COOKIES_KEYS.session)?.value;
   const lang = cookie.get(COOKIES_KEYS.lang)?.value || defaultLocale;
+  const rawRole = cookie.get(COOKIES_KEYS.role)?.value;
+  const role = rawRole ? decodeURIComponent(rawRole).toLowerCase() : '';
+
+  const url = `${API_BASE_URL}${resolveEndpointForRole(endpoint, role)}`;
 
   const headers = {
     ...(!isFormData(body) && {
