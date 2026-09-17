@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'src/i18n/routing';
 import { useToast } from 'src/components/toast';
+import { useAuth } from 'src/contexts/AuthContext';
 
 import { getUniversitiesAction } from 'src/actions/unversity';
 import { getFaculties, type FacultyDto } from 'src/actions/faculties';
@@ -56,6 +57,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   const t = useTranslations('CreateCourse');
   const router = useRouter();
   const toast = useToast();
+  const { isInstructor } = useAuth();
 
   const [activeStep, setActiveStep] = useState(1);
   const [formValues, setFormValues] = useState<CourseFormValues>(initialValues);
@@ -97,10 +99,11 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   }, []);
 
   useEffect(() => {
+    if (isInstructor) return;
     getInstructors({ MaxResultCount: 1000 }).then((res) => {
       if (res.success && res.data) setInstructors(res.data.items.map((item) => ({ id: item.id, name: item.name })));
     });
-  }, []);
+  }, [isInstructor]);
 
   useEffect(() => {
     getCurrenciesAction({ IsActive: true, MaxResultCount: 1000 }).then((res) => {
@@ -212,7 +215,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
         specializationId: initialCourse.specializationId ?? '',
         facultyId: initialCourse.facultyId ?? '',
         studyMaterialId: initialCourse.studyMaterialId ?? '',
-        instructorId: initialCourse.instructorId ?? '',
+        instructorId: isInstructor ? '' : initialCourse.instructorId ?? '',
         fieldId: initialCourse.fieldId ?? '',
         universityId,
         academicYearId,
@@ -371,7 +374,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
     if (!formValues.type) newErrors.type = t('messages.validation_required');
     if (!formValues.price) newErrors.price = t('messages.validation_required');
     if (!formValues.currencyId) newErrors.currencyId = t('messages.validation_required');
-    if (!formValues.instructorId) newErrors.instructorId = t('messages.validation_required');
+    if (!isInstructor && !formValues.instructorId) newErrors.instructorId = t('messages.validation_required');
     if (!formValues.facultyId) newErrors.facultyId = t('messages.validation_required');
     if (!formValues.fieldId) newErrors.fieldId = t('messages.validation_required');
 
@@ -435,6 +438,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
     formValues,
     errors,
     isSubmitting,
+    isInstructor,
     universities,
     fields,
     instructors,

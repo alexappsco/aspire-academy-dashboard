@@ -18,6 +18,10 @@ const INSTRUCTOR_ENDPOINT_REWRITES: Record<string, string> = {
   '/admin/fields': '/instructor/lookups/fields',
   '/admin/currencies': '/instructor/lookups/currencies',
   '/admin/universities': '/instructor/lookups/universities',
+  '/admin/academic-years': '/instructor/lookups/academic-years',
+  '/admin/semesters': '/instructor/lookups/semesters',
+  '/admin/uploads': '/instructor/uploads',
+  '/admin/attachments': '/instructor/attachments',
 };
 
 function resolveEndpointForRole(endpoint: string, role: string): string {

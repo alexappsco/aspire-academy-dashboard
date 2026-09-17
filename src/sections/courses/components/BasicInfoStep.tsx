@@ -39,6 +39,7 @@ interface BasicInfoStepProps {
   loadingSpecializations: boolean;
   loadingStudyMaterials: boolean;
   imageRequired?: boolean;
+  hideInstructor?: boolean;
 }
 
 const inputRootSx = {
@@ -85,6 +86,7 @@ export default function BasicInfoStep({
   loadingSpecializations,
   loadingStudyMaterials,
   imageRequired = true,
+  hideInstructor = false,
 }: BasicInfoStepProps) {
   const t = useTranslations('CreateCourse');
   const locale = useLocale();
@@ -282,6 +284,7 @@ export default function BasicInfoStep({
 
           {/* Row 5: Instructor + University */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
+            {!hideInstructor && (
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 {t('basic_info.lecturer_label')}
@@ -302,6 +305,7 @@ export default function BasicInfoStep({
               </SelectField>
               {errors.instructorId && <FormHelperText error>{errors.instructorId}</FormHelperText>}
             </Box>
+            )}
 
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1 }}>
