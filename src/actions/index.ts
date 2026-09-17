@@ -19,3 +19,4 @@ export * from './students';
 export * from './faqs';
 export * from './pages';
 export * from './instructor-coupons';
+export * from './instructor-dashboard';
