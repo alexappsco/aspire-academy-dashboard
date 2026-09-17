@@ -7,24 +7,47 @@ import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import DialogContent from '@mui/material/DialogContent';
-import { useTranslations } from 'next-intl';
+import Chip from '@mui/material/Chip';
+import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
-import { NotificationItem } from './_mock';
+import type { AdminNotificationItemDto } from 'src/types/admin-notification';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  notification: NotificationItem | null;
+  notification: AdminNotificationItemDto | null;
 }
 
 export default function NotificationDetailsDialog({ open, onClose, notification }: Props) {
   const t = useTranslations('Notifications.details');
-  const tUserTypes = useTranslations('Notifications.user_types');
+  const tTypes = useTranslations('Notifications.types');
+  const locale = useLocale();
 
   if (!notification) return null;
 
-  const title = `${notification.title_ar} - ${notification.title_en}`;
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    try {
+      return tTypes(type);
+    } catch {
+      return type;
+    }
+  };
 
   return (
     <Dialog
@@ -37,8 +60,8 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
           sx: {
             borderRadius: 3,
             p: 1.5,
-          }
-        }
+          },
+        },
       }}
     >
       {/* Header with Title and Close Button */}
@@ -52,7 +75,7 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.1rem', color: '#1C252E' }}>
-          {title}
+          {t('title')}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ color: '#919EAB' }}>
           <Iconify icon="mingcute:close-line" width={20} />
@@ -61,6 +84,70 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
 
       <DialogContent sx={{ px: 2, pb: 2, pt: 1 }}>
         <Stack spacing={2.5}>
+          {/* Optional Image */}
+          {notification.imageUrl && (
+            <Box
+              sx={{
+                width: '100%',
+                maxHeight: 200,
+                borderRadius: 2,
+                overflow: 'hidden',
+                bgcolor: '#F4F6F8',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid #E2E8F0',
+              }}
+            >
+              <Box
+                component="img"
+                src={notification.imageUrl}
+                alt={notification.titleAr}
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: 200,
+                  objectFit: 'contain',
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Type Badge & Date */}
+          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+            <Chip
+              label={getTypeLabel(notification.type)}
+              size="small"
+              sx={{
+                bgcolor: '#E0F2FE',
+                color: '#0284C7',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+              }}
+            />
+            <Typography variant="caption" sx={{ color: '#919EAB', fontWeight: 500 }}>
+              {formatDate(notification.createdAt)}
+            </Typography>
+          </Stack>
+
+          {/* Titles */}
+          <Box>
+            <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 0.5 }}>
+              {t('title_ar')}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C252E' }}>
+              {notification.titleAr}
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 0.5 }}>
+              {t('title_en')}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C252E' }}>
+              {notification.titleEn}
+            </Typography>
+          </Box>
+
           {/* Content Arabic */}
           <Box>
             <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 1 }}>
@@ -75,9 +162,10 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
                 color: '#1C252E',
                 fontSize: '0.9rem',
                 minHeight: 56,
+                whiteSpace: 'pre-wrap',
               }}
             >
-              {notification.content_ar}
+              {notification.messageAr}
             </Box>
           </Box>
 
@@ -95,41 +183,12 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
                 color: '#1C252E',
                 fontSize: '0.9rem',
                 minHeight: 56,
+                whiteSpace: 'pre-wrap',
               }}
             >
-              {notification.content_en}
+              {notification.messageEn}
             </Box>
           </Box>
-
-          {/* Footer Metadata */}
-          <Stack
-            direction="row"
-            spacing={4}
-            sx={{
-              pt: 1.5,
-              fontSize: '0.875rem',
-              color: '#1B8354',
-              fontWeight: 600,
-            }}
-          >
-            <Box>
-              <Typography component="span" sx={{ color: '#637381', fontWeight: 600 }}>
-                {t('user_type_label')} :{' '}
-              </Typography>
-              <Typography component="span" sx={{ color: '#1B8354', fontWeight: 700 }}>
-                {tUserTypes(notification.userType)}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography component="span" sx={{ color: '#637381', fontWeight: 600 }}>
-                {t('user_label')} :{' '}
-              </Typography>
-              <Typography component="span" sx={{ color: '#1B8354', fontWeight: 700 }}>
-                {notification.userName}
-              </Typography>
-            </Box>
-          </Stack>
         </Stack>
       </DialogContent>
     </Dialog>

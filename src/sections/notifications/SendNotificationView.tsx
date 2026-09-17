@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -9,59 +9,121 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import IconButton from '@mui/material/IconButton';
 import { useTranslations } from 'next-intl';
 
 import SelectField from 'src/components/SelectField/SelectField';
+import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
+import { createAdminNotificationAction } from 'src/actions/admin-notifications';
 
 interface Props {
   onCancel: () => void;
-  onSend: (newNotification: {
-    title_ar: string;
-    title_en: string;
-    content_ar: string;
-    content_en: string;
-    userType: 'student' | 'lecturer';
-    userName: string;
-  }) => void;
+  onSuccess: () => void;
 }
 
-export default function SendNotificationView({ onCancel, onSend }: Props) {
+export default function SendNotificationView({ onCancel, onSuccess }: Props) {
   const t = useTranslations('Notifications.send_form');
+  const tTypes = useTranslations('Notifications.types');
+  const tUserTypes = useTranslations('Notifications.user_types');
+  const toast = useToast();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [titleAr, setTitleAr] = useState('');
   const [titleEn, setTitleEn] = useState('');
-  const [contentAr, setContentAr] = useState('');
-  const [contentEn, setContentEn] = useState('');
-  const [studentTarget, setStudentTarget] = useState('all');
-  const [merchantTarget, setMerchantTarget] = useState('all');
+  const [messageAr, setMessageAr] = useState('');
+  const [messageEn, setMessageEn] = useState('');
+  const [type, setType] = useState<'General' | 'CoursePromo' | 'PurchaseComplete'>('General');
+  const [targetRole, setTargetRole] = useState<'Student' | 'Instructor'>('Student');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSend = () => {
-    if (!titleAr.trim() || !titleEn.trim() || !contentAr.trim() || !contentEn.trim()) {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSend = async () => {
+    if (!titleAr.trim() || !titleEn.trim() || !messageAr.trim() || !messageEn.trim()) {
+      toast.error(t('validation_required'));
       return;
     }
-    // Triggers callback to add notification and go back to list
-    onSend({
-      title_ar: titleAr,
-      title_en: titleEn,
-      content_ar: contentAr,
-      content_en: contentEn,
-      userType: 'student', // Mock default target type
-      userName: 'النظام',
-    });
+
+    try {
+      setSubmitting(true);
+      const formData = new FormData();
+      formData.append('TitleAr', titleAr.trim());
+      formData.append('TitleEn', titleEn.trim());
+      formData.append('MessageAr', messageAr.trim());
+      formData.append('MessageEn', messageEn.trim());
+      formData.append('Type', type);
+      formData.append('TargetRole', targetRole);
+
+      if (imageFile) {
+        formData.append('Image', imageFile);
+      }
+
+      const res = await createAdminNotificationAction(formData);
+
+      if (res.success) {
+        toast.success(t('send_success'));
+        onSuccess();
+      } else {
+        toast.error(res.error || t('send_error'));
+      }
+    } catch (err) {
+      console.error('Failed to create notification:', err);
+      toast.error(err instanceof Error ? err.message : t('send_error'));
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const isFormValid =
+    Boolean(titleAr.trim()) &&
+    Boolean(titleEn.trim()) &&
+    Boolean(messageAr.trim()) &&
+    Boolean(messageEn.trim());
 
   return (
     <Box sx={{ py: 2 }}>
-      {/* Title */}
-      <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E', mb: 4 }}>
-        {t('title')}
-      </Typography>
+      {/* Page Title */}
+      <Stack direction="row" sx={{ alignItems: 'center', mb: 3, gap: 1 }}>
+        <Button
+          variant="text"
+          onClick={onCancel}
+          sx={{ color: '#637381', minWidth: 'auto', p: 0.5, mr: 1 }}
+        >
+          <Iconify icon="solar:arrow-right-linear" width={24} />
+        </Button>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
+          {t('title')}
+        </Typography>
+      </Stack>
 
-      {/* Form Card */}
+      {/* Main Content Form Card */}
       <Card
         sx={{
           borderRadius: 3,
-          p: 3,
+          p: 3.5,
           mb: 3,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.02)',
           border: '1px solid #F1F3F5',
@@ -69,12 +131,12 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
         }}
       >
         <Grid container spacing={4}>
-          {/* English Form Column (placed on left or right based on direction; here we order English/Arabic side by side) */}
+          {/* English Fields */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-                  {t('title_en_label')}
+                  {t('title_en_label')} *
                 </Typography>
                 <TextField
                   fullWidth
@@ -96,15 +158,15 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
 
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-                  {t('content_en_label')}
+                  {t('content_en_label')} *
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
-                  rows={8}
+                  rows={6}
                   placeholder={t('content_en_placeholder')}
-                  value={contentEn}
-                  onChange={(e) => setContentEn(e.target.value)}
+                  value={messageEn}
+                  onChange={(e) => setMessageEn(e.target.value)}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
@@ -119,12 +181,12 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
             </Stack>
           </Grid>
 
-          {/* Arabic Form Column */}
+          {/* Arabic Fields */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-                  {t('title_ar_label')}
+                  {t('title_ar_label')} *
                 </Typography>
                 <TextField
                   fullWidth
@@ -146,15 +208,15 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
 
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-                  {t('content_ar_label')}
+                  {t('content_ar_label')} *
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
-                  rows={8}
+                  rows={6}
                   placeholder={t('content_ar_placeholder')}
-                  value={contentAr}
-                  onChange={(e) => setContentAr(e.target.value)}
+                  value={messageAr}
+                  onChange={(e) => setMessageAr(e.target.value)}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
@@ -171,11 +233,11 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
         </Grid>
       </Card>
 
-      {/* Target Audiences Card */}
+      {/* Target Audiences & Notification Configuration */}
       <Card
         sx={{
           borderRadius: 3,
-          p: 3,
+          p: 3.5,
           mb: 4,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.02)',
           border: '1px solid #F1F3F5',
@@ -183,16 +245,16 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
         }}
       >
         <Grid container spacing={3}>
-          {/* Merchants Selection */}
+          {/* Target Role */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-              {t('merchants_label')}
+              {t('target_role_label')} *
             </Typography>
             <SelectField
               fullWidth
               size="small"
-              value={merchantTarget}
-              onChange={(e) => setMerchantTarget(e.target.value)}
+              value={targetRole}
+              onChange={(e) => setTargetRole(e.target.value as 'Student' | 'Instructor')}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -203,21 +265,23 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
                 },
               }}
             >
-              <MenuItem value="all">الكل</MenuItem>
-              <MenuItem value="active_merchants">النشطين</MenuItem>
+              <MenuItem value="Student">{tUserTypes('Student')}</MenuItem>
+              <MenuItem value="Instructor">{tUserTypes('Instructor')}</MenuItem>
             </SelectField>
           </Grid>
 
-          {/* Students Selection */}
+          {/* Notification Type */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
-              {t('students_label')}
+              {t('type_label')} *
             </Typography>
             <SelectField
               fullWidth
               size="small"
-              value={studentTarget}
-              onChange={(e) => setStudentTarget(e.target.value)}
+              value={type}
+              onChange={(e) =>
+                setType(e.target.value as 'General' | 'CoursePromo' | 'PurchaseComplete')
+              }
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2,
@@ -228,25 +292,97 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
                 },
               }}
             >
-              <MenuItem value="all">الكل</MenuItem>
-              <MenuItem value="active_students">النشطين</MenuItem>
+              <MenuItem value="General">{tTypes('General')}</MenuItem>
+              <MenuItem value="CoursePromo">{tTypes('CoursePromo')}</MenuItem>
+              <MenuItem value="PurchaseComplete">{tTypes('PurchaseComplete')}</MenuItem>
             </SelectField>
+          </Grid>
+
+          {/* Image Upload Field */}
+          <Grid size={{ xs: 12 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1C252E', mb: 1 }}>
+              {t('image_label')}
+            </Typography>
+
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleImageChange}
+            />
+
+            {imagePreview ? (
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: 200,
+                  height: 140,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  border: '1px solid #E2E8F0',
+                  bgcolor: '#F8FAFC',
+                }}
+              >
+                <Box
+                  component="img"
+                  src={imagePreview}
+                  alt="preview"
+                  sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                <IconButton
+                  size="small"
+                  onClick={handleRemoveImage}
+                  sx={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    bgcolor: 'rgba(0, 0, 0, 0.6)',
+                    color: '#FFFFFF',
+                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' },
+                  }}
+                >
+                  <Iconify icon="mingcute:close-line" width={16} />
+                </IconButton>
+              </Box>
+            ) : (
+              <Button
+                variant="outlined"
+                onClick={() => fileInputRef.current?.click()}
+                startIcon={<Iconify icon="solar:camera-add-bold" />}
+                sx={{
+                  borderStyle: 'dashed',
+                  borderColor: '#CBD5E1',
+                  color: '#475569',
+                  borderRadius: 2,
+                  py: 1.5,
+                  px: 3,
+                  '&:hover': {
+                    borderColor: '#1B8354',
+                    bgcolor: '#F4FBF7',
+                  },
+                }}
+              >
+                {t('image_upload_btn')}
+              </Button>
+            )}
           </Grid>
         </Grid>
       </Card>
 
-      {/* Form Buttons */}
+      {/* Form Action Buttons */}
       <Stack direction="row" spacing={2} sx={{ justifyContent: 'flex-start' }}>
         <Button
           variant="contained"
           onClick={handleSend}
-          disabled={!titleAr.trim() || !titleEn.trim() || !contentAr.trim() || !contentEn.trim()}
+          disabled={!isFormValid || submitting}
+          startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: 1.5,
             px: 4,
-            py: 1,
+            py: 1.25,
             fontWeight: 700,
             boxShadow: 'none',
             '&:hover': {
@@ -258,18 +394,19 @@ export default function SendNotificationView({ onCancel, onSend }: Props) {
             },
           }}
         >
-          {t('send_btn')}
+          {submitting ? t('sending') : t('send_btn')}
         </Button>
 
         <Button
           variant="outlined"
           onClick={onCancel}
+          disabled={submitting}
           sx={{
             borderColor: '#919EAB40',
             color: '#637381',
             borderRadius: 1.5,
             px: 4,
-            py: 1,
+            py: 1.25,
             fontWeight: 700,
             '&:hover': {
               borderColor: '#919EAB80',
