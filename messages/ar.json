@@ -1632,12 +1632,38 @@
       "rows_per_page": "Rows per page: 6",
       "pagination_info": "1-6 of 12"
     },
+    "attention": {
+      "title": "تحتاج إلى انتباهك",
+      "pending_tasks": "{count} مهام معلقة",
+      "pending_review_title": "دورات بانتظار المراجعة",
+      "pending_review_desc": "بانتظار موافقة الادمن وتحتاج إلى المراجعة قبل النشر للطلاب.",
+      "review_courses_btn": "مراجعة الدورات",
+      "accepted_courses_title": "الدورات المقبولة",
+      "accepted_courses_desc": "تم تأكيد الدورة من قبل الادمن وتم نشر الدورة للطلاب",
+      "rejected_courses_title": "دورات مرفوضة",
+      "rejected_courses_desc": "دورات تحتاج إلى متابعة لمعرفة سبب الرفض واستكمال النواقص.",
+      "view_courses_btn": "عرض الدورات"
+    },
+    "charts": {
+      "course_status_title": "حالة الدورات التدريبية",
+      "total_courses": "إجمالي الدورات: {count} دورة",
+      "registered_course": "دورة مسجلة",
+      "status_published": "منشورة",
+      "status_under_review": "قيد مراجعة الإدارة",
+      "status_rejected": "مرفوضة / بحاجة لتعديل",
+      "student_growth_title": "نمو تسجيل الطلاب",
+      "student_growth_subtitle": "{count} طالبًا جديدًا خلال الفترة المحددة ({percent}% مقارنة بالفترة السابقة)",
+      "filter_last_30_days": "آخر 30 يومًا"
+    },
     "earnings": {
       "title": "نظرة عامة على الأرباح",
       "subtitle": "توزيع الإيرادات بحسب اتفاقية المشاركة",
-      "total_sales": "إجمالي المبيعات",
-      "instructor_share": "أرباحك المستحقة ({percent}%)",
-      "platform_fee": "رسوم المنصة ({percent}%)",
+      "total_sales": "إجمالي الإيرادات المحققة:",
+      "instructor_share": "حصتك من الأرباح ({percent}%):",
+      "platform_fee": "حصة المنصة ({percent}%):",
+      "your_share": "حصتك: {percent}%",
+      "platform_share": "المنصة: {percent}%",
+      "contract_note": "مُحدد من قبل الإدارة بناءً على عقد المحاضر الخاص بك",
       "distribution_ratio": "نسبة التوزيع المتفق عليها",
       "ratio_summary": "70% لك / 30% للمنصة",
       "view_reports": "عرض التقارير المالية المفصلة"

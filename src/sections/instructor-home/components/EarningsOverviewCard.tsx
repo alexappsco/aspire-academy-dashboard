@@ -34,20 +34,20 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
     >
       {/* Top Header */}
       <Box>
-        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5 }}>
+        <Stack direction="row" sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 3 }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.05rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1C252E', fontSize: '1.1rem' }}>
               {t('title')}
             </Typography>
-            <Typography sx={{ color: '#94A3B8', fontSize: '0.8rem', mt: 0.25 }}>
+            <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem', mt: 0.5 }}>
               {t('subtitle')}
             </Typography>
           </Box>
 
           <Box
             sx={{
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: '10px',
               bgcolor: '#ECFDF5',
               display: 'flex',
@@ -61,34 +61,34 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
         </Stack>
 
         {/* Revenue Breakdown */}
-        <Stack spacing={1.75} sx={{ my: 2.5 }}>
-          {/* Total revenue */}
+        <Stack spacing={2} sx={{ my: 3 }}>
+          {/* Total achieved revenue */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748B' }}>
-              {t('total_sales')}:
+              {t('total_sales')}
             </Typography>
-            <Typography sx={{ fontSize: '1rem', fontWeight: 800, color: '#1C252E' }}>
-              ${earnings.totalRevenue.toLocaleString()}
+            <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: '#1C252E' }}>
+              ${(earnings?.totalRevenue ?? 0).toLocaleString()}
             </Typography>
           </Stack>
 
           {/* Instructor share */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
-              {t('instructor_share', { percent: earnings.instructorPercentage })}:
+            <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: '#1C252E' }}>
+              {t('instructor_share', { percent: earnings?.instructorPercentage ?? 70 })}
             </Typography>
             <Typography sx={{ fontSize: '1.25rem', fontWeight: 800, color: '#2563EB' }}>
-              ${earnings.instructorShare.toLocaleString()}
+              ${(earnings?.instructorShare ?? 0).toLocaleString()}
             </Typography>
           </Stack>
 
           {/* Platform share */}
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: '#94A3B8' }}>
-              {t('platform_fee', { percent: earnings.platformPercentage })}:
+              {t('platform_fee', { percent: earnings?.platformPercentage ?? 30 })}
             </Typography>
             <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#64748B' }}>
-              ${earnings.platformShare.toLocaleString()}
+              ${(earnings?.platformShare ?? 0).toLocaleString()}
             </Typography>
           </Stack>
         </Stack>
@@ -96,35 +96,35 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
         {/* Progress Bar & Legend */}
         <Box sx={{ mt: 3, mb: 1 }}>
           {/* Legend */}
-          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'flex-end', mb: 1 }}>
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#E2E8F0' }} />
-              <Typography sx={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500 }}>
-                {earnings.platformPercentage}%
+          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.25 }}>
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#CBD5E1' }} />
+              <Typography sx={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>
+                {t('platform_share', { percent: earnings?.platformPercentage ?? 30 })}
               </Typography>
             </Stack>
 
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#2563EB' }} />
-              <Typography sx={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 700 }}>
-                {earnings.instructorPercentage}%
+            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
+              <Typography sx={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: 700 }}>
+                {t('your_share', { percent: earnings?.instructorPercentage ?? 70 })}
               </Typography>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#2563EB' }} />
             </Stack>
           </Stack>
 
           {/* Progress track */}
           <Box
             sx={{
-              height: 10,
+              height: 12,
               borderRadius: '999px',
-              bgcolor: '#F1F5F9',
+              bgcolor: '#E2E8F0',
               overflow: 'hidden',
               display: 'flex',
             }}
           >
             <Box
               sx={{
-                width: `${earnings.instructorPercentage}%`,
+                width: `${earnings?.instructorPercentage ?? 70}%`,
                 height: '100%',
                 bgcolor: '#2563EB',
                 borderRadius: '999px',
@@ -132,15 +132,15 @@ export default function EarningsOverviewCard({ earnings, onViewReports }: Props)
             />
           </Box>
 
-          {/* Caption */}
+          {/* Contract note Caption */}
           <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mt: 1.5, textAlign: 'left' }}>
-            {t('ratio_summary')}
+            {t('contract_note')}
           </Typography>
         </Box>
       </Box>
 
       {/* Bottom link */}
-      <Box sx={{ pt: 2, mt: 2, borderTop: '1px solid #F1F5F9' }}>
+      <Box sx={{ pt: 2, mt: 2, borderTop: '1px solid #F8FAFC' }}>
         <Button
           onClick={onViewReports}
           endIcon={<Iconify icon="solar:arrow-left-linear" width={16} />}
