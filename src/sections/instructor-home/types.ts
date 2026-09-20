@@ -3,10 +3,73 @@ export interface InstructorKpiStats {
   pendingReviewCourses: number;
   enrolledStudents: number;
   monthlyStudentsGrowth: number;
-  upcomingLessons: number;
-  todayLessonsCount: number;
   monthlyEarnings: number;
   instructorSharePercentage: number;
+  upcomingLessons?: number;
+  todayLessonsCount?: number;
+}
+
+export interface InstructorAttentionItem {
+  id: string;
+  count: number;
+  title: string;
+  description: string;
+  badgeBg: string;
+  badgeColor: string;
+  borderColor: string;
+  buttonText: string;
+  buttonVariant: 'amber' | 'emerald' | 'subtle';
+  actionType: 'pending_review' | 'accepted' | 'rejected';
+}
+
+export interface InstructorAttentionData {
+  pendingTasksCount: number;
+  items: InstructorAttentionItem[];
+}
+
+export interface CourseStatusItem {
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+export interface CourseStatusChartData {
+  totalCount: number;
+  items: CourseStatusItem[];
+}
+
+export interface StudentGrowthPoint {
+  month: string;
+  count: number;
+  isCurrent?: boolean;
+}
+
+export interface StudentGrowthChartData {
+  newStudentsCount: number;
+  growthPercentage: number;
+  dataPoints: StudentGrowthPoint[];
+}
+
+export interface InstructorCourseRow {
+  id: string;
+  title: string;
+  specialization: string;
+  studentsCount: string;
+  rating: number;
+  price: number;
+  status: 'active' | 'under_review' | 'rejected';
+  statusText: string;
+  lastUpdated: string;
+}
+
+export interface EarningsBreakdown {
+  totalRevenue: number;
+  instructorShare: number;
+  instructorPercentage: number;
+  platformShare: number;
+  platformPercentage: number;
+  pendingPayout?: number;
 }
 
 export interface UpcomingLessonItem {
@@ -34,26 +97,6 @@ export interface DailyTimeSlot {
   duration?: string;
 }
 
-export interface InstructorCourseRow {
-  id: string;
-  title: string;
-  specialization: string;
-  studentsCount: string;
-  rating: number;
-  price: number;
-  status: 'active' | 'under_review' | 'rejected';
-  statusText: string;
-  lastUpdated: string;
-}
-
-export interface EarningsBreakdown {
-  totalRevenue: number;
-  instructorShare: number;
-  instructorPercentage: number;
-  platformShare: number;
-  platformPercentage: number;
-}
-
 export interface WeeklyAvailabilityDay {
   dayName: string;
   timeRange?: string;
@@ -63,11 +106,14 @@ export interface WeeklyAvailabilityDay {
 export interface InstructorDashboardData {
   instructorName: string;
   kpis: InstructorKpiStats;
-  upcomingLessons: UpcomingLessonItem[];
-  todayScheduleDate: string;
-  todaySchedule: DailyTimeSlot[];
+  attention: InstructorAttentionData;
+  courseStatus: CourseStatusChartData;
+  studentGrowth: StudentGrowthChartData;
   courses: InstructorCourseRow[];
   coursesTotalCount: number;
   earnings: EarningsBreakdown;
-  weeklyAvailability: WeeklyAvailabilityDay[];
+  upcomingLessons?: UpcomingLessonItem[];
+  todayScheduleDate?: string;
+  todaySchedule?: DailyTimeSlot[];
+  weeklyAvailability?: WeeklyAvailabilityDay[];
 }

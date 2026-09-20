@@ -59,28 +59,6 @@ export default function InstructorKpiCards({ stats }: Props) {
       ),
     },
     {
-      id: 'upcoming_lessons',
-      title: t('upcoming_lessons'),
-      value: stats.upcomingLessons,
-      icon: 'solar:videocamera-record-bold',
-      iconBg: '#EEF2FF',
-      iconColor: '#4F46E5',
-      footer: (
-        <Chip
-          label={t('today_lessons', { count: stats.todayLessonsCount })}
-          size="small"
-          sx={{
-            bgcolor: '#EFF6FF',
-            color: '#2563EB',
-            fontWeight: 700,
-            fontSize: '0.75rem',
-            borderRadius: '6px',
-            height: 24,
-          }}
-        />
-      ),
-    },
-    {
       id: 'monthly_earnings',
       title: t('monthly_earnings'),
       value: `$${stats.monthlyEarnings.toLocaleString()}`,
@@ -98,7 +76,7 @@ export default function InstructorKpiCards({ stats }: Props) {
   return (
     <Grid container spacing={2.5} sx={{ mb: 3 }}>
       {cards.map((card) => (
-        <Grid key={card.id} size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Grid key={card.id} size={{ xs: 12, md: 4 }}>
           <Card
             sx={{
               p: 2.5,

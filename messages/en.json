@@ -1654,12 +1654,38 @@
       "rows_per_page": "Rows per page: 6",
       "pagination_info": "1-6 of 12"
     },
+    "attention": {
+      "title": "Needs Your Attention",
+      "pending_tasks": "{count} Pending Tasks",
+      "pending_review_title": "Courses Awaiting Review",
+      "pending_review_desc": "Pending admin approval and requires review before publishing to students.",
+      "review_courses_btn": "Review Courses",
+      "accepted_courses_title": "Accepted Courses",
+      "accepted_courses_desc": "The course was confirmed by admin and published for students",
+      "rejected_courses_title": "Rejected Courses",
+      "rejected_courses_desc": "Courses that need follow-up to know rejection reasons and complete missing items.",
+      "view_courses_btn": "View Courses"
+    },
+    "charts": {
+      "course_status_title": "Courses Status",
+      "total_courses": "Total Courses: {count} Courses",
+      "registered_course": "Registered Course",
+      "status_published": "Published",
+      "status_under_review": "Under Admin Review",
+      "status_rejected": "Rejected / Needs Modification",
+      "student_growth_title": "Student Enrollment Growth",
+      "student_growth_subtitle": "{count} new students in selected period ({percent}% compared to previous)",
+      "filter_last_30_days": "Last 30 Days"
+    },
     "earnings": {
       "title": "Earnings Overview",
       "subtitle": "Revenue distribution according to the partnership agreement",
-      "total_sales": "Total Sales",
-      "instructor_share": "Your Share ({percent}%)",
-      "platform_fee": "Platform Fee ({percent}%)",
+      "total_sales": "Total Achieved Revenue:",
+      "instructor_share": "Your Share of Profits ({percent}%):",
+      "platform_fee": "Platform Fee ({percent}%):",
+      "your_share": "Your Share: {percent}%",
+      "platform_share": "Platform: {percent}%",
+      "contract_note": "Determined by administration based on your instructor contract",
       "distribution_ratio": "Agreed Distribution Ratio",
       "ratio_summary": "70% You / 30% Platform",
       "view_reports": "View Detailed Financial Reports"

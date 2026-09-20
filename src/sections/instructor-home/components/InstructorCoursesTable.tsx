@@ -6,16 +6,11 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Iconify from 'src/components/iconify';
+import SharedTable from 'src/components/SharedTable/SharedTable';
+import { headCellType, cellAlignment, Action } from 'src/components/SharedTable/types';
 import type { InstructorCourseRow } from '../types';
 
 interface Props {
@@ -33,7 +28,7 @@ export default function InstructorCoursesTable({
 }: Props) {
   const t = useTranslations('InstructorHome.courses');
 
-  const getStatusChip = (status: InstructorCourseRow['status'], label: string) => {
+  const getStatusChip = (status: InstructorCourseRow['status']) => {
     switch (status) {
       case 'active':
         return (
@@ -80,6 +75,61 @@ export default function InstructorCoursesTable({
       default:
         return null;
     }
+  };
+
+  const tableHead: headCellType[] = [
+    { id: 'title', label: t('col_title'), align: cellAlignment.right },
+    { id: 'specialization', label: t('col_specialization'), align: cellAlignment.center },
+    { id: 'studentsCount', label: t('col_students'), align: cellAlignment.center },
+    { id: 'rating', label: t('col_rating'), align: cellAlignment.center },
+    { id: 'price', label: t('col_price'), align: cellAlignment.center },
+    { id: 'status', label: t('col_status'), align: cellAlignment.center },
+    { id: 'lastUpdated', label: t('col_last_updated'), align: cellAlignment.center },
+  ];
+
+  const actions: Action<InstructorCourseRow>[] = [
+    {
+      label: t('col_title'),
+      icon: <Iconify icon="solar:eye-bold" />,
+      onClick: (row) => onCourseAction?.(row),
+    },
+  ];
+
+  const customRender = {
+    title: (row: InstructorCourseRow) => (
+      <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1C252E' }}>
+        {row.title}
+      </Typography>
+    ),
+    specialization: (row: InstructorCourseRow) => (
+      <Typography sx={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
+        {row.specialization}
+      </Typography>
+    ),
+    studentsCount: (row: InstructorCourseRow) => (
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
+        {row.studentsCount}
+      </Typography>
+    ),
+    rating: (row: InstructorCourseRow) => (
+      <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
+        <Iconify icon="solar:star-bold" width={16} sx={{ color: '#F59E0B' }} />
+        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
+          {row.rating}
+        </Typography>
+      </Stack>
+    ),
+    price: (row: InstructorCourseRow) => (
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
+        {row.price}
+      </Typography>
+    ),
+    status: (row: InstructorCourseRow) => getStatusChip(row.status),
+    lastUpdated: (row: InstructorCourseRow) => (
+      <Typography sx={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
+        {row.lastUpdated}
+      </Typography>
+    ),
   };
 
   return (
@@ -143,125 +193,23 @@ export default function InstructorCoursesTable({
         </Button>
       </Stack>
 
-      {/* Table */}
-      <TableContainer sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow sx={{ '& th': { borderBottom: '1px solid #F1F5F9', color: '#94A3B8', fontWeight: 600, fontSize: '0.8rem', py: 1.5 } }}>
-              <TableCell align="right">{t('col_title')}</TableCell>
-              <TableCell align="center">{t('col_specialization')}</TableCell>
-              <TableCell align="center">{t('col_students')}</TableCell>
-              <TableCell align="center">{t('col_rating')}</TableCell>
-              <TableCell align="center">{t('col_price')}</TableCell>
-              <TableCell align="center">{t('col_status')}</TableCell>
-              <TableCell align="center">{t('col_last_updated')}</TableCell>
-              <TableCell align="center" sx={{ width: 48 }} />
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {courses.map((course) => (
-              <TableRow
-                key={course.id}
-                sx={{
-                  '&:last-child td': { borderBottom: 0 },
-                  '& td': { py: 1.75, borderBottom: '1px solid #F8FAFC' },
-                }}
-              >
-                {/* Title */}
-                <TableCell align="right">
-                  <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1C252E' }}>
-                    {course.title}
-                  </Typography>
-                </TableCell>
-
-                {/* Specialization */}
-                <TableCell align="center">
-                  <Typography sx={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
-                    {course.specialization}
-                  </Typography>
-                </TableCell>
-
-                {/* Students Count */}
-                <TableCell align="center">
-                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
-                    {course.studentsCount}
-                  </Typography>
-                </TableCell>
-
-                {/* Rating */}
-                <TableCell align="center">
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
-                    <Iconify icon="solar:star-bold" width={16} sx={{ color: '#F59E0B' }} />
-                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
-                      {course.rating}
-                    </Typography>
-                  </Stack>
-                </TableCell>
-
-                {/* Price */}
-                <TableCell align="center">
-                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: '#1C252E' }}>
-                    {course.price}
-                  </Typography>
-                </TableCell>
-
-                {/* Status */}
-                <TableCell align="center">
-                  {getStatusChip(course.status, course.statusText)}
-                </TableCell>
-
-                {/* Last updated */}
-                <TableCell align="center">
-                  <Typography sx={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
-                    {course.lastUpdated}
-                  </Typography>
-                </TableCell>
-
-                {/* Actions */}
-                <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    onClick={() => onCourseAction?.(course)}
-                    sx={{ color: '#94A3B8', '&:hover': { color: '#1C252E' } }}
-                  >
-                    <Iconify icon="solar:menu-dots-bold" width={18} />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Footer Pagination Bar */}
-      <Stack
-        direction="row"
+      {/* Shared Table with Pagination aligned to the opposite side */}
+      <Box
         sx={{
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pt: 2,
-          mt: 1,
-          borderTop: '1px solid #F1F5F9',
+          '& .MuiTablePagination-toolbar': {
+            justifyContent: 'flex-start',
+          },
         }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
-            {t('rows_per_page')}
-          </Typography>
-          <Typography sx={{ fontSize: '0.8rem', color: '#64748B', ml: 2 }}>
-            {t('pagination_info')}
-          </Typography>
-        </Stack>
-
-        <Stack direction="row" spacing={0.5}>
-          <IconButton size="small" disabled sx={{ color: '#CBD5E1' }}>
-            <Iconify icon="solar:alt-arrow-right-linear" width={16} />
-          </IconButton>
-          <IconButton size="small" sx={{ color: '#64748B' }}>
-            <Iconify icon="solar:alt-arrow-left-linear" width={16} />
-          </IconButton>
-        </Stack>
-      </Stack>
+        <SharedTable<InstructorCourseRow>
+          data={courses}
+          count={totalCount}
+          tableHead={tableHead}
+          actions={actions}
+          customRender={customRender}
+          disablePagination={false}
+        />
+      </Box>
     </Card>
   );
 }
