@@ -82,6 +82,12 @@ export interface CourseObjective {
   order: number;
 }
 
+export enum CourseStatusEnum {
+  Pending = 1,
+  Accepted = 2,
+  Rejected = 3,
+}
+
 export interface CourseCurriculum {
   chapters: CourseChapter[];
 }
@@ -118,7 +124,7 @@ export interface CourseDto {
   ratingAverage?: number;
   ratingCount?: number;
   isActive?: boolean;
-  status?: string | number;
+  status?: CourseStatusEnum | string | number;
   rejectionReason?: string | null;
   reviewedAt?: string | null;
   lastUpdatedAt?: string;
@@ -137,6 +143,7 @@ export interface GetCoursesParams {
   SkipCount?: number;
   MaxResultCount?: number;
   IsActive?: boolean;
+  Status?: CourseStatusEnum | number;
   SpecializationId?: string;
   InstructorId?: string;
 }

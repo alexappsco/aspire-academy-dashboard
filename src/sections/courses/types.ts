@@ -79,6 +79,9 @@ export interface CourseCurriculum {
   chapters: CourseChapter[];
 }
 
+export { CourseStatusEnum } from 'src/types/course';
+import { CourseStatusEnum } from 'src/types/course';
+
 export interface CourseDto {
   id: string;
   title: string;
@@ -107,7 +110,7 @@ export interface CourseDto {
   ratingAverage?: number;
   ratingCount?: number;
   isActive?: boolean;
-  status?: string;
+  status?: CourseStatusEnum | string | number;
   rejectionReason?: string;
   reviewedAt?: string;
   lastUpdatedAt?: string;
@@ -126,6 +129,7 @@ export interface GetCoursesParams {
   SkipCount?: number;
   MaxResultCount?: number;
   IsActive?: boolean;
+  Status?: CourseStatusEnum | number;
   SpecializationId?: string;
   InstructorId?: string;
 }

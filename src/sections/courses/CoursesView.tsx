@@ -23,6 +23,7 @@ import { useToast } from 'src/components/toast';
 import { useAuth } from 'src/contexts/AuthContext';
 import { getCourses, deleteCourse } from 'src/actions/courses';
 import type { CourseDto, GetCoursesParams } from 'src/types/course';
+import { CourseStatusEnum } from 'src/types/course';
 import ReviewCourseDialog from './ReviewCourseDialog';
 
 interface FormattedCourse {
@@ -88,10 +89,11 @@ export default function CoursesView() {
           params.Filter = debouncedSearch.trim();
         }
 
-        if (selectedStatus === 'active') {
-          params.IsActive = true;
-        } else if (selectedStatus === 'paused') {
-          params.IsActive = false;
+        if (selectedStatus !== 'all') {
+          const statusNum = Number(selectedStatus);
+          if (!isNaN(statusNum)) {
+            params.Status = statusNum;
+          }
         }
 
         const res = await getCourses(params);
@@ -152,28 +154,30 @@ export default function CoursesView() {
     // Rating: reads ratingAverage from course root, or rating, or instructor ratingAverage, default 0
     const ratingValue = item.ratingAverage ?? item.rating ?? item.instructor?.ratingAverage ?? 0;
 
-    // Status mapping (handles string or numeric enum from backend)
+    // Status mapping based on CourseStatusEnum (Pending=1, Accepted=2, Rejected=3)
+    const numStatus = Number(item.status);
     const rawStatus = String(item.status ?? '').trim().toLowerCase();
-    let statusLabel = t('status.active');
+
+    let statusLabel = t('status.accepted');
     let statusBg = '#E6F4EA';
     let statusColor = '#137333';
 
-    if (rawStatus === 'pending' || rawStatus === '0') {
+    if (numStatus === CourseStatusEnum.Pending || rawStatus === 'pending' || rawStatus === '1' || rawStatus === '0') {
       statusLabel = t('status.pending');
       statusBg = '#FFF4E5';
       statusColor = '#B76E00';
-    } else if (rawStatus === 'rejected' || rawStatus === '3') {
+    } else if (numStatus === CourseStatusEnum.Rejected || rawStatus === 'rejected' || rawStatus === '3') {
       statusLabel = t('status.rejected');
       statusBg = '#FCE8E6';
       statusColor = '#C5221F';
-    } else if (rawStatus === 'paused' || rawStatus === '2' || item.isActive === false) {
+    } else if (numStatus === CourseStatusEnum.Accepted || rawStatus === 'accepted' || rawStatus === '2' || rawStatus === 'active') {
+      statusLabel = t('status.accepted');
+      statusBg = '#E6F4EA';
+      statusColor = '#137333';
+    } else if (rawStatus === 'paused' || item.isActive === false) {
       statusLabel = t('status.paused');
       statusBg = '#FCE8E6';
       statusColor = '#C5221F';
-    } else {
-      statusLabel = t('status.active');
-      statusBg = '#E6F4EA';
-      statusColor = '#137333';
     }
 
     return {
@@ -184,7 +188,7 @@ export default function CoursesView() {
       students: studentsDisplay,
       rating: ratingValue,
       price: priceDisplay,
-      status: String(item.status ?? (item.isActive !== false ? 'active' : 'paused')),
+      status: String(item.status ?? CourseStatusEnum.Accepted),
       statusLabel,
       statusBg,
       statusColor,
@@ -252,8 +256,9 @@ export default function CoursesView() {
       icon: <Iconify icon="solar:shield-check-bold" />,
       hide: (row: FormattedCourse) => {
         if (!isAdmin) return true;
+        const numS = Number(row.raw.status);
         const s = String(row.raw.status ?? '').trim().toLowerCase();
-        return !(s === 'pending' || s === '0');
+        return !(numS === CourseStatusEnum.Pending || s === 'pending' || s === '1' || s === '0');
       },
       onClick: (row: FormattedCourse) => {
         setCourseToReview(row.raw);
@@ -491,8 +496,9 @@ export default function CoursesView() {
               }}
             >
               <MenuItem value="all">{t('statuses.all')}</MenuItem>
-              <MenuItem value="active">{t('statuses.active')}</MenuItem>
-              <MenuItem value="paused">{t('statuses.paused')}</MenuItem>
+              <MenuItem value={String(CourseStatusEnum.Pending)}>{t('statuses.pending')}</MenuItem>
+              <MenuItem value={String(CourseStatusEnum.Accepted)}>{t('statuses.accepted')}</MenuItem>
+              <MenuItem value={String(CourseStatusEnum.Rejected)}>{t('statuses.rejected')}</MenuItem>
             </SelectField>
           </Stack>
         </Stack>

@@ -66,6 +66,7 @@
       "last_update": "آخر تحديث"
     },
     "status": {
+      "accepted": "مقبول",
       "active": "نشط",
       "pending": "قيد المراجعة",
       "rejected": "مرفوض",
@@ -83,6 +84,9 @@
     },
     "statuses": {
       "all": "الحالة",
+      "pending": "قيد المراجعة",
+      "accepted": "مقبول",
+      "rejected": "مرفوض",
       "active": "نشط",
       "paused": "متوقف"
     },

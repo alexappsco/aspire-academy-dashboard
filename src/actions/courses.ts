@@ -15,6 +15,7 @@ export async function getCourses(
       const searchParams = new URLSearchParams();
       if (params.Filter && params.Filter.trim() !== '') searchParams.append('Filter', params.Filter.trim());
       if (typeof params.IsActive === 'boolean') searchParams.append('IsActive', String(params.IsActive));
+      if (typeof params.Status === 'number') searchParams.append('Status', String(params.Status));
       if (params.SpecializationId) searchParams.append('SpecializationId', params.SpecializationId.trim());
       if (params.InstructorId) searchParams.append('InstructorId', params.InstructorId.trim());
       if (params.Sorting) searchParams.append('Sorting', params.Sorting);

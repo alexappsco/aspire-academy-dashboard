@@ -62,6 +62,7 @@
       "last_update": "Last Update"
     },
     "status": {
+      "accepted": "Accepted",
       "active": "Active",
       "pending": "Pending Review",
       "rejected": "Rejected",
@@ -79,6 +80,9 @@
     },
     "statuses": {
       "all": "Status",
+      "pending": "Pending Review",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
       "active": "Active",
       "paused": "Paused"
     },
