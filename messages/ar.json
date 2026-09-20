@@ -1699,6 +1699,99 @@
       "not_available": "غير متاح",
       "manage_slots": "إدارة فترات الحجز المتاحة"
     }
+  },
+  "Notifications": {
+    "title": "الإشعارات",
+    "send_notification": "إرسال إشعار",
+    "search_placeholder": "البحث في الإشعارات...",
+    "all_user_types": "جميع الفئات",
+    "all_types": "جميع الأنواع",
+    "all_broadcast": "الكل",
+    "broadcast_only": "بث عام للجميع",
+    "targeted_only": "مستخدمين محددين",
+    "all_dates": "جميع التواريخ",
+    "today": "اليوم",
+    "this_week": "هذا الأسبوع",
+    "selected_count": "تم تحديد {count} إشعار",
+    "delete_selected": "حذف المحدد",
+    "delete_confirm_title": "حذف الإشعار",
+    "delete_confirm_message": "هل أنت متأكد من رغبتك في حذف هذا الإشعار؟ لا يمكن التراجع عن هذا الإجراء.",
+    "delete_success": "تم حذف الإشعار بنجاح",
+    "delete_error": "فشل في حذف الإشعار",
+    "empty": "لا توجد إشعارات حالياً",
+    "loading": "جاري تحميل الإشعارات...",
+    "user_types": {
+      "all": "الكل",
+      "student": "طالب",
+      "lecturer": "محاضر",
+      "Student": "الطلاب",
+      "Instructor": "المحاضرون",
+      "General": "عام"
+    },
+    "types": {
+      "all": "جميع الأنواع",
+      "General": "عام",
+      "CoursePromo": "ترويج دورة",
+      "PurchaseComplete": "اكتمال شراء",
+      "1": "عام",
+      "2": "ترويج دورة",
+      "3": "اكتمال شراء"
+    },
+    "columns": {
+      "image": "الصورة",
+      "title": "العنوان",
+      "title_ar": "العنوان (عربي)",
+      "title_en": "العنوان (إنجليزي)",
+      "message": "الرسالة",
+      "message_ar": "الرسالة (عربي)",
+      "message_en": "الرسالة (إنجليزي)",
+      "type": "النوع",
+      "user_type": "الفئة المستهدفة",
+      "date": "التاريخ",
+      "status": "الحالة"
+    },
+    "actions": {
+      "view": "عرض التفاصيل",
+      "delete": "حذف",
+      "cancel": "إلغاء",
+      "confirm_delete": "نعم، احذف"
+    },
+    "send_form": {
+      "title": "إرسال إشعار جديد",
+      "title_ar_label": "عنوان الإشعار (باللغة العربية)",
+      "title_ar_placeholder": "أدخل عنوان الإشعار باللغة العربية...",
+      "title_en_label": "عنوان الإشعار (باللغة الإنجليزية)",
+      "title_en_placeholder": "Enter notification title in English...",
+      "content_ar_label": "نص الإشعار (باللغة العربية)",
+      "content_ar_placeholder": "اكتب محتوى الإشعار بالعربية هنا...",
+      "content_en_label": "نص الإشعار (باللغة الإنجليزية)",
+      "content_en_placeholder": "Write notification content in English here...",
+      "image_label": "صورة الإشعار (اختياري)",
+      "image_upload_btn": "اختر صورة",
+      "image_change_btn": "تغيير الصورة",
+      "type_label": "نوع الإشعار",
+      "target_role_label": "الفئة المستهدفة",
+      "merchants_label": "المحاضرون",
+      "students_label": "الطلاب",
+      "send_btn": "إرسال الإشعار",
+      "sending": "جاري الإرسال...",
+      "cancel_btn": "إلغاء",
+      "send_success": "تم إرسال الإشعار بنجاح",
+      "send_error": "حدث خطأ أثناء إرسال الإشعار",
+      "validation_required": "يرجى ملء كافة الحقول الإلزامية بالعربية والإنجليزية"
+    },
+    "details": {
+      "title": "تفاصيل الإشعار",
+      "title_ar": "العنوان بالعربية",
+      "title_en": "العنوان بالإنجليزية",
+      "content_ar": "الرسالة باللغة العربية",
+      "content_en": "الرسالة باللغة الإنجليزية",
+      "user_type_label": "الفئة المستهدفة",
+      "user_label": "المستخدم",
+      "type_label": "نوع الإشعار",
+      "created_at_label": "تاريخ الإرسال",
+      "close": "إغلاق"
+    }
   }
 }
 

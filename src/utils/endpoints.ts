@@ -143,4 +143,11 @@ export const endpoints = {
     update: (slug: string) => `/admin/pages/${slug}`,
     delete: (slug: string) => `/admin/pages/${slug}`,
   },
+  adminNotifications: {
+    list: '/admin/notifications',
+    create: '/admin/notifications',
+    details: (id: string) => `/admin/notifications/${id}`,
+    update: (id: string) => `/admin/notifications/${id}`,
+    delete: (id: string) => `/admin/notifications/${id}`,
+  },
 };

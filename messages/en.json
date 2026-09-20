@@ -1696,6 +1696,99 @@
       "not_available": "Not Available",
       "manage_slots": "Manage Available Booking Slots"
     }
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "send_notification": "Send Notification",
+    "search_placeholder": "Search notifications...",
+    "all_user_types": "All Roles",
+    "all_types": "All Types",
+    "all_broadcast": "All Delivery",
+    "broadcast_only": "Broadcast to All",
+    "targeted_only": "Specific Users",
+    "all_dates": "All Dates",
+    "today": "Today",
+    "this_week": "This Week",
+    "selected_count": "{count} notification(s) selected",
+    "delete_selected": "Delete Selected",
+    "delete_confirm_title": "Delete Notification",
+    "delete_confirm_message": "Are you sure you want to delete this notification? This action cannot be undone.",
+    "delete_success": "Notification deleted successfully",
+    "delete_error": "Failed to delete notification",
+    "empty": "No notifications found",
+    "loading": "Loading notifications...",
+    "user_types": {
+      "all": "All",
+      "student": "Student",
+      "lecturer": "Instructor",
+      "Student": "Students",
+      "Instructor": "Instructors",
+      "General": "General"
+    },
+    "types": {
+      "all": "All Types",
+      "General": "General",
+      "CoursePromo": "Course Promo",
+      "PurchaseComplete": "Purchase Complete",
+      "1": "General",
+      "2": "Course Promo",
+      "3": "Purchase Complete"
+    },
+    "columns": {
+      "image": "Image",
+      "title": "Title",
+      "title_ar": "Title (Arabic)",
+      "title_en": "Title (English)",
+      "message": "Message",
+      "message_ar": "Message (Arabic)",
+      "message_en": "Message (English)",
+      "type": "Type",
+      "user_type": "Target Audience",
+      "date": "Date",
+      "status": "Status"
+    },
+    "actions": {
+      "view": "View Details",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "confirm_delete": "Yes, Delete"
+    },
+    "send_form": {
+      "title": "Send New Notification",
+      "title_ar_label": "Notification Title (Arabic)",
+      "title_ar_placeholder": "Enter notification title in Arabic...",
+      "title_en_label": "Notification Title (English)",
+      "title_en_placeholder": "Enter notification title in English...",
+      "content_ar_label": "Notification Message (Arabic)",
+      "content_ar_placeholder": "Write notification message in Arabic here...",
+      "content_en_label": "Notification Message (English)",
+      "content_en_placeholder": "Write notification message in English here...",
+      "image_label": "Notification Image (Optional)",
+      "image_upload_btn": "Choose Image",
+      "image_change_btn": "Change Image",
+      "type_label": "Notification Type",
+      "target_role_label": "Target Role",
+      "merchants_label": "Instructors",
+      "students_label": "Students",
+      "send_btn": "Send Notification",
+      "sending": "Sending...",
+      "cancel_btn": "Cancel",
+      "send_success": "Notification sent successfully",
+      "send_error": "Failed to send notification",
+      "validation_required": "Please fill in all required fields in Arabic and English"
+    },
+    "details": {
+      "title": "Notification Details",
+      "title_ar": "Arabic Title",
+      "title_en": "English Title",
+      "content_ar": "Arabic Message",
+      "content_en": "English Message",
+      "user_type_label": "Target Audience",
+      "user_label": "User",
+      "type_label": "Notification Type",
+      "created_at_label": "Sent At",
+      "close": "Close"
+    }
   }
 }
 
