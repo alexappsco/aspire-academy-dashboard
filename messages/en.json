@@ -1789,6 +1789,57 @@
       "created_at_label": "Sent At",
       "close": "Close"
     }
+  },
+  "InstructorNotifications": {
+    "title": "Instructor Notifications",
+    "tab_received": "Received",
+    "tab_sent": "Sent",
+    "mark_all_read": "Mark All as Read",
+    "mark_all_read_success": "All notifications marked as read",
+    "send_notification_btn": "Send Notification to Students",
+    "empty_received": "No received notifications yet",
+    "empty_sent": "No sent notifications yet",
+    "filter_status_all": "All Statuses",
+    "filter_status_unread": "Unread Only",
+    "filter_status_read": "Read Only",
+    "search_placeholder": "Search notifications...",
+    "unread_badge": "{count} unread",
+    "loading": "Loading...",
+    "dialog_details_title": "Notification Details",
+    "dialog_close": "Close",
+    "columns": {
+      "title": "Title",
+      "message": "Message",
+      "type": "Type",
+      "status": "Status",
+      "date": "Date",
+      "read": "Read",
+      "unread": "New"
+    },
+    "actions": {
+      "view": "View Details",
+      "mark_read": "Mark as Read"
+    },
+    "send_dialog": {
+      "title": "Send Notification to Course Students",
+      "course_select_label": "Target Course",
+      "course_select_placeholder": "Select a course...",
+      "title_ar_label": "Title (Arabic)",
+      "title_ar_placeholder": "Enter notification title in Arabic...",
+      "title_en_label": "Title (English)",
+      "title_en_placeholder": "Enter notification title in English...",
+      "message_ar_label": "Message (Arabic)",
+      "message_ar_placeholder": "Write notification message in Arabic here...",
+      "message_en_label": "Message (English)",
+      "message_en_placeholder": "Write notification message in English here...",
+      "send_btn": "Send Notification",
+      "sending": "Sending...",
+      "cancel_btn": "Cancel",
+      "send_success": "Notification sent to course students successfully",
+      "send_error": "Failed to send notification",
+      "validation_required": "Please select a course and fill in all required fields in Arabic and English",
+      "no_courses": "No courses available"
+    }
   }
 }
 

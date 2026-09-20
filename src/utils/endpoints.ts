@@ -150,4 +150,12 @@ export const endpoints = {
     update: (id: string) => `/admin/notifications/${id}`,
     delete: (id: string) => `/admin/notifications/${id}`,
   },
+  instructorNotifications: {
+    received: '/instructor/notifications',
+    sent: '/instructor/notifications/sent',
+    unreadCount: '/instructor/notifications/unread-count',
+    markAsRead: (id: string) => `/instructor/notifications/${id}/read`,
+    markAllAsRead: '/instructor/notifications/read-all',
+    send: '/instructor/notifications/send',
+  },
 };
