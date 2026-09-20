@@ -1704,7 +1704,10 @@
       "all": "All Types",
       "General": "General",
       "CoursePromo": "Course Promo",
-      "PurchaseComplete": "Purchase Complete"
+      "PurchaseComplete": "Purchase Complete",
+      "1": "General",
+      "2": "Course Promo",
+      "3": "Purchase Complete"
     },
     "columns": {
       "image": "Image",

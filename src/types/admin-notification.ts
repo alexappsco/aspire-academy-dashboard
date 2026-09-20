@@ -5,11 +5,21 @@ export interface AdminNotificationItemDto {
   messageAr: string;
   messageEn: string;
   imageUrl?: string | null;
-  type: string; // 'General' | 'CoursePromo' | 'PurchaseComplete'
+  type: string | number; // 'General' | 'CoursePromo' | 'PurchaseComplete' | 1 | 2 | 3
   userId?: string | null;
   senderUserId?: string | null;
   isRead: boolean;
   createdAt: string;
+}
+
+export type NotificationType = 'General' | 'CoursePromo' | 'PurchaseComplete';
+
+export function normalizeNotificationType(type: unknown): NotificationType {
+  const t = String(type ?? '').trim();
+  if (t === '1' || t.toLowerCase() === 'general') return 'General';
+  if (t === '2' || t.toLowerCase() === 'coursepromo') return 'CoursePromo';
+  if (t === '3' || t.toLowerCase() === 'purchasecomplete') return 'PurchaseComplete';
+  return 'General';
 }
 
 export interface AdminNotificationListResponse {

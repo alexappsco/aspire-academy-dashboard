@@ -21,6 +21,7 @@ import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import DeleteDialog from 'src/components/dialog/delete';
 import type { AdminNotificationItemDto } from 'src/types/admin-notification';
+import { normalizeNotificationType } from 'src/types/admin-notification';
 
 import NotificationDetailsDialog from './NotificationDetailsDialog';
 
@@ -124,15 +125,16 @@ export default function NotificationsListView({
     }
   };
 
-  const getTypeChip = (type: string) => {
-    let label = type;
+  const getTypeChip = (typeRaw: string | number) => {
+    const norm = normalizeNotificationType(typeRaw);
+    let label: string = norm;
     try {
-      label = tTypes(type);
+      label = tTypes(norm);
     } catch {
-      label = type;
+      label = norm;
     }
 
-    switch (type) {
+    switch (norm) {
       case 'CoursePromo':
         return (
           <Chip

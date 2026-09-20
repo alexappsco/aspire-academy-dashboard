@@ -12,6 +12,7 @@ import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
 import type { AdminNotificationItemDto } from 'src/types/admin-notification';
+import { normalizeNotificationType } from 'src/types/admin-notification';
 
 interface Props {
   open: boolean;
@@ -41,11 +42,12 @@ export default function NotificationDetailsDialog({ open, onClose, notification 
     }
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: string | number) => {
+    const norm = normalizeNotificationType(type);
     try {
-      return tTypes(type);
+      return tTypes(norm);
     } catch {
-      return type;
+      return norm;
     }
   };
 
