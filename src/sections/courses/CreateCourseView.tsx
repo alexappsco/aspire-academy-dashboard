@@ -28,6 +28,7 @@ export default function CreateCourseView() {
     formValues,
     errors,
     isSubmitting,
+    isInstructor,
     universities,
     fields,
     instructors,
@@ -108,6 +109,7 @@ export default function CreateCourseView() {
           loadingFaculties={loadingFaculties}
           loadingSpecializations={loadingSpecializations}
           loadingStudyMaterials={loadingStudyMaterials}
+          hideInstructor={isInstructor}
         />
       ) : (
         <ChaptersStep

@@ -90,7 +90,7 @@ export function buildCourseFormData(
   formData.append('OldPrice', formValues.oldPrice || '0');
   formData.append('AccessDurationInDays', formValues.accessDurationInDays || '0');
   formData.append('CurrencyId', formValues.currencyId);
-  formData.append('InstructorId', formValues.instructorId);
+  if (formValues.instructorId) formData.append('InstructorId', formValues.instructorId);
   formData.append('FieldId', formValues.fieldId);
 
   if (formValues.specializationId) formData.append('SpecializationId', formValues.specializationId);
