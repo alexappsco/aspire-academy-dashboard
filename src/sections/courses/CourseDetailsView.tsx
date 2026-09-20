@@ -21,6 +21,7 @@ import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import { getCourseById } from 'src/actions/courses';
 import type { CourseDto } from 'src/types/course';
+import { CourseStatusEnum } from 'src/types/course';
 import CourseHeroCard from './details/CourseHeroCard';
 import CourseKpiCards from './details/CourseKpiCards';
 import ContentSummaryCard from './details/ContentSummaryCard';
@@ -62,7 +63,9 @@ function mapCourseToDetailsData(course: CourseDto): CourseDetailsData {
   const chapters = course.curriculum?.chapters ?? [];
   const lessons = chapters.flatMap((chapter) => chapter.lessons);
   const durationSeconds = course.totalDurationInSeconds ?? lessons.reduce((sum, lesson) => sum + (lesson.durationInSeconds ?? 0), 0);
-  const isPublished = Number(course.status) === 1 || course.status === '1' || course.status === 'published' || course.isActive === true;
+  const numStatus = Number(course.status);
+  const strStatus = String(course.status ?? '').trim().toLowerCase();
+  const isPublished = numStatus === CourseStatusEnum.Accepted || strStatus === 'accepted' || strStatus === '2' || strStatus === 'published' || course.isActive === true;
   const currencySymbol = course.currency?.symbol ?? '';
 
   return {

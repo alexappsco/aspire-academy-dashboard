@@ -62,7 +62,10 @@
       "last_update": "Last Update"
     },
     "status": {
+      "accepted": "Accepted",
       "active": "Active",
+      "pending": "Pending Review",
+      "rejected": "Rejected",
       "paused": "Paused"
     },
     "categories": {
@@ -77,13 +80,35 @@
     },
     "statuses": {
       "all": "Status",
+      "pending": "Pending Review",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
       "active": "Active",
       "paused": "Paused"
     },
     "actions": {
       "view": "View",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "review": "Review"
+    },
+    "ReviewCourse": {
+      "title": "Review Course",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accept_desc": "This course will be approved, published and made available to students.",
+      "rejection_reason_label": "Rejection Reason",
+      "rejection_reason_placeholder": "Explain why this course is being rejected...",
+      "rejection_reason_required": "Please enter a rejection reason",
+      "platform_percentage_label": "Platform Percentage (%)",
+      "platform_percentage_hint": "Percentage the platform keeps from each sale (0 - 100).",
+      "platform_percentage_invalid": "Platform percentage must be between 0 and 100",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "cancel": "Cancel",
+      "accepted": "Course accepted successfully",
+      "rejected": "Course rejected",
+      "submit_failed": "Failed to submit review"
     }
   },
   "CreateCourse": {
