@@ -87,14 +87,6 @@ const sidebarItems: SidebarItem[] = [
         key: "college",
         path: "/college",
       },
-      // {
-      //   key: "academic_years",
-      //   path: "/academic-years",
-      // },
-      // {
-      //   key: "academic_semesters",
-      //   path: "/semesters",
-      // },
       {
         key: "academic_years",
         icon: "/icons/curriculum.svg",
@@ -190,6 +182,9 @@ function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): Side
       if (hiddenKeys.has(item.key)) return null;
       if (item.children) {
         const children = filterItemsForRole(item.children, hiddenKeys);
+        if (children.length === 1) {
+          return { key: children[0].key, path: children[0].path, icon: item.icon };
+        }
         return { ...item, children };
       }
       return item;
