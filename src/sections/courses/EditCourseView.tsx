@@ -106,6 +106,7 @@ export default function EditCourseView({ id }: { id: string }) {
     errors,
     isSubmitting,
     isInstructor,
+    isAdmin,
     universities,
     fields,
     instructors,
@@ -220,6 +221,7 @@ export default function EditCourseView({ id }: { id: string }) {
           loadingStudyMaterials={loadingStudyMaterials}
           imageRequired={false}
           hideInstructor={isInstructor}
+          showPlatformPercentage={isAdmin}
         />
       ) : attachmentsReady ? (
         <ChaptersStep

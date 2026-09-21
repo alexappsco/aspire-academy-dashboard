@@ -52,6 +52,9 @@ export const endpoints = {
   instructorDashboard: {
     get: '/instructor/dashboard',
   },
+  instructorReports: {
+    get: '/instructor/reports',
+  },
   studyMaterials: {
     list: '/admin/study-materials',
     details: (id: string) => `/admin/study-materials/${id}`,

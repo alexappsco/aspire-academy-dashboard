@@ -89,6 +89,9 @@ export function buildCourseFormData(
   formData.append('Price', formValues.price || '0');
   formData.append('OldPrice', formValues.oldPrice || '0');
   formData.append('AccessDurationInDays', formValues.accessDurationInDays || '0');
+  if (formValues.platformPercentage !== '' && formValues.platformPercentage != null) {
+    formData.append('PlatformPercentage', formValues.platformPercentage);
+  }
   formData.append('CurrencyId', formValues.currencyId);
   if (formValues.instructorId) formData.append('InstructorId', formValues.instructorId);
   formData.append('FieldId', formValues.fieldId);

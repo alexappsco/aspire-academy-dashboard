@@ -38,6 +38,7 @@ const initialValues: CourseFormValues = {
   type: '',
   price: '',
   oldPrice: '',
+  platformPercentage: '',
   accessDurationInDays: '',
   currencyId: '',
   specializationId: '',
@@ -57,7 +58,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   const t = useTranslations('CreateCourse');
   const router = useRouter();
   const toast = useToast();
-  const { isInstructor } = useAuth();
+  const { isInstructor, isAdmin } = useAuth();
 
   const [activeStep, setActiveStep] = useState(1);
   const [formValues, setFormValues] = useState<CourseFormValues>(initialValues);
@@ -208,6 +209,8 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
         type: COURSE_TYPE_KEY_MAP[Number(initialCourse.type)] ?? '',
         price: String(initialCourse.price ?? ''),
         oldPrice: initialCourse.oldPrice ? String(initialCourse.oldPrice) : '',
+        platformPercentage:
+          initialCourse.platformPercentage != null ? String(initialCourse.platformPercentage) : '',
         accessDurationInDays: initialCourse.accessDurationInDays
           ? String(initialCourse.accessDurationInDays)
           : '',
@@ -378,6 +381,13 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
     if (!formValues.facultyId) newErrors.facultyId = t('messages.validation_required');
     if (!formValues.fieldId) newErrors.fieldId = t('messages.validation_required');
 
+    if (formValues.platformPercentage !== '') {
+      const percentage = Number(formValues.platformPercentage);
+      if (Number.isNaN(percentage) || percentage < 0 || percentage > 100) {
+        newErrors.platformPercentage = t('basic_info.platform_percentage_invalid');
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -439,6 +449,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
     errors,
     isSubmitting,
     isInstructor,
+    isAdmin,
     universities,
     fields,
     instructors,
