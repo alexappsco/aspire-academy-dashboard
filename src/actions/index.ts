@@ -20,5 +20,6 @@ export * from './faqs';
 export * from './pages';
 export * from './instructor-coupons';
 export * from './instructor-dashboard';
+export * from './instructor-reports';
 export * from './admin-notifications';
 export * from './instructor-notifications';

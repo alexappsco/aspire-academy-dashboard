@@ -40,6 +40,7 @@ interface BasicInfoStepProps {
   loadingStudyMaterials: boolean;
   imageRequired?: boolean;
   hideInstructor?: boolean;
+  showPlatformPercentage?: boolean;
 }
 
 const inputRootSx = {
@@ -87,6 +88,7 @@ export default function BasicInfoStep({
   loadingStudyMaterials,
   imageRequired = true,
   hideInstructor = false,
+  showPlatformPercentage = false,
 }: BasicInfoStepProps) {
   const t = useTranslations('CreateCourse');
   const locale = useLocale();
@@ -281,6 +283,30 @@ export default function BasicInfoStep({
               />
             </Box>
           </Stack>
+
+          {/* Row 5: Platform Percentage (admin only) */}
+          {showPlatformPercentage && (
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1 }}>
+                  {t('basic_info.platform_percentage_label')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  slotProps={{ htmlInput: { min: 0, max: 100 } }}
+                  placeholder={t('basic_info.platform_percentage_placeholder')}
+                  value={values.platformPercentage}
+                  onChange={(e) => onChange('platformPercentage', e.target.value)}
+                  error={!!errors.platformPercentage}
+                  sx={inputRootSx}
+                />
+                {errors.platformPercentage && (
+                  <FormHelperText error>{errors.platformPercentage}</FormHelperText>
+                )}
+              </Box>
+            </Stack>
+          )}
 
           {/* Row 5: Instructor + University */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>

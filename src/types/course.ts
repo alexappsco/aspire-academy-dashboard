@@ -102,6 +102,7 @@ export interface CourseDto {
   type?: string | number;
   price: number;
   oldPrice?: number;
+  platformPercentage?: number;
   currencyId?: string;
   currency?: CourseCurrency;
   specializationId?: string;
