@@ -104,7 +104,7 @@
       "rejection_reason_label": "سبب الرفض",
       "rejection_reason_placeholder": "اشرح سبب رفض هذه الدورة...",
       "rejection_reason_required": "يرجى إدخال سبب الرفض",
-      "platform_percentage_label": "نسبة المنصة (%)",
+      "platform_percentage_label": " نسبة المنصة (%) ",
       "platform_percentage_hint": "النسبة التي تحتفظ بها المنصة من كل عملية بيع (0 - 100).",
       "platform_percentage_invalid": "يجب أن تكون نسبة المنصة بين 0 و 100",
       "submit": "إرسال",
@@ -151,6 +151,9 @@
       "currency_placeholder": "اختر العملة...",
       "access_duration_label": "مدة الوصول (بالأيام)",
       "access_duration_placeholder": "مثال: 365",
+      "platform_percentage_label": "نسبة المنصة (%)",
+      "platform_percentage_placeholder": "مثال: 15",
+      "platform_percentage_invalid": "يجب أن تكون نسبة المنصة بين 0 و 100",
       "university_label": "الجامعة",
       "university_placeholder": "اختر الجامعة...",
       "academic_year_label": "الفرقة الدراسية",
@@ -1596,6 +1599,191 @@
       "colleges": "الكليات المسجلة",
       "colleges_sub": "بشري وصيدلة",
       "manage_btn": "إدارة وتعديل الهيكل الأكاديمي"
+    }
+  },
+  "InstructorReports": {
+    "title": "تقاريري",
+    "subtitle": "نظرة شاملة على أرباحك ودروسك ودوراتك وطلابك وأدائك التعليمي.",
+    "metrics": {
+      "net_earnings": "صافي الأرباح",
+      "completed_lessons": "الدروس المكتملة",
+      "active_courses": "الدورات النشطة",
+      "pending_courses": "{count} بانتظار مراجعة الإدارة",
+      "total_students": "إجمالي الطلاب",
+      "vs_previous": "مقارنة بالفترة السابقة",
+      "no_change": "لا يوجد تغيير بعد"
+    },
+    "enrollment_trend": {
+      "title": "نمو تسجيل الطلاب",
+      "subtitle": "{count} طالب مسجل خلال آخر 6 أشهر"
+    },
+    "financial": {
+      "title": "النظرة المالية",
+      "subtitle": "توزيع الإيرادات بحسب اتفاقية المشاركة",
+      "total_revenue": "إجمالي الإيرادات",
+      "platform_share": "حصة المنصة",
+      "net_earnings": "صافي الأرباح",
+      "unsplit_revenue": "إيرادات غير مقسمة",
+      "platform_pct": "المنصة {percent}%",
+      "net_pct": "حصتك {percent}%"
+    },
+    "efficiency": {
+      "title": "الكفاءة التعليمية",
+      "minutes": "دقيقة",
+      "avg_lessons_per_student": "متوسط الدروس لكل طالب",
+      "avg_lesson_duration": "متوسط مدة الدرس",
+      "dropoff_rate": "نسبة الانقطاع",
+      "completion_rate": "نسبة إكمال الدروس",
+      "rating_average": "متوسط التقييم",
+      "rating_count": "إجمالي التقييمات"
+    },
+    "top_courses": {
+      "title": "أفضل الدورات",
+      "subtitle": "مرتبة حسب الطلاب المسجلين والإيرادات",
+      "columns": {
+        "rank": "#",
+        "course": "الدورة",
+        "students": "الطلاب",
+        "completion": "الإكمال",
+        "total_revenue": "إجمالي الإيرادات",
+        "net_revenue": "صافي الإيرادات",
+        "status": "الحالة"
+      },
+      "status_published": "منشورة",
+      "status_under_review": "قيد المراجعة",
+      "status_rejected": "مرفوضة",
+      "empty": "لا توجد دورات بعد"
+    },
+    "transactions": {
+      "title": "أحدث العمليات",
+      "subtitle": "أحدث تسجيلات الطلاب ومدفوعاتهم",
+      "columns": {
+        "student": "الطالب",
+        "course": "الدورة",
+        "amount": "المبلغ",
+        "date": "التاريخ"
+      },
+      "empty": "لا توجد عمليات بعد"
+    },
+    "top_students": {
+      "title": "أفضل الطلاب",
+      "subtitle": "الطلاب الأكثر تفاعلاً مع دوراتك",
+      "columns": {
+        "student": "الطالب",
+        "lessons": "الدروس",
+        "completion": "الإكمال",
+        "rating": "التقييم",
+        "amount": "المبلغ المدفوع"
+      },
+      "empty": "لا يوجد طلاب بعد"
+    }
+  },
+  "InstructorAnalytics": {
+    "header": {
+      "title": "التقارير والتحليلات",
+      "subtitle": "تتبع أداءك التدريسي، تفاعل ونشاط الطلاب، الحصص المباشرة، وإجمالي أرباحك.",
+      "export": "تصدير التقرير",
+      "all_courses": "جميع الدورات ({count})",
+      "only_approved": "الدورات المعتمدة فقط",
+      "only_pending": "الدورات قيد المراجعة",
+      "last_30_days": "آخر 30 يوماً",
+      "last_90_days": "آخر 90 يوماً"
+    },
+    "kpis": {
+      "total_students": "إجمالي الطلاب",
+      "vs_previous": "مقارنة بالشهر السابق",
+      "active_courses": "الدورات النشطة",
+      "approved": "{count} معتمدة",
+      "under_review": "{count} قيد المراجعة",
+      "completed_lessons": "الدروس المكتملة",
+      "net_earnings": "صافي أرباح المحاضر",
+      "share_percent": "نسبة مشاركة {percent}%"
+    },
+    "growth": {
+      "title": "وتيرة نمو وتسجيل الطلاب",
+      "subtitle": "إجمالي الطلاب المسجلين عبر الدورات المعتمدة للمحاضر",
+      "students": "طالب",
+      "new_registrations": "+{count} تسجيل جديد خلال شهر {month}",
+      "retention": "نسبة استبقاء الطلاب: {percent}%"
+    },
+    "top_courses": {
+      "title": "الدورات التدريبية الأكثر أداءً",
+      "subtitle": "مرتبة بحسب أعداد الطلاب، نسبة الإكمال، وإجمالي الإيرادات المحققة",
+      "view_report": "عرض تقارير الدورات التفصيلية",
+      "enrolled": "{count} طالب مسجل",
+      "completion": "الإكمال",
+      "total_revenue": "إجمالي الإيرادات",
+      "instructor_share": "صافي المحاضر",
+      "share_percent": "- {percent}%",
+      "status_approved": "معتمدة",
+      "status_pending": "قيد المراجعة",
+      "empty": "لا توجد دورات"
+    },
+    "financial": {
+      "agreement": "الاتفاقية المعتمدة: المحاضر {instructor}% / المنصة {platform}%",
+      "title": "الأداء المالي وتوزيع الإيرادات",
+      "subtitle": "تفصيل مدقق لإجمالي الإيرادات المحققة واحتساب صافي مستحقات المحاضر",
+      "gross_revenue": "إجمالي الإيرادات المحققة",
+      "net_share": "صافي المحاضر {percent}%",
+      "due_chip": "مستحق الصرف",
+      "platform_share": "حصة المنصة {percent}%",
+      "pending_payouts": "مبالغ قيد الصرف",
+      "pending_note": "معلق مؤقتاً",
+      "instructor_label": "حصة المحاضر {percent}%",
+      "platform_label": "حصة المنصة {percent}%",
+      "of_total": "من إجمالي الأرباح"
+    },
+    "transactions": {
+      "title": "المعاملات المالية الأخيرة",
+      "subtitle": "آخر المعاملات المالية المسجلة لحسابك",
+      "tabs": {
+        "all": "الكل",
+        "paid": "مدفوع",
+        "pending": "معلق",
+        "refunded": "مسترد"
+      },
+      "columns": {
+        "date": "التاريخ والوقت",
+        "description": "الوصف والطالب",
+        "type": "النوع",
+        "total": "المبلغ الإجمالي",
+        "instructor": "المحاضر 70%",
+        "platform": "المنصة 30%",
+        "status": "الحالة"
+      },
+      "type_course": "دورة",
+      "type_lesson": "درس مباشر",
+      "status_paid": "مدفوع",
+      "status_pending": "معلق",
+      "status_refunded": "مسترد",
+      "pagination": "عرض {from} إلى {to} من أصل {total} معاملة",
+      "more_rows": "{count} معاملات أخرى",
+      "empty": "لا توجد معاملات"
+    },
+    "engaged": {
+      "title": "الطلاب الأكثر تفاعلاً",
+      "view_all": "عرض كافة الطلاب ({count})",
+      "lessons": "{count} درساً",
+      "total_spent": "${amount} إجمالي",
+      "empty": "لا يوجد طلاب"
+    },
+    "efficiency": {
+      "title": "كفاءة التدريس",
+      "subtitle": "معدلات تقديم الدروس ومستوى التفاعل لـ {name}",
+      "avg_duration": "متوسط مدة الدرس",
+      "default_duration": "الافتراضي {minutes} دقيقة",
+      "per_student": "دروس لكل طالب",
+      "rebooking": "نسبة إعادة الحجز",
+      "completion_rate": "نسبة الإكمال",
+      "high_engagement": "تفاعل عالي",
+      "cancellation_rate": "نسبة الإلغاء",
+      "below_target": "أقل من الهدف {target}%",
+      "rating": "تقييم الطلاب",
+      "based_on": "بناءً على {count} تقييم",
+      "instructor_id": "معرف المحاضر: {id}",
+      "units": {
+        "minutes": "دقيقة"
+      }
     }
   },
   "InstructorHome": {
