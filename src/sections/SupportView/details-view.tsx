@@ -16,24 +16,27 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useRouter } from 'src/i18n/routing';
+import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { getContactUsMessageById, updateContactUsMessageStatus } from 'src/actions/support';
+import { useAuth } from 'src/contexts/AuthContext';
+import {
+  getContactUsMessageById,
+  getInstructorContactUsMessageById,
+  updateContactUsMessageStatus,
+} from 'src/actions/support';
 import type { ContactUsMessageDto } from 'src/types/support';
 
 type SupportDetailsViewProps = {
   ticketId: string;
 };
 
-const STATUS_OPTIONS = [
-  { value: 'New', label: 'جديد' },
-  { value: 'InProgress', label: 'قيد المعالجة' },
-  { value: 'Resolved', label: 'تم الرد' },
-];
-
 export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps) {
+  const t = useTranslations('Support');
+  const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
+  const { isInstructor } = useAuth();
 
   const [message, setMessage] = useState<ContactUsMessageDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,30 +50,34 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const res = await getContactUsMessageById(ticketId);
+        const res = isInstructor
+          ? await getInstructorContactUsMessageById(ticketId)
+          : await getContactUsMessageById(ticketId);
         if (res.success && res.data) {
           if (isMounted) {
             setMessage(res.data);
             setStatus(res.data.status || 'new');
           }
-        } else {
-          // Fallback demo object if not found or testing
+        } else if (!isInstructor) {
+          // Demo fallback for the admin view
           if (isMounted) {
             setMessage({
               id: ticketId,
-              senderName: 'علي محمود',
+              name: 'علي محمود',
               senderType: 'student',
               senderPhone: '+96513325599',
               senderEmail: 'Ali@gmail.com',
               creationTime: '2026-08-03T10:00:00.000Z',
-              message: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
+              notes: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
               status: 'new',
             });
             setStatus('new');
           }
+        } else if (res.error) {
+          toast.error(res.error);
         }
       } catch {
-        toast.error('فشل في جلب تفاصيل الرسالة');
+        toast.error(t('ticket_load_failed'));
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -80,7 +87,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     return () => {
       isMounted = false;
     };
-  }, [ticketId, toast]);
+  }, [ticketId, isInstructor, toast, t]);
 
   const handleOpenStatusDialog = () => {
     setDraftStatus(status);
@@ -93,17 +100,16 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
       const res = await updateContactUsMessageStatus(ticketId, draftStatus);
       if (res.success) {
         setStatus(draftStatus);
-        toast.success('تم تحديث حالة الرسالة بنجاح');
+        toast.success(t('status_updated'));
         setOpenStatusDialog(false);
       } else {
-        // Allow optimistic update
         setStatus(draftStatus);
-        toast.success('تم تحديث حالة الرسالة بنجاح');
+        toast.success(t('status_updated'));
         setOpenStatusDialog(false);
       }
     } catch {
       setStatus(draftStatus);
-      toast.success('تم تحديث حالة الرسالة بنجاح');
+      toast.success(t('status_updated'));
       setOpenStatusDialog(false);
     } finally {
       setUpdating(false);
@@ -112,9 +118,16 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
 
   const getStatusBadge = (s: unknown) => {
     const str = String(s ?? '').toLowerCase().trim();
-    if (str === '3' || str === 'resolved' || str === 'replied' || str === 'closed' || str === 'تم الرد' || str === 'تم الحل') {
+    if (
+      str === '3' ||
+      str === 'resolved' ||
+      str === 'replied' ||
+      str === 'closed' ||
+      str === 'تم الرد' ||
+      str === 'تم الحل'
+    ) {
       return {
-        label: 'تم الرد',
+        label: t('statuses.resolved'),
         bgcolor: '#E6F4EA',
         color: '#00A76F',
       };
@@ -128,13 +141,13 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
       str === 'جاري العمل'
     ) {
       return {
-        label: 'قيد المعالجة',
+        label: t('statuses.in_progress'),
         bgcolor: '#E0F2FE',
         color: '#0284C7',
       };
     }
     return {
-      label: 'جديد',
+      label: t('statuses.new'),
       bgcolor: '#FEF3C7',
       color: '#D97706',
     };
@@ -150,28 +163,42 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     );
   }
 
+  const senderTypeValue = isInstructor
+    ? t('user_types.lecturer')
+    : message?.senderType?.toLowerCase() === 'lecturer' ||
+      message?.senderType?.toLowerCase() === 'instructor'
+    ? t('user_types.lecturer')
+    : t('user_types.student');
+
   const senderInfo = [
-    { label: 'الاسم', value: message?.name || message?.senderName || message?.fullName || message?.userName || 'علي محمود' },
     {
-      label: 'نوع المرسل',
+      label: t('details_name_label'),
       value:
-        message?.senderType?.toLowerCase() === 'lecturer' || message?.senderType?.toLowerCase() === 'instructor'
-          ? 'محاضر'
-          : 'طالب',
+        message?.name || message?.senderName || message?.fullName || message?.userName || '-',
     },
-    { label: 'رقم الهاتف', value: message?.phone || message?.senderPhone || message?.phoneNumber || '-' },
-    { label: 'البريد الالكتروني', value: message?.email || message?.senderEmail || '-' },
     {
-      label: 'تاريخ الارسال',
+      label: t('details_sender_type_label'),
+      value: senderTypeValue,
+    },
+    {
+      label: t('details_phone_label'),
+      value: message?.phone || message?.senderPhone || message?.phoneNumber || '-',
+    },
+    {
+      label: t('details_email_label'),
+      value: message?.email || message?.senderEmail || '-',
+    },
+    {
+      label: t('details_date_label'),
       value: (message?.creationTime || message?.createdAt || '').split('T')[0] || '-',
     },
   ];
 
   return (
-    <Box sx={{ direction: 'rtl', textAlign: 'right', py: 2 }}>
+    <Box sx={{ direction: locale === 'ar' ? 'rtl' : 'ltr', textAlign: locale === 'ar' ? 'right' : 'left', py: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4 }}>
         <IconButton
-          aria-label="رجوع"
+          aria-label={t('details_back_label')}
           onClick={() => router.back()}
           sx={{
             width: 42,
@@ -183,10 +210,13 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
             '&:hover': { bgcolor: '#F1F5F9' },
           }}
         >
-          <Iconify icon="solar:arrow-right-linear" width={22} />
+          <Iconify
+            icon={locale === 'ar' ? 'solar:arrow-right-linear' : 'solar:arrow-left-linear'}
+            width={22}
+          />
         </IconButton>
         <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F172A' }}>
-          الدعم الفني
+          {t('title')}
         </Typography>
       </Box>
 
@@ -201,7 +231,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         }}
       >
         <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A', pb: 2 }}>
-          معلومات الراسل
+          {t('details_sender_info')}
         </Typography>
         <Box sx={{ borderTop: '1px solid #E2E8F0', pt: 2.5 }}>
           <Box sx={{ display: 'grid', gap: 2.5 }}>
@@ -239,9 +269,10 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           }}
         >
           <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-            تفاصيل الشكوى
+            {t('details_title')}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+
+          {isInstructor ? (
             <Chip
               label={badge.label}
               sx={{
@@ -254,29 +285,44 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 fontSize: 13,
               }}
             />
-            <Button
-              variant="contained"
-              onClick={handleOpenStatusDialog}
-              sx={{
-                height: 40,
-                px: 2.5,
-                bgcolor: '#1E293B',
-                color: '#fff',
-                borderRadius: '8px',
-                fontWeight: 700,
-                boxShadow: 'none',
-                textTransform: 'none',
-                '&:hover': { bgcolor: '#0F172A', boxShadow: 'none' },
-              }}
-            >
-              تغيير الحالة
-            </Button>
-          </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Chip
+                label={badge.label}
+                sx={{
+                  height: 34,
+                  px: 1.5,
+                  borderRadius: '20px',
+                  bgcolor: badge.bgcolor,
+                  color: badge.color,
+                  fontWeight: 700,
+                  fontSize: 13,
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleOpenStatusDialog}
+                sx={{
+                  height: 40,
+                  px: 2.5,
+                  bgcolor: '#1E293B',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  boxShadow: 'none',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: '#0F172A', boxShadow: 'none' },
+                }}
+              >
+                {t('details_change_status')}
+              </Button>
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ borderTop: '1px solid #E2E8F0', pt: 2.5 }}>
           <Typography sx={{ color: '#0F172A', fontSize: 16, fontWeight: 800, mb: 1.5 }}>
-            محتوى الرسالة
+            {message?.title ? message.title : t('details_message_content')}
           </Typography>
           <Typography
             sx={{
@@ -286,7 +332,12 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
               whiteSpace: 'pre-wrap',
             }}
           >
-            {message?.notes || message?.message || message?.content || message?.description || message?.details || '-'}
+            {message?.notes ||
+              message?.message ||
+              message?.content ||
+              message?.description ||
+              message?.details ||
+              '-'}
           </Typography>
         </Box>
       </Card>
@@ -309,10 +360,10 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           },
         }}
       >
-        <DialogContent sx={{ p: { xs: 3, sm: 4 }, direction: 'rtl' }}>
+        <DialogContent sx={{ p: { xs: 3, sm: 4 }, direction: locale === 'ar' ? 'rtl' : 'ltr' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
             <Typography sx={{ fontSize: 20, fontWeight: 800, color: '#0F172A' }}>
-              تغيير حالة الشكوى
+              {t('details_change_status')}
             </Typography>
             <IconButton
               onClick={() => setOpenStatusDialog(false)}
@@ -324,7 +375,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
 
           <FormControl fullWidth sx={{ mb: 3 }}>
             <Typography sx={{ color: '#0F172A', fontSize: 14, fontWeight: 700, mb: 1 }}>
-              حالة الشكوى الجديدة
+              {t('details_new_status_label')}
             </Typography>
             <Select
               value={draftStatus}
@@ -333,16 +384,14 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 height: 48,
                 bgcolor: '#F1F5F9',
                 borderRadius: '10px',
-                textAlign: 'right',
+                textAlign: locale === 'ar' ? 'right' : 'left',
                 '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                '& .MuiSelect-icon': { left: 12, right: 'auto' },
+                ...(locale === 'ar' ? { '& .MuiSelect-icon': { left: 12, right: 'auto' } } : {}),
               }}
             >
-              {STATUS_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
+              <MenuItem value="New">{t('statuses.new')}</MenuItem>
+              <MenuItem value="InProgress">{t('statuses.in_progress')}</MenuItem>
+              <MenuItem value="Resolved">{t('statuses.resolved')}</MenuItem>
             </Select>
           </FormControl>
 
@@ -362,7 +411,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 '&:hover': { bgcolor: '#0F172A', boxShadow: 'none' },
               }}
             >
-              {updating ? 'جاري التحديث...' : 'تحديث الحالة'}
+              {updating ? t('details_updating') : t('details_update_status')}
             </Button>
             <Button
               variant="outlined"
@@ -380,7 +429,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 '&:hover': { borderColor: '#FF5B5B', bgcolor: '#FFF5F5' },
               }}
             >
-              إلغاء
+              {t('details_cancel')}
             </Button>
           </Box>
         </DialogContent>

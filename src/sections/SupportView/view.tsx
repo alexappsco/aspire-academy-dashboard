@@ -9,21 +9,28 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Checkbox from '@mui/material/Checkbox';
-import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 import Iconify from 'src/components/iconify';
 import DateInput from 'src/components/DateInput';
-import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
+import { useAuth } from 'src/contexts/AuthContext';
 
-import { getContactUsMessages } from 'src/actions/support';
+import {
+  createInstructorContactUs,
+  getContactUsMessages,
+  getInstructorContactUsMessages,
+} from 'src/actions/support';
 import type { ContactUsMessageDto, GetContactUsMessagesParams } from 'src/types/support';
+import CreateInstructorTicketDialog from './components/CreateInstructorTicketDialog';
 
 interface FormattedSupportMessage {
   id: string;
@@ -35,6 +42,37 @@ interface FormattedSupportMessage {
   raw: ContactUsMessageDto;
 }
 
+function CountBadge({
+  children,
+  color,
+  bgcolor,
+}: {
+  children: React.ReactNode;
+  color?: string;
+  bgcolor?: string;
+}) {
+  return (
+    <Box
+      component="span"
+      sx={{
+        borderRadius: 12,
+        minWidth: 24,
+        height: 24,
+        px: 1,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 13,
+        fontWeight: 700,
+        bgcolor: bgcolor || '#F1F3F5',
+        color: color || '#1C252E',
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
 export default function SupportView() {
   const t = useTranslations('Support');
   const locale = useLocale();
@@ -43,6 +81,7 @@ export default function SupportView() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { isInstructor, user } = useAuth();
 
   // Helper to normalize status to backend PascalCase enum ('New' | 'InProgress' | 'Resolved')
   // Backend Enum values: 1 = New, 2 = InProgress, 3 = Resolved
@@ -79,6 +118,9 @@ export default function SupportView() {
   const [debouncedSearch, setDebouncedSearch] = useState(rawUrlFilter);
   const [statusFilter, setStatusFilter] = useState(urlStatus);
   const [dateFilter, setDateFilter] = useState(urlDate);
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -141,28 +183,29 @@ export default function SupportView() {
           params.Status = statusFilter;
         }
 
-        if (dateFilter) {
+        if (!isInstructor && dateFilter) {
           params.Date = dateFilter;
         }
 
-        const res = await getContactUsMessages(params);
+        const res = isInstructor
+          ? await getInstructorContactUsMessages(params)
+          : await getContactUsMessages(params);
 
         if (res.success && res.data) {
           setMessages(res.data.items || []);
           setTotalCount(res.data.totalCount || 0);
         } else {
-          // Keep current or empty on error
           if (res.error) {
             toast.error(res.error);
           }
         }
       } catch (err) {
-        toast.error('Failed to load contact us messages');
+        toast.error('Failed to load messages');
       } finally {
         if (showLoading) setLoading(false);
       }
     },
-    [debouncedSearch, statusFilter, dateFilter, toast]
+    [debouncedSearch, statusFilter, dateFilter, isInstructor, toast]
   );
 
   useEffect(() => {
@@ -191,6 +234,30 @@ export default function SupportView() {
     );
   };
 
+  const handleCreateSubmit = async (values: {
+    name: string;
+    email: string;
+    title: string;
+    notes: string;
+  }) => {
+    setSubmitting(true);
+    try {
+      const res = await createInstructorContactUs(values);
+      if (res.success) {
+        setCreateOpen(false);
+        toast.success(t('ticket_sent'));
+        setMessages([]);
+        fetchMessagesData(true);
+      } else {
+        toast.error(res.error || t('ticket_send_failed'));
+      }
+    } catch {
+      toast.error(t('ticket_send_failed'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Helper to format date string cleanly
   const formatDateDisplay = (dateStr?: string) => {
     if (!dateStr) return '-';
@@ -208,7 +275,9 @@ export default function SupportView() {
 
   // Helper to format sender type (handles enum numbers and strings)
   const formatSenderType = (type?: unknown) => {
-    if (type === null || type === undefined) return isRtl ? 'طالب' : 'Student';
+    if (type === null || type === undefined) {
+      return isInstructor ? (isRtl ? 'محاضر' : 'Instructor') : isRtl ? 'طالب' : 'Student';
+    }
     const s = String(type).toLowerCase().trim();
     if (s === '0' || s === 'student' || s === 'طالب') return isRtl ? 'طالب' : 'Student';
     if (s === '1' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم')
@@ -272,7 +341,7 @@ export default function SupportView() {
   };
 
   const formattedMessages: FormattedSupportMessage[] = useMemo(() => {
-    return messages.map((m) => {
+    return messages.map((m, index) => {
       const name = String(m.name || m.senderName || m.fullName || m.userName || '-');
       const date = formatDateDisplay(m.creationTime || m.createdAt || m.created_at);
       const type = formatSenderType(m.senderType ?? m.userType);
@@ -280,7 +349,7 @@ export default function SupportView() {
       const normalizedSt = normalizeStatus(m.status);
 
       return {
-        id: String(m.id || Math.random()),
+        id: String(m.id || `row-${index}`),
         senderName: name,
         sendDate: date,
         senderType: type,
@@ -289,7 +358,7 @@ export default function SupportView() {
         raw: m,
       };
     });
-  }, [messages, isRtl]);
+  }, [messages, isRtl, isInstructor]);
 
   // Client-side filtering as secondary safeguard
   const filteredMessages = useMemo(() => {
@@ -350,12 +419,16 @@ export default function SupportView() {
       align: cellAlignment.center,
       width: 140,
     },
-    {
-      id: 'senderType',
-      label: isRtl ? 'نوع المرسل' : 'Sender Type',
-      align: cellAlignment.center,
-      width: 130,
-    },
+    ...(!isInstructor
+      ? [
+          {
+            id: 'senderType',
+            label: isRtl ? 'نوع المرسل' : 'Sender Type',
+            align: cellAlignment.center,
+            width: 130,
+          },
+        ]
+      : []),
     {
       id: 'complaintContent',
       label: isRtl ? 'محتوى الشكوى' : 'Complaint Content',
@@ -441,6 +514,29 @@ export default function SupportView() {
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
           {t('title')}
         </Typography>
+
+        {isInstructor && (
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="solar:plain-bold" />}
+            onClick={() => setCreateOpen(true)}
+            sx={{
+              bgcolor: '#886ce8',
+              color: '#fff',
+              borderRadius: '12px',
+              fontWeight: 700,
+              px: 3,
+              height: 44,
+              gap: 1,
+              boxShadow: '0 8px 16px 0 rgba(136, 108, 232, 0.24)',
+              '&:hover': { bgcolor: '#7758e6' },
+              textTransform: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t('send_ticket')}
+          </Button>
+        )}
       </Stack>
 
       {/* Main Table Card */}
@@ -453,6 +549,66 @@ export default function SupportView() {
           bgcolor: '#FFFFFF',
         }}
       >
+        {/* Tabs for Status Filter */}
+        <Box sx={{ px: 2, pt: 2, borderBottom: '1px solid #F1F3F5' }}>
+          <Tabs
+            value={statusFilter}
+            onChange={(e, newValue) => setStatusFilter(newValue)}
+            sx={{
+              '& .MuiTabs-indicator': {
+                bgcolor: '#1C252E',
+              },
+            }}
+          >
+            <Tab
+              value="all"
+              label={
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography variant="subtitle2">{t('statuses.all')}</Typography>
+                  <CountBadge
+                    bgcolor={statusFilter === 'all' ? '#1C252E' : '#F1F3F5'}
+                    color={statusFilter === 'all' ? '#fff' : '#1C252E'}
+                  >
+                    {totalCount}
+                  </CountBadge>
+                </Stack>
+              }
+            />
+            <Tab
+              value="Resolved"
+              label={
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography variant="subtitle2">{t('statuses.resolved')}</Typography>
+                  <CountBadge bgcolor="#FFF5F8" color="#FF5630">
+                    {formattedMessages.filter((m) => m.status === 'Resolved').length}
+                  </CountBadge>
+                </Stack>
+              }
+            />
+            <Tab
+              value="InProgress"
+              label={
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography variant="subtitle2">{t('statuses.in_progress')}</Typography>
+                  <CountBadge bgcolor="#E0F2FE" color="#0284C7">
+                    {formattedMessages.filter((m) => m.status === 'InProgress').length}
+                  </CountBadge>
+                </Stack>
+              }
+            />
+            <Tab
+              value="New"
+              label={
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography variant="subtitle2">{t('statuses.new')}</Typography>
+                  <CountBadge bgcolor="#FEF3C7" color="#D97706">
+                    {formattedMessages.filter((m) => m.status === 'New').length}
+                  </CountBadge>
+                </Stack>
+              }
+            />
+          </Tabs>
+        </Box>
         {/* Filter bar */}
         <Stack
           direction={{ xs: 'column', md: 'row' }}
@@ -490,37 +646,16 @@ export default function SupportView() {
           />
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
-            {/* Sent Date Filter */}
-            <DateInput
-              size="small"
-              placeholder={t('send_date')}
-              value={dateFilter}
-              onChange={setDateFilter}
-              sx={{ minWidth: 180 }}
-            />
-
-            {/* Status Filter */}
-            <SelectField
-              size="small"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              slotProps={{
-                select: { displayEmpty: true },
-              }}
-              sx={{
-                minWidth: 150,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': { borderColor: '#E5E7EB' },
-                },
-              }}
-            >
-              <MenuItem value="all">{t('statuses.all')}</MenuItem>
-              <MenuItem value="New">{t('statuses.new')}</MenuItem>
-              <MenuItem value="InProgress">{t('statuses.in_progress')}</MenuItem>
-              <MenuItem value="Resolved">{t('statuses.resolved')}</MenuItem>
-            </SelectField>
+            {/* Sent Date Filter (admin only) */}
+            {!isInstructor && (
+              <DateInput
+                size="small"
+                placeholder={t('send_date')}
+                value={dateFilter}
+                onChange={setDateFilter}
+                sx={{ minWidth: 180 }}
+              />
+            )}
           </Stack>
         </Stack>
 
@@ -534,6 +669,15 @@ export default function SupportView() {
           />
         </Box>
       </Card>
+
+      <CreateInstructorTicketDialog
+        open={createOpen}
+        submitting={submitting}
+        defaultName={user?.name || ''}
+        defaultEmail={user?.email || ''}
+        onClose={() => setCreateOpen(false)}
+        onSubmit={handleCreateSubmit}
+      />
     </Box>
   );
 }

@@ -49,3 +49,20 @@ export interface GetContactUsMessagesParams {
 export interface UpdateContactUsMessageStatusDto {
   status: string | number;
 }
+
+// ── Instructor Contact Us ──────────────────────────────────
+
+export interface CreateInstructorContactUsDto {
+  email: string;
+  title: string;
+  notes: string;
+  name: string;
+}
+
+export interface GetInstructorContactUsMessagesParams {
+  Status?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}

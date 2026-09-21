@@ -110,6 +110,11 @@ export const endpoints = {
     delete: (id: string) => `/admin/contact-us-messages/${id}`,
     updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
   },
+  instructorContactUs: {
+    list: '/instructor/contact-us',
+    details: (id: string) => `/instructor/contact-us/${id}`,
+    create: '/instructor/contact-us',
+  },
   orders: {
     list: '/admin/orders',
     details: (id: string) => `/admin/orders/${id}`,
