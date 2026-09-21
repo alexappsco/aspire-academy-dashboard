@@ -1,12 +1,14 @@
 'use server';
 
-import { getData, editData, deleteData } from 'src/utils/crud-fetch-api';
+import { getData, postData, editData, deleteData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
   ContactUsMessageDto,
   ContactUsMessageListResponse,
+  CreateInstructorContactUsDto,
   GetContactUsMessagesParams,
+  GetInstructorContactUsMessagesParams,
   UpdateContactUsMessageStatusDto,
 } from 'src/types/support';
 
@@ -127,6 +129,111 @@ export async function deleteContactUsMessage(id: string): Promise<ApiSingleRespo
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete contact us message',
+    };
+  }
+}
+
+// ── Instructor Contact Us ──────────────────────────────────
+
+export async function getInstructorContactUsMessages(
+  params?: GetInstructorContactUsMessagesParams
+): Promise<ApiSingleResponse<ContactUsMessageListResponse>> {
+  try {
+    let endpoint = endpoints.instructorContactUs.list;
+    if (params) {
+      const searchParams = new URLSearchParams();
+
+      if (params.Filter && params.Filter.trim() !== '') {
+        searchParams.append('Filter', params.Filter.trim());
+      }
+
+      if (params.Status && params.Status !== 'all') {
+        searchParams.append('Status', params.Status);
+      }
+
+      if (params.Sorting) {
+        searchParams.append('Sorting', params.Sorting);
+      }
+
+      if (typeof params.SkipCount === 'number') {
+        searchParams.append('SkipCount', String(params.SkipCount));
+      }
+
+      if (typeof params.MaxResultCount === 'number') {
+        searchParams.append('MaxResultCount', String(params.MaxResultCount));
+      }
+
+      const query = searchParams.toString();
+      if (query) {
+        endpoint += `?${query}`;
+      }
+    }
+
+    const res = await getData<ContactUsMessageListResponse>(endpoint);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to fetch instructor contact us messages';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch instructor contact us messages',
+    };
+  }
+}
+
+export async function getInstructorContactUsMessageById(
+  id: string
+): Promise<ApiSingleResponse<ContactUsMessageDto>> {
+  try {
+    const res = await getData<ContactUsMessageDto>(endpoints.instructorContactUs.details(id));
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg =
+      'error' in res
+        ? (res as { error: string }).error
+        : 'Failed to get instructor contact us message details';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get instructor contact us message details',
+    };
+  }
+}
+
+export async function createInstructorContactUs(
+  payload: CreateInstructorContactUsDto
+): Promise<ApiSingleResponse<ContactUsMessageDto>> {
+  try {
+    const res = await postData<ContactUsMessageDto, CreateInstructorContactUsDto>(
+      endpoints.instructorContactUs.create,
+      payload
+    );
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+    const errorMsg =
+      'error' in res
+        ? (res as { error: string }).error
+        : 'Failed to send instructor contact us request';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to send instructor contact us request',
     };
   }
 }
