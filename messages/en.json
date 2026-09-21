@@ -1840,6 +1840,64 @@
       "validation_required": "Please select a course and fill in all required fields in Arabic and English",
       "no_courses": "No courses available"
     }
+  },
+  "InstructorStudents": {
+    "title": "Students Management",
+    "search_placeholder": "Search by name or email...",
+    "course_filter_all": "All Courses",
+    "course_filter_label": "Course",
+    "empty": "No registered students found yet",
+    "loading": "Loading...",
+    "columns": {
+      "name": "Name",
+      "courses_count": "Courses Count",
+      "last_enrolled": "Last Enrolled",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View Details"
+    },
+    "details": {
+      "breadcrumb_students": "Students",
+      "details_title": "Student Details",
+      "overview": "Overview",
+      "courses_tab": "Courses",
+      "personal_info": "Personal Information",
+      "academic_info": "Academic Information",
+      "courses_record": "Courses Record & Progress",
+      "courses_record_subtitle": "Courses enrolled by the student and the progress level for each.",
+      "name": "Full Name",
+      "email": "Email Address",
+      "country": "Country",
+      "graduation_year": "Graduation Year",
+      "account_status": "Account Status",
+      "last_active": "Last Active",
+      "registered_date": "Registration Date",
+      "active": "Active",
+      "inactive": "Inactive",
+      "stats": {
+        "total_courses": "Total Courses",
+        "total_courses_sub": "Enrolled with instructor",
+        "completed_courses": "Completed Courses",
+        "completed_courses_sub": "Finished all requirements",
+        "in_progress_courses": "In Progress",
+        "in_progress_courses_sub": "Currently ongoing courses"
+      },
+      "courses_table": {
+        "course_title": "Course",
+        "enrolled_at": "Enrollment Date",
+        "expires_at": "Expiry Date",
+        "completed_at": "Completion Date",
+        "progress": "Course Progress",
+        "status": "Status",
+        "status_completed": "Completed",
+        "status_in_progress": "In Progress",
+        "empty": "No enrolled courses found for this student",
+        "view_progress": "View Progress"
+      }
+    }
   }
 }
 

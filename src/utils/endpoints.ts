@@ -160,4 +160,9 @@ export const endpoints = {
     markAllAsRead: '/instructor/notifications/read-all',
     send: '/instructor/notifications/send',
   },
+  instructorStudents: {
+    list: '/instructor/students',
+    details: (studentId: string) => `/instructor/students/${studentId}`,
+    courses: (studentId: string) => `/instructor/students/${studentId}/courses`,
+  },
 };

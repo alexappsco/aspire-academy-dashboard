@@ -22,3 +22,4 @@ export * from './instructor-coupons';
 export * from './instructor-dashboard';
 export * from './admin-notifications';
 export * from './instructor-notifications';
+export * from './instructor-students';
