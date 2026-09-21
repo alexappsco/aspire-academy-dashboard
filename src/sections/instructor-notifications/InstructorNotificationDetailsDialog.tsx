@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Stack from '@mui/material/Stack';
@@ -8,28 +8,78 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
 import type { InstructorNotificationItemDto } from 'src/types/instructor-notification';
 import { normalizeNotificationType } from 'src/types/admin-notification';
+import {
+  getInstructorNotificationDetailsAction,
+  getInstructorSentNotificationDetailsAction,
+} from 'src/actions/instructor-notifications';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  notification: InstructorNotificationItemDto | null;
+  notificationId: string | null;
+  isSent?: boolean;
 }
 
 export default function InstructorNotificationDetailsDialog({
   open,
   onClose,
-  notification,
+  notificationId,
+  isSent = false,
 }: Props) {
   const t = useTranslations('InstructorNotifications');
   const tTypes = useTranslations('Notifications.types');
   const locale = useLocale();
+  const toast = useToast();
 
-  if (!notification) return null;
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState<InstructorNotificationItemDto | null>(null);
+
+  useEffect(() => {
+    if (!open || !notificationId) {
+      setNotification(null);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchDetails = async () => {
+      setLoading(true);
+      try {
+        const res = isSent
+          ? await getInstructorSentNotificationDetailsAction(notificationId)
+          : await getInstructorNotificationDetailsAction(notificationId);
+
+        if (isMounted) {
+          if (res.success && res.data) {
+            setNotification(res.data);
+          } else {
+            toast.error(res.error || 'Failed to load notification details');
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Failed to load notification details:', err);
+          toast.error('Failed to load notification details');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [open, notificationId, isSent, toast]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -46,7 +96,7 @@ export default function InstructorNotificationDetailsDialog({
     }
   };
 
-  const normType = normalizeNotificationType(notification.type);
+  const normType = notification ? normalizeNotificationType(notification.type) : '';
   let typeLabel: string = normType;
   try {
     typeLabel = tTypes(normType);
@@ -88,97 +138,121 @@ export default function InstructorNotificationDetailsDialog({
       </Stack>
 
       <DialogContent sx={{ px: 2, pb: 2, pt: 1 }}>
-        <Stack spacing={2.5}>
-          {/* Optional Image */}
-          {notification.imageUrl && (
-            <Box
-              sx={{
-                width: '100%',
-                maxHeight: 200,
-                borderRadius: 2,
-                overflow: 'hidden',
-                bgcolor: '#F4F6F8',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid #E2E8F0',
-              }}
-            >
+        {loading ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 200,
+              gap: 2,
+            }}
+          >
+            <CircularProgress size={36} />
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {t('loading')}
+            </Typography>
+          </Box>
+        ) : !notification ? (
+          <Box sx={{ textAlign: 'center', py: 6, color: '#919EAB' }}>
+            <Typography variant="body2">{t('loading')}</Typography>
+          </Box>
+        ) : (
+          <Stack spacing={2.5}>
+            {/* Optional Image */}
+            {notification.imageUrl && (
               <Box
-                component="img"
-                src={notification.imageUrl}
-                alt={notification.title}
                 sx={{
-                  maxWidth: '100%',
+                  width: '100%',
                   maxHeight: 200,
-                  objectFit: 'contain',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  bgcolor: '#F4F6F8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #E2E8F0',
                 }}
-              />
-            </Box>
-          )}
+              >
+                <Box
+                  component="img"
+                  src={notification.imageUrl}
+                  alt={notification.title}
+                  sx={{
+                    maxWidth: '100%',
+                    maxHeight: 200,
+                    objectFit: 'contain',
+                  }}
+                />
+              </Box>
+            )}
 
-          {/* Type Badge & Read status & Date */}
-          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              <Chip
-                label={typeLabel}
-                size="small"
-                sx={{
-                  bgcolor: '#E0F2FE',
-                  color: '#0284C7',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                }}
-              />
-              <Chip
-                label={notification.isRead ? t('columns.read') : t('columns.unread')}
-                size="small"
-                sx={{
-                  bgcolor: notification.isRead ? '#F1F5F9' : '#ECFDF5',
-                  color: notification.isRead ? '#64748B' : '#059669',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                }}
-              />
+            {/* Type Badge & Read status & Date */}
+            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <Chip
+                  label={typeLabel}
+                  size="small"
+                  sx={{
+                    bgcolor: '#E0F2FE',
+                    color: '#0284C7',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                  }}
+                />
+                {!isSent && (
+                  <Chip
+                    label={notification.isRead ? t('columns.read') : t('columns.unread')}
+                    size="small"
+                    sx={{
+                      bgcolor: notification.isRead ? '#F1F5F9' : '#ECFDF5',
+                      color: notification.isRead ? '#64748B' : '#059669',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                )}
+              </Stack>
+
+              <Typography variant="caption" sx={{ color: '#919EAB', fontWeight: 500 }}>
+                {formatDate(notification.createdAt)}
+              </Typography>
             </Stack>
 
-            <Typography variant="caption" sx={{ color: '#919EAB', fontWeight: 500 }}>
-              {formatDate(notification.createdAt)}
-            </Typography>
-          </Stack>
-
-          {/* Title */}
-          <Box>
-            <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 0.5 }}>
-              {t('columns.title')}
-            </Typography>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C252E' }}>
-              {notification.title}
-            </Typography>
-          </Box>
-
-          {/* Message */}
-          <Box>
-            <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 1 }}>
-              {t('columns.message')}
-            </Typography>
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                bgcolor: '#F9FAFB',
-                border: '1px solid #F1F3F5',
-                color: '#1C252E',
-                fontSize: '0.9rem',
-                minHeight: 80,
-                whiteSpace: 'pre-wrap',
-                lineHeight: 1.7,
-              }}
-            >
-              {notification.message}
+            {/* Title */}
+            <Box>
+              <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 0.5 }}>
+                {t('columns.title')}
+              </Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1C252E' }}>
+                {notification.title}
+              </Typography>
             </Box>
-          </Box>
-        </Stack>
+
+            {/* Message */}
+            <Box>
+              <Typography variant="body2" sx={{ color: '#637381', fontWeight: 600, mb: 1 }}>
+                {t('columns.message')}
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: '#F9FAFB',
+                  border: '1px solid #F1F3F5',
+                  color: '#1C252E',
+                  fontSize: '0.9rem',
+                  minHeight: 80,
+                  whiteSpace: 'pre-wrap',
+                  lineHeight: 1.7,
+                }}
+              >
+                {notification.message}
+              </Box>
+            </Box>
+          </Stack>
+        )}
       </DialogContent>
     </Dialog>
   );

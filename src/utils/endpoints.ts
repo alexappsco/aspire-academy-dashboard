@@ -152,7 +152,9 @@ export const endpoints = {
   },
   instructorNotifications: {
     received: '/instructor/notifications',
+    receivedDetails: (id: string) => `/instructor/notifications/${id}`,
     sent: '/instructor/notifications/sent',
+    sentDetails: (id: string) => `/instructor/notifications/sent/${id}`,
     unreadCount: '/instructor/notifications/unread-count',
     markAsRead: (id: string) => `/instructor/notifications/${id}/read`,
     markAllAsRead: '/instructor/notifications/read-all',

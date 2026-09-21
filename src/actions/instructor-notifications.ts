@@ -176,3 +176,50 @@ export async function sendInstructorNotificationAction(
     };
   }
 }
+
+export async function getInstructorNotificationDetailsAction(
+  id: string
+): Promise<{ success: boolean; data?: InstructorNotificationItemDto; error?: string }> {
+  try {
+    const res = await getData<InstructorNotificationItemDto>(
+      endpoints.instructorNotifications.receivedDetails(id)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to fetch notification details';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch notification details',
+    };
+  }
+}
+
+export async function getInstructorSentNotificationDetailsAction(
+  id: string
+): Promise<{ success: boolean; data?: InstructorNotificationItemDto; error?: string }> {
+  try {
+    const res = await getData<InstructorNotificationItemDto>(
+      endpoints.instructorNotifications.sentDetails(id)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to fetch sent notification details';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch sent notification details',
+    };
+  }
+}
+

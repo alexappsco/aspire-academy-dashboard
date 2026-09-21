@@ -69,8 +69,7 @@ export default function InstructorNotificationsView() {
 
   // Dialogs state
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
-  const [selectedNotification, setSelectedNotification] =
-    useState<InstructorNotificationItemDto | null>(null);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Fetch unread count
@@ -162,7 +161,7 @@ export default function InstructorNotificationsView() {
 
   // Open Details & Mark single as read
   const handleOpenDetails = async (notification: InstructorNotificationItemDto) => {
-    setSelectedNotification(notification);
+    setSelectedNotificationId(notification.id);
     setDetailsOpen(true);
 
     if (!notification.isRead && currentTab === 0) {
@@ -601,8 +600,12 @@ export default function InstructorNotificationsView() {
       {/* Details Dialog */}
       <InstructorNotificationDetailsDialog
         open={detailsOpen}
-        onClose={() => setDetailsOpen(false)}
-        notification={selectedNotification}
+        onClose={() => {
+          setDetailsOpen(false);
+          setSelectedNotificationId(null);
+        }}
+        notificationId={selectedNotificationId}
+        isSent={currentTab === 1}
       />
 
       {/* Send Notification to Course Students Dialog */}
