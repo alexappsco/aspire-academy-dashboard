@@ -1792,6 +1792,57 @@
       "created_at_label": "تاريخ الإرسال",
       "close": "إغلاق"
     }
+  },
+  "InstructorNotifications": {
+    "title": "إشعارات المحاضر",
+    "tab_received": "الإشعارات الواردة",
+    "tab_sent": "الإشعارات المرسلة",
+    "mark_all_read": "تحديد الكل كمقروء",
+    "mark_all_read_success": "تم تحديد كافة الإشعارات كمقروءة",
+    "send_notification_btn": "إرسال إشعار للطلاب",
+    "empty_received": "لا توجد إشعارات واردة حتى الآن",
+    "empty_sent": "لم تقم بإرسال أي إشعارات حتى الآن",
+    "filter_status_all": "جميع الحالات",
+    "filter_status_unread": "غير المقروءة فقط",
+    "filter_status_read": "المقروءة فقط",
+    "search_placeholder": "بحث في الإشعارات...",
+    "unread_badge": "{count} إشعار غير مقروء",
+    "loading": "جاري التحميل...",
+    "dialog_details_title": "تفاصيل الإشعار",
+    "dialog_close": "إغلاق",
+    "columns": {
+      "title": "العنوان",
+      "message": "الرسالة",
+      "type": "النوع",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "read": "مقروء",
+      "unread": "جديد"
+    },
+    "actions": {
+      "view": "عرض التفاصيل",
+      "mark_read": "تعليم كمقروء"
+    },
+    "send_dialog": {
+      "title": "إرسال إشعار لطلاب دورة تدريبية",
+      "course_select_label": "الدورة التدريبية المستهدفة",
+      "course_select_placeholder": "اختر الدورة التدريبية...",
+      "title_ar_label": "عنوان الإشعار (بالعربية)",
+      "title_ar_placeholder": "أدخل عنوان الإشعار باللغة العربية...",
+      "title_en_label": "عنوان الإشعار (بالإنجليزية)",
+      "title_en_placeholder": "Enter notification title in English...",
+      "message_ar_label": "نص الإشعار (بالعربية)",
+      "message_ar_placeholder": "اكتب محتوى الإشعار بالعربية هنا...",
+      "message_en_label": "نص الإشعار (بالإنجليزية)",
+      "message_en_placeholder": "Write notification content in English here...",
+      "send_btn": "إرسال الإشعار",
+      "sending": "جاري الإرسال...",
+      "cancel_btn": "إلغاء",
+      "send_success": "تم إرسال الإشعار لطلاب الدورة بنجاح",
+      "send_error": "حدث خطأ أثناء إرسال الإشعار",
+      "validation_required": "يرجى اختيار الدورة وتعبئة جميع الحقول الإلزامية بالعربية والإنجليزية",
+      "no_courses": "لا توجد دورات تدريبية متاحة حالياً"
+    }
   }
 }
 
