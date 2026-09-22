@@ -10,7 +10,6 @@ import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
-import TablePagination from '@mui/material/TablePagination';
 import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
@@ -37,9 +36,6 @@ export default function InstructorStudentsListView() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>('');
   const [courses, setCourses] = useState<CourseDto[]>([]);
 
-  // Pagination state
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Data state
   const [loading, setLoading] = useState(true);
@@ -51,7 +47,6 @@ export default function InstructorStudentsListView() {
   useEffect(() => {
     debounceTimer.current = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      setPage(0);
     }, 400);
     return () => clearTimeout(debounceTimer.current);
   }, [searchTerm]);
@@ -78,8 +73,8 @@ export default function InstructorStudentsListView() {
       const res = await getInstructorStudentsAction({
         Filter: debouncedSearch.trim() || undefined,
         CourseId: selectedCourseId || undefined,
-        SkipCount: page * rowsPerPage,
-        MaxResultCount: rowsPerPage,
+        SkipCount: 0,
+        MaxResultCount: 1000,
       });
 
       if (res.success && res.data) {
@@ -94,7 +89,7 @@ export default function InstructorStudentsListView() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedCourseId, page, rowsPerPage, toast]);
+  }, [debouncedSearch, selectedCourseId, toast]);
 
   useEffect(() => {
     fetchStudents();
@@ -267,7 +262,6 @@ export default function InstructorStudentsListView() {
               value={selectedCourseId}
               onChange={(e) => {
                 setSelectedCourseId(e.target.value as string);
-                setPage(0);
               }}
             >
               <MenuItem value="">{t('course_filter_all')}</MenuItem>
@@ -296,23 +290,10 @@ export default function InstructorStudentsListView() {
           <Box sx={{ px: 0.5 }}>
             <SharedTable<InstructorStudentItemDto>
               data={students}
-              count={totalCount}
+              count={students.length}
               tableHead={tableHead}
               actions={actions}
               customRender={customRender}
-            />
-            <TablePagination
-              component="div"
-              count={totalCount}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10));
-                setPage(0);
-              }}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              labelRowsPerPage={locale === 'ar' ? 'عدد الصفوف لكل صفحة:' : 'Rows per page:'}
             />
           </Box>
         )}
