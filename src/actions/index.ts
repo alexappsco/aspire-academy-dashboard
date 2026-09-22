@@ -23,3 +23,4 @@ export * from './instructor-dashboard';
 export * from './instructor-reports';
 export * from './admin-notifications';
 export * from './instructor-notifications';
+export * from './instructor-students';

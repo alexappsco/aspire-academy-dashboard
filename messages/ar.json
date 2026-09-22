@@ -2060,6 +2060,64 @@
       "validation_required": "يرجى اختيار الدورة وتعبئة جميع الحقول الإلزامية بالعربية والإنجليزية",
       "no_courses": "لا توجد دورات تدريبية متاحة حالياً"
     }
+  },
+  "InstructorStudents": {
+    "title": "إدارة الطلاب",
+    "search_placeholder": "بحث بالاسم أو البريد الإلكتروني...",
+    "course_filter_all": "جميع الدورات",
+    "course_filter_label": "الدورة التدريبية",
+    "empty": "لا يوجد طلاب مسجلين حتى الآن",
+    "loading": "جاري التحميل...",
+    "columns": {
+      "name": "الاسم",
+      "courses_count": "عدد الدورات",
+      "last_enrolled": "آخر تسجيل",
+      "status": "الحالة",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "actions": {
+      "view": "عرض التفاصيل"
+    },
+    "details": {
+      "breadcrumb_students": "الطلاب",
+      "details_title": "تفاصيل الطالب",
+      "overview": "نظرة عامة",
+      "courses_tab": "الدورات",
+      "personal_info": "البيانات الشخصية",
+      "academic_info": "البيانات الأكاديمية",
+      "courses_record": "سجل الدورات التدريبية والتقدم",
+      "courses_record_subtitle": "الدورات التي التحق بها الطالب ومستوى التقدم الخاص بكل دورة على حدة.",
+      "name": "الاسم بالكامل",
+      "email": "البريد الإلكتروني",
+      "country": "الدولة",
+      "graduation_year": "سنة التخرج",
+      "account_status": "حالة الحساب",
+      "last_active": "آخر نشاط",
+      "registered_date": "تاريخ التسجيل",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "stats": {
+        "total_courses": "إجمالي الدورات",
+        "total_courses_sub": "مسجل بها لدى المحاضر",
+        "completed_courses": "الدورات المكتملة",
+        "completed_courses_sub": "أنهى كافة متطلباتها",
+        "in_progress_courses": "قيد الدراسة",
+        "in_progress_courses_sub": "دورات مستمرة حالياً"
+      },
+      "courses_table": {
+        "course_title": "الدورة التدريبية",
+        "enrolled_at": "تاريخ التسجيل",
+        "expires_at": "تاريخ الانتهاء",
+        "completed_at": "تاريخ الاكتمال",
+        "progress": "نسبة التقدم بالدورة",
+        "status": "الحالة",
+        "status_completed": "مكتملة",
+        "status_in_progress": "قيد الدراسة",
+        "empty": "لا توجد دورات مسجلة لهذا الطالب",
+        "view_progress": "عرض التقدم"
+      }
+    }
   }
 }
 
