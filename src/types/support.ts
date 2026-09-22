@@ -1,34 +1,24 @@
-export type ContactUsMessageStatus = 'new' | 'in_progress' | 'resolved' | string;
+export type ContactUsMessageStatus = 'New' | 'InProgress' | 'Resolved' | string;
 
-export type SenderType = 'student' | 'lecturer' | 'instructor' | string;
+export type SenderType = 'Student' | 'Instructor' | string;
 
 export interface ContactUsMessageDto {
   id: string;
-  senderName?: string;
-  name?: string;
-  fullName?: string;
-  senderEmail?: string;
-  email?: string;
-  senderPhone?: string;
-  phoneNumber?: string;
-  phone?: string;
-  senderType?: string;
-  userType?: string;
+  email: string;
+  title: string;
+  notes: string;
+  name: string;
   userId?: string | null;
   userName?: string | null;
-  title?: string;
-  subject?: string;
-  notes?: string;
-  message?: string;
-  content?: string;
-  description?: string;
-  details?: string;
+  senderType: SenderType;
   status: ContactUsMessageStatus;
-  creationTime?: string;
+  creationTime: string;
+
+  // Backward-compatible fallback aliases
+  senderName?: string;
+  senderEmail?: string;
+  message?: string;
   createdAt?: string;
-  created_at?: string;
-  reply?: string | null;
-  response?: string | null;
 }
 
 export interface ContactUsMessageListResponse {
