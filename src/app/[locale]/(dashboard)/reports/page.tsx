@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIES_KEYS } from 'src/config-global';
 import ReportsView from '@/sections/reports/view';
-import { InstructorReportsView } from '@/sections/instructor-reports';
+import { InstructorAnalyticsView } from '@/sections/reports/components/instructor';
 
 export default async function ReportsPage() {
   const cookieStore = await cookies();
@@ -11,7 +11,7 @@ export default async function ReportsPage() {
   const isInstructor = role === 'instructor';
 
   if (isInstructor) {
-    return <InstructorReportsView />;
+    return <InstructorAnalyticsView />;
   }
 
   return <ReportsView />;
