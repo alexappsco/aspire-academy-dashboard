@@ -31,6 +31,38 @@ type SupportDetailsViewProps = {
   ticketId: string;
 };
 
+const normalizeStatus = (st: unknown): 'New' | 'InProgress' | 'Resolved' => {
+  if (st === null || st === undefined) return 'New';
+  const s = String(st).toLowerCase().trim();
+  if (s === '1' || s === '0' || s === 'new' || s === 'pending' || s === 'جديد') return 'New';
+  if (
+    s === '2' ||
+    s === 'inprogress' ||
+    s === 'in_progress' ||
+    s === 'in progress' ||
+    s === 'قيد المعالجة' ||
+    s === 'جاري العمل'
+  )
+    return 'InProgress';
+  if (s === '3' || s === 'resolved' || s === 'replied' || s === 'closed' || s === 'تم الرد' || s === 'تم الحل')
+    return 'Resolved';
+  return 'New';
+};
+
+const formatDateDisplay = (dateStr?: string) => {
+  if (!dateStr) return '-';
+  try {
+    const clean = dateStr.split('T')[0];
+    const parts = clean.split('-');
+    if (parts.length === 3) {
+      return `${parts[0]}-${parts[1]}-${parseInt(parts[2], 10)}`;
+    }
+    return clean;
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps) {
   const t = useTranslations('Support');
   const locale = useLocale();
@@ -40,8 +72,8 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
 
   const [message, setMessage] = useState<ContactUsMessageDto | null>(null);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<string>('new');
-  const [draftStatus, setDraftStatus] = useState<string>('new');
+  const [status, setStatus] = useState<'New' | 'InProgress' | 'Resolved'>('New');
+  const [draftStatus, setDraftStatus] = useState<'New' | 'InProgress' | 'Resolved'>('New');
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -56,25 +88,12 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         if (res.success && res.data) {
           if (isMounted) {
             setMessage(res.data);
-            setStatus(res.data.status || 'new');
+            const norm = normalizeStatus(res.data.status);
+            setStatus(norm);
+            setDraftStatus(norm);
           }
-        } else if (!isInstructor) {
-          // Demo fallback for the admin view
-          if (isMounted) {
-            setMessage({
-              id: ticketId,
-              name: 'علي محمود',
-              senderType: 'student',
-              senderPhone: '+96513325599',
-              senderEmail: 'Ali@gmail.com',
-              creationTime: '2026-08-03T10:00:00.000Z',
-              notes: 'تم ايقاف الكورس مع انى لم اتمكن من انهائة بعد يرجى حل المشكلة في اقرب وقت',
-              status: 'new',
-            });
-            setStatus('new');
-          }
-        } else if (res.error) {
-          toast.error(res.error);
+        } else {
+          toast.error(res.error || t('ticket_load_failed'));
         }
       } catch {
         toast.error(t('ticket_load_failed'));
@@ -100,46 +119,29 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
       const res = await updateContactUsMessageStatus(ticketId, draftStatus);
       if (res.success) {
         setStatus(draftStatus);
+        setMessage((prev) => (prev ? { ...prev, status: draftStatus } : null));
         toast.success(t('status_updated'));
         setOpenStatusDialog(false);
       } else {
-        setStatus(draftStatus);
-        toast.success(t('status_updated'));
-        setOpenStatusDialog(false);
+        toast.error(res.error || t('status_update_failed'));
       }
     } catch {
-      setStatus(draftStatus);
-      toast.success(t('status_updated'));
-      setOpenStatusDialog(false);
+      toast.error(t('status_update_failed'));
     } finally {
       setUpdating(false);
     }
   };
 
   const getStatusBadge = (s: unknown) => {
-    const str = String(s ?? '').toLowerCase().trim();
-    if (
-      str === '3' ||
-      str === 'resolved' ||
-      str === 'replied' ||
-      str === 'closed' ||
-      str === 'تم الرد' ||
-      str === 'تم الحل'
-    ) {
+    const norm = normalizeStatus(s);
+    if (norm === 'Resolved') {
       return {
         label: t('statuses.resolved'),
         bgcolor: '#E6F4EA',
         color: '#00A76F',
       };
     }
-    if (
-      str === '2' ||
-      str === 'inprogress' ||
-      str === 'in_progress' ||
-      str === 'in progress' ||
-      str === 'قيد المعالجة' ||
-      str === 'جاري العمل'
-    ) {
+    if (norm === 'InProgress') {
       return {
         label: t('statuses.in_progress'),
         bgcolor: '#E0F2FE',
@@ -170,19 +172,16 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     ? t('user_types.lecturer')
     : t('user_types.student');
 
+  // Strict adherence to backend schema: id, email, title, notes, name, userId, userName, senderType, status, creationTime
+  // Phone number is omitted because backend does not provide it.
   const senderInfo = [
     {
       label: t('details_name_label'),
-      value:
-        message?.name || message?.senderName || message?.fullName || message?.userName || '-',
+      value: message?.name || message?.userName || message?.senderName || '-',
     },
     {
       label: t('details_sender_type_label'),
       value: senderTypeValue,
-    },
-    {
-      label: t('details_phone_label'),
-      value: message?.phone || message?.senderPhone || message?.phoneNumber || '-',
     },
     {
       label: t('details_email_label'),
@@ -190,12 +189,13 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     },
     {
       label: t('details_date_label'),
-      value: (message?.creationTime || message?.createdAt || '').split('T')[0] || '-',
+      value: formatDateDisplay(message?.creationTime || message?.createdAt),
     },
   ];
 
   return (
     <Box sx={{ direction: locale === 'ar' ? 'rtl' : 'ltr', textAlign: locale === 'ar' ? 'right' : 'left', py: 2 }}>
+      {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 4 }}>
         <IconButton
           aria-label={t('details_back_label')}
@@ -220,6 +220,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         </Typography>
       </Box>
 
+      {/* Card 1: Sender Information */}
       <Card
         sx={{
           mb: 3,
@@ -249,6 +250,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         </Box>
       </Card>
 
+      {/* Card 2: Complaint Details */}
       <Card
         sx={{
           p: { xs: 2.5, sm: 3 },
@@ -269,7 +271,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           }}
         >
           <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-            {t('details_title')}
+            {t('details_complaint_details')}
           </Typography>
 
           {isInstructor ? (
@@ -278,7 +280,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
               sx={{
                 height: 34,
                 px: 1.5,
-                borderRadius: '20px',
+                borderRadius: '8px',
                 bgcolor: badge.bgcolor,
                 color: badge.color,
                 fontWeight: 700,
@@ -292,7 +294,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
                 sx={{
                   height: 34,
                   px: 1.5,
-                  borderRadius: '20px',
+                  borderRadius: '8px',
                   bgcolor: badge.bgcolor,
                   color: badge.color,
                   fontWeight: 700,
@@ -321,8 +323,13 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         </Box>
 
         <Box sx={{ borderTop: '1px solid #E2E8F0', pt: 2.5 }}>
-          <Typography sx={{ color: '#0F172A', fontSize: 16, fontWeight: 800, mb: 1.5 }}>
-            {message?.title ? message.title : t('details_message_content')}
+          {message?.title && (
+            <Typography sx={{ color: '#0F172A', fontSize: 16, fontWeight: 800, mb: 1.5 }}>
+              {message.title}
+            </Typography>
+          )}
+          <Typography sx={{ color: '#64748B', fontSize: 14, fontWeight: 600, mb: 1 }}>
+            {t('details_message_content')}
           </Typography>
           <Typography
             sx={{
@@ -334,14 +341,12 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           >
             {message?.notes ||
               message?.message ||
-              message?.content ||
-              message?.description ||
-              message?.details ||
               '-'}
           </Typography>
         </Box>
       </Card>
 
+      {/* Dialog: Change Status */}
       <Dialog
         open={openStatusDialog}
         onClose={() => setOpenStatusDialog(false)}
@@ -363,7 +368,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
         <DialogContent sx={{ p: { xs: 3, sm: 4 }, direction: locale === 'ar' ? 'rtl' : 'ltr' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
             <Typography sx={{ fontSize: 20, fontWeight: 800, color: '#0F172A' }}>
-              {t('details_change_status')}
+              {t('details_dialog_title')}
             </Typography>
             <IconButton
               onClick={() => setOpenStatusDialog(false)}
@@ -379,7 +384,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
             </Typography>
             <Select
               value={draftStatus}
-              onChange={(event) => setDraftStatus(event.target.value as string)}
+              onChange={(event) => setDraftStatus(event.target.value as 'New' | 'InProgress' | 'Resolved')}
               sx={{
                 height: 48,
                 bgcolor: '#F1F5F9',
