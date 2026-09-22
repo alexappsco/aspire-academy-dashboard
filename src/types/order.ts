@@ -73,3 +73,19 @@ export function isCancelledOrder(status: unknown): boolean {
   const s = String(status).trim().toLowerCase();
   return s === 'cancelled' || s === 'canceled' || s === '2' || s === 'rejected';
 }
+
+export function resolveReceiptUrl(rawUrl?: string | null): string {
+  if (!rawUrl) return '';
+  const url = String(rawUrl).trim();
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:') ||
+    url.startsWith('blob:')
+  ) {
+    return url;
+  }
+  const base = process.env.NEXT_PUBLIC_HOST_API || '';
+  const cleanBase = base.replace(/\/api\/v1\/?$/, '').replace(/\/+$/, '');
+  return `${cleanBase}/${url.replace(/^\/+/, '')}`;
+}
