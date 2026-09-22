@@ -29,9 +29,9 @@ import {
   isPendingOrder,
   isPaidOrder,
   isCancelledOrder,
+  resolveReceiptUrl,
   OrderDto,
 } from 'src/types/order';
-import PaymentReceiptDialog, { PaymentReceiptData } from './dialog-paid-resit';
 
 interface CourseStudentsTabProps {
   courseId: string;
@@ -65,7 +65,6 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
   const [rejectTarget, setRejectTarget] = useState<OrderDto | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectLoading, setRejectLoading] = useState(false);
-  const [receiptOrder, setReceiptOrder] = useState<OrderDto | null>(null);
 
   const fetchOrders = useCallback(async () => {
     const res = await getOrders({
@@ -150,37 +149,13 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
     setRejectLoading(false);
   };
 
-  const buildReceiptData = (order: OrderDto): PaymentReceiptData => {
-    const item = order.items?.find((i) => i.courseId) ?? order.items?.[0];
-    return {
-      refNumber: order.id,
-      bankName: 'بنك مصر • Banque Misr',
-      bankSubtext: 'إشعار تحويل مصرفي إلكتروني رسمي',
-      amount: order.total ?? 0,
-      currency: 'جنيه مصري (EGP)',
-      amountInWords: 'فقط ' + (order.total ?? 0).toLocaleString('ar-EG') + ' جنيهاً مصرياً لا غير',
-      transactionTime: order.creationTime
-        ? new Date(order.creationTime).toLocaleString(isRtl ? 'ar-KW' : 'en-US')
-        : '—',
-      senderName: order.buyerName || '—',
-      receiverName: 'أكاديمية أسباير للتعليم الطبي (Aspire)',
-      iban: 'EG3400020001000000284918234',
-      purpose: item?.courseTitle ? `رسوم دورة ${item.courseTitle}` : 'رسوم دورة',
-    };
-  };
-
-  const handleReceiptAccept = () => {
-    if (!receiptOrder) return;
-    const order = receiptOrder;
-    setReceiptOrder(null);
-    void handleApprove(order);
-  };
-
-  const handleReceiptReject = () => {
-    if (!receiptOrder) return;
-    const order = receiptOrder;
-    setReceiptOrder(null);
-    openRejectDialog(order);
+  const handleViewReceipt = (rawUrl?: string | null) => {
+    const url = resolveReceiptUrl(rawUrl);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      toast.info(locale === 'ar' ? 'لا توجد صورة إيصال مرفقة لهذا الطلب' : 'No receipt image attached for this order');
+    }
   };
 
   const statusConfig = (order: OrderDto) => {
@@ -277,7 +252,7 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
           <Button
             size="small"
             variant="outlined"
-            onClick={() => setReceiptOrder(row)}
+            onClick={() => handleViewReceipt(row.receiptUrl)}
             startIcon={<Iconify icon="solar:receipt-2-bold" width={15} />}
             sx={{
               borderRadius: 1.5,
@@ -466,17 +441,6 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Payment Receipt Dialog */}
-      {receiptOrder && (
-        <PaymentReceiptDialog
-          open
-          onClose={() => setReceiptOrder(null)}
-          onAccept={handleReceiptAccept}
-          onReject={handleReceiptReject}
-          data={buildReceiptData(receiptOrder)}
-        />
-      )}
     </Stack>
   );
 }
