@@ -52,6 +52,9 @@ export const endpoints = {
   instructorDashboard: {
     get: '/instructor/dashboard',
   },
+  instructorReports: {
+    get: '/instructor/reports',
+  },
   studyMaterials: {
     list: '/admin/study-materials',
     details: (id: string) => `/admin/study-materials/${id}`,
@@ -106,6 +109,11 @@ export const endpoints = {
     details: (id: string) => `/admin/contact-us-messages/${id}`,
     delete: (id: string) => `/admin/contact-us-messages/${id}`,
     updateStatus: (id: string) => `/admin/contact-us-messages/${id}/status`,
+  },
+  instructorContactUs: {
+    list: '/instructor/contact-us',
+    details: (id: string) => `/instructor/contact-us/${id}`,
+    create: '/instructor/contact-us',
   },
   orders: {
     list: '/admin/orders',

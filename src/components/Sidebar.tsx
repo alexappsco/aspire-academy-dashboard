@@ -19,6 +19,7 @@ import {
   useTheme,
 } from "@mui/material";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import { useAuth } from "src/contexts/AuthContext";
 
 interface SidebarProps {
   open: boolean;
@@ -86,14 +87,6 @@ const sidebarItems: SidebarItem[] = [
         key: "college",
         path: "/college",
       },
-      // {
-      //   key: "academic_years",
-      //   path: "/academic-years",
-      // },
-      // {
-      //   key: "academic_semesters",
-      //   path: "/semesters",
-      // },
       {
         key: "academic_years",
         icon: "/icons/curriculum.svg",
@@ -172,6 +165,32 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
 ];
+
+const INSTRUCTOR_HIDDEN_KEYS = new Set([
+  "specializations",
+  "lecturers_management",
+  "academic_hierarchy",
+  "currencies",
+  "categories",
+  "banners",
+  "legal_info",
+]);
+
+function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): SidebarItem[] {
+  return items
+    .map((item) => {
+      if (hiddenKeys.has(item.key)) return null;
+      if (item.children) {
+        const children = filterItemsForRole(item.children, hiddenKeys);
+        if (children.length === 1) {
+          return { key: children[0].key, path: children[0].path, icon: item.icon };
+        }
+        return { ...item, children };
+      }
+      return item;
+    })
+    .filter((item): item is SidebarItem => item !== null && (!item.children || item.children.length > 0));
+}
 
 const COLORS = {
   text: "#1E293B",
@@ -415,6 +434,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const anchor = isRtl ? "right" : "left";
+  const { isInstructor } = useAuth();
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
@@ -447,7 +467,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         }}
       >
         <List disablePadding>
-          {sidebarItems.map((item) => {
+          {(isInstructor ? filterItemsForRole(sidebarItems, INSTRUCTOR_HIDDEN_KEYS) : sidebarItems).map((item) => {
             const expanded = expandedItems.includes(item.key);
 
             return (

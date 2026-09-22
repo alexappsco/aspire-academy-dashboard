@@ -147,6 +147,9 @@
       "currency_placeholder": "Select currency...",
       "access_duration_label": "Access Duration (Days)",
       "access_duration_placeholder": "e.g. 365",
+      "platform_percentage_label": "Platform Percentage (%)",
+      "platform_percentage_placeholder": "e.g. 15",
+      "platform_percentage_invalid": "Platform percentage must be between 0 and 100",
       "university_label": "University",
       "university_placeholder": "Select university...",
       "academic_year_label": "Academic Year",
@@ -840,6 +843,35 @@
       "view": "View"
     },
     "send_ticket": "Send Ticket",
+    "ticket_sent": "Ticket sent successfully",
+    "ticket_send_failed": "Failed to send the ticket",
+    "ticket_load_failed": "Failed to load ticket details",
+    "status_updated": "Ticket status updated successfully",
+    "create_ticket_title": "Send Support Ticket",
+    "create_name_label": "Full Name",
+    "create_name_placeholder": "Enter your full name",
+    "create_email_label": "Email",
+    "create_email_placeholder": "Enter your email",
+    "create_title_label": "Ticket Title",
+    "create_title_placeholder": "Enter a title for your issue",
+    "create_notes_label": "Issue Description",
+    "create_notes_placeholder": "Describe your issue in detail...",
+    "send": "Send",
+    "sending": "Sending...",
+    "cancel": "Cancel",
+    "details_sender_info": "Sender Information",
+    "details_name_label": "Name",
+    "details_sender_type_label": "Sender Type",
+    "details_phone_label": "Phone Number",
+    "details_email_label": "Email",
+    "details_date_label": "Sent Date",
+    "details_message_content": "Message Content",
+    "details_change_status": "Change Status",
+    "details_new_status_label": "New Ticket Status",
+    "details_update_status": "Update Status",
+    "details_updating": "Updating...",
+    "details_cancel": "Cancel",
+    "details_back_label": "Back",
     "all": "All",
     "replied": "Resolved",
     "pending": "New",
@@ -1593,6 +1625,191 @@
       "colleges": "Registered Colleges",
       "colleges_sub": "Medicine & Pharmacy",
       "manage_btn": "Manage & Edit Academic Structure"
+    }
+  },
+  "InstructorReports": {
+    "title": "My Reports",
+    "subtitle": "Comprehensive overview of your earnings, lessons, courses, students, and teaching performance.",
+    "metrics": {
+      "net_earnings": "Net Earnings",
+      "completed_lessons": "Completed Lessons",
+      "active_courses": "Active Courses",
+      "pending_courses": "{count} awaiting admin review",
+      "total_students": "Total Students",
+      "vs_previous": "vs previous period",
+      "no_change": "No change yet"
+    },
+    "enrollment_trend": {
+      "title": "Enrollment Trend",
+      "subtitle": "{count} students enrolled over the last 6 months"
+    },
+    "financial": {
+      "title": "Financial Overview",
+      "subtitle": "Revenue distribution according to the sharing agreement",
+      "total_revenue": "Total Revenue",
+      "platform_share": "Platform Share",
+      "net_earnings": "Net Earnings",
+      "unsplit_revenue": "Unsplit Revenue",
+      "platform_pct": "Platform {percent}%",
+      "net_pct": "Your share {percent}%"
+    },
+    "efficiency": {
+      "title": "Teaching Efficiency",
+      "minutes": "min",
+      "avg_lessons_per_student": "Avg Lessons / Student",
+      "avg_lesson_duration": "Avg Lesson Duration",
+      "dropoff_rate": "Drop-off Rate",
+      "completion_rate": "Lesson Completion Rate",
+      "rating_average": "Average Rating",
+      "rating_count": "Total Ratings"
+    },
+    "top_courses": {
+      "title": "Top Courses",
+      "subtitle": "Ranked by enrolled students and revenue",
+      "columns": {
+        "rank": "#",
+        "course": "Course",
+        "students": "Students",
+        "completion": "Completion",
+        "total_revenue": "Total Revenue",
+        "net_revenue": "Net Revenue",
+        "status": "Status"
+      },
+      "status_published": "Published",
+      "status_under_review": "Under Review",
+      "status_rejected": "Rejected",
+      "empty": "No courses yet"
+    },
+    "transactions": {
+      "title": "Recent Transactions",
+      "subtitle": "Latest student enrollments and payments",
+      "columns": {
+        "student": "Student",
+        "course": "Course",
+        "amount": "Amount",
+        "date": "Date"
+      },
+      "empty": "No transactions yet"
+    },
+    "top_students": {
+      "title": "Top Students",
+      "subtitle": "Most engaged students with your courses",
+      "columns": {
+        "student": "Student",
+        "lessons": "Lessons",
+        "completion": "Completion",
+        "rating": "Rating",
+        "amount": "Amount Paid"
+      },
+      "empty": "No students yet"
+    }
+  },
+  "InstructorAnalytics": {
+    "header": {
+      "title": "Reports & Analytics",
+      "subtitle": "Track your teaching performance, student engagement and activity, live lessons, and total earnings.",
+      "export": "Export Report",
+      "all_courses": "All Courses ({count})",
+      "only_approved": "Approved Courses",
+      "only_pending": "Under Review Courses",
+      "last_30_days": "Last 30 Days",
+      "last_90_days": "Last 90 Days"
+    },
+    "kpis": {
+      "total_students": "Total Students",
+      "vs_previous": "vs previous month",
+      "active_courses": "Active Courses",
+      "approved": "{count} approved",
+      "under_review": "{count} under review",
+      "completed_lessons": "Completed Lessons",
+      "net_earnings": "Net Instructor Earnings",
+      "share_percent": "Share {percent}%"
+    },
+    "growth": {
+      "title": "Student Growth & Registration Trend",
+      "subtitle": "Total students enrolled in the instructor's approved courses",
+      "students": "students",
+      "new_registrations": "+{count} new registrations in {month}",
+      "retention": "Student retention rate: {percent}%"
+    },
+    "top_courses": {
+      "title": "Top Performing Courses",
+      "subtitle": "Ranked by number of students, completion rate, and total revenue",
+      "view_report": "View Detailed Course Reports",
+      "enrolled": "{count} enrolled students",
+      "completion": "Completion",
+      "total_revenue": "Total Revenue",
+      "instructor_share": "Instructor Share",
+      "share_percent": "- {percent}%",
+      "status_approved": "Approved",
+      "status_pending": "Under Review",
+      "empty": "No courses available"
+    },
+    "financial": {
+      "agreement": "Approved agreement: Instructor {instructor}% / Platform {platform}%",
+      "title": "Financial Performance & Revenue Breakdown",
+      "subtitle": "Audited breakdown of total revenue and net instructor dues calculation",
+      "gross_revenue": "Gross Revenue",
+      "net_share": "Net Instructor {percent}%",
+      "due_chip": "Due for Payout",
+      "platform_share": "Platform Share {percent}%",
+      "pending_payouts": "Pending Payouts",
+      "pending_note": "Temporarily on Hold",
+      "instructor_label": "Instructor share {percent}%",
+      "platform_label": "Platform share {percent}%",
+      "of_total": "of total earnings"
+    },
+    "transactions": {
+      "title": "Recent Financial Transactions",
+      "subtitle": "Latest recorded financial transactions for your account",
+      "tabs": {
+        "all": "All",
+        "paid": "Paid",
+        "pending": "Pending",
+        "refunded": "Refunded"
+      },
+      "columns": {
+        "date": "Date & Time",
+        "description": "Description & Student",
+        "type": "Type",
+        "total": "Total Amount",
+        "instructor": "Instructor 70%",
+        "platform": "Platform 30%",
+        "status": "Status"
+      },
+      "type_course": "Course",
+      "type_lesson": "Live Lesson",
+      "status_paid": "Paid",
+      "status_pending": "Pending",
+      "status_refunded": "Refunded",
+      "pagination": "Showing {from} to {to} of {total} transactions",
+      "more_rows": "{count} more transactions",
+      "empty": "No transactions found"
+    },
+    "engaged": {
+      "title": "Most Engaged Students",
+      "view_all": "View all students ({count})",
+      "lessons": "{count} lessons",
+      "total_spent": "${amount} total",
+      "empty": "No students yet"
+    },
+    "efficiency": {
+      "title": "Teaching Efficiency",
+      "subtitle": "Lesson delivery rates and engagement level for {name}",
+      "avg_duration": "Average Lesson Duration",
+      "default_duration": "Default {minutes} min",
+      "per_student": "Lessons Per Student",
+      "rebooking": "re-booking rate",
+      "completion_rate": "Completion Rate",
+      "high_engagement": "High engagement",
+      "cancellation_rate": "Cancellation Rate",
+      "below_target": "Below target {target}%",
+      "rating": "Student Rating",
+      "based_on": "Based on {count} reviews",
+      "instructor_id": "Instructor ID: {id}",
+      "units": {
+        "minutes": "min"
+      }
     }
   },
   "InstructorHome": {
