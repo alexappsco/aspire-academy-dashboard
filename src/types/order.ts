@@ -13,7 +13,7 @@ export interface OrderDto {
   buyerName?: string;
   buyerEmail?: string;
   buyerPhone?: string;
-  status: number;
+  status: string | number;
   subtotal: number;
   vatAmount: number;
   discountAmount: number;
@@ -43,10 +43,33 @@ export interface GetOrdersParams {
 }
 
 export const ORDER_STATUS = {
-  PENDING: 0,
-  APPROVED: 1,
-  REJECTED: 2,
+  PENDING: 'Pending',
+  PAID: 'Paid',
+  CANCELLED: 'Cancelled',
 } as const;
 
-export const isPendingOrder = (status: number): boolean =>
-  Number(status) === ORDER_STATUS.PENDING;
+export type OrderStatusType = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
+
+export function isPendingOrder(status: unknown): boolean {
+  if (status === null || status === undefined) return false;
+  const s = String(status).trim().toLowerCase();
+  return s === 'pending' || s === '0' || s === 'under_review';
+}
+
+export function isPaidOrder(status: unknown): boolean {
+  if (status === null || status === undefined) return false;
+  const s = String(status).trim().toLowerCase();
+  return (
+    s === 'paid' ||
+    s === '1' ||
+    s === 'approved' ||
+    s === 'paid_active' ||
+    s === 'completed'
+  );
+}
+
+export function isCancelledOrder(status: unknown): boolean {
+  if (status === null || status === undefined) return false;
+  const s = String(status).trim().toLowerCase();
+  return s === 'cancelled' || s === 'canceled' || s === '2' || s === 'rejected';
+}
