@@ -34,14 +34,13 @@ import {
   getInstructorCourses,
 } from 'src/actions/instructors';
 import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
-import { isPendingOrder, isPaidOrder, isCancelledOrder } from 'src/types/order';
+import { isPendingOrder, isPaidOrder, isCancelledOrder, resolveReceiptUrl } from 'src/types/order';
 import type {
   Instructor,
   InstructorCourseApiResponse,
   InstructorOrderApiResponse,
   InstructorReviewApiResponse,
 } from 'src/types/instructor';
-import PaymentReceiptDialog from 'src/sections/students/PaymentReceiptDialog';
 
 interface Props {
   instructorId?: string;
@@ -119,9 +118,6 @@ export default function InstructorDetailsView({ instructorId }: Props) {
   const [courseAnchorEl, setCourseAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<InstructorCourseApiResponse | null>(null);
 
-  // Receipt dialog
-  const [receiptOpen, setReceiptOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   // Actions states
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -703,7 +699,20 @@ export default function InstructorDetailsView({ instructorId }: Props) {
                         <Chip label={os.label} size="small" sx={{ bgcolor: os.bg, color: os.color, fontWeight: 700, fontSize: 12, height: 24, borderRadius: 1.5 }} />
                       </Box>
                       <Box component="td">
-                        <Button size="small" variant="outlined" onClick={() => { setSelectedOrder(order); setReceiptOpen(true); }} startIcon={<Iconify icon="solar:document-text-linear" width={16} />} sx={{ gap: 0.75, '& .MuiButton-startIcon': { m: 0 }, borderRadius: 1.5, borderColor: '#E2E8F0', color: '#008767', bgcolor: '#F0FDF4', fontWeight: 700, fontSize: 12, px: 1.5, py: 0.5, '&:hover': { bgcolor: '#DCFCE7', borderColor: '#86EFAC' } }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            const url = resolveReceiptUrl(order.receiptUrl);
+                            if (url) {
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                            } else {
+                              toast.info('لا توجد صورة إيصال مرفقة لهذا الطلب');
+                            }
+                          }}
+                          startIcon={<Iconify icon="solar:document-text-linear" width={16} />}
+                          sx={{ gap: 0.75, '& .MuiButton-startIcon': { m: 0 }, borderRadius: 1.5, borderColor: '#E2E8F0', color: '#008767', bgcolor: '#F0FDF4', fontWeight: 700, fontSize: 12, px: 1.5, py: 0.5, '&:hover': { bgcolor: '#DCFCE7', borderColor: '#86EFAC' } }}
+                        >
                           عرض الإيصال
                         </Button>
                       </Box>
@@ -842,35 +851,6 @@ export default function InstructorDetailsView({ instructorId }: Props) {
           عرض تفاصيل الدورة
         </MenuItem>
       </Menu>
-
-      {/* Receipt Dialog */}
-      <PaymentReceiptDialog
-        open={receiptOpen}
-        onClose={() => setReceiptOpen(false)}
-        order={
-          selectedOrder
-            ? ({
-                id: selectedOrder.id,
-                total: selectedOrder.total,
-                creationTime: selectedOrder.creationTime,
-                buyerName: selectedOrder.buyerName,
-                receiptUrl: selectedOrder.receiptUrl,
-                items: selectedOrder.items,
-              } as any)
-            : null
-        }
-        studentName={selectedOrder?.buyerName}
-        onAccept={() => {
-          if (selectedOrder) {
-            void handleApprove(selectedOrder.id);
-          }
-        }}
-        onReject={() => {
-          if (selectedOrder) {
-            openRejectDialog(selectedOrder);
-          }
-        }}
-      />
 
       {/* Reject Order Dialog */}
       <Dialog

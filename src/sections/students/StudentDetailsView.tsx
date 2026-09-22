@@ -34,9 +34,8 @@ import {
 } from 'src/actions/students';
 import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
 import { StudentItem, StudentCourseItem, StudentOrderItem } from 'src/types/student';
-import { isPendingOrder, OrderDto } from 'src/types/order';
+import { isPendingOrder, OrderDto, resolveReceiptUrl } from 'src/types/order';
 import { MOCK_STUDENTS } from './_mock';
-import PaymentReceiptDialog from './PaymentReceiptDialog';
 
 interface Props {
   studentId: string;
@@ -124,8 +123,6 @@ export default function StudentDetailsView({ studentId }: Props) {
 
   const [currentTab, setCurrentTab] = useState<'overview' | 'academic' | 'courses' | 'orders'>('overview');
   const [copied, setCopied] = useState(false);
-  const [openReceiptModal, setOpenReceiptModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   const fetchStudentData = useCallback(async () => {
     setLoading(true);
@@ -212,9 +209,13 @@ export default function StudentDetailsView({ studentId }: Props) {
     }
   };
 
-  const handleOpenReceipt = (order: any) => {
-    setSelectedOrder(order);
-    setOpenReceiptModal(true);
+  const handleViewReceipt = (rawUrl?: string | null) => {
+    const url = resolveReceiptUrl(rawUrl);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      toast.info(locale === 'ar' ? 'لا توجد صورة إيصال مرفقة لهذا الطلب' : 'No receipt image attached for this order');
+    }
   };
 
   const handleApprove = async (orderId: string) => {
@@ -256,18 +257,6 @@ export default function StudentDetailsView({ studentId }: Props) {
       toast.error(locale === 'ar' ? 'فشل رفض الطلب' : 'Failed to reject order');
     } finally {
       setRejectLoading(false);
-    }
-  };
-
-  const handleAcceptReceipt = () => {
-    if (selectedOrder) {
-      void handleApprove(selectedOrder.id);
-    }
-  };
-
-  const handleRejectReceipt = () => {
-    if (selectedOrder) {
-      openRejectDialog(selectedOrder);
     }
   };
 
@@ -1219,7 +1208,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                             <Button
                               size="small"
                               variant={statusInfo.isPending || order.receiptUrl ? 'contained' : 'outlined'}
-                              onClick={() => handleOpenReceipt(order)}
+                              onClick={() => handleViewReceipt(order.receiptUrl)}
                               startIcon={<Iconify icon="solar:receipt-2-bold" width={15} />}
                               sx={{
                                 ...(statusInfo.isPending || order.receiptUrl
@@ -1298,16 +1287,6 @@ export default function StudentDetailsView({ studentId }: Props) {
           )}
         </Card>
       )}
-
-      {/* Payment Receipt Verification Dialog */}
-      <PaymentReceiptDialog
-        open={openReceiptModal}
-        onClose={() => setOpenReceiptModal(false)}
-        order={selectedOrder}
-        studentName={currentStudent.name}
-        onAccept={handleAcceptReceipt}
-        onReject={handleRejectReceipt}
-      />
 
       {/* Reject Order Dialog */}
       <Dialog
