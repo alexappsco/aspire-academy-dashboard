@@ -216,7 +216,7 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
           />
         </IconButton>
         <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F172A' }}>
-          {t('title')}
+          {isInstructor ? t('contact_us_title') : t('title')}
         </Typography>
       </Box>
 
