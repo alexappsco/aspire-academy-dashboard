@@ -20,6 +20,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import TablePagination from '@mui/material/TablePagination';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -27,9 +31,10 @@ import { useRouter } from 'src/i18n/routing';
 import {
   getInstructorById,
   getInstructorReviews,
-  getInstructorOrders,
   getInstructorCourses,
 } from 'src/actions/instructors';
+import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
+import { isPendingOrder, isPaidOrder, isCancelledOrder } from 'src/types/order';
 import type {
   Instructor,
   InstructorCourseApiResponse,
@@ -67,15 +72,17 @@ function getCourseStatus(status: string): { label: string; active: boolean } {
   return map[status] ?? { label: status, active: false };
 }
 
-function getOrderStatusLabel(status: string): { label: string; color: string; bg: string } {
-  const map: Record<string, { label: string; color: string; bg: string }> = {
-    Completed: { label: 'مكتمل', color: '#059669', bg: '#ECFDF5' },
-    Paid: { label: 'مدفوع', color: '#059669', bg: '#ECFDF5' },
-    Pending: { label: 'قيد الانتظار', color: '#B45309', bg: '#FEF3C7' },
-    Cancelled: { label: 'ملغي', color: '#E11D48', bg: '#FFF1F2' },
-    Refunded: { label: 'مسترجع', color: '#E11D48', bg: '#FFF1F2' },
-  };
-  return map[status] ?? { label: status, color: '#64748B', bg: '#EDF2F7' };
+function getOrderStatusLabel(status: unknown): { label: string; color: string; bg: string } {
+  if (isPaidOrder(status)) {
+    return { label: 'مكتمل', color: '#059669', bg: '#ECFDF5' };
+  }
+  if (isCancelledOrder(status)) {
+    return { label: 'ملغي', color: '#E11D48', bg: '#FFF1F2' };
+  }
+  if (isPendingOrder(status)) {
+    return { label: 'قيد الانتظار', color: '#B45309', bg: '#FEF3C7' };
+  }
+  return { label: String(status ?? '-'), color: '#64748B', bg: '#EDF2F7' };
 }
 
 export default function InstructorDetailsView({ instructorId }: Props) {
@@ -114,7 +121,13 @@ export default function InstructorDetailsView({ instructorId }: Props) {
 
   // Receipt dialog
   const [receiptOpen, setReceiptOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<InstructorOrderApiResponse | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+
+  // Actions states
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectLoading, setRejectLoading] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -153,9 +166,15 @@ export default function InstructorDetailsView({ instructorId }: Props) {
           setCoursesTotal(res.data.totalCount);
         }
       } else if (currentTab === 'subscriptions') {
-        const res = await getInstructorOrders(instructorId, params);
+        const res = await getOrders({
+          InstructorId: instructorId,
+          Status: statusFilter === 'all' ? undefined : statusFilter,
+          Filter: debouncedSearch.trim() || undefined,
+          SkipCount: page * rowsPerPage,
+          MaxResultCount: rowsPerPage,
+        });
         if (res.success && res.data) {
-          setOrders(res.data.items);
+          setOrders(res.data.items as any);
           setOrdersTotal(res.data.totalCount);
         }
       } else if (currentTab === 'reviews') {
@@ -170,7 +189,49 @@ export default function InstructorDetailsView({ instructorId }: Props) {
     } finally {
       setLoadingTab(false);
     }
-  }, [instructorId, currentTab, page, rowsPerPage, toast]);
+  }, [instructorId, currentTab, page, rowsPerPage, statusFilter, debouncedSearch, toast]);
+
+  const handleApprove = async (orderId: string) => {
+    setActionLoadingId(orderId);
+    try {
+      const res = await approveOrder(orderId);
+      if (res.success) {
+        toast.success('تم قبول الطلب بنجاح');
+        fetchTabData();
+      } else {
+        toast.error(res.error || 'فشل قبول الطلب');
+      }
+    } catch {
+      toast.error('فشل قبول الطلب');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const openRejectDialog = (order: any) => {
+    setRejectTarget(order);
+    setRejectReason('');
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget) return;
+    setRejectLoading(true);
+    try {
+      const res = await rejectOrder(rejectTarget.id, rejectReason.trim());
+      if (res.success) {
+        toast.success('تم رفض الطلب بنجاح');
+        setRejectTarget(null);
+        setRejectReason('');
+        fetchTabData();
+      } else {
+        toast.error(res.error || 'فشل رفض الطلب');
+      }
+    } catch {
+      toast.error('فشل رفض الطلب');
+    } finally {
+      setRejectLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchTabData();
@@ -615,6 +676,7 @@ export default function InstructorDetailsView({ instructorId }: Props) {
                   <Box component="th">الحالة</Box>
                   <Box component="th">الإيصال</Box>
                   <Box component="th">التاريخ</Box>
+                  <Box component="th">الإجراءات</Box>
                 </Box>
               </Box>
               <Box component="tbody">
@@ -646,11 +708,55 @@ export default function InstructorDetailsView({ instructorId }: Props) {
                         </Button>
                       </Box>
                       <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>{formatDate(order.creationTime)}</Box>
+                      <Box component="td">
+                        {isPendingOrder(order.status) ? (
+                          <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <IconButton
+                              size="small"
+                              disabled={actionLoadingId === order.id}
+                              onClick={() => handleApprove(order.id)}
+                              title="قبول"
+                              sx={{
+                                bgcolor: '#E6F4EA',
+                                color: '#10B981',
+                                borderRadius: 1.5,
+                                width: 30,
+                                height: 30,
+                                '&:hover': { bgcolor: '#C6F6D5' },
+                              }}
+                            >
+                              {actionLoadingId === order.id ? (
+                                <CircularProgress size={16} color="inherit" />
+                              ) : (
+                                <Iconify icon="eva:checkmark-fill" width={18} />
+                              )}
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              disabled={actionLoadingId === order.id}
+                              onClick={() => openRejectDialog(order)}
+                              title="رفض"
+                              sx={{
+                                bgcolor: '#FCE8E6',
+                                color: '#EF4444',
+                                borderRadius: 1.5,
+                                width: 30,
+                                height: 30,
+                                '&:hover': { bgcolor: '#FEE2E2' },
+                              }}
+                            >
+                              <Iconify icon="eva:close-fill" width={18} />
+                            </IconButton>
+                          </Stack>
+                        ) : (
+                          <Typography sx={{ fontSize: 12, color: '#CBD5E1' }}>—</Typography>
+                        )}
+                      </Box>
                     </Box>
                   );
                 })}
                 {filteredOrders.length === 0 && (
-                  <Box component="tr"><Box component="td" colSpan={6} sx={{ textAlign: 'center', py: 6, color: '#94A3B8' }}>لا توجد طلبات</Box></Box>
+                  <Box component="tr"><Box component="td" colSpan={7} sx={{ textAlign: 'center', py: 6, color: '#94A3B8' }}>لا توجد طلبات</Box></Box>
                 )}
               </Box>
             </Box>
@@ -741,9 +847,81 @@ export default function InstructorDetailsView({ instructorId }: Props) {
       <PaymentReceiptDialog
         open={receiptOpen}
         onClose={() => setReceiptOpen(false)}
-        order={selectedOrder ? { id: selectedOrder.id, total: selectedOrder.total, creationTime: selectedOrder.creationTime } as any : null}
+        order={
+          selectedOrder
+            ? ({
+                id: selectedOrder.id,
+                total: selectedOrder.total,
+                creationTime: selectedOrder.creationTime,
+                buyerName: selectedOrder.buyerName,
+                receiptUrl: selectedOrder.receiptUrl,
+                items: selectedOrder.items,
+              } as any)
+            : null
+        }
         studentName={selectedOrder?.buyerName}
+        onAccept={() => {
+          if (selectedOrder) {
+            void handleApprove(selectedOrder.id);
+          }
+        }}
+        onReject={() => {
+          if (selectedOrder) {
+            openRejectDialog(selectedOrder);
+          }
+        }}
       />
+
+      {/* Reject Order Dialog */}
+      <Dialog
+        open={Boolean(rejectTarget)}
+        onClose={() => setRejectTarget(null)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B', fontSize: 17, pb: 1 }}>
+          رفض طلب الاشتراك
+        </DialogTitle>
+        <DialogContent sx={{ pt: '8px !important' }}>
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            size="small"
+            label="سبب الرفض"
+            placeholder="يرجى كتابة سبب الرفض لتوضيحه..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => setRejectTarget(null)}
+            sx={{ borderRadius: 2, color: '#475569', borderColor: '#E2E8F0', fontWeight: 600 }}
+          >
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!rejectReason.trim() || rejectLoading}
+            startIcon={rejectLoading && <CircularProgress size={16} color="inherit" />}
+            onClick={handleReject}
+            sx={{
+              bgcolor: '#E11D48',
+              color: '#FFFFFF',
+              borderRadius: 2,
+              fontWeight: 700,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#BE123C' },
+            }}
+          >
+            تأكيد الرفض
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

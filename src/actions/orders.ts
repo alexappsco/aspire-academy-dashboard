@@ -65,11 +65,11 @@ export async function approveOrder(id: string): Promise<ApiSingleResponse<OrderD
 
 export async function rejectOrder(
   id: string,
-  reason: string
+  reason?: string
 ): Promise<ApiSingleResponse<OrderDto>> {
   try {
-    const res = await postData<OrderDto, { reason: string }>(endpoints.orders.reject(id), {
-      reason,
+    const res = await postData<OrderDto, { reason?: string | null }>(endpoints.orders.reject(id), {
+      reason: reason?.trim() || null,
     });
     if ('success' in res && res.success) {
       return { success: true, data: res.data };

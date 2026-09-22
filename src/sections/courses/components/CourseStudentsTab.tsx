@@ -24,14 +24,20 @@ import { cellAlignment } from 'src/components/SharedTable/types';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
-import { ORDER_STATUS, isPendingOrder, OrderDto } from 'src/types/order';
+import {
+  ORDER_STATUS,
+  isPendingOrder,
+  isPaidOrder,
+  isCancelledOrder,
+  OrderDto,
+} from 'src/types/order';
 import PaymentReceiptDialog, { PaymentReceiptData } from './dialog-paid-resit';
 
 interface CourseStudentsTabProps {
   courseId: string;
 }
 
-type StatusFilterValue = 'all' | '0' | '1' | '2';
+type StatusFilterValue = 'all' | 'Pending' | 'Paid' | 'Cancelled';
 
 const TABLE_HEAD_ALIGN: { [key: string]: cellAlignment } = {
   student: cellAlignment.right,
@@ -178,10 +184,10 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
   };
 
   const statusConfig = (order: OrderDto) => {
-    if (Number(order.status) === ORDER_STATUS.APPROVED) {
+    if (isPaidOrder(order.status)) {
       return { label: t('statuses.approved'), bg: '#D1FAE5', color: '#059669' };
     }
-    if (Number(order.status) === ORDER_STATUS.REJECTED) {
+    if (isCancelledOrder(order.status)) {
       return { label: t('statuses.rejected'), bg: '#FEE2E2', color: '#DC2626' };
     }
     return { label: t('statuses.pending'), bg: '#FEF3C7', color: '#D97706' };
@@ -368,9 +374,9 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
             }}
           >
             <MenuItem value="all">{t('filters.all')}</MenuItem>
-            <MenuItem value={String(ORDER_STATUS.PENDING)}>{t('statuses.pending')}</MenuItem>
-            <MenuItem value={String(ORDER_STATUS.APPROVED)}>{t('statuses.approved')}</MenuItem>
-            <MenuItem value={String(ORDER_STATUS.REJECTED)}>{t('statuses.rejected')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.PENDING}>{t('statuses.pending')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.PAID}>{t('statuses.approved')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.CANCELLED}>{t('statuses.rejected')}</MenuItem>
           </TextField>
 
           <TextField
