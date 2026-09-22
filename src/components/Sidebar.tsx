@@ -234,6 +234,7 @@ function SidebarItemButton({
   item,
   currentPathname,
   isRtl,
+  isInstructor = false,
   expanded,
   onToggle,
   depth = 0,
@@ -241,6 +242,7 @@ function SidebarItemButton({
   item: SidebarItem;
   currentPathname: string;
   isRtl: boolean;
+  isInstructor?: boolean;
   expanded?: boolean;
   onToggle?: () => void;
   depth?: number;
@@ -248,6 +250,7 @@ function SidebarItemButton({
   const t = useTranslations("Sidebar");
   const hasChildren = !!item.children?.length;
   const isExpandable = hasChildren && onToggle;
+  const label = item.key === "support" && isInstructor ? t("contact_us") : t(item.key);
 
   const isCurrentActive = (
     hasChildren
@@ -359,7 +362,7 @@ function SidebarItemButton({
               textAlign: isRtl ? "right" : "left",
             }}
           >
-            {t(item.key)}
+            {label}
           </Typography>
         }
         sx={{
@@ -417,6 +420,7 @@ function SidebarItemButton({
                 item={child}
                 currentPathname={currentPathname}
                 isRtl={isRtl}
+                isInstructor={isInstructor}
                 depth={depth + 1}
               />
             ))}
@@ -476,6 +480,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 item={item}
                 currentPathname={pathname}
                 isRtl={isRtl}
+                isInstructor={isInstructor}
                 expanded={expanded}
                 onToggle={() => toggleExpand(item.key)}
               />

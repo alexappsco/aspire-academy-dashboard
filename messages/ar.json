@@ -18,6 +18,7 @@
     "finance_payments": "المالية والمدفوعات",
     "reports_analytics": "التقارير والتحليلات",
     "support": "الدعم الفني",
+    "contact_us": "تواصل معنا",
     "notifications": "الإشعارات",
     "banners": "البانرات",
     "common_questions": "الأسئلة الشائعة",
@@ -819,6 +820,7 @@
   },
   "Support": {
     "title": "الدعم الفني",
+    "contact_us_title": "تواصل معنا",
     "search_placeholder": "بحث باسم المرسل",
     "send_date": "تاريخ الارسال",
     "status": "الحالة",

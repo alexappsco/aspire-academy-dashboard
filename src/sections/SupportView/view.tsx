@@ -506,7 +506,7 @@ export default function SupportView() {
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
-          {t('title')}
+          {isInstructor ? t('contact_us_title') : t('title')}
         </Typography>
 
         {isInstructor && (

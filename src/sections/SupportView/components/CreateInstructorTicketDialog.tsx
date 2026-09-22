@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 type CreateInstructorTicketDialogProps = {
@@ -22,6 +22,7 @@ type CreateInstructorTicketDialogProps = {
 };
 
 const inputSx = {
+  direction: 'inherit' as const,
   '& .MuiOutlinedInput-root': {
     borderRadius: '8px',
     bgcolor: '#fff',
@@ -37,13 +38,24 @@ export default function CreateInstructorTicketDialog({
   onSubmit,
 }: CreateInstructorTicketDialogProps) {
   const t = useTranslations('Support');
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
+  const textAlign = isRtl ? 'right' : 'left';
 
+  const [name, setName] = useState(defaultName);
+  const [email, setEmail] = useState(defaultEmail);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
 
-  const isValid = title.trim().length > 0 && notes.trim().length > 0;
+  const isValid =
+    name.trim().length > 0 &&
+    email.trim().length > 0 &&
+    title.trim().length > 0 &&
+    notes.trim().length > 0;
 
   const resetForm = () => {
+    setName(defaultName);
+    setEmail(defaultEmail);
     setTitle('');
     setNotes('');
   };
@@ -54,7 +66,7 @@ export default function CreateInstructorTicketDialog({
   };
 
   const handleSubmit = () => {
-    onSubmit({ name: defaultName, email: defaultEmail, title, notes });
+    onSubmit({ name, email, title, notes });
     resetForm();
   };
 
@@ -75,8 +87,8 @@ export default function CreateInstructorTicketDialog({
         },
       }}
     >
-      <DialogContent sx={{ p: 0 }}>
-        <Box sx={{ p: { xs: 3, sm: 4 } }}>
+      <DialogContent sx={{ p: 0 }} dir={isRtl ? 'rtl' : 'ltr'}>
+        <Box sx={{ p: { xs: 3, sm: 4 }, direction: isRtl ? 'rtl' : 'ltr', textAlign: isRtl ? 'right' : 'left' }}>
           <Box
             sx={{
               display: 'flex',
@@ -107,12 +119,33 @@ export default function CreateInstructorTicketDialog({
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+              <TextField
+                label={t('create_name_label')}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t('create_name_placeholder')}
+                slotProps={{ input: { sx: { textAlign } } }}
+                sx={inputSx}
+              />
+
+              <TextField
+                label={t('create_email_label')}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t('create_email_placeholder')}
+                slotProps={{ input: { sx: { textAlign } } }}
+                sx={inputSx}
+              />
+            </Box>
+
             <TextField
               fullWidth
               label={t('create_title_label')}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t('create_title_placeholder')}
+              slotProps={{ input: { sx: { textAlign } } }}
               sx={inputSx}
             />
 
@@ -124,6 +157,7 @@ export default function CreateInstructorTicketDialog({
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               placeholder={t('create_notes_placeholder')}
+              slotProps={{ input: { sx: { textAlign } } }}
               sx={inputSx}
             />
 
