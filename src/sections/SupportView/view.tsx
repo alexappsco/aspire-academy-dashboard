@@ -515,15 +515,15 @@ export default function SupportView() {
             startIcon={<Iconify icon="solar:plain-bold" />}
             onClick={() => setCreateOpen(true)}
             sx={{
-              bgcolor: '#886ce8',
+              bgcolor: '#1C252E',
               color: '#fff',
               borderRadius: '12px',
               fontWeight: 700,
               px: 3,
               height: 44,
               gap: 1,
-              boxShadow: '0 8px 16px 0 rgba(136, 108, 232, 0.24)',
-              '&:hover': { bgcolor: '#7758e6' },
+              boxShadow: '0 8px 16px 0 rgba(28, 37, 46, 0.24)',
+              '&:hover': { bgcolor: '#212B36' },
               textTransform: 'none',
               whiteSpace: 'nowrap',
             }}

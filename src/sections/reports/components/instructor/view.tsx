@@ -149,21 +149,24 @@ export default function InstructorAnalyticsView() {
 
       <InstructorKpiCards kpis={data.kpis} />
 
-      <Grid container spacing={2.5} sx={{ mb: 2, alignItems: 'stretch' }}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <StudentGrowthChart growth={data.growth} />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <FinancialRevenueBreakdown financials={data.financials} revenueSources={data.revenueSources} />
-        </Grid>
-      </Grid>
+      <Box sx={{ mb: 2.5 }}>
+        <StudentGrowthChart growth={data.growth} />
+      </Box>
 
-      <TopCoursesPerformance topCourses={data.topCourses} />
+      <Box sx={{ mb: 2.5 }}>
+        <TopCoursesPerformance topCourses={data.topCourses} />
+      </Box>
 
-      <FinancialTransactionsTable
-        transactions={data.transactions}
-        totalTransactions={data.totalTransactions}
-      />
+      <Box sx={{ mb: 2.5 }}>
+        <FinancialRevenueBreakdown financials={data.financials} revenueSources={data.revenueSources} />
+      </Box>
+
+      <Box sx={{ mb: 2.5 }}>
+        <FinancialTransactionsTable
+          transactions={data.transactions}
+          totalTransactions={data.totalTransactions}
+        />
+      </Box>
 
       <Grid container spacing={2.5} sx={{ alignItems: 'stretch' }}>
         <Grid size={{ xs: 12, lg: 7 }}>
