@@ -117,11 +117,18 @@ export default function LatestUsersList({ recentAccounts }: Props) {
         />
       );
     },
-    actions: () => (
+    actions: (row: FormattedRecentAccount) => (
       <IconButton
         size="small"
         sx={{ color: '#94A3B8' }}
-        onClick={() => router.push('/instructors')}
+        onClick={() => {
+          const r = String(row.role || '').toLowerCase();
+          if (r.includes('lectur') || r.includes('instruct') || r.includes('محاضر')) {
+            router.push('/minutes-management');
+          } else {
+            router.push('/students');
+          }
+        }}
       >
         <Iconify icon="solar:menu-dots-bold" width={18} />
       </IconButton>
@@ -187,7 +194,7 @@ export default function LatestUsersList({ recentAccounts }: Props) {
         {/* Left in RTL: View Accounts */}
         <Button
           variant="outlined"
-          onClick={() => router.push('/instructors')}
+          onClick={() => router.push('/students')}
           endIcon={<Iconify icon="solar:arrow-left-linear" width={16} sx={{ ml: 0.5 }} />}
           sx={{
             borderRadius: 2,

@@ -362,8 +362,18 @@ export default function SupportView() {
       }
 
       if (!isInstructor && senderTypeFilter && senderTypeFilter !== 'all') {
-        const itemType = (item.raw.senderType || '').toLowerCase();
-        if (itemType !== senderTypeFilter.toLowerCase()) return false;
+        const itemType = String(item.raw.senderType ?? '').toLowerCase().trim();
+        const filter = senderTypeFilter.toLowerCase().trim();
+        const isStudentFilter = filter === 'student' || filter === '0';
+        const isInstructorFilter = filter === 'instructor' || filter === 'lecturer' || filter === '1';
+
+        const isItemStudent = itemType === 'student' || itemType === '0' || itemType === 'طالب';
+        const isItemInstructor =
+          itemType === 'instructor' || itemType === 'lecturer' || itemType === '1' || itemType === 'محاضر';
+
+        if (isStudentFilter && !isItemStudent) return false;
+        if (isInstructorFilter && !isItemInstructor) return false;
+        if (!isStudentFilter && !isInstructorFilter && itemType !== filter) return false;
       }
 
       if (dateFilter) {
