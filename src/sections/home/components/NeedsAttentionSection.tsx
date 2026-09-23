@@ -51,7 +51,7 @@ export default function NeedsAttentionSection({ pendingTasks }: Props) {
         ? `${pendingTasks.newInstructorsPendingVerification} محاضر تم إنشاء حساباتهم مؤخراً وبانتظار اعتماد التخصص والجامعة.`
         : 'No data from backend',
       action: t('card_2.action'),
-      actionHref: '/instructors',
+      actionHref: '/minutes-management',
       badge: t('card_2.badge'),
       badgeColor: '#D97706',
       btnBg: '#FEF3C7',

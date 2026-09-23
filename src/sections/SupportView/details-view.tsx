@@ -165,12 +165,29 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     );
   }
 
-  const senderTypeValue = isInstructor
-    ? t('user_types.lecturer')
-    : message?.senderType?.toLowerCase() === 'lecturer' ||
-      message?.senderType?.toLowerCase() === 'instructor'
-    ? t('user_types.lecturer')
-    : t('user_types.student');
+  const senderTypeValue = (() => {
+    if (isInstructor) return t('user_types.lecturer');
+    if (message?.senderType === null || message?.senderType === undefined) {
+      return t('user_types.student');
+    }
+    const raw = String(message.senderType).toLowerCase().trim();
+    if (
+      raw === '1' ||
+      raw === 'lecturer' ||
+      raw === 'instructor' ||
+      raw === 'محاضر' ||
+      raw === 'معلم'
+    ) {
+      return t('user_types.lecturer');
+    }
+    if (raw === 'admin' || raw === 'مسؤول') {
+      return t('user_types.admin');
+    }
+    if (raw === '0' || raw === 'student' || raw === 'طالب') {
+      return t('user_types.student');
+    }
+    return String(message.senderType);
+  })();
 
   // Strict adherence to backend schema: id, email, title, notes, name, userId, userName, senderType, status, creationTime
   // Phone number is omitted because backend does not provide it.
