@@ -41,6 +41,7 @@ interface BasicInfoStepProps {
   imageRequired?: boolean;
   hideInstructor?: boolean;
   showPlatformPercentage?: boolean;
+  hidePricing?: boolean;
 }
 
 const inputRootSx = {
@@ -89,6 +90,7 @@ export default function BasicInfoStep({
   imageRequired = true,
   hideInstructor = false,
   showPlatformPercentage = false,
+  hidePricing = false,
 }: BasicInfoStepProps) {
   const t = useTranslations('CreateCourse');
   const locale = useLocale();
@@ -210,63 +212,67 @@ export default function BasicInfoStep({
           </Stack>
 
           {/* Row 3: Price + OldPrice */}
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                {t('basic_info.current_price_label')}
-                <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                placeholder={t('basic_info.current_price_placeholder')}
-                value={values.price}
-                onChange={(e) => onChange('price', e.target.value)}
-                error={!!errors.price}
-                sx={inputRootSx}
-              />
-              {errors.price && <FormHelperText error>{errors.price}</FormHelperText>}
-            </Box>
+          {!hidePricing && (
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {t('basic_info.current_price_label')}
+                  <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  placeholder={t('basic_info.current_price_placeholder')}
+                  value={values.price}
+                  onChange={(e) => onChange('price', e.target.value)}
+                  error={!!errors.price}
+                  sx={inputRootSx}
+                />
+                {errors.price && <FormHelperText error>{errors.price}</FormHelperText>}
+              </Box>
 
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1 }}>
-                {t('basic_info.old_price_label')}
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                placeholder={t('basic_info.old_price_placeholder')}
-                value={values.oldPrice}
-                onChange={(e) => onChange('oldPrice', e.target.value)}
-                sx={inputRootSx}
-              />
-            </Box>
-          </Stack>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1 }}>
+                  {t('basic_info.old_price_label')}
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  placeholder={t('basic_info.old_price_placeholder')}
+                  value={values.oldPrice}
+                  onChange={(e) => onChange('oldPrice', e.target.value)}
+                  sx={inputRootSx}
+                />
+              </Box>
+            </Stack>
+          )}
 
           {/* Row 4: Currency + Access Duration */}
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={2.5}>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                {t('basic_info.currency_label')}
-                <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
-              </Typography>
-              <SelectField
-                fullWidth
-                value={values.currencyId}
-                onChange={(e) => onChange('currencyId', e.target.value)}
-                error={!!errors.currencyId}
-                slotProps={{ select: { displayEmpty: true } }}
-                sx={inputRootSx}
-              >
-                <MenuItem value="" disabled>{t('basic_info.currency_placeholder')}</MenuItem>
-                {currencies.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.name} {item.symbol ? `(${item.symbol})` : ''}
-                  </MenuItem>
-                ))}
-              </SelectField>
-              {errors.currencyId && <FormHelperText error>{errors.currencyId}</FormHelperText>}
-            </Box>
+            {!hidePricing && (
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {t('basic_info.currency_label')}
+                  <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+                </Typography>
+                <SelectField
+                  fullWidth
+                  value={values.currencyId}
+                  onChange={(e) => onChange('currencyId', e.target.value)}
+                  error={!!errors.currencyId}
+                  slotProps={{ select: { displayEmpty: true } }}
+                  sx={inputRootSx}
+                >
+                  <MenuItem value="" disabled>{t('basic_info.currency_placeholder')}</MenuItem>
+                  {currencies.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.name} {item.symbol ? `(${item.symbol})` : ''}
+                    </MenuItem>
+                  ))}
+                </SelectField>
+                {errors.currencyId && <FormHelperText error>{errors.currencyId}</FormHelperText>}
+              </Box>
+            )}
 
             <Box sx={{ flex: 1 }}>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#1E293B', mb: 1 }}>

@@ -112,6 +112,7 @@ export default function CreateCourseView() {
           loadingStudyMaterials={loadingStudyMaterials}
           hideInstructor={isInstructor}
           showPlatformPercentage={isAdmin}
+          hidePricing={isInstructor}
         />
       ) : (
         <ChaptersStep

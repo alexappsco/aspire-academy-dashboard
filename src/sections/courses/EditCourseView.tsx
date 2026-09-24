@@ -222,6 +222,7 @@ export default function EditCourseView({ id }: { id: string }) {
           imageRequired={false}
           hideInstructor={isInstructor}
           showPlatformPercentage={isAdmin}
+          hidePricing={isInstructor}
         />
       ) : attachmentsReady ? (
         <ChaptersStep

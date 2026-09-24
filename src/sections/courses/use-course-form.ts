@@ -109,10 +109,14 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   useEffect(() => {
     getCurrenciesAction({ IsActive: true, MaxResultCount: 1000 }).then((res) => {
       if (res.success && res.data) {
-        setCurrencies(res.data.items.map((item) => ({ id: item.id, name: item.nameAr, symbol: item.symbol })));
+        const mapped = res.data.items.map((item) => ({ id: item.id, name: item.nameAr, symbol: item.symbol }));
+        setCurrencies(mapped);
+        if (isInstructor && mapped.length > 0) {
+          setFormValues((prev) => (prev.currencyId ? prev : { ...prev, currencyId: mapped[0].id }));
+        }
       }
     });
-  }, []);
+  }, [isInstructor]);
 
   useEffect(() => {
     getAcademicYears().then((res) => {
@@ -375,8 +379,8 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
     if (!formValues.title.trim()) newErrors.title = t('messages.validation_required');
     if (!formValues.description.trim()) newErrors.description = t('messages.validation_required');
     if (!formValues.type) newErrors.type = t('messages.validation_required');
-    if (!formValues.price) newErrors.price = t('messages.validation_required');
-    if (!formValues.currencyId) newErrors.currencyId = t('messages.validation_required');
+    if (!isInstructor && !formValues.price) newErrors.price = t('messages.validation_required');
+    if (!isInstructor && !formValues.currencyId) newErrors.currencyId = t('messages.validation_required');
     if (!isInstructor && !formValues.instructorId) newErrors.instructorId = t('messages.validation_required');
     if (!formValues.facultyId) newErrors.facultyId = t('messages.validation_required');
     if (!formValues.fieldId) newErrors.fieldId = t('messages.validation_required');

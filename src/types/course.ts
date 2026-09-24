@@ -152,5 +152,8 @@ export interface GetCoursesParams {
 export interface CourseReviewPayload {
   accept: boolean;
   rejectionReason?: string;
+  price?: number;
+  oldPrice?: number;
+  currencyId?: string;
   platformPercentage?: number;
 }

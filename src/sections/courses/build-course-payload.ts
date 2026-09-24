@@ -92,7 +92,7 @@ export function buildCourseFormData(
   if (formValues.platformPercentage !== '' && formValues.platformPercentage != null) {
     formData.append('PlatformPercentage', formValues.platformPercentage);
   }
-  formData.append('CurrencyId', formValues.currencyId);
+  if (formValues.currencyId) formData.append('CurrencyId', formValues.currencyId);
   if (formValues.instructorId) formData.append('InstructorId', formValues.instructorId);
   formData.append('FieldId', formValues.fieldId);
 
