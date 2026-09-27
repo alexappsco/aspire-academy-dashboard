@@ -107,13 +107,10 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   }, [isInstructor]);
 
   useEffect(() => {
+    if (isInstructor) return;
     getCurrenciesAction({ IsActive: true, MaxResultCount: 1000 }).then((res) => {
       if (res.success && res.data) {
-        const mapped = res.data.items.map((item) => ({ id: item.id, name: item.nameAr, symbol: item.symbol }));
-        setCurrencies(mapped);
-        if (isInstructor && mapped.length > 0) {
-          setFormValues((prev) => (prev.currencyId ? prev : { ...prev, currencyId: mapped[0].id }));
-        }
+        setCurrencies(res.data.items.map((item) => ({ id: item.id, name: item.nameAr, symbol: item.symbol })));
       }
     });
   }, [isInstructor]);
@@ -424,7 +421,7 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
 
     setIsSubmitting(true);
     try {
-      const formData = buildCourseFormData(formValues, mode);
+      const formData = buildCourseFormData(formValues, mode, { omitPricing: isInstructor });
 
       const courseId = initialCourse?.id;
       const res = courseId
