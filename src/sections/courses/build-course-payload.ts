@@ -77,8 +77,10 @@ function appendFormObject(formData: FormData, prefix: string, value: unknown): v
 
 export function buildCourseFormData(
   formValues: CourseFormValues,
-  mode: CoursePayloadMode = 'json'
+  mode: CoursePayloadMode = 'json',
+  options: { omitPricing?: boolean } = {}
 ): FormData {
+  const { omitPricing = false } = options;
   const formData = new FormData();
   const objectives = buildObjectives(formValues.learningObjectives);
   const curriculum = buildCurriculum(formValues.chapters);
@@ -86,13 +88,15 @@ export function buildCourseFormData(
   formData.append('Title', formValues.title);
   formData.append('Description', formValues.description);
   formData.append('Type', String(COURSE_TYPE_MAP[formValues.type] ?? 0));
-  formData.append('Price', formValues.price || '0');
-  formData.append('OldPrice', formValues.oldPrice || '0');
+  if (!omitPricing) {
+    formData.append('Price', formValues.price || '0');
+    formData.append('OldPrice', formValues.oldPrice || '0');
+  }
   formData.append('AccessDurationInDays', formValues.accessDurationInDays || '0');
-  if (formValues.platformPercentage !== '' && formValues.platformPercentage != null) {
+  if (!omitPricing && formValues.platformPercentage !== '' && formValues.platformPercentage != null) {
     formData.append('PlatformPercentage', formValues.platformPercentage);
   }
-  if (formValues.currencyId) formData.append('CurrencyId', formValues.currencyId);
+  if (!omitPricing && formValues.currencyId) formData.append('CurrencyId', formValues.currencyId);
   if (formValues.instructorId) formData.append('InstructorId', formValues.instructorId);
   formData.append('FieldId', formValues.fieldId);
 
