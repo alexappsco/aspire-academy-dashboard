@@ -5,10 +5,8 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
-
 import { getDashboardData } from 'src/actions/dashboard';
 import type { DashboardDataResponse } from 'src/types/dashboard';
-
 import HomeHeader from './components/HomeHeader';
 import AttentionBanner from './components/AttentionBanner';
 import KpiStatsGrid from './components/KpiStatsGrid';
