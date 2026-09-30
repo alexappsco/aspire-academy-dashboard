@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIES_KEYS } from 'src/config-global';
 import NotificationsView from 'src/sections/notifications/NotificationsView';
-import InstructorNotificationsView from 'src/sections/instructor-notifications/view';
+import InstructorNotificationsView from 'src/sections/notifications/instructor/view';
 
 export default async function NotificationsPage() {
   const cookieStore = await cookies();
