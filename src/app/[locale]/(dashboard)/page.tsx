@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIES_KEYS } from 'src/config-global';
 import { HomeView } from 'src/sections/home';
-import { InstructorHomeView } from 'src/sections/instructor-home';
+import { InstructorHomeView } from 'src/sections/home/instructor';
 
 export default async function Home() {
   const cookieStore = await cookies();

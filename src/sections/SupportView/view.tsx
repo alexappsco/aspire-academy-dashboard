@@ -362,18 +362,8 @@ export default function SupportView() {
       }
 
       if (!isInstructor && senderTypeFilter && senderTypeFilter !== 'all') {
-        const itemType = String(item.raw.senderType ?? '').toLowerCase().trim();
-        const filter = senderTypeFilter.toLowerCase().trim();
-        const isStudentFilter = filter === 'student' || filter === '0';
-        const isInstructorFilter = filter === 'instructor' || filter === 'lecturer' || filter === '1';
-
-        const isItemStudent = itemType === 'student' || itemType === '0' || itemType === 'طالب';
-        const isItemInstructor =
-          itemType === 'instructor' || itemType === 'lecturer' || itemType === '1' || itemType === 'محاضر';
-
-        if (isStudentFilter && !isItemStudent) return false;
-        if (isInstructorFilter && !isItemInstructor) return false;
-        if (!isStudentFilter && !isInstructorFilter && itemType !== filter) return false;
+        const itemType = (item.raw.senderType || '').toLowerCase();
+        if (itemType !== senderTypeFilter.toLowerCase()) return false;
       }
 
       if (dateFilter) {
@@ -516,7 +506,7 @@ export default function SupportView() {
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
-          {isInstructor ? t('contact_us_title') : t('title')}
+          {t('title')}
         </Typography>
 
         {isInstructor && (
@@ -525,15 +515,15 @@ export default function SupportView() {
             startIcon={<Iconify icon="solar:plain-bold" />}
             onClick={() => setCreateOpen(true)}
             sx={{
-              bgcolor: '#1C252E',
+              bgcolor: '#886ce8',
               color: '#fff',
               borderRadius: '12px',
               fontWeight: 700,
               px: 3,
               height: 44,
               gap: 1,
-              boxShadow: '0 8px 16px 0 rgba(28, 37, 46, 0.24)',
-              '&:hover': { bgcolor: '#212B36' },
+              boxShadow: '0 8px 16px 0 rgba(136, 108, 232, 0.24)',
+              '&:hover': { bgcolor: '#7758e6' },
               textTransform: 'none',
               whiteSpace: 'nowrap',
             }}

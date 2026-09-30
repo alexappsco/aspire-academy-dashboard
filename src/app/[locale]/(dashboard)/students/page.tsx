@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIES_KEYS } from 'src/config-global';
 import StudentsListView from '@/sections/students/StudentsListView';
-import { InstructorStudentsListView } from '@/sections/instructor-students';
+import { InstructorStudentsListView } from '@/sections/students/instructor';
 
 export default async function StudentsPage() {
   const cookieStore = await cookies();
