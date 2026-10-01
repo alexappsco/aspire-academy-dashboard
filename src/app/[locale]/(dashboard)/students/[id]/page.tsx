@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { COOKIES_KEYS } from 'src/config-global';
 import StudentDetailsView from '@/sections/students/StudentDetailsView';
-import { InstructorStudentDetailsView } from '@/sections/instructor-students';
+import { InstructorStudentDetailsView } from '@/sections/students/instructor';
 
 interface PageProps {
   params: Promise<{
