@@ -1393,7 +1393,10 @@
       "deactivate_success": "تم تعطيل حساب الطالب",
       "status_error": "حدث خطأ أثناء تعديل حالة الحساب",
       "delete_success": "تم حذف الطالب بنجاح",
-      "delete_error": "حدث خطأ أثناء حذف الطالب"
+      "delete_error": "حدث خطأ أثناء حذف الطالب",
+      "activate_course_success": "تم تفعيل الدورة للطالب بنجاح",
+      "deactivate_course_success": "تم إيقاف الدورة للطالب بنجاح",
+      "course_status_error": "حدث خطأ أثناء تعديل حالة الدورة"
     },
     "details": {
       "breadcrumb_students": "إدارة الطلاب",
@@ -1452,6 +1455,7 @@
         "col_progress": "نسبة التقدم بالدورة",
         "col_last_activity": "آخر نشاط",
         "col_status": "الحالة",
+        "col_activation": "تفعيل الدورة",
         "col_action": "الإجراء",
         "status_completed": "مكتملة",
         "status_in_progress": "قيد الدراسة",

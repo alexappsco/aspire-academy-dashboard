@@ -130,6 +130,8 @@ export const endpoints = {
     courseProgress: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}`,
     activate: (id: string) => `/admin/students/${id}/activate`,
     deactivate: (id: string) => `/admin/students/${id}/deactivate`,
+    activateCourse: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}/activate`,
+    deactivateCourse: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}/deactivate`,
   },
   dashboard: {
     get: '/admin/dashboard',

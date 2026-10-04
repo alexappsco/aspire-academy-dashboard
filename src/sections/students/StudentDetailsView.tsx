@@ -11,6 +11,7 @@ import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -31,6 +32,8 @@ import {
   getStudentCourses,
   activateStudent,
   deactivateStudent,
+  activateStudentCourse,
+  deactivateStudentCourse,
 } from 'src/actions/students';
 import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
 import { StudentItem, StudentCourseItem, StudentOrderItem } from 'src/types/student';
@@ -120,6 +123,7 @@ export default function StudentDetailsView({ studentId }: Props) {
   const [rejectTarget, setRejectTarget] = useState<any | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectLoading, setRejectLoading] = useState(false);
+  const [togglingCourseId, setTogglingCourseId] = useState<string | null>(null);
 
   const [currentTab, setCurrentTab] = useState<'overview' | 'academic' | 'courses' | 'orders'>('overview');
   const [copied, setCopied] = useState(false);
@@ -206,6 +210,58 @@ export default function StudentDetailsView({ studentId }: Props) {
       }
     } catch {
       toast.error(t('messages.status_error'));
+    }
+  };
+
+  const handleToggleCourseStatus = async (courseItem: StudentCourseItem) => {
+    if (!student) return;
+    const currentActive = courseItem.isActive !== false;
+    const nextStatus = !currentActive;
+
+    // Optimistic UI update
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.courseId === courseItem.courseId || (courseItem.enrollmentId && c.enrollmentId === courseItem.enrollmentId)
+          ? { ...c, isActive: nextStatus }
+          : c
+      )
+    );
+    setTogglingCourseId(courseItem.courseId);
+
+    try {
+      const res = nextStatus
+        ? await activateStudentCourse(student.id, courseItem.courseId)
+        : await deactivateStudentCourse(student.id, courseItem.courseId);
+
+      if (res.success) {
+        toast.success(
+          nextStatus
+            ? t('messages.activate_course_success')
+            : t('messages.deactivate_course_success')
+        );
+      } else {
+        // Rollback on failure
+        setCourses((prev) =>
+          prev.map((c) =>
+            c.courseId === courseItem.courseId || (courseItem.enrollmentId && c.enrollmentId === courseItem.enrollmentId)
+              ? { ...c, isActive: currentActive }
+              : c
+          )
+        );
+        toast.error(res.error || t('messages.course_status_error'));
+      }
+    } catch {
+      // Rollback on error
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.courseId === courseItem.courseId || (courseItem.enrollmentId && c.enrollmentId === courseItem.enrollmentId)
+            ? { ...c, isActive: currentActive }
+            : c
+        )
+      );
+      toast.error(t('messages.course_status_error'));
+    } finally {
+      setTogglingCourseId(null);
     }
   };
 
@@ -960,6 +1016,7 @@ export default function StudentDetailsView({ studentId }: Props) {
                     <Box component="th">{t('details.courses_table.col_progress')}</Box>
                     <Box component="th">{t('details.courses_table.col_last_activity')}</Box>
                     <Box component="th">{t('details.courses_table.col_status')}</Box>
+                    <Box component="th">{t('details.courses_table.col_activation')}</Box>
                     <Box component="th">{t('details.courses_table.col_action')}</Box>
                   </Box>
                 </Box>
@@ -1068,6 +1125,42 @@ export default function StudentDetailsView({ studentId }: Props) {
                               borderRadius: 1.5,
                             }}
                           />
+                        </Box>
+
+                        {/* Course Activation Switch */}
+                        <Box component="td">
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.5 }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Switch
+                              checked={course.isActive !== false}
+                              disabled={togglingCourseId === course.courseId}
+                              onChange={() => {}}
+                              onClick={() => handleToggleCourseStatus(course)}
+                              size="small"
+                              sx={{
+                                '& .MuiSwitch-switchBase.Mui-checked': {
+                                  color: '#10B981',
+                                  '& + .MuiSwitch-track': {
+                                    backgroundColor: '#10B981',
+                                  },
+                                },
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                fontSize: 12.5,
+                                fontWeight: 700,
+                                color: course.isActive !== false ? '#10B981' : '#94A3B8',
+                                minWidth: 40,
+                              }}
+                            >
+                              {course.isActive !== false ? t('active') : t('inactive')}
+                            </Typography>
+                          </Stack>
                         </Box>
 
                         {/* Action */}
