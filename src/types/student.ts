@@ -59,6 +59,7 @@ export interface StudentCourseItem {
   progressPercent: number;
   isCompleted: boolean;
   lastActivityAt?: string;
+  isActive?: boolean;
 }
 
 export interface StudentCourseListResponse {

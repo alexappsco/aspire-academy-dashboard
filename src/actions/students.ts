@@ -211,4 +211,58 @@ export async function getStudentOrders(
   }
 }
 
+// ── Activate Student Course ────────────────────────────────
+
+export async function activateStudentCourse(
+  studentId: string,
+  courseId: string
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, undefined>(
+      endpoints.students.activateCourse(studentId, courseId),
+      undefined
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to activate student course';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to activate student course',
+    };
+  }
+}
+
+// ── Deactivate Student Course ──────────────────────────────
+
+export async function deactivateStudentCourse(
+  studentId: string,
+  courseId: string
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, undefined>(
+      endpoints.students.deactivateCourse(studentId, courseId),
+      undefined
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to deactivate student course';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to deactivate student course',
+    };
+  }
+}
+
 

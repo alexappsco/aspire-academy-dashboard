@@ -1390,7 +1390,10 @@
       "deactivate_success": "Student account deactivated successfully",
       "status_error": "An error occurred while updating account status",
       "delete_success": "Student deleted successfully",
-      "delete_error": "An error occurred while deleting student"
+      "delete_error": "An error occurred while deleting student",
+      "activate_course_success": "Course activated for student successfully",
+      "deactivate_course_success": "Course deactivated for student successfully",
+      "course_status_error": "An error occurred while updating course status"
     },
     "details": {
       "breadcrumb_students": "Students Management",
@@ -1449,6 +1452,7 @@
         "col_progress": "Course Progress",
         "col_last_activity": "Last Activity",
         "col_status": "Status",
+        "col_activation": "Activation",
         "col_action": "Action",
         "status_completed": "Completed",
         "status_in_progress": "In Progress",
