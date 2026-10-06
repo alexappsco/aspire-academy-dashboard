@@ -132,12 +132,12 @@ export function textField(theme: Theme) {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          backgroundColor: 'white',
+          backgroundColor: '#FFFFFF',
           '&:hover': {
-            backgroundColor: theme.palette.primary.light,
+            backgroundColor: '#FFFFFF',
           },
           [`&.${filledInputClasses.focused}`]: {
-            backgroundColor: theme.palette.primary.light,
+            backgroundColor: '#FFFFFF',
           },
           [`&.${filledInputClasses.error}`]: {
             backgroundColor: theme.palette.error.lighter,

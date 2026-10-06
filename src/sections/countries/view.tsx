@@ -476,16 +476,17 @@ export default function CountriesView() {
       >
         {/* Filter bar */}
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
+          direction={{ xs: 'column', md: 'row' }}
           spacing={2}
           sx={{
             p: 2.5,
-            justifyContent: 'space-between',
+            borderBottom: '1px dashed #F1F3F5',
             alignItems: 'center',
           }}
         >
           {/* Search field */}
           <TextField
+            fullWidth
             size="small"
             placeholder={t('search_placeholder')}
             value={searchQuery}
@@ -494,13 +495,13 @@ export default function CountriesView() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB', width: 20, height: 20 }} />
+                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              width: { xs: '100%', sm: 300 },
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',
@@ -512,30 +513,32 @@ export default function CountriesView() {
           />
 
           {/* Status Filter */}
-          <SelectField
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            slotProps={{
-              select: {
-                displayEmpty: true,
-              },
-            }}
-            sx={{
-              minWidth: 150,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                '& fieldset': {
-                  borderColor: '#E5E7EB',
+          <Box sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+            <SelectField
+              fullWidth
+              size="small"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              slotProps={{
+                select: {
+                  displayEmpty: true,
                 },
-              },
-            }}
-          >
-            <MenuItem value="all">{t('status.all')}</MenuItem>
-            <MenuItem value="active">{t('status.active')}</MenuItem>
-            <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
-          </SelectField>
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: '#FFFFFF',
+                  '& fieldset': {
+                    borderColor: '#E5E7EB',
+                  },
+                },
+              }}
+            >
+              <MenuItem value="all">{t('status.all')}</MenuItem>
+              <MenuItem value="active">{t('status.active')}</MenuItem>
+              <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
+            </SelectField>
+          </Box>
         </Stack>
 
         {/* Table list */}
