@@ -268,12 +268,13 @@ export default function CollegeView() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB', width: 20, height: 20 }} />
+                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',
@@ -282,27 +283,28 @@ export default function CollegeView() {
             }}
           />
 
-          <SelectField
-            fullWidth
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            slotProps={{
-              select: { displayEmpty: true },
-            }}
-            sx={{
-              maxWidth: 200,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                '& fieldset': { borderColor: '#E5E7EB' },
-              },
-            }}
-          >
-            <MenuItem value="all">{t('statuses.all')}</MenuItem>
-            <MenuItem value="active">{t('status.active')}</MenuItem>
-            <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
-          </SelectField>
+          <Box sx={{ minWidth: { xs: '100%', sm: 200 } }}>
+            <SelectField
+              fullWidth
+              size="small"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              slotProps={{
+                select: { displayEmpty: true },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: '#FFFFFF',
+                  '& fieldset': { borderColor: '#E5E7EB' },
+                },
+              }}
+            >
+              <MenuItem value="all">{t('statuses.all')}</MenuItem>
+              <MenuItem value="active">{t('status.active')}</MenuItem>
+              <MenuItem value="inactive">{t('status.inactive')}</MenuItem>
+            </SelectField>
+          </Box>
         </Stack>
 
         {/* Table list */}

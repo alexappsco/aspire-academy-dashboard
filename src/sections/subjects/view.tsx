@@ -536,7 +536,6 @@ export default function SubjectsView() {
           sx={{
             p: 2.5,
             borderBottom: '1px dashed #F1F3F5',
-            justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
@@ -560,7 +559,7 @@ export default function SubjectsView() {
               },
             }}
             sx={{
-              maxWidth: { md: 360 },
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 '& fieldset': { borderColor: '#E5E7EB' },

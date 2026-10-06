@@ -2,10 +2,23 @@ import { Theme } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
-export function select(_theme: Theme) {
+export function select(theme: Theme) {
   return {
     MuiSelect: {
       styleOverrides: {
+        root: {
+          '&.Mui-focused': {
+            backgroundColor: 'transparent',
+          },
+        },
+        select: {
+          '&:focus': {
+            backgroundColor: 'transparent',
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'transparent',
+          },
+        },
         icon: {
           right: 10,
           width: 18,

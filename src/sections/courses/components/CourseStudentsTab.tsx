@@ -332,29 +332,12 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
           sx={{
-            justifyContent: 'space-between',
             alignItems: { xs: 'stretch', sm: 'center' },
             mb: 2.5,
           }}
         >
           <TextField
-            select
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilterValue)}
-            sx={{
-              width: 150,
-              bgcolor: '#F8FAFC',
-              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-            }}
-          >
-            <MenuItem value="all">{t('filters.all')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.PENDING}>{t('statuses.pending')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.PAID}>{t('statuses.approved')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.CANCELLED}>{t('statuses.rejected')}</MenuItem>
-          </TextField>
-
-          <TextField
+            fullWidth
             size="small"
             placeholder={t('search_placeholder')}
             value={searchQuery}
@@ -369,11 +352,28 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
               },
             }}
             sx={{
-              width: { xs: '100%', sm: 340 },
+              flex: 1,
               bgcolor: '#F8FAFC',
               '& .MuiOutlinedInput-root': { borderRadius: 2 },
             }}
           />
+
+          <TextField
+            select
+            size="small"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilterValue)}
+            sx={{
+              minWidth: { xs: '100%', sm: 160 },
+              bgcolor: '#F8FAFC',
+              '& .MuiOutlinedInput-root': { borderRadius: 2 },
+            }}
+          >
+            <MenuItem value="all">{t('filters.all')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.PENDING}>{t('statuses.pending')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.PAID}>{t('statuses.approved')}</MenuItem>
+            <MenuItem value={ORDER_STATUS.CANCELLED}>{t('statuses.rejected')}</MenuItem>
+          </TextField>
         </Stack>
 
         {/* Orders Table */}
