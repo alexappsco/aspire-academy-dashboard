@@ -519,6 +519,7 @@ export default function StudentsListView() {
               },
             }}
             sx={{
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',

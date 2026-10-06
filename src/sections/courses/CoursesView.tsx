@@ -414,6 +414,7 @@ export default function CoursesView() {
               },
             }}
             sx={{
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',

@@ -376,7 +376,7 @@ export default function NotificationsListView({
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
-          sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
+          sx={{ mb: 3, alignItems: 'center' }}
         >
           {/* Search Field */}
           <TextField
@@ -389,13 +389,13 @@ export default function NotificationsListView({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB' }} />
+                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              maxWidth: { xs: '100%', md: 360 },
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',

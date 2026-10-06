@@ -573,9 +573,10 @@ export default function DiscountCodesView({ isInstructor = false }: DiscountCode
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
-          sx={{ p: 2.5, justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #F1F3F5' }}
+          sx={{ p: 2.5, alignItems: 'center', borderBottom: '1px dashed #F1F3F5' }}
         >
           <TextField
+            fullWidth
             size="small"
             placeholder={t('search_placeholder')}
             value={searchQuery}
@@ -584,13 +585,13 @@ export default function DiscountCodesView({ isInstructor = false }: DiscountCode
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: '#919EAB', width: 20, height: 20 }} />
+                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              width: { xs: '100%', sm: 300 },
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',
@@ -599,7 +600,7 @@ export default function DiscountCodesView({ isInstructor = false }: DiscountCode
             }}
           />
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', md: 'auto' } }}>
             <SelectField
               size="small"
               value={statusFilter}

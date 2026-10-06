@@ -483,6 +483,7 @@ export default function BannersView() {
               },
             }}
             sx={{
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',

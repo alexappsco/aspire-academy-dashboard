@@ -235,7 +235,7 @@ export default function InstructorStudentsListView() {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
-          sx={{ p: 2.5, alignItems: 'center', justifyContent: 'space-between' }}
+          sx={{ p: 2.5, alignItems: 'center' }}
         >
           {/* Search Box */}
           <TextField
@@ -243,12 +243,12 @@ export default function InstructorStudentsListView() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('search_placeholder')}
-            sx={{ maxWidth: { sm: 380 } }}
+            sx={{ flex: 1 }}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
               },

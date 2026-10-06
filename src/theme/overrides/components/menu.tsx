@@ -10,6 +10,15 @@ export function menu(theme: Theme) {
       styleOverrides: {
         root: {
           ...menuItem(theme),
+          '&.Mui-selected': {
+            backgroundColor: 'transparent !important',
+            '&:hover': {
+              backgroundColor: `${theme.palette.action.hover} !important`,
+            },
+            '&.Mui-focusVisible': {
+              backgroundColor: `${theme.palette.action.hover} !important`,
+            },
+          },
         },
       },
     },

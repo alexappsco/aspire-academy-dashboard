@@ -54,8 +54,11 @@ export const menuItem = (theme: Theme) => ({
   },
   [`&.${menuItemClasses.selected}`]: {
     fontWeight: theme.typography.fontWeightSemiBold,
-    backgroundColor: theme.palette.action.selected,
+    backgroundColor: 'transparent',
     '&:hover': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    '&.Mui-focusVisible': {
       backgroundColor: theme.palette.action.hover,
     },
   },
@@ -65,7 +68,7 @@ export const menuItem = (theme: Theme) => ({
     marginRight: theme.spacing(0.5),
   },
   [`&.${autocompleteClasses.option}[aria-selected="true"]`]: {
-    backgroundColor: theme.palette.action.selected,
+    backgroundColor: 'transparent',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
     },
