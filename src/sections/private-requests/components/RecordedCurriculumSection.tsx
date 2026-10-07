@@ -207,13 +207,41 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
           bgcolor: '#ECFDF5',
           border: '1px solid #A7F3D0',
           display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
           justifyContent: 'space-between',
           gap: 2,
           mb: 2.5,
         }}
       >
+        {/* Right in RTL (First child): Title and Icon */}
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              bgcolor: '#D1FAE5',
+              color: '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Iconify icon="solar:clapperboard-play-bold" width={22} />
+          </Box>
+          <Box sx={{ textAlign: 'start' }}>
+            <Typography sx={{ fontWeight: 800, fontSize: 15.5, color: '#065F46' }}>
+              إضافة محاضرة أو مقطع مسجل جديد
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: '#047857', mt: 0.25 }}>
+              يتم التحقق من مدة الفيديو وحساب ساعاته التلقائية فور الرفع.
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* Left in RTL (Second child): Add content button */}
         <Button
           variant="contained"
           startIcon={<Iconify icon="solar:videocamera-add-bold" width={18} />}
@@ -230,6 +258,7 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
             px: 2.5,
             py: 1,
             boxShadow: 'none',
+            flexShrink: 0,
             '&:hover': {
               bgcolor: '#065F46',
               boxShadow: 'none',
@@ -238,34 +267,9 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
         >
           + إضافة محتوى مسجل
         </Button>
-
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', textAlign: 'end', gap: 1.5 }}>
-          <Box>
-            <Typography sx={{ fontWeight: 800, fontSize: 15.5, color: '#065F46' }}>
-              إضافة محاضرة أو مقطع مسجل جديد
-            </Typography>
-            <Typography sx={{ fontSize: 12, color: '#047857', mt: 0.25 }}>
-              يتم التحقق من مدة الفيديو وحساب ساعاته التلقائية فور الرفع.
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              bgcolor: '#D1FAE5',
-              color: '#059669',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Iconify icon="solar:clapperboard-play-bold" width={22} />
-          </Box>
-        </Stack>
       </Box>
 
-      {/* 2. Add Lesson Input Bar */}
+      {/* 2. Add Lesson Input Bar: Input on RIGHT (First in RTL), Button on LEFT (Second in RTL) */}
       <Card
         sx={{
           p: 2,
@@ -276,27 +280,7 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
           mb: 2.5,
         }}
       >
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            onClick={handleAddLesson}
-            startIcon={<Iconify icon="solar:add-circle-bold" width={18} />}
-            sx={{
-              borderRadius: 2,
-              bgcolor: '#0F172A',
-              color: '#FFFFFF',
-              fontWeight: 800,
-              fontSize: 13.5,
-              px: 2.5,
-              py: 1.25,
-              flexShrink: 0,
-              boxShadow: 'none',
-              '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
-            }}
-          >
-            إضافة درس
-          </Button>
-
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
           <TextField
             id="lesson-title-input"
             fullWidth
@@ -318,6 +302,27 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
               },
             }}
           />
+
+          <Button
+            variant="contained"
+            onClick={handleAddLesson}
+            startIcon={<Iconify icon="solar:add-circle-bold" width={18} />}
+            sx={{
+              borderRadius: 2,
+              bgcolor: '#0F172A',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: 13.5,
+              px: 2.5,
+              py: 1.25,
+              flexShrink: 0,
+              width: { xs: '100%', sm: 'auto' },
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+            }}
+          >
+            إضافة درس
+          </Button>
         </Stack>
       </Card>
 
@@ -337,7 +342,7 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                 overflow: 'hidden',
               }}
             >
-              {/* Chapter Header */}
+              {/* Chapter Header: Title on RIGHT (First in RTL), Delete on LEFT (Second in RTL) */}
               <Box
                 onClick={() => handleToggleChapter(chapter.id)}
                 sx={{
@@ -352,7 +357,19 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                   '&:hover': { bgcolor: '#F1F5F9' },
                 }}
               >
-                {/* Delete chapter button */}
+                {/* Chapter Title & Arrow (Right in RTL) */}
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                  <Iconify
+                    icon={isExpanded ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
+                    width={18}
+                    sx={{ color: '#64748B' }}
+                  />
+                  <Typography sx={{ fontWeight: 800, fontSize: 15, color: '#0F172A' }}>
+                    {chapter.number}. {chapter.title} ({chapter.lessons.length} دروس)
+                  </Typography>
+                </Stack>
+
+                {/* Delete chapter button (Left in RTL) */}
                 <IconButton
                   size="small"
                   onClick={(e) => {
@@ -363,18 +380,6 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                 >
                   <Iconify icon="solar:trash-bin-trash-bold" width={18} />
                 </IconButton>
-
-                {/* Chapter Title & Counter */}
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-                  <Typography sx={{ fontWeight: 800, fontSize: 15, color: '#0F172A' }}>
-                    {chapter.number}. {chapter.title} ({chapter.lessons.length} دروس)
-                  </Typography>
-                  <Iconify
-                    icon={isExpanded ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
-                    width={18}
-                    sx={{ color: '#64748B' }}
-                  />
-                </Stack>
               </Box>
 
               {/* Chapter Lessons Collapse */}
@@ -389,14 +394,14 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                       <Card
                         key={lesson.id}
                         sx={{
-                          p: 2.5,
+                          p: { xs: 2, sm: 2.5 },
                           borderRadius: 2,
                           bgcolor: '#FFFFFF',
                           border: '1px solid #E2E8F0',
                           boxShadow: 'none',
                         }}
                       >
-                        {/* Lesson Top Row */}
+                        {/* Lesson Top Row: Title on RIGHT (First in RTL), Actions on LEFT (Second in RTL) */}
                         <Stack
                           direction="row"
                           spacing={1.5}
@@ -408,29 +413,11 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                             gap: 1,
                           }}
                         >
-                          {/* Actions: Edit title & Delete */}
-                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                            <IconButton
-                              size="small"
-                              onClick={() => handleDeleteLesson(chapter.id, lesson.id)}
-                              sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
-                            >
-                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                            </IconButton>
-
-                            <Button
-                              size="small"
-                              variant="text"
-                              startIcon={<Iconify icon="solar:pen-new-square-linear" width={15} />}
-                              onClick={() => handleOpenEditLesson(chapter.id, lesson)}
-                              sx={{ fontSize: 12, fontWeight: 700, color: '#64748B' }}
-                            >
-                              تعديل العنوان
-                            </Button>
-                          </Stack>
-
-                          {/* Lesson Title & Status badge */}
-                          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1 }}>
+                          {/* Right in RTL (First child): Lesson Title & Status badge */}
+                          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Typography sx={{ fontWeight: 800, fontSize: 14.5, color: '#0F172A' }}>
+                              {lesson.number}. {lesson.title}
+                            </Typography>
                             {lesson.statusBadge && (
                               <Chip
                                 label={lesson.statusBadge}
@@ -445,9 +432,26 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                 }}
                               />
                             )}
-                            <Typography sx={{ fontWeight: 800, fontSize: 14.5, color: '#0F172A' }}>
-                              {lesson.number}. {lesson.title}
-                            </Typography>
+                          </Stack>
+
+                          {/* Left in RTL (Second child): Actions: Edit title & Delete */}
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <Button
+                              size="small"
+                              variant="text"
+                              startIcon={<Iconify icon="solar:pen-new-square-linear" width={15} />}
+                              onClick={() => handleOpenEditLesson(chapter.id, lesson)}
+                              sx={{ fontSize: 12, fontWeight: 700, color: '#64748B' }}
+                            >
+                              تعديل العنوان
+                            </Button>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteLesson(chapter.id, lesson.id)}
+                              sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
+                            >
+                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                            </IconButton>
                           </Stack>
                         </Stack>
 
@@ -468,134 +472,14 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                   bgcolor: '#F8FAFC',
                                   border: '1px solid #F1F5F9',
                                   display: 'flex',
-                                  flexWrap: 'wrap',
-                                  alignItems: 'center',
+                                  flexDirection: { xs: 'column', md: 'row' },
+                                  alignItems: { xs: 'flex-start', md: 'center' },
                                   justifyContent: 'space-between',
                                   gap: 1.5,
                                 }}
                               >
-                                {/* Left Action Buttons */}
-                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteAttachment(chapter.id, lesson.id, att.id)}
-                                    sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
-                                  >
-                                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                  </IconButton>
-
-                                  {isVid && (
-                                    <>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={() => {
-                                          toast.info('تم بدء استبدال الفيديو...');
-                                        }}
-                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
-                                      >
-                                        استبدال
-                                      </Button>
-                                      <Button
-                                        size="small"
-                                        variant="contained"
-                                        startIcon={<Iconify icon="solar:play-bold" width={14} />}
-                                        onClick={() => {
-                                          setPreviewVideoTitle(att.title);
-                                          setVideoPreviewOpen(true);
-                                        }}
-                                        sx={{
-                                          borderRadius: 1.5,
-                                          fontSize: 11.5,
-                                          fontWeight: 800,
-                                          bgcolor: '#0F172A',
-                                          color: '#FFFFFF',
-                                          boxShadow: 'none',
-                                          '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
-                                        }}
-                                      >
-                                        معاينة الفيديو
-                                      </Button>
-                                    </>
-                                  )}
-
-                                  {isDoc && (
-                                    <>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={() => {
-                                          toast.info('تم بدء استبدال المستند...');
-                                        }}
-                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
-                                      >
-                                        استبدال
-                                      </Button>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        startIcon={<Iconify icon="solar:file-download-linear" width={15} />}
-                                        onClick={() => toast.info('جاري فتح / تحميل المستند...')}
-                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#0F172A' }}
-                                      >
-                                        تحميل / عرض
-                                      </Button>
-                                    </>
-                                  )}
-
-                                  {isQuiz && (
-                                    <>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        onClick={() => toast.info('إضافة سؤال جديد للاختبار')}
-                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
-                                      >
-                                        + إضافة سؤال
-                                      </Button>
-                                      <Button
-                                        size="small"
-                                        variant="contained"
-                                        startIcon={<Iconify icon="solar:document-add-bold" width={14} />}
-                                        onClick={() => toast.info('معاينة بنك الأسئلة')}
-                                        sx={{
-                                          borderRadius: 1.5,
-                                          fontSize: 11.5,
-                                          fontWeight: 800,
-                                          bgcolor: '#0F172A',
-                                          color: '#FFFFFF',
-                                          boxShadow: 'none',
-                                          '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
-                                        }}
-                                      >
-                                        معاينة وتعديل الأسئلة ({att.questionsCount || 5})
-                                      </Button>
-                                    </>
-                                  )}
-                                </Stack>
-
-                                {/* Right: Item Description & Icon */}
-                                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', textAlign: 'end', gap: 1.5 }}>
-                                  <Box>
-                                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'flex-end', gap: 0.75 }}>
-                                      {att.statusText && (
-                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                                          <Iconify icon="solar:check-circle-bold" width={13} />
-                                          {att.statusText}
-                                        </Typography>
-                                      )}
-                                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                                        {att.title}
-                                      </Typography>
-                                    </Stack>
-
-                                    <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
-                                      {isVid && `الجودة: ${att.quality || '1080p Full HD'} • الحجم: ${att.fileSize || '340 MB'} • المدة: ${att.duration || '24:15 دقيقة'}`}
-                                      {isDoc && `الحجم: ${att.fileSize || '4.8 MB'} • ${att.pagesCount || 32} صفحة • ملف PDF إلكتروني`}
-                                      {isQuiz && `درجة الاجتياز: %${att.passingScore || 60} • ${att.questionsCount || 5} أسئلة تدريبية تفاعلية (MCQ)`}
-                                    </Typography>
-                                  </Box>
-
+                                {/* Right in RTL (First child): Description & Icon */}
+                                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', textAlign: 'start', gap: 1.5, width: { xs: '100%', md: 'auto' } }}>
                                   <Box
                                     sx={{
                                       width: 36,
@@ -620,59 +504,200 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                       width={20}
                                     />
                                   </Box>
+
+                                  <Box sx={{ flex: 1 }}>
+                                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
+                                        {att.title}
+                                      </Typography>
+                                      {att.statusText && (
+                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                                          <Iconify icon="solar:check-circle-bold" width={13} />
+                                          {att.statusText}
+                                        </Typography>
+                                      )}
+                                    </Stack>
+
+                                    <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
+                                      {isVid && `الجودة: ${att.quality || '1080p Full HD'} • الحجم: ${att.fileSize || '340 MB'} • المدة: ${att.duration || '24:15 دقيقة'}`}
+                                      {isDoc && `الحجم: ${att.fileSize || '4.8 MB'} • ${att.pagesCount || 32} صفحة • ملف PDF إلكتروني`}
+                                      {isQuiz && `درجة الاجتياز: %${att.passingScore || 60} • ${att.questionsCount || 5} أسئلة تدريبية تفاعلية (MCQ)`}
+                                    </Typography>
+                                  </Box>
+                                </Stack>
+
+                                {/* Left in RTL (Second child): Action Buttons */}
+                                <Stack
+                                  direction="row"
+                                  spacing={1}
+                                  sx={{
+                                    alignItems: 'center',
+                                    flexWrap: 'wrap',
+                                    gap: 1,
+                                    width: { xs: '100%', md: 'auto' },
+                                    justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                  }}
+                                >
+                                  {isVid && (
+                                    <>
+                                      <Button
+                                        size="small"
+                                        variant="contained"
+                                        startIcon={<Iconify icon="solar:play-bold" width={14} />}
+                                        onClick={() => {
+                                          setPreviewVideoTitle(att.title);
+                                          setVideoPreviewOpen(true);
+                                        }}
+                                        sx={{
+                                          borderRadius: 1.5,
+                                          fontSize: 11.5,
+                                          fontWeight: 800,
+                                          bgcolor: '#0F172A',
+                                          color: '#FFFFFF',
+                                          boxShadow: 'none',
+                                          '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+                                        }}
+                                      >
+                                        معاينة الفيديو
+                                      </Button>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => {
+                                          toast.info('تم بدء استبدال الفيديو...');
+                                        }}
+                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
+                                      >
+                                        استبدال
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  {isDoc && (
+                                    <>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        startIcon={<Iconify icon="solar:file-download-linear" width={15} />}
+                                        onClick={() => toast.info('جاري فتح / تحميل المستند...')}
+                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#0F172A' }}
+                                      >
+                                        تحميل / عرض
+                                      </Button>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => {
+                                          toast.info('تم بدء استبدال المستند...');
+                                        }}
+                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
+                                      >
+                                        استبدال
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  {isQuiz && (
+                                    <>
+                                      <Button
+                                        size="small"
+                                        variant="contained"
+                                        startIcon={<Iconify icon="solar:document-add-bold" width={14} />}
+                                        onClick={() => toast.info('معاينة بنك الأسئلة')}
+                                        sx={{
+                                          borderRadius: 1.5,
+                                          fontSize: 11.5,
+                                          fontWeight: 800,
+                                          bgcolor: '#0F172A',
+                                          color: '#FFFFFF',
+                                          boxShadow: 'none',
+                                          '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+                                        }}
+                                      >
+                                        معاينة وتعديل الأسئلة ({att.questionsCount || 5})
+                                      </Button>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() => toast.info('إضافة سؤال جديد للاختبار')}
+                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#475569' }}
+                                      >
+                                        + إضافة سؤال
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteAttachment(chapter.id, lesson.id, att.id)}
+                                    sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
+                                  >
+                                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                                  </IconButton>
                                 </Stack>
                               </Box>
                             );
                           })}
                         </Stack>
 
-                        {/* Add Attachments Buttons Row */}
-                        <Stack
-                          direction="row"
-                          spacing={1}
+                        {/* Add Attachments Buttons Row & Order Hint */}
+                        <Box
                           sx={{
-                            flexWrap: 'wrap',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                            pt: 1,
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            alignItems: { xs: 'flex-start', md: 'center' },
+                            justifyContent: 'space-between',
+                            pt: 1.5,
                             borderTop: '1px dashed #E2E8F0',
-                            gap: 1,
+                            gap: 1.5,
                           }}
                         >
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<Iconify icon="solar:videocamera-record-linear" width={15} />}
-                            onClick={() => handleAddAttachment(chapter.id, lesson.id, 'video')}
-                            sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
-                          >
-                            + فيديو إضافي
-                          </Button>
+                          {/* Right in RTL: Reorder Hint */}
+                          <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
+                            يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
+                          </Typography>
 
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<Iconify icon="solar:document-linear" width={15} />}
-                            onClick={() => handleAddAttachment(chapter.id, lesson.id, 'document')}
-                            sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                          {/* Left in RTL: Add Media Buttons */}
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
+                              gap: 1,
+                            }}
                           >
-                            + مستند إضافي
-                          </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:videocamera-record-linear" width={15} />}
+                              onClick={() => handleAddAttachment(chapter.id, lesson.id, 'video')}
+                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                            >
+                              + فيديو إضافي
+                            </Button>
 
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            startIcon={<Iconify icon="solar:question-circle-linear" width={15} />}
-                            onClick={() => handleAddAttachment(chapter.id, lesson.id, 'quiz')}
-                            sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
-                          >
-                            + إضافة أسئلة
-                          </Button>
-                        </Stack>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:document-linear" width={15} />}
+                              onClick={() => handleAddAttachment(chapter.id, lesson.id, 'document')}
+                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                            >
+                              + مستند إضافي
+                            </Button>
 
-                        <Typography sx={{ fontSize: 11, color: '#94A3B8', mt: 1, textAlign: 'end' }}>
-                          يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
-                        </Typography>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:question-circle-linear" width={15} />}
+                              onClick={() => handleAddAttachment(chapter.id, lesson.id, 'quiz')}
+                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                            >
+                              + إضافة أسئلة
+                            </Button>
+                          </Stack>
+                        </Box>
                       </Card>
                     ))
                   )}
