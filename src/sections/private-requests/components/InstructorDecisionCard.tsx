@@ -37,19 +37,20 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
   return (
     <Card
       sx={{
-        p: { xs: 2.5, md: 3 },
+        p: { xs: 2, sm: 2.5, md: 3 },
         borderRadius: 3,
         bgcolor: '#FFFFFF',
         border: '1px solid #F1F5F9',
         boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
         mt: 3,
+        textAlign: 'start',
       }}
     >
       {/* Title & Subtitle */}
-      <Typography sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', mb: 0.5 }}>
+      <Typography sx={{ fontWeight: 800, fontSize: { xs: 16.5, sm: 18 }, color: '#0F172A', mb: 0.5 }}>
         قرار المحاضر
       </Typography>
-      <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500, mb: 3 }}>
+      <Typography sx={{ fontSize: { xs: 12, sm: 13 }, color: '#64748B', fontWeight: 500, mb: 3 }}>
         إجراءك ينقل الطلب فوراً إلى منسق الشؤون الأكاديمية لمراجعة التسعير والتواصل مع الطالب.
       </Typography>
 

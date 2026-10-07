@@ -117,48 +117,92 @@ export default function RequestHeaderCard({
         </Stack>
       </Box>
 
-      {/* Main Title Row */}
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={2}
+      {/* Main Title & Action Row */}
+      <Box
         sx={{
-          alignItems: { xs: 'flex-start', sm: 'center' },
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'flex-start' },
           justifyContent: 'space-between',
-          mb: 1.5,
+          gap: 2,
+          mb: 2,
         }}
       >
-        {/* Title + Service Type Badge */}
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.25 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: '#0F172A',
-              fontSize: { xs: 20, md: 24 },
-            }}
-          >
-            تفاصيل الطلب الخاص #{request.id}
-          </Typography>
+        {/* Right Side in RTL (First child): Title, Badge, and Status Subline */}
+        <Box sx={{ textAlign: 'start' }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1.25 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                color: '#0F172A',
+                fontSize: { xs: 20, md: 24 },
+              }}
+            >
+              تفاصيل الطلب الخاص #{request.id}
+            </Typography>
 
-          {/* Service badge */}
-          <Chip
-            icon={<Iconify icon={isRecorded ? 'solar:videocamera-record-bold' : 'solar:users-group-rounded-bold'} width={16} />}
-            label={isRecorded ? 'محتوى مسجل' : 'جلسة مباشرة'}
-            size="small"
-            sx={{
-              bgcolor: isRecorded ? '#EFF6FF' : '#EEF2FF',
-              color: isRecorded ? '#2563EB' : '#4F46E5',
-              fontWeight: 700,
-              fontSize: 12,
-              borderRadius: 1.5,
-              '& .MuiChip-icon': {
+            {/* Service badge */}
+            <Chip
+              icon={<Iconify icon={isRecorded ? 'solar:videocamera-record-bold' : 'solar:users-group-rounded-bold'} width={16} />}
+              label={isRecorded ? 'محتوى مسجل' : 'جلسة مباشرة'}
+              size="small"
+              sx={{
+                bgcolor: isRecorded ? '#EFF6FF' : '#EEF2FF',
                 color: isRecorded ? '#2563EB' : '#4F46E5',
-              },
-            }}
-          />
-        </Stack>
+                fontWeight: 700,
+                fontSize: 12,
+                borderRadius: 1.5,
+                '& .MuiChip-icon': {
+                  color: isRecorded ? '#2563EB' : '#4F46E5',
+                },
+              }}
+            />
+          </Stack>
 
-        {/* Action button on Left/Top (Active state) */}
+          {/* Status Label & Dot (Directly under title) */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                bgcolor: isActive ? '#10B981' : isNew ? '#0284C7' : '#D97706',
+              }}
+            />
+            <Typography
+              sx={{
+                color: isActive ? '#15803D' : isNew ? '#0284C7' : '#D97706',
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              {isActive ? 'طلب معتمد نشط' : isNew ? 'طلب جديد' : 'بانتظار اعتماد الإدارة'}
+            </Typography>
+          </Box>
+
+          {/* Date info subline for new and pending states */}
+          {!isActive && (
+            <Stack direction="row" spacing={1.5} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+              <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Iconify icon="solar:calendar-date-bold" width={16} />
+                تاريخ التقديم: {request.submittedAtFormatted || '5 أكتوبر 2026'}
+              </Typography>
+
+              {isPendingAdmin && request.acceptedAtFormatted && (
+                <>
+                  <Typography sx={{ color: '#CBD5E1', fontSize: 12 }}>|</Typography>
+                  <Typography sx={{ fontSize: 12.5, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Iconify icon="solar:check-circle-bold" width={16} />
+                    تم قبول الطلب من المحاضر: {request.acceptedAtFormatted}
+                  </Typography>
+                </>
+              )}
+            </Stack>
+          )}
+        </Box>
+
+        {/* Left Side in RTL (Second child): Finish button if Active */}
         {isActive && (
           <Button
             variant="outlined"
@@ -172,7 +216,9 @@ export default function RequestHeaderCard({
               borderColor: '#FCA5A5',
               color: '#DC2626',
               bgcolor: '#FEF2F2',
-              px: 2,
+              px: 2.5,
+              py: 0.85,
+              flexShrink: 0,
               '&:hover': {
                 bgcolor: '#FEE2E2',
                 borderColor: '#F87171',
@@ -182,86 +228,13 @@ export default function RequestHeaderCard({
             إنهاء الخدمة
           </Button>
         )}
-      </Stack>
+      </Box>
 
-      {/* Status Details / Chips */}
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={2}
-        sx={{
-          alignItems: { xs: 'flex-start', md: 'center' },
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 1.5,
-        }}
-      >
-        {/* Status chip */}
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-          {isNew && (
-            <Chip
-              label="طلب جديد"
-              size="small"
-              sx={{
-                bgcolor: '#E0F2FE',
-                color: '#0284C7',
-                fontWeight: 700,
-                fontSize: 12,
-                borderRadius: 1.5,
-              }}
-            />
-          )}
-
-          {isPendingAdmin && (
-            <Chip
-              label="بانتظار اعتماد الإدارة"
-              size="small"
-              sx={{
-                bgcolor: '#FEF3C7',
-                color: '#D97706',
-                fontWeight: 700,
-                fontSize: 12,
-                borderRadius: 1.5,
-              }}
-            />
-          )}
-
-          {isActive && (
-            <Chip
-              label={isRecorded ? 'طلب معتمد نشط' : 'قيد التنفيذ (معتمد ومتاح للبث)'}
-              size="small"
-              sx={{
-                bgcolor: '#DCFCE7',
-                color: '#15803D',
-                fontWeight: 700,
-                fontSize: 12,
-                borderRadius: 1.5,
-              }}
-            />
-          )}
-
-          {/* Accept timestamp note if pending or active */}
-          {(isPendingAdmin || isActive) && request.acceptedAtFormatted && (
-            <Typography sx={{ fontSize: 12.5, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Iconify icon="solar:check-circle-bold" width={16} />
-              تم قبول الطلب من المحاضر: {request.acceptedAtFormatted}
-            </Typography>
-          )}
-        </Stack>
-
-        {/* Date / Metadata info */}
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-          <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Iconify icon="solar:calendar-date-bold" width={16} />
-            تاريخ التقديم: {request.submittedAtFormatted || '5 أكتوبر 2026'}
-          </Typography>
-        </Stack>
-      </Stack>
-
-      {/* Extended metadata bar for active requests (Images 4 & 5) */}
+      {/* Extended metadata bar for active requests (Images 1 & 2) */}
       {isActive && (
         <Box
           sx={{
-            mt: 2.5,
+            mt: 2,
             pt: 2,
             borderTop: '1px solid #F1F5F9',
             display: 'flex',
