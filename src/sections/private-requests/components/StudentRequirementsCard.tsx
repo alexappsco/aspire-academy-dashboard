@@ -85,19 +85,6 @@ export default function StudentRequirementsCard({ description }: Props) {
         >
           &ldquo;{description}&rdquo;
         </Typography>
-
-        <Typography
-          sx={{
-            fontSize: 14.5,
-            lineHeight: 1.8,
-            color: '#1E293B',
-            fontWeight: 600,
-            textAlign: 'start',
-            mt: 2,
-          }}
-        >
-          &ldquo;{description}&rdquo;
-        </Typography>
       </Box>
     </Card>
   );
