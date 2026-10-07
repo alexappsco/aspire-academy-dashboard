@@ -111,3 +111,16 @@ export interface ServiceSettings {
     activeSessionId?: string;
   };
 }
+
+export interface InstructorSessionSettingsDto {
+  acceptsLiveSessions: boolean;
+  acceptsRecordedSessions: boolean;
+  liveSessionsCount: number;
+  recordedSessionsCount: number;
+}
+
+export interface UpdateInstructorSessionSettingsDto {
+  acceptsLiveSessions: boolean;
+  acceptsRecordedSessions: boolean;
+}
+

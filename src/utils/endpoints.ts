@@ -175,4 +175,8 @@ export const endpoints = {
     details: (studentId: string) => `/instructor/students/${studentId}`,
     courses: (studentId: string) => `/instructor/students/${studentId}/courses`,
   },
+  instructorSessionSettings: {
+    get: '/instructor/session-settings',
+    update: '/instructor/session-settings',
+  },
 };

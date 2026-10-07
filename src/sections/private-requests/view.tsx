@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -19,21 +19,121 @@ import Menu from '@mui/material/Menu';
 import TablePagination from '@mui/material/TablePagination';
 import { useRouter } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
+import {
+  getInstructorSessionSettingsAction,
+  updateInstructorSessionSettingsAction,
+} from 'src/actions';
 import {
   MOCK_PRIVATE_REQUESTS,
-  INITIAL_SERVICE_SETTINGS,
 } from './_mock';
 import {
   PrivateRequestItem,
   PrivateRequestStatus,
-  ServiceSettings,
+  InstructorSessionSettingsDto,
 } from 'src/types/private-request';
 import ServiceToggleCards from './components/ServiceToggleCards';
 
 export default function PrivateRequestsListView() {
   const router = useRouter();
+  const toast = useToast();
 
-  const [settings, setSettings] = useState<ServiceSettings>(INITIAL_SERVICE_SETTINGS);
+  // Backend session settings state
+  const [sessionSettings, setSessionSettings] = useState<InstructorSessionSettingsDto | null>(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [updatingRecorded, setUpdatingRecorded] = useState(false);
+  const [updatingLive, setUpdatingLive] = useState(false);
+
+  // Fetch real settings from backend API
+  const fetchSettings = useCallback(async () => {
+    setLoadingSettings(true);
+    const res = await getInstructorSessionSettingsAction();
+    if (res.success && res.data) {
+      setSessionSettings(res.data);
+    } else {
+      // Graceful default if network issue or guest mode
+      setSessionSettings({
+        acceptsLiveSessions: false,
+        acceptsRecordedSessions: false,
+        liveSessionsCount: 0,
+        recordedSessionsCount: 0,
+      });
+    }
+    setLoadingSettings(false);
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  // Toggle Recorded Sessions
+  const handleToggleRecorded = async () => {
+    if (!sessionSettings) return;
+    const current = sessionSettings.acceptsRecordedSessions;
+    const nextVal = !current;
+    setUpdatingRecorded(true);
+
+    // Optimistic update
+    setSessionSettings((prev) =>
+      prev ? { ...prev, acceptsRecordedSessions: nextVal } : prev
+    );
+
+    const res = await updateInstructorSessionSettingsAction({
+      acceptsRecordedSessions: nextVal,
+      acceptsLiveSessions: sessionSettings.acceptsLiveSessions,
+    });
+
+    setUpdatingRecorded(false);
+
+    if (res.success) {
+      toast.success(
+        nextVal
+          ? 'تم تفعيل استقبال طلبات المحتوى المسجل بنجاح'
+          : 'تم إيقاف استقبال طلبات المحتوى المسجل مؤقتاً'
+      );
+    } else {
+      // Revert on error
+      setSessionSettings((prev) =>
+        prev ? { ...prev, acceptsRecordedSessions: current } : prev
+      );
+      toast.error(res.error || 'فشل تحديث إعدادات المحتوى المسجل');
+    }
+  };
+
+  // Toggle Live Sessions
+  const handleToggleLive = async () => {
+    if (!sessionSettings) return;
+    const current = sessionSettings.acceptsLiveSessions;
+    const nextVal = !current;
+    setUpdatingLive(true);
+
+    // Optimistic update
+    setSessionSettings((prev) =>
+      prev ? { ...prev, acceptsLiveSessions: nextVal } : prev
+    );
+
+    const res = await updateInstructorSessionSettingsAction({
+      acceptsRecordedSessions: sessionSettings.acceptsRecordedSessions,
+      acceptsLiveSessions: nextVal,
+    });
+
+    setUpdatingLive(false);
+
+    if (res.success) {
+      toast.success(
+        nextVal
+          ? 'تم تفعيل استقبال طلبات الجلسات المباشرة بنجاح'
+          : 'تم إيقاف استقبال طلبات الجلسات المباشرة مؤقتاً'
+      );
+    } else {
+      // Revert on error
+      setSessionSettings((prev) =>
+        prev ? { ...prev, acceptsLiveSessions: current } : prev
+      );
+      toast.error(res.error || 'فشل تحديث إعدادات الجلسات المباشرة');
+    }
+  };
+
   const [requests] = useState<PrivateRequestItem[]>(MOCK_PRIVATE_REQUESTS);
 
   // Tab Filter
@@ -136,8 +236,15 @@ export default function PrivateRequestsListView() {
         </Typography>
       </Stack>
 
-      {/* 2. Top Toggle Cards: Private Recorded & Private Live (Image 1) */}
-      <ServiceToggleCards settings={settings} onSettingsChange={setSettings} />
+      {/* 2. Top Toggle Cards: Private Recorded & Private Live (Bound to Backend API) */}
+      <ServiceToggleCards
+        settings={sessionSettings}
+        loading={loadingSettings}
+        onToggleRecorded={handleToggleRecorded}
+        onToggleLive={handleToggleLive}
+        isUpdatingRecorded={updatingRecorded}
+        isUpdatingLive={updatingLive}
+      />
 
       {/* 3. Main Card with Tabs & Filters & Table */}
       <Card

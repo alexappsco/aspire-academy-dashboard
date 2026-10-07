@@ -148,7 +148,15 @@ async function apiRequest<TResponse, TBody = undefined>(
       };
     }
 
-    const responseData = await response.json();
+    let responseData: any = {};
+    const rawText = await response.text();
+    if (rawText) {
+      try {
+        responseData = JSON.parse(rawText);
+      } catch {
+        responseData = { message: rawText };
+      }
+    }
 
     // Response check after parsing so i can get the error message
     if (!response.ok) {
