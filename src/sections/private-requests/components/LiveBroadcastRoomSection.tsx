@@ -73,19 +73,40 @@ export default function LiveBroadcastRoomSection({
         mb: 3,
       }}
     >
-      {/* Top Header Row */}
+      {/* Top Header Row: Title on RIGHT (First in RTL), Tabs on LEFT (Second in RTL) */}
       <Stack
-        direction="row"
+        direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
         sx={{
-          alignItems: 'center',
+          alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
           mb: 2.5,
-          flexWrap: 'wrap',
           gap: 1.5,
         }}
       >
-        {/* Tabs: شاشة البث / سجل الجلسات */}
+        {/* Right in RTL: Title with live red dot & Chip */}
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+          <Box
+            sx={{
+              width: 9,
+              height: 9,
+              borderRadius: '50%',
+              bgcolor: '#EF4444',
+              boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)',
+              flexShrink: 0,
+            }}
+          />
+          <Typography sx={{ fontWeight: 800, fontSize: { xs: 15, sm: 16 }, color: '#0F172A' }}>
+            المعاينة الحية لغرفة البث الأكاديمي
+          </Typography>
+          <Chip
+            label="بث تجريبي"
+            size="small"
+            sx={{ bgcolor: '#FEE2E2', color: '#DC2626', fontWeight: 700, fontSize: 11, height: 22 }}
+          />
+        </Stack>
+
+        {/* Left in RTL: Tabs: شاشة البث / سجل الجلسات */}
         <Tabs
           value={activeTab}
           onChange={(_, val) => setActiveTab(val)}
@@ -111,27 +132,6 @@ export default function LiveBroadcastRoomSection({
           <Tab value="screen" label="شاشة البث" />
           <Tab value="logs" label="سجل الجلسات" />
         </Tabs>
-
-        {/* Title with live red dot */}
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-          <Chip
-            label="بث تجريبي"
-            size="small"
-            sx={{ bgcolor: '#FEE2E2', color: '#DC2626', fontWeight: 700, fontSize: 11, height: 22 }}
-          />
-          <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-            المعاينة الحية لغرفة البث الأكاديمي
-          </Typography>
-          <Box
-            sx={{
-              width: 9,
-              height: 9,
-              borderRadius: '50%',
-              bgcolor: '#EF4444',
-              boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)',
-            }}
-          />
-        </Stack>
       </Stack>
 
       {/* Main Live Room Frame */}
@@ -151,13 +151,28 @@ export default function LiveBroadcastRoomSection({
               'radial-gradient(ellipse at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%)',
           }}
         >
-          {/* Top Floating Bar inside Live Screen */}
+          {/* Top Floating Bar inside Live Screen: Student on RIGHT (First in RTL), Timer on LEFT (Second in RTL) */}
           <Stack
             direction="row"
-            spacing={2}
+            spacing={1.5}
             sx={{ alignItems: 'center', justifyContent: 'space-between', zIndex: 2 }}
           >
-            {/* Live Timer */}
+            {/* Right in RTL: Connected Student status */}
+            <Chip
+              icon={<Iconify icon="solar:user-bold" width={15} sx={{ color: '#FFFFFF !important' }} />}
+              label={`مباشر الآن (${studentName} - طالب متصل)`}
+              size="small"
+              sx={{
+                bgcolor: '#DC2626',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: { xs: 11, sm: 12 },
+                borderRadius: 2,
+                px: 0.5,
+              }}
+            />
+
+            {/* Left in RTL: Live Timer */}
             <Chip
               icon={<Iconify icon="solar:clock-circle-bold" width={16} sx={{ color: '#FFFFFF !important' }} />}
               label={`زمن الجلسة: ${duration}`}
@@ -167,22 +182,7 @@ export default function LiveBroadcastRoomSection({
                 backdropFilter: 'blur(8px)',
                 color: '#FFFFFF',
                 fontWeight: 700,
-                fontSize: 12.5,
-                borderRadius: 2,
-                px: 0.5,
-              }}
-            />
-
-            {/* Connected Student status */}
-            <Chip
-              icon={<Iconify icon="solar:user-bold" width={15} sx={{ color: '#FFFFFF !important' }} />}
-              label={`مباشر الآن (${studentName} - طالب متصل)`}
-              size="small"
-              sx={{
-                bgcolor: '#DC2626',
-                color: '#FFFFFF',
-                fontWeight: 700,
-                fontSize: 12,
+                fontSize: { xs: 11.5, sm: 12.5 },
                 borderRadius: 2,
                 px: 0.5,
               }}
@@ -193,10 +193,10 @@ export default function LiveBroadcastRoomSection({
           <Box
             sx={{
               position: 'absolute',
-              top: 70,
-              left: 20,
-              width: { xs: 110, md: 150 },
-              height: { xs: 80, md: 105 },
+              top: { xs: 55, md: 70 },
+              left: { xs: 15, md: 20 },
+              width: { xs: 95, sm: 120, md: 150 },
+              height: { xs: 68, sm: 85, md: 105 },
               borderRadius: 2.5,
               overflow: 'hidden',
               bgcolor: '#1E293B',
@@ -248,7 +248,7 @@ export default function LiveBroadcastRoomSection({
           <Box
             sx={{
               textAlign: 'center',
-              py: 6,
+              py: { xs: 4, md: 6 },
               px: 2,
               zIndex: 1,
               maxWidth: 600,
@@ -315,7 +315,7 @@ export default function LiveBroadcastRoomSection({
               zIndex: 2,
             }}
           >
-            {/* End session button on Left */}
+            {/* Right in RTL (First child): End session button */}
             <Button
               variant="contained"
               color="error"
@@ -333,17 +333,7 @@ export default function LiveBroadcastRoomSection({
               إنهاء الجلسة الحالية
             </Button>
 
-            {/* Audio Waveform status */}
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ color: '#E2E8F0', fontSize: 12, fontWeight: 700 }}>
-                الصوت متصل
-              </Typography>
-              <Box sx={{ color: '#10B981', display: 'flex' }}>
-                <Iconify icon="solar:soundwave-bold" width={22} />
-              </Box>
-            </Stack>
-
-            {/* Controls (Mic, Cam, Share, Settings) */}
+            {/* Center: Controls (Mic, Cam, Share, Settings) */}
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
               <IconButton
                 onClick={handleToggleMic}
@@ -388,6 +378,16 @@ export default function LiveBroadcastRoomSection({
                 <Iconify icon="solar:settings-minimalistic-bold" width={18} />
               </IconButton>
             </Stack>
+
+            {/* Left in RTL (Third child): Audio Waveform status */}
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
+              <Typography sx={{ color: '#E2E8F0', fontSize: 12, fontWeight: 700 }}>
+                الصوت متصل
+              </Typography>
+              <Box sx={{ color: '#10B981', display: 'flex' }}>
+                <Iconify icon="solar:soundwave-bold" width={22} />
+              </Box>
+            </Stack>
           </Box>
         </Box>
       ) : (
@@ -403,7 +403,7 @@ export default function LiveBroadcastRoomSection({
         </Box>
       )}
 
-      {/* Info status alert below live room */}
+      {/* Info status alert below live room: Note on RIGHT (First in RTL), Status on LEFT (Second in RTL) */}
       <Box
         sx={{
           mt: 2,
@@ -419,16 +419,18 @@ export default function LiveBroadcastRoomSection({
           gap: 1.5,
         }}
       >
-        <Typography sx={{ fontSize: 12, color: '#059669', fontWeight: 700 }}>
-          حالة الاتصال: ممتازة (Ping: 24ms)
-        </Typography>
-
+        {/* Right in RTL (First child): Note */}
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
           <Iconify icon="solar:info-circle-bold" width={18} sx={{ color: '#2563EB' }} />
           <Typography sx={{ fontSize: 12.5, color: '#1E40AF', fontWeight: 600 }}>
             الجلسة الحالية استغرقت {elapsedMinutes} دقيقة بنجاح. عند الإنهاء سيتم اعتماد {expectedEarnings.toFixed(2)} ج.م بحسابك فوراً.
           </Typography>
         </Stack>
+
+        {/* Left in RTL (Second child): Connection status */}
+        <Typography sx={{ fontSize: 12, color: '#059669', fontWeight: 700 }}>
+          حالة الاتصال: ممتازة (Ping: 24ms)
+        </Typography>
       </Box>
 
       {/* End Live Session Confirmation Dialog */}

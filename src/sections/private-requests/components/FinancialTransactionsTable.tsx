@@ -30,10 +30,10 @@ export default function FinancialTransactionsTable({ requestId, transactions = [
         mb: 3,
       }}
     >
-      {/* Table Header Row */}
+      {/* Table Header Row: Title & Icon on RIGHT (First in RTL), Chip on LEFT (Second in RTL) */}
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           borderBottom: '1px solid #F1F5F9',
           display: 'flex',
           flexWrap: 'wrap',
@@ -42,22 +42,24 @@ export default function FinancialTransactionsTable({ requestId, transactions = [
           gap: 1.5,
         }}
       >
+        {/* Right in RTL (First child): Title and Icon */}
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:bill-list-bold" width={22} sx={{ color: '#0D9488' }} />
+          <Typography sx={{ fontWeight: 800, fontSize: { xs: 15, sm: 16 }, color: '#0F172A' }}>
+            سجل حركات الساعات والعمليات المالية للطلب #{requestId}
+          </Typography>
+        </Stack>
+
+        {/* Left in RTL (Second child): Chip */}
         <Chip
           label={`${transactions.length} حركات استهلاك مسجلة`}
           size="small"
           sx={{ bgcolor: '#F8FAFC', color: '#64748B', fontWeight: 600, fontSize: 12 }}
         />
-
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-            سجل حركات الساعات والعمليات المالية للطلب #{requestId}
-          </Typography>
-          <Iconify icon="solar:bill-list-bold" width={22} sx={{ color: '#0D9488' }} />
-        </Stack>
       </Box>
 
       {/* Table Container */}
-      <Box sx={{ overflowX: 'auto' }}>
+      <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <Box
           component="table"
           sx={{
