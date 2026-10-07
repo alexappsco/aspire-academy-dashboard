@@ -38,6 +38,15 @@ export default function StudentRequirementsCard({ description }: Props) {
           gap: 1,
         }}
       >
+        {/* Right in RTL (First child): Title and Icon */}
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+          <Iconify icon="solar:document-text-bold" width={20} sx={{ color: '#0284C7' }} />
+          <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
+            وصف متطلبات الطالب والمستهدف الأكاديمي
+          </Typography>
+        </Stack>
+
+        {/* Left in RTL (Second child): Literal quote badge */}
         <Chip
           label="النص الحرفي للطلب"
           size="small"
@@ -49,13 +58,6 @@ export default function StudentRequirementsCard({ description }: Props) {
             borderRadius: 1.5,
           }}
         />
-
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-            وصف متطلبات الطالب والمستهدف الأكاديمي
-          </Typography>
-          <Iconify icon="solar:document-text-bold" width={20} sx={{ color: '#0284C7' }} />
-        </Stack>
       </Stack>
 
       {/* Description Quote Box */}

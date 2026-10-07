@@ -112,16 +112,16 @@ export default function PrivateRequestDetailsView({ requestId = 'PR-1050' }: Pro
       {/* 3. Notice Banner if Pending Admin (Image 3) */}
       {request.status === 'pending_admin' && <AdminReviewNoticeCard />}
 
-      {/* 4. Student Academic Info + Requirements Description (Images 2, 3, 4, 5) */}
+      {/* 4. Student Academic Info + Requirements Description (Images 1, 2, 3, 4) */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {/* Left: Requirements description */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <StudentRequirementsCard description={request.description} />
-        </Grid>
-
-        {/* Right: Academic student info */}
+        {/* Right in RTL (First child): Academic student info */}
         <Grid size={{ xs: 12, md: 6 }}>
           <StudentInfoCard student={request.student} showContactInfo={isActive} />
+        </Grid>
+
+        {/* Left in RTL (Second child): Requirements description */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <StudentRequirementsCard description={request.description} />
         </Grid>
       </Grid>
 

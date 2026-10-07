@@ -68,30 +68,30 @@ export default function FinancialTermsCards({
               justifyContent: 'space-between',
             }}
           >
-            {/* Header */}
+            {/* Header: Title and Icon on RIGHT (First in RTL), Flag on LEFT (Second in RTL) */}
             <Stack
               direction="row"
               spacing={1}
               sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}
             >
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+                <Iconify icon="solar:bill-check-bold" width={20} sx={{ color: '#0D9488' }} />
+                <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
+                  الشروط المالية المعتمدة للطلب
+                </Typography>
+              </Stack>
+
               <Chip
                 label="جمهورية مصر العربية 🇪🇬"
                 size="small"
                 sx={{ bgcolor: '#F8FAFC', color: '#475569', fontWeight: 600, fontSize: 11.5 }}
               />
-
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-                  الشروط المالية المعتمدة للطلب
-                </Typography>
-                <Iconify icon="solar:bill-check-bold" width={20} sx={{ color: '#0D9488' }} />
-              </Stack>
             </Stack>
 
             {/* Row 1: Approved price & Instructor share */}
             <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%' }}>
+                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', textAlign: 'start' }}>
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
                     سعر الساعة المعتمد
                   </Typography>
@@ -105,7 +105,7 @@ export default function FinancialTermsCards({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', position: 'relative' }}>
+                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', position: 'relative', textAlign: 'start' }}>
                   <Box sx={{ position: 'absolute', top: 12, left: 12, color: '#94A3B8' }}>
                     <Iconify icon="solar:lock-bold" width={16} />
                   </Box>
@@ -128,23 +128,27 @@ export default function FinancialTermsCards({
             {/* Row 2: Distribution per hour */}
             <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9' }}>
               <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 700, bgcolor: '#ECFDF5', px: 1, py: 0.25, borderRadius: 1 }}>
-                  معتمد ومؤمن بالنظام
-                </Typography>
                 <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600 }}>
                   توزيع استحقاق الساعة الواحدة:
                 </Typography>
+                <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 700, bgcolor: '#ECFDF5', px: 1, py: 0.25, borderRadius: 1 }}>
+                  معتمد ومؤمن بالنظام
+                </Typography>
               </Stack>
 
-              <Stack direction="row" spacing={2} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography sx={{ fontSize: 12, color: '#64748B' }}>
-                  حصة المنصة لكل ساعة (شاملة السيرفرات والإشراف):{' '}
-                  <strong style={{ color: '#0F172A' }}>{currentTerms.platformPerHour.toFixed(2)} {currentTerms.currencySymbol} /ساعة</strong>
-                </Typography>
-
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}
+              >
                 <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#059669' }}>
                   قيمة المحاضر لكل ساعة منجزة:{' '}
                   <span>{currentTerms.instructorPerHour.toFixed(2)} {currentTerms.currencySymbol} / ساعة</span>
+                </Typography>
+
+                <Typography sx={{ fontSize: 12, color: '#64748B' }}>
+                  حصة المنصة لكل ساعة (شاملة السيرفرات والإشراف):{' '}
+                  <strong style={{ color: '#0F172A' }}>{currentTerms.platformPerHour.toFixed(2)} {currentTerms.currencySymbol} /ساعة</strong>
                 </Typography>
               </Stack>
             </Box>
@@ -166,16 +170,16 @@ export default function FinancialTermsCards({
               justifyContent: 'space-between',
             }}
           >
-            {/* Header */}
+            {/* Header: Title and Icon on RIGHT (First in RTL) */}
             <Stack
               direction="row"
               spacing={1}
-              sx={{ alignItems: 'center', justifyContent: 'flex-end', mb: 2.5, gap: 1 }}
+              sx={{ alignItems: 'center', justifyContent: 'flex-start', mb: 2.5, gap: 1 }}
             >
+              <Iconify icon="solar:wallet-money-bold" width={20} sx={{ color: '#059669' }} />
               <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
                 استهلاك الساعات والأرباح الفعلية
               </Typography>
-              <Iconify icon="solar:wallet-money-bold" width={20} sx={{ color: '#059669' }} />
             </Stack>
 
             {/* Metrics Row */}

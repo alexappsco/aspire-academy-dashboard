@@ -64,7 +64,7 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
         </Box>
       </Box>
 
-      {/* Key-Value Details */}
+      {/* Key-Value Details: Value on RIGHT (First in RTL), Label on LEFT (Second in RTL) */}
       <Stack spacing={1.5}>
         <Box
           sx={{
@@ -78,12 +78,12 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
             alignItems: 'center',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الدولة:
-          </Typography>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
             {student.country}
           </Typography>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+            الدولة:
+          </Typography>
         </Box>
 
         <Box
@@ -98,12 +98,12 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
             alignItems: 'center',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الجامعة:
-          </Typography>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
             {student.university}
           </Typography>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+            الجامعة:
+          </Typography>
         </Box>
 
         <Box
@@ -118,11 +118,11 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
             alignItems: 'center',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الكلية:
-          </Typography>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
             {student.college}
+          </Typography>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+            الكلية:
           </Typography>
         </Box>
 
@@ -140,11 +140,11 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
               alignItems: 'center',
             }}
           >
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              رقم الهاتف:
-            </Typography>
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A', direction: 'ltr' }}>
               {student.phone}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+              رقم الهاتف:
             </Typography>
           </Box>
         )}
@@ -162,11 +162,11 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
               alignItems: 'center',
             }}
           >
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              البريد الإلكتروني:
-            </Typography>
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#2563EB', direction: 'ltr' }}>
               {student.email}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+              البريد الإلكتروني:
             </Typography>
           </Box>
         )}
