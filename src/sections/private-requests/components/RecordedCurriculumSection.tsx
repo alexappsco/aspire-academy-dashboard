@@ -14,6 +14,10 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import { RequestChapter, RequestLesson, LessonAttachment } from 'src/types/private-request';
@@ -30,6 +34,12 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
   const [activeChapterId, setActiveChapterId] = useState<string>(
     initialChapters?.[0]?.id || 'ch-1'
   );
+
+  // Add recorded lecture modal dialog
+  const [addContentDialogOpen, setAddContentDialogOpen] = useState(false);
+  const [dialogLessonTitle, setDialogLessonTitle] = useState('');
+  const [dialogChapterId, setDialogChapterId] = useState(initialChapters?.[0]?.id || 'ch-1');
+  const [dialogVideoFileName, setDialogVideoFileName] = useState('');
 
   // Video preview dialog
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
@@ -87,6 +97,56 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
 
     setNewLessonTitle('');
     toast.success('تمت إضافة الدرس بنجاح، يمكنك الآن إرفاق الفيديو والمستندات');
+  };
+
+  // Add recorded lecture from dialog
+  const handleSaveDialogContent = () => {
+    if (!dialogLessonTitle.trim()) {
+      toast.warning('يرجى كتابة عنوان المحاضرة أو المقطع');
+      return;
+    }
+
+    const newLes: RequestLesson = {
+      id: `les-${Date.now()}`,
+      number: 1,
+      title: dialogLessonTitle.trim(),
+      statusBadge: 'مكتمل المحتوى (1 مرفق)',
+      attachments: [
+        {
+          id: `att-${Date.now()}`,
+          type: 'video',
+          title: dialogVideoFileName || `${dialogLessonTitle.trim()}.mp4`,
+          quality: '1080p Full HD',
+          fileSize: '320 MB',
+          duration: '22:15 دقيقة',
+          statusText: 'تم المعالجة والرفع بنجاح',
+        },
+      ],
+    };
+
+    setChapters((prev) => {
+      if (prev.length === 0) {
+        return [
+          {
+            id: 'ch-1',
+            number: 1,
+            title: 'الفصل الأول - أساسيات',
+            isExpanded: true,
+            lessons: [newLes],
+          },
+        ];
+      }
+      return prev.map((ch) =>
+        ch.id === dialogChapterId
+          ? { ...ch, isExpanded: true, lessons: [newLes, ...ch.lessons] }
+          : ch
+      );
+    });
+
+    setDialogLessonTitle('');
+    setDialogVideoFileName('');
+    setAddContentDialogOpen(false);
+    toast.success('تمت إضافة المحاضرة والمقطع المسجل بنجاح');
   };
 
   // Edit lesson title
@@ -245,10 +305,7 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
         <Button
           variant="contained"
           startIcon={<Iconify icon="solar:videocamera-add-bold" width={18} />}
-          onClick={() => {
-            const el = document.getElementById('lesson-title-input');
-            el?.focus();
-          }}
+          onClick={() => setAddContentDialogOpen(true)}
           sx={{
             borderRadius: 2,
             bgcolor: '#047857',
@@ -789,6 +846,279 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
           </Button>
           <Button variant="contained" onClick={handleSaveEditLesson} sx={{ bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' } }}>
             حفظ
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Recorded Lesson / Lecture Dialog (Matching Course Creation Design) */}
+      <Dialog
+        open={addContentDialogOpen}
+        onClose={() => setAddContentDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              p: 1,
+              bgcolor: '#FFFFFF',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+            },
+          },
+        }}
+      >
+        <DialogTitle sx={{ px: 2.5, py: 2 }}>
+          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 2,
+                  bgcolor: '#D1FAE5',
+                  color: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Iconify icon="solar:clapperboard-play-bold" width={24} />
+              </Box>
+              <Box sx={{ textAlign: 'start' }}>
+                <Typography sx={{ fontWeight: 800, fontSize: 16.5, color: '#0F172A' }}>
+                  إضافة محاضرة أو مقطع مسجل جديد
+                </Typography>
+                <Typography sx={{ fontSize: 12.5, color: '#64748B', mt: 0.25 }}>
+                  رفع فيديو المحاضرة وربطه بالفصل المستهدف للطالب
+                </Typography>
+              </Box>
+            </Stack>
+
+            <IconButton
+              size="small"
+              onClick={() => setAddContentDialogOpen(false)}
+              sx={{ color: '#94A3B8', '&:hover': { color: '#0F172A' } }}
+            >
+              <Iconify icon="solar:close-circle-bold" width={22} />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent sx={{ px: 2.5, py: 1 }}>
+          <Stack spacing={2.5}>
+            {/* Target Chapter Selection */}
+            <FormControl fullWidth size="small">
+              <InputLabel id="dialog-chapter-label" sx={{ fontSize: 13.5, fontWeight: 600 }}>
+                الفصل المستهدف
+              </InputLabel>
+              <Select
+                labelId="dialog-chapter-label"
+                value={dialogChapterId}
+                label="الفصل المستهدف"
+                onChange={(e) => setDialogChapterId(e.target.value)}
+                sx={{ borderRadius: 2, fontSize: 13.5 }}
+              >
+                {chapters.map((ch) => (
+                  <MenuItem key={ch.id} value={ch.id} sx={{ fontSize: 13.5 }}>
+                    {ch.title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Lecture / Lesson Title */}
+            <Box>
+              <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B', mb: 1, textAlign: 'start' }}>
+                عنوان المحاضرة / المقطع المسجل <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="مثال: حل المسألة الإجرائية وتطبيق القانون..."
+                value={dialogLessonTitle}
+                onChange={(e) => setDialogLessonTitle(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    fontSize: 13.5,
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Media Upload Box (Same style as Course MediaUploadBox) */}
+            <Box>
+              <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B', mb: 1, textAlign: 'start' }}>
+                ملف الفيديو المسجل <Box component="span" sx={{ color: '#EF4444' }}>*</Box>
+              </Typography>
+
+              <Box
+                component="label"
+                sx={{
+                  border: '1.5px dashed',
+                  borderColor: dialogVideoFileName ? '#10B981' : '#CBD5E1',
+                  borderRadius: 2.5,
+                  bgcolor: dialogVideoFileName ? '#F0FDF4' : '#FAFBFD',
+                  minHeight: 160,
+                  p: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: '#10B981',
+                    bgcolor: '#F0FDF4',
+                  },
+                }}
+              >
+                <input
+                  type="file"
+                  accept="video/mp4,video/quicktime,video/webm"
+                  hidden
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setDialogVideoFileName(file.name);
+                    }
+                  }}
+                />
+
+                {dialogVideoFileName ? (
+                  <Stack direction="row" spacing={2} sx={{ width: '100%', px: 1, alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 2,
+                        bgcolor: '#D1FAE5',
+                        color: '#059669',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Iconify icon="solar:videocamera-record-bold" width={28} />
+                    </Box>
+                    <Box sx={{ flex: 1, textAlign: 'start', overflow: 'hidden' }}>
+                      <Typography noWrap sx={{ fontWeight: 700, fontSize: 13.5, color: '#0F172A' }}>
+                        {dialogVideoFileName}
+                      </Typography>
+                      <Stack direction="row" spacing={1} sx={{ mt: 0.5, alignItems: 'center' }}>
+                        <Chip
+                          label="جاهز للرفع (1080p FHD)"
+                          size="small"
+                          sx={{
+                            bgcolor: '#D1FAE5',
+                            color: '#047857',
+                            fontWeight: 700,
+                            fontSize: 11,
+                            height: 22,
+                          }}
+                        />
+                        <Typography sx={{ fontSize: 12, color: '#64748B' }}>
+                          حجم الملف المقدر: 320 MB
+                        </Typography>
+                      </Stack>
+                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setDialogVideoFileName('');
+                      }}
+                      sx={{ color: '#EF4444', bgcolor: '#FEE2E2', '&:hover': { bgcolor: '#FCA5A5' } }}
+                    >
+                      <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                    </IconButton>
+                  </Stack>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        bgcolor: '#F1F5F9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#64748B',
+                        mb: 1.5,
+                      }}
+                    >
+                      <Iconify icon="solar:cloud-upload-bold" width={26} />
+                    </Box>
+                    <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B', textAlign: 'center' }}>
+                      اسحب وأفلت ملف الفيديو هنا أو اضغط للتصفح
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: '#94A3B8', mt: 0.5, textAlign: 'center' }}>
+                      الصيغ المدعومة: MP4, MOV, WebM (الحد الأقصى: 2GB) — الدقة المقترحة: 1080p
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            </Box>
+
+            {/* Note alert */}
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              }}
+            >
+              <Iconify icon="solar:info-circle-bold" width={20} sx={{ color: '#64748B', flexShrink: 0 }} />
+              <Typography sx={{ fontSize: 12, color: '#475569', textAlign: 'start' }}>
+                سيتم تشفير ومعالجة الفيديو وضغط الصوت تلقائياً لتوفير أفضل تجربة استماع للطالب.
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 2.5, py: 2, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setAddContentDialogOpen(false)}
+            sx={{
+              borderRadius: 2,
+              color: '#64748B',
+              borderColor: '#CBD5E1',
+              fontWeight: 700,
+              fontSize: 13,
+              px: 2.5,
+            }}
+          >
+            إلغاء
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleSaveDialogContent}
+            startIcon={<Iconify icon="solar:check-circle-bold" width={18} />}
+            sx={{
+              borderRadius: 2,
+              bgcolor: '#047857',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: 13,
+              px: 3,
+              boxShadow: 'none',
+              '&:hover': {
+                bgcolor: '#065F46',
+                boxShadow: 'none',
+              },
+            }}
+          >
+            حفظ وإضافة المحاضرة
           </Button>
         </DialogActions>
       </Dialog>
