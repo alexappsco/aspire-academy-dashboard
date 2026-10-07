@@ -55,7 +55,7 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
       <Grid size={{ xs: 12, md: 6 }}>
         <Card
           sx={{
-            p: 2.5,
+            p: { xs: 2, sm: 2.5 },
             borderRadius: 3,
             bgcolor: '#FFFFFF',
             border: '1px solid #F1F5F9',
@@ -66,48 +66,22 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
             justifyContent: 'space-between',
           }}
         >
-          {/* Header Row: Switch & Info & Icon */}
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}
+          {/* Header Row: Icon & Info on RIGHT (First in RTL), Switch on LEFT (Second in RTL) */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+              gap: 1.5,
+            }}
           >
-            {/* Switch on left (or right in RTL) */}
-            <Switch
-              checked={settings.recorded.isActive}
-              onChange={handleToggleRecorded}
-              sx={{
-                '& .MuiSwitch-switchBase.Mui-checked': {
-                  color: '#10B981',
-                  '& + .MuiSwitch-track': {
-                    backgroundColor: '#10B981',
-                  },
-                },
-              }}
-            />
-
-            {/* Info and Icon */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', textAlign: 'end', gap: 1.5 }}>
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: 16.5,
-                    fontWeight: 800,
-                    color: '#0F172A',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  المحتوى المسجل – Private Recorded
-                </Typography>
-                <Typography sx={{ fontSize: 12, color: '#64748B', mt: 0.25 }}>
-                  محاضرات مجزأة / تفريغات وشروحات خاصة
-                </Typography>
-              </Box>
-
+            {/* Right side: Icon + Title & Subtitle */}
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
-                  width: 44,
-                  height: 44,
+                  width: { xs: 40, sm: 46 },
+                  height: { xs: 40, sm: 46 },
                   borderRadius: 2.5,
                   bgcolor: '#E0F2FE',
                   color: '#0284C7',
@@ -119,8 +93,39 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
               >
                 <Iconify icon="solar:videocamera-record-bold" width={24} />
               </Box>
+
+              <Box sx={{ textAlign: 'start' }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 14.5, sm: 16.5 },
+                    fontWeight: 800,
+                    color: '#0F172A',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  المحتوى المسجل – Private Recorded
+                </Typography>
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: '#64748B', mt: 0.25 }}>
+                  محاضرات مجزأة / تفريغات وشروحات خاصة
+                </Typography>
+              </Box>
             </Stack>
-          </Stack>
+
+            {/* Left side: Switch */}
+            <Switch
+              checked={settings.recorded.isActive}
+              onChange={handleToggleRecorded}
+              sx={{
+                flexShrink: 0,
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: '#10B981',
+                  '& + .MuiSwitch-track': {
+                    backgroundColor: '#10B981',
+                  },
+                },
+              }}
+            />
+          </Box>
 
           {/* Status Bar */}
           <Box
@@ -131,17 +136,24 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
               bgcolor: settings.recorded.isActive ? '#F0FDF4' : '#F8FAFC',
               border: `1px solid ${settings.recorded.isActive ? '#DCFCE7' : '#E2E8F0'}`,
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
               justifyContent: 'space-between',
-              fontSize: 12,
+              gap: 1,
               mb: 2,
             }}
           >
-            <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-              زمن الاستجابة التقديري: {settings.recorded.estimatedResponseTime}
-            </Typography>
-
+            {/* Right in RTL (First child): Dot + Status text */}
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  bgcolor: settings.recorded.isActive ? '#10B981' : '#94A3B8',
+                  flexShrink: 0,
+                }}
+              />
               <Typography
                 sx={{
                   fontSize: 12,
@@ -153,23 +165,20 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
                   ? 'متاح ومفعل لاستقبال طلبات جديدة'
                   : 'غير متاح حالياً لاستقبال طلبات جديدة'}
               </Typography>
-              <Box
-                sx={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  bgcolor: settings.recorded.isActive ? '#10B981' : '#94A3B8',
-                }}
-              />
             </Stack>
+
+            {/* Left in RTL (Second child): Estimated time */}
+            <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
+              زمن الاستجابة التقديري: {settings.recorded.estimatedResponseTime}
+            </Typography>
           </Box>
 
-          {/* Bottom Counter */}
+          {/* Bottom Counter (Right aligned) */}
           <Box sx={{ textAlign: 'start' }}>
             <Typography sx={{ fontSize: 11.5, color: '#94A3B8', fontWeight: 600 }}>
               الطلبات المسجلة النشطة
             </Typography>
-            <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
+            <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
               {settings.recorded.activeRequestsCount} طلبات قيد الإنجاز
             </Typography>
           </Box>
@@ -180,7 +189,7 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
       <Grid size={{ xs: 12, md: 6 }}>
         <Card
           sx={{
-            p: 2.5,
+            p: { xs: 2, sm: 2.5 },
             borderRadius: 3,
             bgcolor: '#FFFFFF',
             border: '1px solid #F1F5F9',
@@ -191,48 +200,22 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
             justifyContent: 'space-between',
           }}
         >
-          {/* Header Row: Switch & Info & Icon */}
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}
+          {/* Header Row: Icon & Info on RIGHT (First in RTL), Switch on LEFT (Second in RTL) */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+              gap: 1.5,
+            }}
           >
-            {/* Switch on left (or right in RTL) */}
-            <Switch
-              checked={settings.live.isActive}
-              onChange={handleToggleLive}
-              sx={{
-                '& .MuiSwitch-switchBase.Mui-checked': {
-                  color: '#10B981',
-                  '& + .MuiSwitch-track': {
-                    backgroundColor: '#10B981',
-                  },
-                },
-              }}
-            />
-
-            {/* Info and Icon */}
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', textAlign: 'end', gap: 1.5 }}>
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: 16.5,
-                    fontWeight: 800,
-                    color: '#0F172A',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  الجلسات المباشرة – Private Live
-                </Typography>
-                <Typography sx={{ fontSize: 12, color: '#64748B', mt: 0.25 }}>
-                  بث 1-على-1 تفاعلي / مناقشات حالات إكلينيكية
-                </Typography>
-              </Box>
-
+            {/* Right side: Icon + Title & Subtitle */}
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
               <Box
                 sx={{
-                  width: 44,
-                  height: 44,
+                  width: { xs: 40, sm: 46 },
+                  height: { xs: 40, sm: 46 },
                   borderRadius: 2.5,
                   bgcolor: '#EEF2FF',
                   color: '#4F46E5',
@@ -244,8 +227,39 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
               >
                 <Iconify icon="solar:users-group-rounded-bold" width={24} />
               </Box>
+
+              <Box sx={{ textAlign: 'start' }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: 14.5, sm: 16.5 },
+                    fontWeight: 800,
+                    color: '#0F172A',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  الجلسات المباشرة – Private Live
+                </Typography>
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: '#64748B', mt: 0.25 }}>
+                  بث 1-على-1 تفاعلي / مناقشات حالات إكلينيكية
+                </Typography>
+              </Box>
             </Stack>
-          </Stack>
+
+            {/* Left side: Switch */}
+            <Switch
+              checked={settings.live.isActive}
+              onChange={handleToggleLive}
+              sx={{
+                flexShrink: 0,
+                '& .MuiSwitch-switchBase.Mui-checked': {
+                  color: '#10B981',
+                  '& + .MuiSwitch-track': {
+                    backgroundColor: '#10B981',
+                  },
+                },
+              }}
+            />
+          </Box>
 
           {/* Status Bar */}
           <Box
@@ -256,17 +270,24 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
               bgcolor: settings.live.isActive ? '#F0FDF4' : '#FEF2F2',
               border: `1px solid ${settings.live.isActive ? '#DCFCE7' : '#FEE2E2'}`,
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: { xs: 'column-reverse', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
               justifyContent: 'space-between',
-              fontSize: 12,
+              gap: 1,
               mb: 2,
             }}
           >
-            <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-              الوضع: {settings.live.statusLabel}
-            </Typography>
-
+            {/* Right in RTL (First child): Dot + Status text */}
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  bgcolor: settings.live.isActive ? '#10B981' : '#EF4444',
+                  flexShrink: 0,
+                }}
+              />
               <Typography
                 sx={{
                   fontSize: 12,
@@ -278,23 +299,20 @@ export default function ServiceToggleCards({ settings, onSettingsChange }: Props
                   ? 'متاح ومفعل لاستقبال جلسات حية جديدة'
                   : 'غير متاح حالياً لاستقبال جلسات حية جديدة'}
               </Typography>
-              <Box
-                sx={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  bgcolor: settings.live.isActive ? '#10B981' : '#EF4444',
-                }}
-              />
             </Stack>
+
+            {/* Left in RTL (Second child): Status label */}
+            <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
+              الوضع: {settings.live.statusLabel}
+            </Typography>
           </Box>
 
-          {/* Bottom Counter */}
+          {/* Bottom Counter (Right aligned) */}
           <Box sx={{ textAlign: 'start' }}>
             <Typography sx={{ fontSize: 11.5, color: '#94A3B8', fontWeight: 600 }}>
               الجلسات المتبقية قيد التنفيذ
             </Typography>
-            <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
+            <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
               {String(settings.live.remainingSessionsCount).padStart(2, '0')} جلسة نشطة
               {settings.live.activeSessionId ? ` (#${settings.live.activeSessionId})` : ''}
             </Typography>

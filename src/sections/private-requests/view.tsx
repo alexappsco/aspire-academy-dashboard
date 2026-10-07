@@ -156,6 +156,9 @@ export default function PrivateRequestsListView() {
               setCurrentTab(val);
               setPage(0);
             }}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               minHeight: 52,
               '& .MuiTab-root': {
@@ -178,7 +181,6 @@ export default function PrivateRequestsListView() {
               value="all"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>الكل</span>
                   <Chip
                     label={counts.all}
                     size="small"
@@ -189,6 +191,7 @@ export default function PrivateRequestsListView() {
                       height: 22,
                     }}
                   />
+                  <span>الكل</span>
                 </Stack>
               }
             />
@@ -196,7 +199,6 @@ export default function PrivateRequestsListView() {
               value="new"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>جديد</span>
                   <Chip
                     label={counts.new}
                     size="small"
@@ -207,6 +209,7 @@ export default function PrivateRequestsListView() {
                       height: 22,
                     }}
                   />
+                  <span>جديد</span>
                 </Stack>
               }
             />
@@ -214,7 +217,6 @@ export default function PrivateRequestsListView() {
               value="pending_admin"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>بانتظار التاكيد</span>
                   <Chip
                     label={counts.pending_admin}
                     size="small"
@@ -225,6 +227,7 @@ export default function PrivateRequestsListView() {
                       height: 22,
                     }}
                   />
+                  <span>بانتظار التاكيد</span>
                 </Stack>
               }
             />
@@ -232,7 +235,6 @@ export default function PrivateRequestsListView() {
               value="active"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>نشط</span>
                   <Chip
                     label={counts.active}
                     size="small"
@@ -243,6 +245,7 @@ export default function PrivateRequestsListView() {
                       height: 22,
                     }}
                   />
+                  <span>نشط</span>
                 </Stack>
               }
             />
@@ -250,7 +253,6 @@ export default function PrivateRequestsListView() {
               value="completed"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <span>منتهي</span>
                   <Chip
                     label={counts.completed}
                     size="small"
@@ -261,73 +263,26 @@ export default function PrivateRequestsListView() {
                       height: 22,
                     }}
                   />
+                  <span>منتهي</span>
                 </Stack>
               }
             />
           </Tabs>
         </Box>
 
-        {/* Filter Controls Bar */}
+        {/* Filter Controls Bar: Search on FAR RIGHT (First in RTL), Selects on LEFT */}
         <Box
           sx={{
-            p: 2.5,
+            p: { xs: 2, sm: 2.5 },
             borderBottom: '1px solid #F1F5F9',
             display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'center' },
             justifyContent: 'space-between',
             gap: 2,
           }}
         >
-          {/* Status & Service selects */}
-          <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
-            <FormControl size="small" sx={{ minWidth: 130 }}>
-              <Select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                displayEmpty
-                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
-              >
-                <MenuItem value="all">الحالة</MenuItem>
-                <MenuItem value="new">جديد</MenuItem>
-                <MenuItem value="pending_admin">بانتظار التأكيد</MenuItem>
-                <MenuItem value="active">نشط</MenuItem>
-                <MenuItem value="completed">منتهي</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <Select
-                value={serviceTypeFilter}
-                onChange={(e) => setServiceTypeFilter(e.target.value as any)}
-                displayEmpty
-                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
-              >
-                <MenuItem value="all">نوع الخدمة</MenuItem>
-                <MenuItem value="recorded">مسجل</MenuItem>
-                <MenuItem value="live">لايف</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              size="small"
-              placeholder="التاريخ"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Iconify icon="solar:calendar-linear" width={18} sx={{ color: '#94A3B8' }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{ width: 140, '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13 } }}
-            />
-          </Stack>
-
-          {/* Search Input */}
+          {/* Search Input: Far Right in RTL */}
           <TextField
             size="small"
             placeholder="بحث..."
@@ -346,14 +301,74 @@ export default function PrivateRequestsListView() {
               },
             }}
             sx={{
-              minWidth: { xs: '100%', sm: 260 },
+              width: { xs: '100%', md: 280 },
               '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13.5 },
             }}
           />
+
+          {/* Filters: Date, Service Type, Status (Left side in RTL) */}
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 1.5,
+              width: { xs: '100%', md: 'auto' },
+            }}
+          >
+            <TextField
+              size="small"
+              placeholder="التاريخ"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Iconify icon="solar:calendar-linear" width={18} sx={{ color: '#94A3B8' }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                width: { xs: 'calc(50% - 6px)', sm: 140 },
+                '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13 },
+              }}
+            />
+
+            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 140 } }}>
+              <Select
+                value={serviceTypeFilter}
+                onChange={(e) => setServiceTypeFilter(e.target.value as any)}
+                displayEmpty
+                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
+              >
+                <MenuItem value="all">نوع الخدمة</MenuItem>
+                <MenuItem value="recorded">مسجل</MenuItem>
+                <MenuItem value="live">لايف</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 130 } }}>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                displayEmpty
+                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
+              >
+                <MenuItem value="all">الحالة</MenuItem>
+                <MenuItem value="new">جديد</MenuItem>
+                <MenuItem value="pending_admin">بانتظار التأكيد</MenuItem>
+                <MenuItem value="active">نشط</MenuItem>
+                <MenuItem value="completed">منتهي</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
         </Box>
 
-        {/* Table Content */}
-        <Box sx={{ overflowX: 'auto' }}>
+        {/* Table Content: Column 1 on Right is Request ID, Column 7 on Left is Actions */}
+        <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <Box
             component="table"
             sx={{
@@ -378,13 +393,13 @@ export default function PrivateRequestsListView() {
                   },
                 }}
               >
-                <Box component="th" sx={{ width: 50 }}></Box>
-                <Box component="th">الحالة</Box>
-                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>الوصف</Box>
-                <Box component="th">نوع الخدمة</Box>
-                <Box component="th">تاريخ الطلب</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', pr: 3, width: 120 }}>رقم الطلب</Box>
                 <Box component="th" sx={{ textAlign: 'start !important' }}>الطالب والجهة</Box>
-                <Box component="th">رقم الطلب</Box>
+                <Box component="th">تاريخ الطلب</Box>
+                <Box component="th">نوع الخدمة</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>الوصف</Box>
+                <Box component="th">الحالة</Box>
+                <Box component="th" sx={{ width: 50 }}>الإجراءات</Box>
               </Box>
             </Box>
 
@@ -407,34 +422,41 @@ export default function PrivateRequestsListView() {
                       '& td': { p: 2, fontSize: 13, textAlign: 'center' },
                     }}
                   >
-                    {/* Action Three Dots */}
-                    <Box component="td" onClick={(e) => e.stopPropagation()}>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleOpenMenu(e, req)}
-                        sx={{ color: '#94A3B8' }}
-                      >
-                        <Iconify icon="solar:menu-dots-bold" width={18} />
-                      </IconButton>
+                    {/* 1. Request ID (Far Right) */}
+                    <Box component="td" sx={{ textAlign: 'start !important', pr: 3, fontWeight: 700, color: '#0F172A' }}>
+                      #{req.id}
                     </Box>
 
-                    {/* Status Badge */}
-                    <Box component="td">
-                      <Chip
-                        label={isAct ? 'نشط' : isNewReq ? 'جديد' : 'بانتظار التأكيد'}
-                        size="small"
-                        sx={{
-                          bgcolor: isAct ? '#DCFCE7' : isNewReq ? '#E0F2FE' : '#FEF3C7',
-                          color: isAct ? '#15803D' : isNewReq ? '#0284C7' : '#D97706',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          height: 24,
-                          borderRadius: 1.5,
-                        }}
-                      />
+                    {/* 2. Student & Scope */}
+                    <Box component="td" sx={{ textAlign: 'start !important' }}>
+                      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                        <Avatar
+                          src={req.student.avatar}
+                          alt={req.student.name}
+                          sx={{ width: 36, height: 36 }}
+                        />
+                        <Box>
+                          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                            {req.student.name}
+                          </Typography>
+                          <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
+                            {req.targetAudience === 'direct' ? 'موجه لك خصيصاً' : 'طلب موجه للجميع'}
+                          </Typography>
+                        </Box>
+                      </Stack>
                     </Box>
 
-                    {/* Description */}
+                    {/* 3. Submitted Date */}
+                    <Box component="td" sx={{ color: '#64748B' }}>
+                      {req.createdAt || '6/10/2026'}
+                    </Box>
+
+                    {/* 4. Service Type */}
+                    <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
+                      {isRec ? 'مسجل' : 'لايف'}
+                    </Box>
+
+                    {/* 5. Description */}
                     <Box
                       component="td"
                       sx={{
@@ -450,38 +472,31 @@ export default function PrivateRequestsListView() {
                       {req.description}
                     </Box>
 
-                    {/* Service Type */}
-                    <Box component="td" sx={{ color: '#0F172A', fontWeight: 700 }}>
-                      {isRec ? 'مسجل' : 'لايف'}
+                    {/* 6. Status Badge */}
+                    <Box component="td">
+                      <Chip
+                        label={isAct ? 'نشط' : isNewReq ? 'جديد' : 'بانتظار التأكيد'}
+                        size="small"
+                        sx={{
+                          bgcolor: isAct ? '#DCFCE7' : isNewReq ? '#E0F2FE' : '#FEF3C7',
+                          color: isAct ? '#15803D' : isNewReq ? '#0284C7' : '#D97706',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          height: 24,
+                          borderRadius: 1.5,
+                        }}
+                      />
                     </Box>
 
-                    {/* Request Date */}
-                    <Box component="td" sx={{ color: '#64748B', fontWeight: 500 }}>
-                      6/10/2026
-                    </Box>
-
-                    {/* Student & Audience */}
-                    <Box component="td" sx={{ textAlign: 'start !important' }}>
-                      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-                        <Avatar
-                          src={req.student.avatar}
-                          alt={req.student.name}
-                          sx={{ width: 38, height: 38 }}
-                        />
-                        <Box>
-                          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                            {req.student.name}
-                          </Typography>
-                          <Typography sx={{ fontSize: 11.5, color: '#94A3B8', mt: 0.25 }}>
-                            {req.targetAudience === 'direct' ? 'موجه لك خصيصا' : 'طلب موجه للجميع'}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
-
-                    {/* Request ID */}
-                    <Box component="td" sx={{ fontWeight: 800, color: '#0F172A' }}>
-                      #{req.id}
+                    {/* 7. Actions Three Dots (Far Left) */}
+                    <Box component="td" onClick={(e) => e.stopPropagation()}>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleOpenMenu(e, req)}
+                        sx={{ color: '#94A3B8' }}
+                      >
+                        <Iconify icon="solar:menu-dots-bold" width={18} />
+                      </IconButton>
                     </Box>
                   </Box>
                 );
