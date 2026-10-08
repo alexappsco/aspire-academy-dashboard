@@ -94,16 +94,39 @@ export async function getInstructorById(
   }
 }
 
+// Multipart body builder: arrays are sent as repeated keys (SpecializationIds=a&SpecializationIds=b),
+// booleans as "true"/"false" strings — matching the API's multipart/form-data contract.
+function buildInstructorFormData(payload: Record<string, unknown>): FormData {
+  const formData = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item !== undefined && item !== null && item !== '') {
+          formData.append(key, String(item));
+        }
+      });
+      return;
+    }
+
+    if (typeof value === 'boolean') {
+      formData.append(key, String(value));
+      return;
+    }
+
+    formData.append(key, value as string | Blob);
+  });
+
+  return formData;
+}
+
 export async function createInstructor(
   payload: CreateInstructorPayload
 ): Promise<ApiSingleResponse<Instructor>> {
   try {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value as string | Blob);
-      }
-    });
+    const formData = buildInstructorFormData(payload as unknown as Record<string, unknown>);
 
     const res = await postData<Instructor, FormData>(endpoints.instructors.create, formData);
 
@@ -126,12 +149,7 @@ export async function updateInstructor(
   payload: UpdateInstructorPayload
 ): Promise<ApiSingleResponse<Instructor>> {
   try {
-    const formData = new FormData();
-    Object.entries(payload).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value as string | Blob);
-      }
-    });
+    const formData = buildInstructorFormData(payload as unknown as Record<string, unknown>);
 
     const res = await editData<Instructor, FormData>(
       endpoints.instructors.update(id),
