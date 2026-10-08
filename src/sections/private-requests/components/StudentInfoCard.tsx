@@ -7,20 +7,13 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Iconify from 'src/components/iconify';
-import { StudentAcademicInfo } from 'src/types/private-request';
 
 interface Props {
   student?: {
-    id?: string;
     studentId?: string;
     name?: string | null;
-    avatar?: string;
     imageUrl?: string | null;
-    country?: string;
     countryName?: string | null;
-    university?: string;
-    college?: string;
-    phone?: string;
     email?: string | null;
   } | null;
   specializationName?: string | null;
@@ -33,10 +26,8 @@ export default function StudentInfoCard({
   showContactInfo = false,
 }: Props) {
   const studentName = student?.name || 'طالب غير محدد';
-  const studentAvatar = student?.imageUrl || student?.avatar || undefined;
-  const country = student?.countryName || student?.country || 'غير محدد';
-  const university = student?.university;
-  const collegeOrSpec = student?.college || specializationName || 'غير محدد';
+  const studentAvatar = student?.imageUrl || undefined;
+  const country = student?.countryName || 'غير محدد';
 
   return (
     <Card
@@ -55,7 +46,7 @@ export default function StudentInfoCard({
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2.5, gap: 1 }}>
         <Iconify icon="solar:user-id-bold" width={20} sx={{ color: '#0D9488' }} />
         <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-          بيانات الطالب الأكاديمية
+          بيانات الطالب
         </Typography>
       </Stack>
 
@@ -75,7 +66,14 @@ export default function StudentInfoCard({
         <Avatar
           src={studentAvatar}
           alt={studentName}
-          sx={{ width: 54, height: 54, border: '2px solid #E2E8F0', bgcolor: '#E2E8F0', color: '#475569' }}
+          sx={{
+            width: 54,
+            height: 54,
+            border: '2px solid #E2E8F0',
+            bgcolor: '#E2E8F0',
+            color: '#475569',
+            fontWeight: 700,
+          }}
         >
           {(studentName[0] || 'S').toUpperCase()}
         </Avatar>
@@ -83,13 +81,15 @@ export default function StudentInfoCard({
           <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>
             {studentName}
           </Typography>
-          <Typography sx={{ fontSize: 12.5, color: '#64748B', mt: 0.25 }}>
-            {university ? `${university} - ` : ''}{collegeOrSpec}
-          </Typography>
+          {specializationName && (
+            <Typography sx={{ fontSize: 12.5, color: '#64748B', mt: 0.25 }}>
+              {specializationName}
+            </Typography>
+          )}
         </Box>
       </Box>
 
-      {/* Key-Value Details: Value on RIGHT (First in RTL), Label on LEFT (Second in RTL) */}
+      {/* Key-Value Details based on actual backend response */}
       <Stack spacing={1.5}>
         <Box
           sx={{
@@ -133,73 +133,7 @@ export default function StudentInfoCard({
           </Box>
         )}
 
-        {university && (
-          <Box
-            sx={{
-              p: 1.5,
-              px: 2,
-              borderRadius: 2,
-              bgcolor: '#F8FAFC',
-              border: '1px solid #F1F5F9',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-              {university}
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              الجامعة:
-            </Typography>
-          </Box>
-        )}
-
-        {student?.college && (
-          <Box
-            sx={{
-              p: 1.5,
-              px: 2,
-              borderRadius: 2,
-              bgcolor: '#F8FAFC',
-              border: '1px solid #F1F5F9',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-              {student.college}
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              الكلية:
-            </Typography>
-          </Box>
-        )}
-
-        {/* Contact information (Visible in active requests) */}
-        {showContactInfo && student?.phone && (
-          <Box
-            sx={{
-              p: 1.5,
-              px: 2,
-              borderRadius: 2,
-              bgcolor: '#F8FAFC',
-              border: '1px solid #F1F5F9',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A', direction: 'ltr' }}>
-              {student.phone}
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              رقم الهاتف:
-            </Typography>
-          </Box>
-        )}
-
+        {/* Email is displayed if available and request is active */}
         {showContactInfo && student?.email && (
           <Box
             sx={{

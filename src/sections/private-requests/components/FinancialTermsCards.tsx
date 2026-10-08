@@ -9,50 +9,51 @@ import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 import Chip from '@mui/material/Chip';
 import Iconify from 'src/components/iconify';
-import { FinancialTerms, ActualConsumption } from 'src/types/private-request';
 
 interface Props {
-  terms?: FinancialTerms;
-  consumption?: ActualConsumption;
-  showKpis?: boolean;
-  totalVideosCount?: number;
-  totalDeliveredHours?: number;
-  earningHours?: number;
-  recordedEarnings?: number;
+  platformPercentage?: number | null;
+  totalChapterHours?: number | null;
+  effectiveHours?: number | null;
+  pricePerHour?: number | null;
+  effectiveHoursValue?: number | null;
+  currencyCode?: string | null;
+  currencySymbol?: string | null;
 }
 
 export default function FinancialTermsCards({
-  terms,
-  consumption,
-  showKpis = false,
-  totalVideosCount = 3,
-  totalDeliveredHours = 2.25,
-  earningHours = 2.25,
-  recordedEarnings = 15.75,
+  platformPercentage = 0,
+  totalChapterHours = 0,
+  effectiveHours = 0,
+  pricePerHour = 0,
+  effectiveHoursValue = 0,
+  currencyCode,
+  currencySymbol,
 }: Props) {
-  const currentTerms = terms || {
-    countryName: 'جمهورية مصر العربية',
-    countryCode: 'EG',
-    currencySymbol: 'جنيه',
-    approvedHourPrice: 10.0,
-    instructorSharePercent: 70,
-    platformSharePercent: 30,
-    instructorPerHour: 7.0,
-    platformPerHour: 3.0,
-  };
+  const currency = currencySymbol || currencyCode || '';
+  const price = Number(pricePerHour) || 0;
+  const platPercent = Number(platformPercentage) || 0;
+  const instructorPercent = Math.max(0, 100 - platPercent);
 
-  const currentConsumption = consumption || {
-    actualHours: 2.25,
-    filesCount: 3,
-    instructorNetEarnings: 15.75,
-    totalExecutedValue: 22.5,
-    platformRetainedShare: 6.75,
-  };
+  // Per-hour rates
+  const instructorPerHour = price * (instructorPercent / 100);
+  const platformPerHour = price * (platPercent / 100);
+
+  // Executed metrics
+  const effHours = Number(effectiveHours) || 0;
+  const effValue = Number(effectiveHoursValue) || 0;
+  const chapHours = Number(totalChapterHours) || 0;
+  const instructorNetEarnings = effValue * (instructorPercent / 100);
+  const platformRetainedShare = effValue * (platPercent / 100);
+
+  // Progress percentage based on chapter hours or instructor share
+  const progressPercent =
+    chapHours > 0
+      ? Math.min(100, Math.round((effHours / chapHours) * 100))
+      : instructorPercent;
 
   return (
     <Box sx={{ mb: 3 }}>
-      {/* 1. Two Main Cards: Approved Financial Terms & Actual Consumption */}
-      <Grid container spacing={2.5} sx={{ mb: showKpis ? 2.5 : 0 }}>
+      <Grid container spacing={2.5}>
         {/* Right Card: الشروط المالية المعتمدة للطلب */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
@@ -68,7 +69,7 @@ export default function FinancialTermsCards({
               justifyContent: 'space-between',
             }}
           >
-            {/* Header: Title and Icon on RIGHT (First in RTL), Flag on LEFT (Second in RTL) */}
+            {/* Header: Title and Icon on RIGHT (First in RTL), Currency Chip on LEFT */}
             <Stack
               direction="row"
               spacing={1}
@@ -81,22 +82,33 @@ export default function FinancialTermsCards({
                 </Typography>
               </Stack>
 
-              <Chip
-                label="جمهورية مصر العربية 🇪🇬"
-                size="small"
-                sx={{ bgcolor: '#F8FAFC', color: '#475569', fontWeight: 600, fontSize: 11.5 }}
-              />
+              {currency && (
+                <Chip
+                  label={currency}
+                  size="small"
+                  sx={{ bgcolor: '#F8FAFC', color: '#475569', fontWeight: 700, fontSize: 11.5 }}
+                />
+              )}
             </Stack>
 
             {/* Row 1: Approved price & Instructor share */}
             <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', textAlign: 'start' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: '#F8FAFC',
+                    border: '1px solid #F1F5F9',
+                    height: '100%',
+                    textAlign: 'start',
+                  }}
+                >
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
                     سعر الساعة المعتمد
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A', mt: 0.5 }}>
-                    {currentTerms.approvedHourPrice.toFixed(2)} {currentTerms.currencySymbol} / ساعة
+                    {price.toFixed(2)} {currency} / ساعة
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: '#94A3B8', mt: 0.25 }}>
                     سعر موحد ومثبت
@@ -105,7 +117,17 @@ export default function FinancialTermsCards({
               </Grid>
 
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', position: 'relative', textAlign: 'start' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: '#F8FAFC',
+                    border: '1px solid #F1F5F9',
+                    height: '100%',
+                    position: 'relative',
+                    textAlign: 'start',
+                  }}
+                >
                   <Box sx={{ position: 'absolute', top: 12, left: 12, color: '#94A3B8' }}>
                     <Iconify icon="solar:lock-bold" width={16} />
                   </Box>
@@ -113,13 +135,13 @@ export default function FinancialTermsCards({
                     نسبة المحاضر المعتمدة
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#059669', mt: 0.5 }}>
-                    %{currentTerms.instructorSharePercent}
+                    %{instructorPercent}
                     <Typography component="span" sx={{ fontSize: 11.5, color: '#64748B', mr: 0.75 }}>
                       (صافي استحقاقك)
                     </Typography>
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: '#94A3B8', mt: 0.25 }}>
-                    حصة المنصة: %{currentTerms.platformSharePercent}
+                    حصة المنصة: %{platPercent}
                   </Typography>
                 </Box>
               </Grid>
@@ -127,11 +149,25 @@ export default function FinancialTermsCards({
 
             {/* Row 2: Distribution per hour */}
             <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9' }}>
-              <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
+              >
                 <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600 }}>
                   توزيع استحقاق الساعة الواحدة:
                 </Typography>
-                <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 700, bgcolor: '#ECFDF5', px: 1, py: 0.25, borderRadius: 1 }}>
+                <Typography
+                  sx={{
+                    fontSize: 11,
+                    color: '#059669',
+                    fontWeight: 700,
+                    bgcolor: '#ECFDF5',
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: 1,
+                  }}
+                >
                   معتمد ومؤمن بالنظام
                 </Typography>
               </Stack>
@@ -139,16 +175,24 @@ export default function FinancialTermsCards({
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
-                sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1 }}
+                sx={{
+                  justifyContent: 'space-between',
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  gap: 1,
+                }}
               >
                 <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#059669' }}>
                   قيمة المحاضر لكل ساعة منجزة:{' '}
-                  <span>{currentTerms.instructorPerHour.toFixed(2)} {currentTerms.currencySymbol} / ساعة</span>
+                  <span>
+                    {instructorPerHour.toFixed(2)} {currency} / ساعة
+                  </span>
                 </Typography>
 
                 <Typography sx={{ fontSize: 12, color: '#64748B' }}>
-                  حصة المنصة لكل ساعة (شاملة السيرفرات والإشراف):{' '}
-                  <strong style={{ color: '#0F172A' }}>{currentTerms.platformPerHour.toFixed(2)} {currentTerms.currencySymbol} /ساعة</strong>
+                  حصة المنصة لكل ساعة:{' '}
+                  <strong style={{ color: '#0F172A' }}>
+                    {platformPerHour.toFixed(2)} {currency} / ساعة
+                  </strong>
                 </Typography>
               </Stack>
             </Box>
@@ -186,19 +230,30 @@ export default function FinancialTermsCards({
             <Grid container spacing={1.5} sx={{ mb: 2 }}>
               {/* Actual Hours */}
               <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ p: 2, borderRadius: 2, bgcolor: '#F8FAFC', border: '1px solid #F1F5F9', height: '100%', textAlign: 'center' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: '#F8FAFC',
+                    border: '1px solid #F1F5F9',
+                    height: '100%',
+                    textAlign: 'center',
+                  }}
+                >
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
                     إجمالي الساعات الفعلية
                   </Typography>
                   <Typography sx={{ fontSize: 24, fontWeight: 900, color: '#0F172A', mt: 0.5 }}>
-                    {currentConsumption.actualHours}{' '}
+                    {effHours}{' '}
                     <Typography component="span" sx={{ fontSize: 14, fontWeight: 700, color: '#64748B' }}>
                       ساعة
                     </Typography>
                   </Typography>
-                  <Typography sx={{ fontSize: 11.5, color: '#94A3B8', mt: 0.25 }}>
-                    عبر {currentConsumption.filesCount} ملفات مسجلة
-                  </Typography>
+                  {chapHours > 0 && (
+                    <Typography sx={{ fontSize: 11.5, color: '#94A3B8', mt: 0.25 }}>
+                      من إجمالي {chapHours} ساعة للفصول
+                    </Typography>
+                  )}
                 </Box>
               </Grid>
 
@@ -215,12 +270,12 @@ export default function FinancialTermsCards({
                   }}
                 >
                   <Typography sx={{ fontSize: 12, color: '#047857', fontWeight: 700 }}>
-                    صافي مستحق المحاضر (%70)
+                    صافي مستحق المحاضر (%{instructorPercent})
                   </Typography>
                   <Typography sx={{ fontSize: 24, fontWeight: 900, color: '#065F46', mt: 0.5 }}>
-                    {currentConsumption.instructorNetEarnings}{' '}
+                    {instructorNetEarnings.toFixed(2)}{' '}
                     <Typography component="span" sx={{ fontSize: 14, fontWeight: 700, color: '#047857' }}>
-                      جنيه
+                      {currency}
                     </Typography>
                   </Typography>
                   <Typography sx={{ fontSize: 11.5, color: '#059669', mt: 0.25, fontWeight: 600 }}>
@@ -234,7 +289,7 @@ export default function FinancialTermsCards({
             <Box sx={{ pt: 1.5, borderTop: '1px solid #F1F5F9' }}>
               <LinearProgress
                 variant="determinate"
-                value={70}
+                value={progressPercent}
                 sx={{
                   height: 8,
                   borderRadius: 4,
@@ -247,69 +302,28 @@ export default function FinancialTermsCards({
                 }}
               />
 
-              <Stack direction="row" spacing={1} sx={{ justifyContent: 'space-between', fontSize: 12 }}>
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1}
+                sx={{ justifyContent: 'space-between', fontSize: 12, gap: 1 }}
+              >
                 <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
                   القيمة الإجمالية للخدمة المنفذة:{' '}
-                  <strong style={{ color: '#0F172A' }}>{currentConsumption.totalExecutedValue.toFixed(2)} جنيه</strong>
+                  <strong style={{ color: '#0F172A' }}>
+                    {effValue.toFixed(2)} {currency}
+                  </strong>
                 </Typography>
                 <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                  حصة المنصة المحتجزة (%30):{' '}
-                  <strong style={{ color: '#0F172A' }}>{currentConsumption.platformRetainedShare.toFixed(2)} جنيه</strong>
+                  حصة المنصة المحتجزة (%{platPercent}):{' '}
+                  <strong style={{ color: '#0F172A' }}>
+                    {platformRetainedShare.toFixed(2)} {currency}
+                  </strong>
                 </Typography>
               </Stack>
             </Box>
           </Card>
         </Grid>
       </Grid>
-
-      {/* 2. Four KPI Metric Boxes (Image 4) */}
-      {showKpis && (
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FFFFFF', border: '1px solid #F1F5F9', textAlign: 'center' }}>
-              <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-                إجمالي الفيديوهات المرفوعة
-              </Typography>
-              <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#0F172A', mt: 0.5 }}>
-                {totalVideosCount} فيديوهات
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FFFFFF', border: '1px solid #F1F5F9', textAlign: 'center' }}>
-              <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-                إجمالي الساعات المقدمة
-              </Typography>
-              <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#0F172A', mt: 0.5 }}>
-                {totalDeliveredHours} ساعة
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FFFFFF', border: '1px solid #F1F5F9', textAlign: 'center' }}>
-              <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-                الساعات المحتسبة للأرباح
-              </Typography>
-              <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#0284C7', mt: 0.5 }}>
-                {earningHours} ساعة
-              </Typography>
-            </Card>
-          </Grid>
-
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Card sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FFFFFF', border: '1px solid #F1F5F9', textAlign: 'center' }}>
-              <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-                أرباح المحتوى المسجل
-              </Typography>
-              <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#059669', mt: 0.5 }}>
-                {recordedEarnings} جنيه
-              </Typography>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
     </Box>
   );
 }

@@ -35,7 +35,6 @@ import AdminReviewNoticeCard from './components/AdminReviewNoticeCard';
 import FinancialTermsCards from './components/FinancialTermsCards';
 import RecordedCurriculumSection from './components/RecordedCurriculumSection';
 import LiveBroadcastRoomSection from './components/LiveBroadcastRoomSection';
-import FinancialTransactionsTable from './components/FinancialTransactionsTable';
 
 interface Props {
   requestId: string;
@@ -416,20 +415,22 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         />
       )}
 
-      {/* 7. Active States: Financial Terms & Curriculum / Live Room */}
+      {/* 7. Financial Terms Cards (When pricePerHour is approved / available or request is Active) */}
+      {(isActive || Boolean(request.pricePerHour && request.pricePerHour > 0)) && (
+        <FinancialTermsCards
+          platformPercentage={request.platformPercentage}
+          totalChapterHours={request.totalChapterHours}
+          effectiveHours={request.effectiveHours}
+          pricePerHour={request.pricePerHour}
+          effectiveHoursValue={request.effectiveHoursValue}
+          currencyCode={request.currencyCode}
+          currencySymbol={request.currencySymbol}
+        />
+      )}
+
+      {/* 8. Active Content Sections */}
       {isActive && (
         <>
-          <FinancialTermsCards
-            showKpis={isRecorded}
-            totalVideosCount={mappedChapters.reduce(
-              (acc, ch) => acc + ch.lessons.filter((l) => l.attachments.some((a) => a.type === 'video')).length,
-              0
-            )}
-            totalDeliveredHours={0}
-            earningHours={0}
-            recordedEarnings={0}
-          />
-
           {/* If Recorded Content: Curriculum / Upload Lessons Section */}
           {isRecorded && <RecordedCurriculumSection initialChapters={mappedChapters} />}
 
@@ -439,13 +440,14 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
               studentName={request.student?.name || 'الطالب'}
               duration="01:30:00"
               elapsedMinutes={0}
-              expectedEarnings={10.5}
+              expectedEarnings={
+                (Number(request.effectiveHoursValue) || 0) *
+                ((100 - (Number(request.platformPercentage) || 0)) / 100)
+              }
+              currency={request.currencySymbol || request.currencyCode || ''}
               onEndLiveSession={handleFinishService}
             />
           )}
-
-          {/* Financial Transactions Table */}
-          <FinancialTransactionsTable requestId={request.id} />
         </>
       )}
     </Box>

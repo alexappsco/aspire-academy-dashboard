@@ -208,6 +208,13 @@ export interface SessionRequestInstructorResult {
   rejectionReason?: string | null;
   respondedAt?: string | null;
   platformPercentage?: number | null;
+  totalChapterHours?: number | null;
+  effectiveHours?: number | null;
+  pricePerHour?: number | null;
+  effectiveHoursValue?: number | null;
+  currencyId?: string | null;
+  currencyCode?: string | null;
+  currencySymbol?: string | null;
   chapters?: SessionChapterResult[] | null;
   creationTime: string;
 }

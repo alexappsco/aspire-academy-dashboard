@@ -23,14 +23,16 @@ interface Props {
   duration?: string;
   elapsedMinutes?: number;
   expectedEarnings?: number;
+  currency?: string;
   onEndLiveSession?: () => void;
 }
 
 export default function LiveBroadcastRoomSection({
-  studentName = 'محمد أحمد',
+  studentName = 'الطالب',
   duration = '01:30:00',
-  elapsedMinutes = 90,
-  expectedEarnings = 10.5,
+  elapsedMinutes = 0,
+  expectedEarnings = 0,
+  currency = '',
   onEndLiveSession,
 }: Props) {
   const toast = useToast();
@@ -423,7 +425,7 @@ export default function LiveBroadcastRoomSection({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
           <Iconify icon="solar:info-circle-bold" width={18} sx={{ color: '#2563EB' }} />
           <Typography sx={{ fontSize: 12.5, color: '#1E40AF', fontWeight: 600 }}>
-            الجلسة الحالية استغرقت {elapsedMinutes} دقيقة بنجاح. عند الإنهاء سيتم اعتماد {expectedEarnings.toFixed(2)} ج.م بحسابك فوراً.
+            الجلسة الحالية استغرقت {elapsedMinutes} دقيقة. عند الإنهاء سيتم اعتماد {expectedEarnings.toFixed(2)} {currency} بحسابك.
           </Typography>
         </Stack>
 
