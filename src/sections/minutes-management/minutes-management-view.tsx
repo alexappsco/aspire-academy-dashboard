@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
@@ -12,13 +12,18 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import Switch from '@mui/material/Switch';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
 import { getInstructors, deleteInstructor, verifyInstructor, rejectInstructor } from 'src/actions/instructors';
-import type { Instructor } from 'src/types/instructor';
+import { getSpecializations } from 'src/actions/specializations';
+import type { Instructor, GetInstructorsParams } from 'src/types/instructor';
+import type { Specialization } from 'src/types/specialization';
 
 import DeleteConfirmDialog from './delete-confirm-dialog';
 
@@ -53,14 +58,25 @@ export default function MinutesManagementView() {
   const toast = useToast();
   const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isRtl = locale === 'ar';
 
   const [items, setItems] = useState<Instructor[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlIsVerified = searchParams.get('IsVerified');
+  const initialStatus =
+    urlIsVerified === 'true' ? 'verified' : urlIsVerified === 'false' ? 'rejected' : 'all';
+  const urlSpecialization = searchParams.get('SpecializationId') || 'all';
+
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [specializationFilter, setSpecializationFilter] = useState(urlSpecialization);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -73,25 +89,60 @@ export default function MinutesManagementView() {
     return () => clearTimeout(debounceTimer.current);
   }, [searchQuery]);
 
+  // Sync browser URL parameters with current active filters
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    } else {
+      params.delete('Filter');
+    }
+
+    if (statusFilter === 'verified') {
+      params.set('IsVerified', 'true');
+    } else if (statusFilter === 'rejected') {
+      params.set('IsVerified', 'false');
+    } else {
+      params.delete('IsVerified');
+    }
+
+    if (specializationFilter !== 'all') {
+      params.set('SpecializationId', specializationFilter);
+    } else {
+      params.delete('SpecializationId');
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, statusFilter, specializationFilter, pathname, router, searchParams]);
+
+  useEffect(() => {
+    getSpecializations({ MaxResultCount: 1000 }).then((res) => {
+      if (res.success && res.data) setSpecializations(res.data.items);
+    });
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
     async function loadInstructors() {
       try {
-        const params: Record<string, unknown> = {
+        const params: GetInstructorsParams = {
           SkipCount: 0,
           MaxResultCount: 1000,
         };
         if (statusFilter === 'verified') params.IsVerified = true;
         if (statusFilter === 'rejected') params.IsVerified = false;
         if (debouncedSearch.trim()) params.Filter = debouncedSearch.trim();
+        if (specializationFilter !== 'all') params.SpecializationId = specializationFilter;
 
-        const res = await getInstructors(params as {
-          IsVerified?: boolean;
-          Filter?: string;
-          SkipCount?: number;
-          MaxResultCount?: number;
-        });
+        const res = await getInstructors(params);
 
         if (!isMounted) return;
 
@@ -113,7 +164,7 @@ export default function MinutesManagementView() {
     return () => {
       isMounted = false;
     };
-  }, [debouncedSearch, statusFilter, toast]);
+  }, [debouncedSearch, statusFilter, specializationFilter, toast]);
 
   const handleOpenEdit = (row: FormattedInstructor) => {
     router.push(`/${locale}/minutes-management/${row.id}`);
@@ -499,6 +550,48 @@ export default function MinutesManagementView() {
               },
             }}
           />
+
+          {/* Specialization Filter */}
+          <FormControl
+            size="small"
+            variant="outlined"
+            sx={{ minWidth: { xs: '100%', sm: 180 }, flexShrink: 0 }}
+          >
+            <Select
+              variant="outlined"
+              value={specializationFilter}
+              onChange={(e) => setSpecializationFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                height: '44px',
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#1C252E',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  border: '1px solid #E5E8EB',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#919EAB',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#008767',
+                  borderWidth: '1px',
+                },
+                '& .MuiSelect-icon': {
+                  color: '#64748B',
+                },
+              }}
+            >
+              <MenuItem value="all">{t('filter_specialization_all')}</MenuItem>
+              {specializations.map((s) => (
+                <MenuItem key={s.id} value={s.id}>
+                  {isRtl ? s.nameAr || s.nameEn : s.nameEn || s.nameAr}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
         {/* Table */}

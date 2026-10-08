@@ -55,6 +55,17 @@ export type Instructor = {
   country?: Country | null;
   universityId?: string;
   university?: University | null;
+  specializationIds?: string[];
+  specializations?: {
+    id: string;
+    name?: string;
+    nameAr?: string;
+    nameEn?: string;
+  }[] | null;
+  acceptsLiveSessions?: boolean;
+  acceptsRecordedSessions?: boolean;
+  isActive?: boolean;
+  createdAt?: string | null;
   verifiedAt?: string | null;
   rejectedAt?: string | null;
   ratingAverage?: number;
@@ -72,6 +83,8 @@ export type InstructorListResponse = {
 
 export type GetInstructorsParams = {
   IsVerified?: boolean;
+  IsActive?: boolean;
+  SpecializationId?: string;
   Filter?: string;
   Sorting?: string;
   SkipCount?: number;
@@ -106,10 +119,15 @@ export type CreateInstructorPayload = {
   EducationalQualification?: string;
   StartJobAt?: string;
   UniversityId?: string;
+  SpecializationIds?: string[];
+  AcceptsLiveSessions?: boolean;
+  AcceptsRecordedSessions?: boolean;
 };
 
 export type UpdateInstructorPayload = {
   Name?: string;
+  Email?: string;
+  PhoneNumber?: string;
   ProfileImage?: File;
   Bio?: string;
   Title?: string;
@@ -117,6 +135,9 @@ export type UpdateInstructorPayload = {
   StartJobAt?: string;
   CountryId?: string;
   UniversityId?: string;
+  SpecializationIds?: string[];
+  AcceptsLiveSessions?: boolean;
+  AcceptsRecordedSessions?: boolean;
 };
 
 // ==========================================
