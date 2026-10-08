@@ -18,6 +18,9 @@ import Link from "@mui/material/Link";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import MenuItem from "@mui/material/MenuItem";
 
 import Iconify from "src/components/iconify";
@@ -29,8 +32,10 @@ import {
   updateInstructor,
   getUniversities,
 } from "src/actions/instructors";
+import { getSpecializations } from "src/actions/specializations";
 import { getCountriesAction } from "src/actions/countries";
 import type { Country, University } from "src/types/instructor";
+import type { Specialization } from "src/types/specialization";
 
 interface MinutesFormViewProps {
   id?: string;
@@ -110,6 +115,9 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
     phone: "",
     password: "",
     confirmPassword: "",
+    specializationIds: [] as string[],
+    acceptsLiveSessions: true,
+    acceptsRecordedSessions: true,
   });
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -121,6 +129,7 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [universities, setUniversities] = useState<University[]>([]);
+  const [specializations, setSpecializations] = useState<Specialization[]>([]);
 
   useEffect(() => {
     getCountriesAction({ MaxResultCount: 1000 }).then((res) => {
@@ -128,6 +137,9 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
     });
     getUniversities({ MaxResultCount: 1000 }).then((res) => {
       if (res.success && res.data) setUniversities(res.data.items);
+    });
+    getSpecializations({ MaxResultCount: 1000, IsActive: true }).then((res) => {
+      if (res.success && res.data) setSpecializations(res.data.items);
     });
   }, []);
 
@@ -153,6 +165,12 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
             phone: inst.phoneNumber ?? "",
             password: "",
             confirmPassword: "",
+            specializationIds:
+              inst.specializationIds ??
+              inst.specializations?.map((s) => s.id) ??
+              [],
+            acceptsLiveSessions: inst.acceptsLiveSessions ?? true,
+            acceptsRecordedSessions: inst.acceptsRecordedSessions ?? true,
           });
           setAvatarPreview(inst.imageUrl || null);
         } else {
@@ -180,6 +198,13 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData((prev) => ({ ...prev, [field]: e.target.value }));
     };
+
+  const handleSpecializationsChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const selected = e.target.value as unknown as string[];
+    setFormData((prev) => ({ ...prev, specializationIds: selected }));
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -218,9 +243,12 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
           StartJobAt: formData.startDate || undefined,
           CountryId: formData.country || undefined,
           UniversityId: formData.university || undefined,
+          SpecializationIds: formData.specializationIds,
+          AcceptsLiveSessions: formData.acceptsLiveSessions,
+          AcceptsRecordedSessions: formData.acceptsRecordedSessions,
           ...(avatarFile && { ProfileImage: avatarFile }),
         };
-        const res = await updateInstructor(id, payload as never);
+        const res = await updateInstructor(id, payload);
         if (res.success) {
           toast.success(t("messages.update_success"));
           window.location.assign(listPath);
@@ -240,9 +268,12 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
           StartJobAt: formData.startDate || undefined,
           CountryId: formData.country || undefined,
           UniversityId: formData.university || undefined,
+          SpecializationIds: formData.specializationIds,
+          AcceptsLiveSessions: formData.acceptsLiveSessions,
+          AcceptsRecordedSessions: formData.acceptsRecordedSessions,
           ...(avatarFile && { ProfileImage: avatarFile }),
         };
-        const res = await createInstructor(payload as never);
+        const res = await createInstructor(payload);
         if (res.success) {
           toast.success(t("messages.add_success"));
           router.push("/minutes-management");
@@ -544,6 +575,45 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
                   </FormField>
                 </Stack>
 
+                <FormField label={t("field_specializations")} rtl={isRtl}>
+                  <SelectField
+                    fullWidth
+                    size="small"
+                    value={formData.specializationIds}
+                    onChange={handleSpecializationsChange}
+                    slotProps={{
+                      select: {
+                        multiple: true,
+                        renderValue: (selected: unknown) => {
+                          const ids = ((selected as string[]) ?? []).filter(
+                            Boolean,
+                          );
+                          const names = ids
+                            .map((sid) =>
+                              specializations.find((s) => s.id === sid),
+                            )
+                            .filter((s): s is Specialization => !!s)
+                            .map((s) => (isRtl ? s.nameAr : s.nameEn));
+                          return names.length
+                            ? names.join(isRtl ? "، " : ", ")
+                            : t("specializations_placeholder");
+                        },
+                      },
+                    }}
+                    sx={inputRootSx}
+                  >
+                    {specializations.map((s) => (
+                      <MenuItem key={s.id} value={s.id}>
+                        <Checkbox
+                          checked={formData.specializationIds.includes(s.id)}
+                          size="small"
+                        />
+                        {isRtl ? s.nameAr : s.nameEn}
+                      </MenuItem>
+                    ))}
+                  </SelectField>
+                </FormField>
+
                 <FormField label={t("field_bio")} rtl={isRtl}>
                   <TextField
                     fullWidth
@@ -558,6 +628,86 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
                 </FormField>
               </Stack>
             </Box>
+          </Stack>
+        </Box>
+      </Card>
+
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.02)",
+          border: "1px solid #F1F3F5",
+          mb: 3,
+          bgcolor: "#FFFFFF",
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, color: "#1C252E", mb: 0.5 }}
+          >
+            {t("section_preferences")}
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#64748B", mb: 2 }}>
+            {t("preferences_subtitle")}
+          </Typography>
+          <Divider sx={{ mb: 3, borderColor: "#E5E7EB" }} />
+
+          <Stack spacing={1}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.acceptsLiveSessions}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      acceptsLiveSessions: e.target.checked,
+                    }))
+                  }
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": {
+                      color: "#00A76F",
+                    },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                      { backgroundColor: "#00A76F" },
+                  }}
+                />
+              }
+              label={
+                <Typography
+                  sx={{ fontSize: 14, fontWeight: 600, color: "#344054" }}
+                >
+                  {t("field_accepts_live_sessions")}
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.acceptsRecordedSessions}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      acceptsRecordedSessions: e.target.checked,
+                    }))
+                  }
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": {
+                      color: "#00A76F",
+                    },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                      { backgroundColor: "#00A76F" },
+                  }}
+                />
+              }
+              label={
+                <Typography
+                  sx={{ fontSize: 14, fontWeight: 600, color: "#344054" }}
+                >
+                  {t("field_accepts_recorded_sessions")}
+                </Typography>
+              }
+            />
           </Stack>
         </Box>
       </Card>
