@@ -124,3 +124,91 @@ export interface UpdateInstructorSessionSettingsDto {
   acceptsRecordedSessions: boolean;
 }
 
+export type SessionRequestStatus =
+  | 'Pending'
+  | 'AwaitingAdminReview'
+  | 'Active'
+  | 'Completed'
+  | 'Rejected'
+  | 'Cancelled';
+
+export type SessionType = 'Live' | 'Recorded';
+
+export interface SessionRequestStudentResult {
+  studentId: string;
+  name?: string | null;
+  email?: string | null;
+  imageUrl?: string | null;
+  countryId?: string | null;
+  countryName?: string | null;
+}
+
+export interface SessionLessonQuestionChoiceResult {
+  id: string;
+  title: string;
+  order: number;
+  isRight: boolean;
+}
+
+export interface SessionLessonQuestionResult {
+  id: string;
+  text: string;
+  explanation?: string | null;
+  choices: SessionLessonQuestionChoiceResult[];
+}
+
+export interface SessionLessonTestResult {
+  id: string;
+  questions: SessionLessonQuestionResult[];
+}
+
+export interface SessionLessonResult {
+  id: string;
+  title: string;
+  description?: string | null;
+  order: number;
+  durationInSeconds: number;
+  videoUrl?: string | null;
+  test?: SessionLessonTestResult | null;
+  creationTime: string;
+}
+
+export interface SessionChapterResult {
+  id: string;
+  title: string;
+  order: number;
+  hours: number;
+  lessons: SessionLessonResult[];
+}
+
+export interface SessionRequestInstructorResult {
+  id: string;
+  student: SessionRequestStudentResult;
+  type: SessionType;
+  specializationId?: string;
+  specializationName?: string | null;
+  description?: string | null;
+  isBroadcast: boolean;
+  status: SessionRequestStatus;
+  rejectionReason?: string | null;
+  respondedAt?: string | null;
+  platformPercentage?: number | null;
+  chapters?: SessionChapterResult[] | null;
+  creationTime: string;
+}
+
+export interface SessionRequestListResponse {
+  items: SessionRequestInstructorResult[];
+  totalCount: number;
+}
+
+export interface GetSessionRequestsParams {
+  Status?: SessionRequestStatus;
+  Type?: SessionType;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+

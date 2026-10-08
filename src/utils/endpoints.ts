@@ -179,4 +179,11 @@ export const endpoints = {
     get: '/instructor/session-settings',
     update: '/instructor/session-settings',
   },
+  instructorSessionRequests: {
+    list: '/instructor/session-requests',
+    details: (id: string) => `/instructor/session-requests/${id}`,
+    accept: (id: string) => `/instructor/session-requests/${id}/accept`,
+    reject: (id: string) => `/instructor/session-requests/${id}/reject`,
+    chapters: (id: string) => `/instructor/session-requests/${id}/chapters`,
+  },
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -17,41 +17,245 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import TablePagination from '@mui/material/TablePagination';
-import { useRouter } from 'src/i18n/routing';
+import Skeleton from '@mui/material/Skeleton';
+import { useSearchParams } from 'next/navigation';
+import { useRouter, usePathname } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import {
   getInstructorSessionSettingsAction,
   updateInstructorSessionSettingsAction,
+  getSessionRequestsAction,
 } from 'src/actions';
 import {
-  MOCK_PRIVATE_REQUESTS,
-} from './_mock';
-import {
-  PrivateRequestItem,
-  PrivateRequestStatus,
   InstructorSessionSettingsDto,
+  SessionRequestInstructorResult,
+  SessionRequestStatus,
+  SessionType,
 } from 'src/types/private-request';
 import ServiceToggleCards from './components/ServiceToggleCards';
 
+// Format backend ISO date to Arabic readable format
+function formatRequestDate(dateStr?: string): string {
+  if (!dateStr) return '—';
+  try {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat('ar-EG', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(date);
+  } catch {
+    return dateStr;
+  }
+}
+
+// Render status badge chip
+function renderStatusChip(status: SessionRequestStatus) {
+  switch (status) {
+    case 'Pending':
+      return (
+        <Chip
+          label="جديد"
+          size="small"
+          sx={{
+            bgcolor: '#E0F2FE',
+            color: '#0284C7',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    case 'AwaitingAdminReview':
+      return (
+        <Chip
+          label="بانتظار التأكيد"
+          size="small"
+          sx={{
+            bgcolor: '#FEF3C7',
+            color: '#D97706',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    case 'Active':
+      return (
+        <Chip
+          label="نشط"
+          size="small"
+          sx={{
+            bgcolor: '#DCFCE7',
+            color: '#15803D',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    case 'Completed':
+      return (
+        <Chip
+          label="منتهي"
+          size="small"
+          sx={{
+            bgcolor: '#E2E8F0',
+            color: '#334155',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    case 'Rejected':
+      return (
+        <Chip
+          label="مرفوض"
+          size="small"
+          sx={{
+            bgcolor: '#FEE2E2',
+            color: '#DC2626',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    case 'Cancelled':
+      return (
+        <Chip
+          label="ملغي"
+          size="small"
+          sx={{
+            bgcolor: '#F1F5F9',
+            color: '#64748B',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    default:
+      return (
+        <Chip
+          label={status}
+          size="small"
+          sx={{ bgcolor: '#F1F5F9', color: '#64748B', fontWeight: 700, fontSize: 12, height: 24 }}
+        />
+      );
+  }
+}
+
 export default function PrivateRequestsListView() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const toast = useToast();
 
-  // Backend session settings state
+  // Read initial values from URL query parameters
+  const urlStatus = searchParams.get('Status') || 'all';
+  const urlType = searchParams.get('Type') || 'all';
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlPage = parseInt(searchParams.get('page') || '0', 10);
+
+  // Tab state (mapped to StatusEnum or 'all')
+  const initialTab = useMemo(() => {
+    if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(urlStatus)) {
+      return urlStatus as SessionRequestStatus;
+    }
+    return 'all';
+  }, [urlStatus]);
+
+  const [currentTab, setCurrentTab] = useState<SessionRequestStatus | 'all'>(initialTab);
+
+  // Filter Bar States
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<'all' | 'Recorded' | 'Live'>(
+    urlType === 'Live' || urlType === 'Recorded' ? urlType : 'all'
+  );
+  const [statusFilter, setStatusFilter] = useState<string>(urlStatus);
+
+  // Backend session settings state (Top Cards)
   const [sessionSettings, setSessionSettings] = useState<InstructorSessionSettingsDto | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [updatingRecorded, setUpdatingRecorded] = useState(false);
   const [updatingLive, setUpdatingLive] = useState(false);
 
-  // Fetch real settings from backend API
+  // Requests Table Data & Pagination States
+  const [requests, setRequests] = useState<SessionRequestInstructorResult[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [tableLoading, setTableLoading] = useState<boolean>(true);
+  const [page, setPage] = useState(isNaN(urlPage) ? 0 : urlPage);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Action Menu
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+
+  // 1. Debounce Search Input (400ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // 2. Sync URL parameters with current active filters
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    // Status: Prioritize tab if not 'all', otherwise check dropdown
+    const effectiveStatus =
+      currentTab !== 'all' ? currentTab : statusFilter !== 'all' ? statusFilter : null;
+
+    if (effectiveStatus) {
+      params.set('Status', effectiveStatus);
+    }
+
+    if (serviceTypeFilter !== 'all') {
+      params.set('Type', serviceTypeFilter);
+    }
+
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    }
+
+    if (page > 0) {
+      params.set('page', String(page));
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [currentTab, statusFilter, serviceTypeFilter, debouncedSearch, page, pathname, router, searchParams]);
+
+  // 3. Fetch Session Settings for top toggle cards
   const fetchSettings = useCallback(async () => {
     setLoadingSettings(true);
     const res = await getInstructorSessionSettingsAction();
     if (res.success && res.data) {
       setSessionSettings(res.data);
     } else {
-      // Graceful default if network issue or guest mode
       setSessionSettings({
         acceptsLiveSessions: false,
         acceptsRecordedSessions: false,
@@ -66,14 +270,49 @@ export default function PrivateRequestsListView() {
     fetchSettings();
   }, [fetchSettings]);
 
-  // Toggle Recorded Sessions
+  // 4. Fetch Session Requests for Table from Backend API
+  const fetchRequests = useCallback(async () => {
+    setTableLoading(true);
+
+    const effectiveStatus =
+      currentTab !== 'all' ? currentTab : statusFilter !== 'all' ? (statusFilter as SessionRequestStatus) : undefined;
+
+    const effectiveType =
+      serviceTypeFilter !== 'all' ? (serviceTypeFilter as SessionType) : undefined;
+
+    const res = await getSessionRequestsAction({
+      Status: effectiveStatus,
+      Type: effectiveType,
+      Filter: debouncedSearch.trim() || undefined,
+      SkipCount: page * rowsPerPage,
+      MaxResultCount: rowsPerPage,
+    });
+
+    if (res.success && res.data) {
+      setRequests(res.data.items || []);
+      setTotalCount(res.data.totalCount || 0);
+    } else {
+      setRequests([]);
+      setTotalCount(0);
+      if (res.error) {
+        toast.error(res.error);
+      }
+    }
+
+    setTableLoading(false);
+  }, [currentTab, statusFilter, serviceTypeFilter, debouncedSearch, page, rowsPerPage, toast]);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  // Toggle Recorded Sessions (Optimistic UI)
   const handleToggleRecorded = async () => {
     if (!sessionSettings) return;
     const current = sessionSettings.acceptsRecordedSessions;
     const nextVal = !current;
     setUpdatingRecorded(true);
 
-    // Optimistic update
     setSessionSettings((prev) =>
       prev ? { ...prev, acceptsRecordedSessions: nextVal } : prev
     );
@@ -92,7 +331,6 @@ export default function PrivateRequestsListView() {
           : 'تم إيقاف استقبال طلبات المحتوى المسجل مؤقتاً'
       );
     } else {
-      // Revert on error
       setSessionSettings((prev) =>
         prev ? { ...prev, acceptsRecordedSessions: current } : prev
       );
@@ -100,14 +338,13 @@ export default function PrivateRequestsListView() {
     }
   };
 
-  // Toggle Live Sessions
+  // Toggle Live Sessions (Optimistic UI)
   const handleToggleLive = async () => {
     if (!sessionSettings) return;
     const current = sessionSettings.acceptsLiveSessions;
     const nextVal = !current;
     setUpdatingLive(true);
 
-    // Optimistic update
     setSessionSettings((prev) =>
       prev ? { ...prev, acceptsLiveSessions: nextVal } : prev
     );
@@ -126,7 +363,6 @@ export default function PrivateRequestsListView() {
           : 'تم إيقاف استقبال طلبات الجلسات المباشرة مؤقتاً'
       );
     } else {
-      // Revert on error
       setSessionSettings((prev) =>
         prev ? { ...prev, acceptsLiveSessions: current } : prev
       );
@@ -134,91 +370,32 @@ export default function PrivateRequestsListView() {
     }
   };
 
-  const [requests] = useState<PrivateRequestItem[]>(MOCK_PRIVATE_REQUESTS);
-
-  // Tab Filter
-  const [currentTab, setCurrentTab] = useState<'all' | 'new' | 'pending_admin' | 'active' | 'completed'>('all');
-
-  // Filter Bar States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<'all' | 'recorded' | 'live'>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-
-  // Action Menu
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedRequest, setSelectedRequest] = useState<PrivateRequestItem | null>(null);
-
-  // Pagination
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(6);
-
-  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>, req: PrivateRequestItem) => {
-    setMenuAnchorEl(e.currentTarget);
-    setSelectedRequest(req);
-  };
-
-  const handleCloseMenu = () => {
-    setMenuAnchorEl(null);
-    setSelectedRequest(null);
-  };
-
+  // Navigate to details
   const handleNavigateToDetails = useCallback(
     (id: string) => {
-      handleCloseMenu();
+      setMenuAnchorEl(null);
+      setSelectedRequestId(null);
       router.push(`/private-requests/${id}`);
     },
     [router]
   );
 
-  // Tab counts
-  const counts = useMemo(() => {
-    return {
-      all: 80,
-      new: 18,
-      pending_admin: 22,
-      active: 22,
-      completed: 32,
-    };
-  }, []);
+  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
+    setMenuAnchorEl(e.currentTarget);
+    setSelectedRequestId(id);
+  };
 
-  // Filtered requests
-  const filteredRequests = useMemo(() => {
-    return requests.filter((req) => {
-      // 1. Tab filter
-      if (currentTab === 'new' && req.status !== 'new') return false;
-      if (currentTab === 'pending_admin' && req.status !== 'pending_admin') return false;
-      if (currentTab === 'active' && req.status !== 'active') return false;
-      if (currentTab === 'completed' && req.status !== 'completed') return false;
+  const handleCloseMenu = () => {
+    setMenuAnchorEl(null);
+    setSelectedRequestId(null);
+  };
 
-      // 2. Search filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = req.student.name.toLowerCase().includes(q);
-        const matchesId = req.id.toLowerCase().includes(q);
-        const matchesDesc = req.description.toLowerCase().includes(q);
-        if (!matchesName && !matchesId && !matchesDesc) return false;
-      }
-
-      // 3. Service type filter
-      if (serviceTypeFilter !== 'all' && req.serviceType !== serviceTypeFilter) {
-        return false;
-      }
-
-      // 4. Status select filter
-      if (statusFilter !== 'all' && req.status !== statusFilter) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [requests, currentTab, searchQuery, serviceTypeFilter, statusFilter]);
-
-  // Paginated requests
-  const paginatedRequests = useMemo(() => {
-    const start = page * rowsPerPage;
-    return filteredRequests.slice(start, start + rowsPerPage);
-  }, [filteredRequests, page, rowsPerPage]);
+  // Tab change handler
+  const handleTabChange = (_: React.SyntheticEvent, val: SessionRequestStatus | 'all') => {
+    setCurrentTab(val);
+    setStatusFilter(val);
+    setPage(0);
+  };
 
   return (
     <Box sx={{ py: 2, pb: 8 }}>
@@ -259,10 +436,7 @@ export default function PrivateRequestsListView() {
         <Box sx={{ borderBottom: '1px solid #F1F5F9', px: 2 }}>
           <Tabs
             value={currentTab}
-            onChange={(_, val) => {
-              setCurrentTab(val);
-              setPage(0);
-            }}
+            onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
@@ -288,88 +462,98 @@ export default function PrivateRequestsListView() {
               value="all"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={counts.all}
-                    size="small"
-                    sx={{
-                      bgcolor: currentTab === 'all' ? '#0F172A' : '#F1F5F9',
-                      color: currentTab === 'all' ? '#FFFFFF' : '#64748B',
-                      fontWeight: 700,
-                      height: 22,
-                    }}
-                  />
+                  {currentTab === 'all' && (
+                    <Chip
+                      label={totalCount}
+                      size="small"
+                      sx={{
+                        bgcolor: '#0F172A',
+                        color: '#FFFFFF',
+                        fontWeight: 700,
+                        height: 22,
+                      }}
+                    />
+                  )}
                   <span>الكل</span>
                 </Stack>
               }
             />
             <Tab
-              value="new"
+              value="Pending"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={counts.new}
-                    size="small"
-                    sx={{
-                      bgcolor: currentTab === 'new' ? '#E0F2FE' : '#F1F5F9',
-                      color: currentTab === 'new' ? '#0284C7' : '#64748B',
-                      fontWeight: 700,
-                      height: 22,
-                    }}
-                  />
+                  {currentTab === 'Pending' && (
+                    <Chip
+                      label={totalCount}
+                      size="small"
+                      sx={{
+                        bgcolor: '#E0F2FE',
+                        color: '#0284C7',
+                        fontWeight: 700,
+                        height: 22,
+                      }}
+                    />
+                  )}
                   <span>جديد</span>
                 </Stack>
               }
             />
             <Tab
-              value="pending_admin"
+              value="AwaitingAdminReview"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={counts.pending_admin}
-                    size="small"
-                    sx={{
-                      bgcolor: currentTab === 'pending_admin' ? '#FEF3C7' : '#F1F5F9',
-                      color: currentTab === 'pending_admin' ? '#D97706' : '#64748B',
-                      fontWeight: 700,
-                      height: 22,
-                    }}
-                  />
-                  <span>بانتظار التاكيد</span>
+                  {currentTab === 'AwaitingAdminReview' && (
+                    <Chip
+                      label={totalCount}
+                      size="small"
+                      sx={{
+                        bgcolor: '#FEF3C7',
+                        color: '#D97706',
+                        fontWeight: 700,
+                        height: 22,
+                      }}
+                    />
+                  )}
+                  <span>بانتظار التأكيد</span>
                 </Stack>
               }
             />
             <Tab
-              value="active"
+              value="Active"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={counts.active}
-                    size="small"
-                    sx={{
-                      bgcolor: currentTab === 'active' ? '#DCFCE7' : '#F1F5F9',
-                      color: currentTab === 'active' ? '#15803D' : '#64748B',
-                      fontWeight: 700,
-                      height: 22,
-                    }}
-                  />
+                  {currentTab === 'Active' && (
+                    <Chip
+                      label={totalCount}
+                      size="small"
+                      sx={{
+                        bgcolor: '#DCFCE7',
+                        color: '#15803D',
+                        fontWeight: 700,
+                        height: 22,
+                      }}
+                    />
+                  )}
                   <span>نشط</span>
                 </Stack>
               }
             />
             <Tab
-              value="completed"
+              value="Completed"
               label={
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    label={counts.completed}
-                    size="small"
-                    sx={{
-                      bgcolor: currentTab === 'completed' ? '#E2E8F0' : '#F1F5F9',
-                      color: currentTab === 'completed' ? '#334155' : '#64748B',
-                      fontWeight: 700,
-                      height: 22,
-                    }}
-                  />
+                  {currentTab === 'Completed' && (
+                    <Chip
+                      label={totalCount}
+                      size="small"
+                      sx={{
+                        bgcolor: '#E2E8F0',
+                        color: '#334155',
+                        fontWeight: 700,
+                        height: 22,
+                      }}
+                    />
+                  )}
                   <span>منتهي</span>
                 </Stack>
               }
@@ -392,7 +576,7 @@ export default function PrivateRequestsListView() {
           {/* Search Input: Far Right in RTL */}
           <TextField
             size="small"
-            placeholder="بحث..."
+            placeholder="بحث في الطلبات..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -413,7 +597,7 @@ export default function PrivateRequestsListView() {
             }}
           />
 
-          {/* Filters: Date, Service Type, Status (Left side in RTL) */}
+          {/* Filters: Service Type, Status (Left side in RTL) */}
           <Stack
             direction="row"
             spacing={1.5}
@@ -424,51 +608,47 @@ export default function PrivateRequestsListView() {
               width: { xs: '100%', md: 'auto' },
             }}
           >
-            <TextField
-              size="small"
-              placeholder="التاريخ"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Iconify icon="solar:calendar-linear" width={18} sx={{ color: '#94A3B8' }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                width: { xs: 'calc(50% - 6px)', sm: 140 },
-                '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13 },
-              }}
-            />
-
-            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 140 } }}>
+            {/* Service Type Select */}
+            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 150 } }}>
               <Select
                 value={serviceTypeFilter}
-                onChange={(e) => setServiceTypeFilter(e.target.value as any)}
+                onChange={(e) => {
+                  setServiceTypeFilter(e.target.value as any);
+                  setPage(0);
+                }}
                 displayEmpty
                 sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
               >
-                <MenuItem value="all">نوع الخدمة</MenuItem>
-                <MenuItem value="recorded">مسجل</MenuItem>
-                <MenuItem value="live">لايف</MenuItem>
+                <MenuItem value="all">كل أنواع الخدمات</MenuItem>
+                <MenuItem value="Recorded">محتوى مسجل</MenuItem>
+                <MenuItem value="Live">جلسة مباشرة</MenuItem>
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ width: { xs: '100%', sm: 130 } }}>
+            {/* Status Select */}
+            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 150 } }}>
               <Select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setStatusFilter(val);
+                  if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(val)) {
+                    setCurrentTab(val as SessionRequestStatus);
+                  } else {
+                    setCurrentTab('all');
+                  }
+                  setPage(0);
+                }}
                 displayEmpty
                 sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
               >
-                <MenuItem value="all">الحالة</MenuItem>
-                <MenuItem value="new">جديد</MenuItem>
-                <MenuItem value="pending_admin">بانتظار التأكيد</MenuItem>
-                <MenuItem value="active">نشط</MenuItem>
-                <MenuItem value="completed">منتهي</MenuItem>
+                <MenuItem value="all">جميع الحالات</MenuItem>
+                <MenuItem value="Pending">جديد</MenuItem>
+                <MenuItem value="AwaitingAdminReview">بانتظار التأكيد</MenuItem>
+                <MenuItem value="Active">نشط</MenuItem>
+                <MenuItem value="Completed">منتهي</MenuItem>
+                <MenuItem value="Rejected">مرفوض</MenuItem>
+                <MenuItem value="Cancelled">ملغي</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -500,114 +680,208 @@ export default function PrivateRequestsListView() {
                   },
                 }}
               >
-                <Box component="th" sx={{ textAlign: 'start !important', pr: 3, width: 120 }}>رقم الطلب</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', pr: 3, width: 140 }}>رقم الطلب</Box>
                 <Box component="th" sx={{ textAlign: 'start !important' }}>الطالب والجهة</Box>
                 <Box component="th">تاريخ الطلب</Box>
                 <Box component="th">نوع الخدمة</Box>
-                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>الوصف</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>الوصف والتخصص</Box>
                 <Box component="th">الحالة</Box>
-                <Box component="th" sx={{ width: 50 }}>الإجراءات</Box>
+                <Box component="th" sx={{ width: 60 }}>الإجراءات</Box>
               </Box>
             </Box>
 
             {/* Table Body */}
             <Box component="tbody">
-              {paginatedRequests.map((req) => {
-                const isRec = req.serviceType === 'recorded';
-                const isAct = req.status === 'active';
-                const isNewReq = req.status === 'new';
-
-                return (
-                  <Box
-                    component="tr"
-                    key={req.id}
-                    onClick={() => handleNavigateToDetails(req.id)}
-                    sx={{
-                      cursor: 'pointer',
-                      borderBottom: '1px solid #F1F5F9',
-                      '&:hover': { bgcolor: '#F8FAFC' },
-                      '& td': { p: 2, fontSize: 13, textAlign: 'center' },
-                    }}
-                  >
-                    {/* 1. Request ID (Far Right) */}
-                    <Box component="td" sx={{ textAlign: 'start !important', pr: 3, fontWeight: 700, color: '#0F172A' }}>
-                      #{req.id}
+              {tableLoading ? (
+                // Skeletons
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <Box component="tr" key={`skel-${idx}`} sx={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <Box component="td" sx={{ p: 2, pr: 3 }}>
+                      <Skeleton width={100} height={20} />
                     </Box>
-
-                    {/* 2. Student & Scope */}
-                    <Box component="td" sx={{ textAlign: 'start !important' }}>
-                      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
-                        <Avatar
-                          src={req.student.avatar}
-                          alt={req.student.name}
-                          sx={{ width: 36, height: 36 }}
-                        />
+                    <Box component="td" sx={{ p: 2 }}>
+                      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                        <Skeleton variant="circular" width={36} height={36} />
                         <Box>
-                          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                            {req.student.name}
-                          </Typography>
-                          <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                            {req.targetAudience === 'direct' ? 'موجه لك خصيصاً' : 'طلب موجه للجميع'}
-                          </Typography>
+                          <Skeleton width={120} height={18} />
+                          <Skeleton width={80} height={14} />
                         </Box>
                       </Stack>
                     </Box>
-
-                    {/* 3. Submitted Date */}
-                    <Box component="td" sx={{ color: '#64748B' }}>
-                      {req.createdAt || '6/10/2026'}
+                    <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
+                      <Skeleton width={80} height={18} sx={{ mx: 'auto' }} />
                     </Box>
-
-                    {/* 4. Service Type */}
-                    <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                      {isRec ? 'مسجل' : 'لايف'}
+                    <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
+                      <Skeleton width={60} height={24} sx={{ mx: 'auto' }} />
                     </Box>
-
-                    {/* 5. Description */}
-                    <Box
-                      component="td"
-                      sx={{
-                        textAlign: 'start !important',
-                        maxWidth: 320,
-                        color: '#475569',
-                        fontWeight: 600,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {req.description}
+                    <Box component="td" sx={{ p: 2 }}>
+                      <Skeleton width={200} height={18} />
                     </Box>
-
-                    {/* 6. Status Badge */}
-                    <Box component="td">
-                      <Chip
-                        label={isAct ? 'نشط' : isNewReq ? 'جديد' : 'بانتظار التأكيد'}
-                        size="small"
-                        sx={{
-                          bgcolor: isAct ? '#DCFCE7' : isNewReq ? '#E0F2FE' : '#FEF3C7',
-                          color: isAct ? '#15803D' : isNewReq ? '#0284C7' : '#D97706',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          height: 24,
-                          borderRadius: 1.5,
-                        }}
-                      />
+                    <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
+                      <Skeleton width={70} height={24} sx={{ mx: 'auto' }} />
                     </Box>
-
-                    {/* 7. Actions Three Dots (Far Left) */}
-                    <Box component="td" onClick={(e) => e.stopPropagation()}>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleOpenMenu(e, req)}
-                        sx={{ color: '#94A3B8' }}
-                      >
-                        <Iconify icon="solar:menu-dots-bold" width={18} />
-                      </IconButton>
+                    <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
+                      <Skeleton variant="circular" width={28} height={28} sx={{ mx: 'auto' }} />
                     </Box>
                   </Box>
-                );
-              })}
+                ))
+              ) : requests.length === 0 ? (
+                // Empty state
+                <Box component="tr">
+                  <Box component="td" colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
+                    <Box sx={{ maxWidth: 360, mx: 'auto', textAlign: 'center' }}>
+                      <Box
+                        sx={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: '50%',
+                          bgcolor: '#F1F5F9',
+                          color: '#94A3B8',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mx: 'auto',
+                          mb: 2,
+                        }}
+                      >
+                        <Iconify icon="solar:folder-open-broken" width={32} />
+                      </Box>
+                      <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#1E293B' }}>
+                        لا توجد طلبات متطابقة
+                      </Typography>
+                      <Typography sx={{ fontSize: 13, color: '#64748B', mt: 0.5 }}>
+                        لم نتمكن من العثور على أية طلبات خاصة مطابقة لمعايير الفلترة الحالية.
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              ) : (
+                // Rows
+                requests.map((req) => {
+                  const isRec = req.type === 'Recorded';
+
+                  return (
+                    <Box
+                      component="tr"
+                      key={req.id}
+                      onClick={() => handleNavigateToDetails(req.id)}
+                      sx={{
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #F1F5F9',
+                        '&:hover': { bgcolor: '#F8FAFC' },
+                        '& td': { p: 2, fontSize: 13, textAlign: 'center' },
+                      }}
+                    >
+                      {/* 1. Request ID (Far Right) */}
+                      <Box
+                        component="td"
+                        sx={{
+                          textAlign: 'start !important',
+                          pr: 3,
+                          fontWeight: 700,
+                          color: '#0F172A',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        #{req.id.slice(0, 8)}...
+                      </Box>
+
+                      {/* 2. Student & Scope */}
+                      <Box component="td" sx={{ textAlign: 'start !important' }}>
+                        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                          <Avatar
+                            src={req.student?.imageUrl || undefined}
+                            alt={req.student?.name || 'Student'}
+                            sx={{ width: 36, height: 36, bgcolor: '#E2E8F0', color: '#475569' }}
+                          >
+                            {(req.student?.name?.[0] || 'S').toUpperCase()}
+                          </Avatar>
+                          <Box>
+                            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+                              {req.student?.name || 'طالب مجهول'}
+                            </Typography>
+                            <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
+                              {req.isBroadcast ? 'طلب موجه للجميع' : 'موجه لك خصيصاً'}
+                              {req.student?.countryName ? ` • ${req.student.countryName}` : ''}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Box>
+
+                      {/* 3. Submitted Date */}
+                      <Box component="td" sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>
+                        {formatRequestDate(req.creationTime)}
+                      </Box>
+
+                      {/* 4. Service Type */}
+                      <Box component="td">
+                        <Chip
+                          icon={
+                            <Iconify
+                              icon={isRec ? 'solar:videocamera-record-bold' : 'solar:users-group-rounded-bold'}
+                              width={14}
+                            />
+                          }
+                          label={isRec ? 'محتوى مسجل' : 'جلسة مباشرة'}
+                          size="small"
+                          sx={{
+                            bgcolor: isRec ? '#EFF6FF' : '#EEF2FF',
+                            color: isRec ? '#2563EB' : '#4F46E5',
+                            fontWeight: 700,
+                            fontSize: 11.5,
+                            borderRadius: 1.5,
+                            '& .MuiChip-icon': {
+                              color: isRec ? '#2563EB' : '#4F46E5',
+                            },
+                          }}
+                        />
+                      </Box>
+
+                      {/* 5. Description & Specialization */}
+                      <Box
+                        component="td"
+                        sx={{
+                          textAlign: 'start !important',
+                          maxWidth: 280,
+                        }}
+                      >
+                        <Typography
+                          noWrap
+                          sx={{
+                            fontSize: 13,
+                            color: '#334155',
+                            fontWeight: 600,
+                            maxWidth: 280,
+                          }}
+                        >
+                          {req.description || 'لا يوجد وصف مدخل من الطالب'}
+                        </Typography>
+                        {req.specializationName && (
+                          <Typography sx={{ fontSize: 11.5, color: '#0284C7', mt: 0.25 }}>
+                            {req.specializationName}
+                          </Typography>
+                        )}
+                      </Box>
+
+                      {/* 6. Status Badge */}
+                      <Box component="td">
+                        {renderStatusChip(req.status)}
+                      </Box>
+
+                      {/* 7. Actions Three Dots (Far Left) */}
+                      <Box component="td" onClick={(e) => e.stopPropagation()}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleOpenMenu(e, req.id)}
+                          sx={{ color: '#94A3B8' }}
+                        >
+                          <Iconify icon="solar:menu-dots-bold" width={18} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  );
+                })
+              )}
             </Box>
           </Box>
         </Box>
@@ -615,7 +889,7 @@ export default function PrivateRequestsListView() {
         {/* Pagination */}
         <TablePagination
           component="div"
-          count={filteredRequests.length}
+          count={totalCount}
           page={page}
           onPageChange={(_, newPage) => setPage(newPage)}
           rowsPerPage={rowsPerPage}
@@ -623,8 +897,8 @@ export default function PrivateRequestsListView() {
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}
-          labelRowsPerPage="Rows per page:"
-          rowsPerPageOptions={[6, 12, 24]}
+          labelRowsPerPage="عدد العناصر لكل صفحة:"
+          rowsPerPageOptions={[5, 10, 20, 50]}
           sx={{
             borderTop: '1px solid #F1F5F9',
             '& .MuiTablePagination-toolbar': {
@@ -653,8 +927,8 @@ export default function PrivateRequestsListView() {
       >
         <MenuItem
           onClick={() => {
-            if (selectedRequest) {
-              handleNavigateToDetails(selectedRequest.id);
+            if (selectedRequestId) {
+              handleNavigateToDetails(selectedRequestId);
             }
           }}
           sx={{ fontSize: 13.5, fontWeight: 600, gap: 1.5 }}
