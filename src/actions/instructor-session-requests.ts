@@ -1,6 +1,6 @@
 'use server';
 
-import { getData, editData } from 'src/utils/crud-fetch-api';
+import { getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
@@ -93,15 +93,14 @@ export async function getSessionRequestDetailsAction(
 
 /**
  * Accept session request
- * PUT /api/v1/instructor/session-requests/{id}/accept
+ * POST /api/v1/instructor/session-requests/{id}/accept
  */
 export async function acceptSessionRequestAction(
   id: string
 ): Promise<ApiSingleResponse<any>> {
   try {
-    const res = await editData<any, Record<string, never>>(
+    const res = await postData<any, Record<string, never>>(
       endpoints.instructorSessionRequests.accept(id),
-      'PUT',
       {}
     );
 
@@ -122,17 +121,16 @@ export async function acceptSessionRequestAction(
 
 /**
  * Reject session request
- * PUT /api/v1/instructor/session-requests/{id}/reject
+ * POST /api/v1/instructor/session-requests/{id}/reject
  */
 export async function rejectSessionRequestAction(
   id: string,
-  rejectionReason?: string
+  reason?: string
 ): Promise<ApiSingleResponse<any>> {
   try {
-    const res = await editData<any, { rejectionReason?: string }>(
+    const res = await postData<any, { reason: string }>(
       endpoints.instructorSessionRequests.reject(id),
-      'PUT',
-      { rejectionReason }
+      { reason: reason || '' }
     );
 
     if ('success' in res && res.success) {
@@ -149,3 +147,4 @@ export async function rejectSessionRequestAction(
     };
   }
 }
+

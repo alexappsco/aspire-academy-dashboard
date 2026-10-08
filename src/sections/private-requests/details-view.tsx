@@ -1,15 +1,31 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import Iconify from 'src/components/iconify';
-import { MOCK_PRIVATE_REQUESTS } from './_mock';
-import { PrivateRequestItem, PrivateRequestStatus, PrivateRequestServiceType } from 'src/types/private-request';
+import { useToast } from 'src/components/toast';
+
+import {
+  getSessionRequestDetailsAction,
+  acceptSessionRequestAction,
+  rejectSessionRequestAction,
+} from 'src/actions/instructor-session-requests';
+import {
+  SessionRequestInstructorResult,
+  SessionRequestStatusEnum,
+  RequestChapter,
+  PrivateRequestItem,
+} from 'src/types/private-request';
 
 import RequestHeaderCard from './components/RequestHeaderCard';
 import StudentInfoCard from './components/StudentInfoCard';
@@ -22,64 +38,277 @@ import LiveBroadcastRoomSection from './components/LiveBroadcastRoomSection';
 import FinancialTransactionsTable from './components/FinancialTransactionsTable';
 
 interface Props {
-  requestId?: string;
+  requestId: string;
 }
 
-export default function PrivateRequestDetailsView({ requestId = 'PR-1050' }: Props) {
+export default function PrivateRequestDetailsView({ requestId }: Props) {
   const locale = useLocale();
+  const toast = useToast();
 
-  // Find initial request from mock or default to PR-1050
-  const initialRequest = useMemo(() => {
-    return (
-      MOCK_PRIVATE_REQUESTS.find((r) => r.id === requestId) ||
-      MOCK_PRIVATE_REQUESTS[0]
-    );
+  const [request, setRequest] = useState<SessionRequestInstructorResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch request details from backend API
+  const fetchRequestDetails = useCallback(async () => {
+    if (!requestId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getSessionRequestDetailsAction(requestId);
+      if (res.success && res.data) {
+        setRequest(res.data);
+      } else {
+        setError(res.error || 'فشل في تحميل تفاصيل الطلب');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات الطلب');
+    } finally {
+      setLoading(false);
+    }
   }, [requestId]);
 
-  const [request, setRequest] = useState<PrivateRequestItem>(initialRequest);
+  useEffect(() => {
+    fetchRequestDetails();
+  }, [fetchRequestDetails]);
 
-  // Status handlers for interactive UI preview
-  const handleStatusChange = (newStatus: PrivateRequestStatus) => {
-    setRequest((prev) => ({
-      ...prev,
-      status: newStatus,
-      acceptedAtFormatted:
-        newStatus !== 'new' ? prev.acceptedAtFormatted || '5 أكتوبر 2026 - 11:30 ص' : undefined,
-    }));
+  // Status checks normalized across numeric enum and string representation
+  const normalizedStatus = useMemo(() => {
+    if (!request) return 'Pending';
+    const s = request.status as any;
+    if (s === 1 || s === 'Pending' || s === SessionRequestStatusEnum.Pending) return 'Pending';
+    if (s === 2 || s === 'AwaitingAdminReview' || s === SessionRequestStatusEnum.AwaitingAdminReview)
+      return 'AwaitingAdminReview';
+    if (s === 3 || s === 'Active' || s === SessionRequestStatusEnum.Active) return 'Active';
+    if (s === 4 || s === 'Completed' || s === SessionRequestStatusEnum.Completed) return 'Completed';
+    if (s === 5 || s === 'Rejected' || s === SessionRequestStatusEnum.Rejected) return 'Rejected';
+    if (s === 6 || s === 'Cancelled' || s === SessionRequestStatusEnum.Cancelled) return 'Cancelled';
+    return String(s);
+  }, [request]);
+
+  const isNew = normalizedStatus === 'Pending';
+  const isPendingAdmin = normalizedStatus === 'AwaitingAdminReview';
+  const isActive = normalizedStatus === 'Active';
+  const isCompleted = normalizedStatus === 'Completed';
+  const isRejected = normalizedStatus === 'Rejected';
+  const isCancelled = normalizedStatus === 'Cancelled';
+
+  // Service type check: Live vs Recorded
+  const isRecorded = useMemo(() => {
+    if (!request) return false;
+    const t = request.type;
+    return t === 'Recorded' || (t as any) === 2 || String(t).toLowerCase() === 'recorded';
+  }, [request]);
+
+  const isLive = !isRecorded;
+
+  // Accept action handler
+  const handleInstructorAccept = async () => {
+    if (!request) return;
+    setIsSubmitting(true);
+    try {
+      const res = await acceptSessionRequestAction(request.id);
+      if (res.success) {
+        toast.success('تم قبول الطلب المبدئي بنجاح ونقله إلى مراجعة الإدارة الأكاديمية');
+        setRequest((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: SessionRequestStatusEnum.AwaitingAdminReview,
+                respondedAt: new Date().toISOString(),
+              }
+            : null
+        );
+      } else {
+        toast.error(res.error || 'فشل قبول الطلب');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء تنفيذ القبول');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleServiceTypeChange = (newType: PrivateRequestServiceType) => {
-    setRequest((prev) => ({
-      ...prev,
-      serviceType: newType,
-    }));
-  };
-
-  const handleInstructorAccept = () => {
-    setRequest((prev) => ({
-      ...prev,
-      status: 'pending_admin',
-      acceptedAtFormatted: '5 أكتوبر 2026 - 11:30 ص',
-    }));
-  };
-
-  const handleInstructorReject = () => {
-    setRequest((prev) => ({
-      ...prev,
-      status: 'cancelled',
-    }));
+  // Reject action handler
+  const handleInstructorReject = async (reason?: string) => {
+    if (!request) return;
+    setIsSubmitting(true);
+    try {
+      const res = await rejectSessionRequestAction(request.id, reason || '');
+      if (res.success) {
+        toast.info('تم تسجيل الاعتذار عن الطلب بنجاح وإخطار الطالب');
+        setRequest((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: SessionRequestStatusEnum.Rejected,
+                rejectionReason: reason || 'اعتذار المحاضر عن تقديم الجلسة',
+                respondedAt: new Date().toISOString(),
+              }
+            : null
+        );
+      } else {
+        toast.error(res.error || 'فشل تسجيل الاعتذار عن الطلب');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء تسجيل الاعتذار');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFinishService = () => {
-    setRequest((prev) => ({
-      ...prev,
-      status: 'completed',
-    }));
+    setRequest((prev) =>
+      prev
+        ? {
+            ...prev,
+            status: SessionRequestStatusEnum.Completed,
+          }
+        : null
+    );
   };
 
-  const isActive = request.status === 'active';
-  const isRecorded = request.serviceType === 'recorded';
-  const isLive = request.serviceType === 'live';
+  // Map backend chapters to UI format
+  const mappedChapters: RequestChapter[] = useMemo(() => {
+    if (!request?.chapters || request.chapters.length === 0) return [];
+
+    return request.chapters.map((ch, idx) => ({
+      id: ch.id || `ch-${idx + 1}`,
+      number: ch.order || idx + 1,
+      title: ch.title || `الفصل ${idx + 1}`,
+      isExpanded: idx === 0,
+      lessons: (ch.lessons || []).map((les, lIdx) => ({
+        id: les.id || `les-${lIdx + 1}`,
+        number: les.order || lIdx + 1,
+        title: les.title || `الدرس ${lIdx + 1}`,
+        statusBadge: 'معتمد',
+        attachments: [
+          ...(les.videoUrl
+            ? [
+                {
+                  id: `vid-${les.id}`,
+                  type: 'video' as const,
+                  title: les.title,
+                  url: les.videoUrl,
+                  duration: les.durationInSeconds
+                    ? `${Math.floor(les.durationInSeconds / 60)} دقيقة`
+                    : undefined,
+                  statusText: 'جاهز للمشاهدة',
+                },
+              ]
+            : []),
+          ...(les.test
+            ? [
+                {
+                  id: `quiz-${les.test.id}`,
+                  type: 'quiz' as const,
+                  title: `اختبار تقييمي (${les.test.questions?.length || 0} أسئلة)`,
+                  questionsCount: les.test.questions?.length || 0,
+                  passingScore: 70,
+                  statusText: 'معتمد',
+                },
+              ]
+            : []),
+        ],
+      })),
+    }));
+  }, [request?.chapters]);
+
+  // Adapted request object for header
+  const headerAdaptedRequest: PrivateRequestItem | null = useMemo(() => {
+    if (!request) return null;
+
+    let uiStatus: any = 'new';
+    if (isPendingAdmin) uiStatus = 'pending_admin';
+    else if (isActive) uiStatus = 'active';
+    else if (isCompleted) uiStatus = 'completed';
+    else if (isRejected) uiStatus = 'rejected';
+    else if (isCancelled) uiStatus = 'cancelled';
+
+    return {
+      id: request.id,
+      serviceType: isRecorded ? 'recorded' : 'live',
+      status: uiStatus,
+      targetAudience: request.isBroadcast ? 'public' : 'direct',
+      student: {
+        id: request.student?.studentId || request.student?.countryId || '',
+        name: request.student?.name || 'طالب',
+        country: request.student?.countryName || 'غير محدد',
+        university: '',
+        college: request.specializationName || '',
+        imageUrl: request.student?.imageUrl || undefined,
+        email: request.student?.email || undefined,
+      },
+      description: request.description || '',
+      createdAt: request.creationTime,
+      submittedAtFormatted: request.creationTime
+        ? new Date(request.creationTime).toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : undefined,
+      acceptedAtFormatted: request.respondedAt
+        ? new Date(request.respondedAt).toLocaleDateString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : undefined,
+      chapters: mappedChapters,
+    };
+  }, [request, isRecorded, isPendingAdmin, isActive, isCompleted, isRejected, isCancelled, mappedChapters]);
+
+  const displayId =
+    request?.id && request.id.length > 12 ? `${request.id.slice(0, 8)}...` : request?.id || requestId;
+
+  // 1. Loading Skeleton
+  if (loading) {
+    return (
+      <Box sx={{ py: 2, pb: 8 }}>
+        <Skeleton variant="rounded" width={220} height={24} sx={{ mb: 2.5 }} />
+        <Skeleton variant="rounded" width="100%" height={140} sx={{ mb: 3, borderRadius: 3 }} />
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Skeleton variant="rounded" width="100%" height={320} sx={{ borderRadius: 3 }} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Skeleton variant="rounded" width="100%" height={320} sx={{ borderRadius: 3 }} />
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+
+  // 2. Error State
+  if (error || !request || !headerAdaptedRequest) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Alert
+          severity="error"
+          sx={{ mb: 3, maxWidth: 600, mx: 'auto', borderRadius: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={fetchRequestDetails}>
+              إعادة المحاولة
+            </Button>
+          }
+        >
+          {error || 'لم يتم العثور على بيانات الطلب المطلوب'}
+        </Alert>
+
+        <Button
+          component={Link}
+          href="/private-requests"
+          variant="outlined"
+          startIcon={<Iconify icon={locale === 'ar' ? 'solar:alt-arrow-right-linear' : 'solar:alt-arrow-left-linear'} />}
+          sx={{ borderRadius: 2 }}
+        >
+          العودة لقائمة الطلبات الخاصة
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 2, pb: 8 }}>
@@ -92,81 +321,131 @@ export default function PrivateRequestDetailsView({ requestId = 'PR-1050' }: Pro
             sx={{ color: '#94A3B8' }}
           />
         }
-        sx={{ mb: 2, '& a': { color: '#64748B', textDecoration: 'none', fontWeight: 600, fontSize: 13 } }}
+        sx={{
+          mb: 2,
+          '& a': {
+            color: '#64748B',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: 13,
+            '&:hover': { color: '#0F172A' },
+          },
+        }}
       >
         <Link href="/">لوحة التحكم</Link>
         <Link href="/private-requests">الطلبات الخاصة</Link>
         <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>
-          تفاصيل الطلب #{request.id}
+          تفاصيل الطلب #{displayId}
         </Typography>
       </Breadcrumbs>
 
       {/* 2. Request Header Card */}
       <RequestHeaderCard
-        request={request}
-        onStatusChange={handleStatusChange}
-        onServiceTypeChange={handleServiceTypeChange}
+        request={headerAdaptedRequest}
         onFinishService={handleFinishService}
       />
 
-      {/* 3. Notice Banner if Pending Admin (Image 3) */}
-      {request.status === 'pending_admin' && <AdminReviewNoticeCard />}
+      {/* 3. Notice Banner if Pending Admin */}
+      {isPendingAdmin && <AdminReviewNoticeCard />}
 
-      {/* 4. Student Academic Info + Requirements Description (Images 1, 2, 3, 4) */}
+      {/* 4. Notice Banner if Rejected */}
+      {isRejected && (
+        <Card
+          sx={{
+            p: { xs: 2.5, md: 3 },
+            borderRadius: 3,
+            bgcolor: '#FEF2F2',
+            border: '1px solid #FEE2E2',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.02)',
+            mb: 3,
+          }}
+        >
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start', gap: 2 }}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2.5,
+                bgcolor: '#FEE2E2',
+                color: '#DC2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Iconify icon="solar:close-circle-bold" width={26} />
+            </Box>
+            <Box sx={{ flex: 1, textAlign: 'start' }}>
+              <Typography sx={{ fontWeight: 800, fontSize: 16.5, color: '#991B1B', mb: 0.5 }}>
+                تم الاعتذار عن قبول هذا الطلب
+              </Typography>
+              <Typography sx={{ fontSize: 13.5, color: '#B91C1C', fontWeight: 600 }}>
+                سبب الاعتذار المسجل: {request.rejectionReason || 'عدم توفر وقت كافٍ لدى المحاضر'}
+              </Typography>
+            </Box>
+          </Stack>
+        </Card>
+      )}
+
+      {/* 5. Student Academic Info + Requirements Description */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {/* Right in RTL (First child): Academic student info */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <StudentInfoCard student={request.student} showContactInfo={isActive} />
+          <StudentInfoCard
+            student={request.student}
+            specializationName={request.specializationName}
+            showContactInfo={isActive}
+          />
         </Grid>
 
         {/* Left in RTL (Second child): Requirements description */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <StudentRequirementsCard description={request.description} />
+          <StudentRequirementsCard
+            description={request.description || 'لم يتم تقديم وصف إضافي من قبل الطالب'}
+          />
         </Grid>
       </Grid>
 
-      {/* 5. State 1: Instructor Decision Card (Image 2) */}
-      {request.status === 'new' && (
+      {/* 6. State 1: Instructor Decision Card (When status is Pending / New) */}
+      {isNew && (
         <InstructorDecisionCard
+          isSubmitting={isSubmitting}
           onAccept={handleInstructorAccept}
           onReject={handleInstructorReject}
         />
       )}
 
-      {/* 6. Active States: Financial Terms & KPIs (Images 4 & 5) */}
+      {/* 7. Active States: Financial Terms & Curriculum / Live Room */}
       {isActive && (
         <>
           <FinancialTermsCards
-            terms={request.financialTerms}
-            consumption={request.consumption}
             showKpis={isRecorded}
-            totalVideosCount={request.totalVideosCount}
-            totalDeliveredHours={request.totalDeliveredHours}
-            earningHours={request.earningHours}
-            recordedEarnings={request.recordedEarnings}
+            totalVideosCount={mappedChapters.reduce(
+              (acc, ch) => acc + ch.lessons.filter((l) => l.attachments.some((a) => a.type === 'video')).length,
+              0
+            )}
+            totalDeliveredHours={0}
+            earningHours={0}
+            recordedEarnings={0}
           />
 
-          {/* If Recorded Content: Curriculum / Upload Lessons Section (Image 4) */}
-          {isRecorded && (
-            <RecordedCurriculumSection initialChapters={request.chapters} />
-          )}
+          {/* If Recorded Content: Curriculum / Upload Lessons Section */}
+          {isRecorded && <RecordedCurriculumSection initialChapters={mappedChapters} />}
 
-          {/* If Live Session: Live Broadcast Room Preview (Image 5) */}
+          {/* If Live Session: Live Broadcast Room Preview */}
           {isLive && (
             <LiveBroadcastRoomSection
-              studentName={request.student.name}
-              duration={request.liveSessionDuration}
-              elapsedMinutes={request.liveSessionElapsedMinutes}
+              studentName={request.student?.name || 'الطالب'}
+              duration="01:30:00"
+              elapsedMinutes={0}
               expectedEarnings={10.5}
               onEndLiveSession={handleFinishService}
             />
           )}
 
-          {/* Financial Transactions Table (Images 4 & 5) */}
-          <FinancialTransactionsTable
-            requestId={request.id}
-            transactions={request.transactions}
-          />
+          {/* Financial Transactions Table */}
+          <FinancialTransactionsTable requestId={request.id} />
         </>
       )}
     </Box>

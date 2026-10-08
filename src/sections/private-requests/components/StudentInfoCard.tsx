@@ -10,11 +10,34 @@ import Iconify from 'src/components/iconify';
 import { StudentAcademicInfo } from 'src/types/private-request';
 
 interface Props {
-  student: StudentAcademicInfo;
+  student?: {
+    id?: string;
+    studentId?: string;
+    name?: string | null;
+    avatar?: string;
+    imageUrl?: string | null;
+    country?: string;
+    countryName?: string | null;
+    university?: string;
+    college?: string;
+    phone?: string;
+    email?: string | null;
+  } | null;
+  specializationName?: string | null;
   showContactInfo?: boolean;
 }
 
-export default function StudentInfoCard({ student, showContactInfo = false }: Props) {
+export default function StudentInfoCard({
+  student,
+  specializationName,
+  showContactInfo = false,
+}: Props) {
+  const studentName = student?.name || 'طالب غير محدد';
+  const studentAvatar = student?.imageUrl || student?.avatar || undefined;
+  const country = student?.countryName || student?.country || 'غير محدد';
+  const university = student?.university;
+  const collegeOrSpec = student?.college || specializationName || 'غير محدد';
+
   return (
     <Card
       sx={{
@@ -50,16 +73,18 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
         }}
       >
         <Avatar
-          src={student.avatar}
-          alt={student.name}
-          sx={{ width: 54, height: 54, border: '2px solid #E2E8F0' }}
-        />
+          src={studentAvatar}
+          alt={studentName}
+          sx={{ width: 54, height: 54, border: '2px solid #E2E8F0', bgcolor: '#E2E8F0', color: '#475569' }}
+        >
+          {(studentName[0] || 'S').toUpperCase()}
+        </Avatar>
         <Box>
           <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#0F172A' }}>
-            {student.name}
+            {studentName}
           </Typography>
           <Typography sx={{ fontSize: 12.5, color: '#64748B', mt: 0.25 }}>
-            {student.university} - {student.college}
+            {university ? `${university} - ` : ''}{collegeOrSpec}
           </Typography>
         </Box>
       </Box>
@@ -79,55 +104,81 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
           }}
         >
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-            {student.country}
+            {country}
           </Typography>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             الدولة:
           </Typography>
         </Box>
 
-        <Box
-          sx={{
-            p: 1.5,
-            px: 2,
-            borderRadius: 2,
-            bgcolor: '#F8FAFC',
-            border: '1px solid #F1F5F9',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-            {student.university}
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الجامعة:
-          </Typography>
-        </Box>
+        {specializationName && (
+          <Box
+            sx={{
+              p: 1.5,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: '#F8FAFC',
+              border: '1px solid #F1F5F9',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0284C7' }}>
+              {specializationName}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+              التخصص الأكاديمي:
+            </Typography>
+          </Box>
+        )}
 
-        <Box
-          sx={{
-            p: 1.5,
-            px: 2,
-            borderRadius: 2,
-            bgcolor: '#F8FAFC',
-            border: '1px solid #F1F5F9',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-            {student.college}
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الكلية:
-          </Typography>
-        </Box>
+        {university && (
+          <Box
+            sx={{
+              p: 1.5,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: '#F8FAFC',
+              border: '1px solid #F1F5F9',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+              {university}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+              الجامعة:
+            </Typography>
+          </Box>
+        )}
+
+        {student?.college && (
+          <Box
+            sx={{
+              p: 1.5,
+              px: 2,
+              borderRadius: 2,
+              bgcolor: '#F8FAFC',
+              border: '1px solid #F1F5F9',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+              {student.college}
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
+              الكلية:
+            </Typography>
+          </Box>
+        )}
 
         {/* Contact information (Visible in active requests) */}
-        {showContactInfo && student.phone && (
+        {showContactInfo && student?.phone && (
           <Box
             sx={{
               p: 1.5,
@@ -149,7 +200,7 @@ export default function StudentInfoCard({ student, showContactInfo = false }: Pr
           </Box>
         )}
 
-        {showContactInfo && student.email && (
+        {showContactInfo && student?.email && (
           <Box
             sx={{
               p: 1.5,

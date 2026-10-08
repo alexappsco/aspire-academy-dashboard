@@ -17,6 +17,7 @@ import { PrivateRequestItem, PrivateRequestStatus, PrivateRequestServiceType } f
 
 interface Props {
   request: PrivateRequestItem;
+  showPreviewSwitcher?: boolean;
   onStatusChange?: (newStatus: PrivateRequestStatus) => void;
   onServiceTypeChange?: (newType: PrivateRequestServiceType) => void;
   onFinishService?: () => void;
@@ -24,6 +25,7 @@ interface Props {
 
 export default function RequestHeaderCard({
   request,
+  showPreviewSwitcher = false,
   onStatusChange,
   onServiceTypeChange,
   onFinishService,
@@ -37,10 +39,41 @@ export default function RequestHeaderCard({
     toast.success('تم إنهاء الخدمة بنجاح وإرسال الإشعار للطالب والإدارة');
   };
 
-  const isRecorded = request.serviceType === 'recorded';
-  const isActive = request.status === 'active';
-  const isPendingAdmin = request.status === 'pending_admin';
-  const isNew = request.status === 'new';
+  const isRecorded =
+    request.serviceType === 'recorded' || (request as any).type === 'Recorded' || (request as any).type === 2;
+
+  const rawStatus = String(request.status).toLowerCase();
+  const isNew = rawStatus === 'new' || rawStatus === 'pending' || rawStatus === '1';
+  const isPendingAdmin =
+    rawStatus === 'pending_admin' || rawStatus === 'awaitingadminreview' || rawStatus === '2';
+  const isActive = rawStatus === 'active' || rawStatus === '3';
+  const isCompleted = rawStatus === 'completed' || rawStatus === '4';
+  const isRejected = rawStatus === 'rejected' || rawStatus === '5';
+  const isCancelled = rawStatus === 'cancelled' || rawStatus === '6';
+
+  const getStatusLabel = () => {
+    if (isNew) return 'طلب جديد';
+    if (isPendingAdmin) return 'بانتظار اعتماد الإدارة';
+    if (isActive) return 'طلب معتمد نشط';
+    if (isCompleted) return 'طلب منتهي ومكتمل';
+    if (isRejected) return 'تم الاعتذار عن الطلب';
+    if (isCancelled) return 'طلب ملغي';
+    return 'طلب جديد';
+  };
+
+  const getStatusColor = () => {
+    if (isNew) return { dot: '#0284C7', text: '#0284C7' };
+    if (isPendingAdmin) return { dot: '#D97706', text: '#D97706' };
+    if (isActive) return { dot: '#10B981', text: '#15803D' };
+    if (isCompleted) return { dot: '#059669', text: '#059669' };
+    if (isRejected) return { dot: '#DC2626', text: '#DC2626' };
+    if (isCancelled) return { dot: '#64748B', text: '#64748B' };
+    return { dot: '#0284C7', text: '#0284C7' };
+  };
+
+  const statusColor = getStatusColor();
+  const displayId =
+    request.id?.length > 12 ? `${request.id.slice(0, 8)}...` : request.id;
 
   return (
     <Card
@@ -53,69 +86,71 @@ export default function RequestHeaderCard({
         mb: 3,
       }}
     >
-      {/* Interactive Mode Switcher for UI Prototype / Review */}
-      <Box
-        sx={{
-          mb: 2.5,
-          p: 1.25,
-          borderRadius: 2,
-          bgcolor: '#F8FAFC',
-          border: '1px dashed #CBD5E1',
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 1.5,
-        }}
-      >
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-          <Iconify icon="solar:tuning-bold" width={18} sx={{ color: '#0284C7' }} />
-          <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
-            محاكي المعاينة السريعة للحالات (UI Preview):
-          </Typography>
-        </Stack>
+      {/* Optional Preview Switcher for testing */}
+      {showPreviewSwitcher && (
+        <Box
+          sx={{
+            mb: 2.5,
+            p: 1.25,
+            borderRadius: 2,
+            bgcolor: '#F8FAFC',
+            border: '1px dashed #CBD5E1',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1.5,
+          }}
+        >
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
+            <Iconify icon="solar:tuning-bold" width={18} sx={{ color: '#0284C7' }} />
+            <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
+              محاكي المعاينة السريعة للحالات (UI Preview):
+            </Typography>
+          </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-          <Chip
-            label="1. طلب جديد (قرار المحاضر)"
-            size="small"
-            clickable
-            color={isNew ? 'primary' : 'default'}
-            onClick={() => onStatusChange?.('new')}
-            sx={{ fontWeight: 700, fontSize: 11.5 }}
-          />
-          <Chip
-            label="2. بانتظار اعتماد الإدارة"
-            size="small"
-            clickable
-            color={isPendingAdmin ? 'warning' : 'default'}
-            onClick={() => onStatusChange?.('pending_admin')}
-            sx={{ fontWeight: 700, fontSize: 11.5 }}
-          />
-          <Chip
-            label="3. طلب معتمد (محتوى مسجل)"
-            size="small"
-            clickable
-            color={isActive && isRecorded ? 'success' : 'default'}
-            onClick={() => {
-              onStatusChange?.('active');
-              onServiceTypeChange?.('recorded');
-            }}
-            sx={{ fontWeight: 700, fontSize: 11.5 }}
-          />
-          <Chip
-            label="4. طلب معتمد (جلسة مباشرة)"
-            size="small"
-            clickable
-            color={isActive && !isRecorded ? 'error' : 'default'}
-            onClick={() => {
-              onStatusChange?.('active');
-              onServiceTypeChange?.('live');
-            }}
-            sx={{ fontWeight: 700, fontSize: 11.5 }}
-          />
-        </Stack>
-      </Box>
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+            <Chip
+              label="1. طلب جديد (قرار المحاضر)"
+              size="small"
+              clickable
+              color={isNew ? 'primary' : 'default'}
+              onClick={() => onStatusChange?.('new')}
+              sx={{ fontWeight: 700, fontSize: 11.5 }}
+            />
+            <Chip
+              label="2. بانتظار اعتماد الإدارة"
+              size="small"
+              clickable
+              color={isPendingAdmin ? 'warning' : 'default'}
+              onClick={() => onStatusChange?.('pending_admin')}
+              sx={{ fontWeight: 700, fontSize: 11.5 }}
+            />
+            <Chip
+              label="3. طلب معتمد (محتوى مسجل)"
+              size="small"
+              clickable
+              color={isActive && isRecorded ? 'success' : 'default'}
+              onClick={() => {
+                onStatusChange?.('active');
+                onServiceTypeChange?.('recorded');
+              }}
+              sx={{ fontWeight: 700, fontSize: 11.5 }}
+            />
+            <Chip
+              label="4. طلب معتمد (جلسة مباشرة)"
+              size="small"
+              clickable
+              color={isActive && !isRecorded ? 'error' : 'default'}
+              onClick={() => {
+                onStatusChange?.('active');
+                onServiceTypeChange?.('live');
+              }}
+              sx={{ fontWeight: 700, fontSize: 11.5 }}
+            />
+          </Stack>
+        </Box>
+      )}
 
       {/* Main Title & Action Row */}
       <Box
@@ -139,7 +174,7 @@ export default function RequestHeaderCard({
                 fontSize: { xs: 20, md: 24 },
               }}
             >
-              تفاصيل الطلب الخاص #{request.id}
+              تفاصيل الطلب الخاص #{displayId}
             </Typography>
 
             {/* Service badge */}
@@ -167,17 +202,17 @@ export default function RequestHeaderCard({
                 width: 8,
                 height: 8,
                 borderRadius: '50%',
-                bgcolor: isActive ? '#10B981' : isNew ? '#0284C7' : '#D97706',
+                bgcolor: statusColor.dot,
               }}
             />
             <Typography
               sx={{
-                color: isActive ? '#15803D' : isNew ? '#0284C7' : '#D97706',
+                color: statusColor.text,
                 fontWeight: 700,
                 fontSize: 13,
               }}
             >
-              {isActive ? 'طلب معتمد نشط' : isNew ? 'طلب جديد' : 'بانتظار اعتماد الإدارة'}
+              {getStatusLabel()}
             </Typography>
           </Box>
 

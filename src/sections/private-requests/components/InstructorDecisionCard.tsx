@@ -10,28 +10,38 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
 import Iconify from 'src/components/iconify';
-import { useToast } from 'src/components/toast';
 
 interface Props {
-  onAccept: () => void;
-  onReject: () => void;
+  onAccept: () => Promise<void> | void;
+  onReject: (reason?: string) => Promise<void> | void;
+  isSubmitting?: boolean;
 }
 
-export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
-  const toast = useToast();
+export default function InstructorDecisionCard({ onAccept, onReject, isSubmitting = false }: Props) {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
-  const handleAcceptClick = () => {
-    onAccept();
-    toast.success('تم قبول الطلب مبدئياً وإحالته للإدارة الأكاديمية لتحديد التسعير المعتمد');
+  const handleAcceptClick = async () => {
+    try {
+      setIsAccepting(true);
+      await onAccept();
+    } finally {
+      setIsAccepting(false);
+    }
   };
 
-  const handleConfirmReject = () => {
-    setRejectDialogOpen(false);
-    onReject();
-    toast.info('تم تسجيل الاعتذار عن الطلب وإخطار الطالب');
+  const handleConfirmReject = async () => {
+    try {
+      setIsRejecting(true);
+      await onReject(rejectReason.trim());
+      setRejectDialogOpen(false);
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
   return (
@@ -60,7 +70,14 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
           fullWidth
           variant="contained"
           size="large"
-          startIcon={<Iconify icon="solar:like-bold" width={20} />}
+          disabled={isSubmitting || isAccepting || isRejecting}
+          startIcon={
+            isAccepting ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <Iconify icon="solar:like-bold" width={20} />
+            )
+          }
           onClick={handleAcceptClick}
           sx={{
             py: 1.5,
@@ -76,13 +93,14 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
             },
           }}
         >
-          قبول الطلب المبدئي (إلى التسعير الإداري)
+          {isAccepting ? 'جاري قبول الطلب...' : 'قبول الطلب المبدئي (إلى التسعير الإداري)'}
         </Button>
 
         <Button
           fullWidth
           variant="contained"
           size="large"
+          disabled={isSubmitting || isAccepting || isRejecting}
           startIcon={<Iconify icon="solar:close-circle-bold" width={20} />}
           onClick={() => setRejectDialogOpen(true)}
           sx={{
@@ -106,7 +124,7 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
       {/* Reject Confirmation Dialog */}
       <Dialog
         open={rejectDialogOpen}
-        onClose={() => setRejectDialogOpen(false)}
+        onClose={() => !isRejecting && setRejectDialogOpen(false)}
         maxWidth="xs"
         fullWidth
         slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
@@ -124,6 +142,7 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
             rows={3}
             placeholder="سبب الاعتذار..."
             value={rejectReason}
+            disabled={isRejecting}
             onChange={(e) => setRejectReason(e.target.value)}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -136,6 +155,7 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
         <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 1.5 }}>
           <Button
             variant="outlined"
+            disabled={isRejecting}
             onClick={() => setRejectDialogOpen(false)}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
@@ -144,10 +164,12 @@ export default function InstructorDecisionCard({ onAccept, onReject }: Props) {
           <Button
             variant="contained"
             color="error"
+            disabled={isRejecting}
             onClick={handleConfirmReject}
+            startIcon={isRejecting ? <CircularProgress size={16} color="inherit" /> : undefined}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            تأكيد الاعتذار
+            {isRejecting ? 'جاري تسجيل الاعتذار...' : 'تأكيد الاعتذار'}
           </Button>
         </DialogActions>
       </Dialog>
