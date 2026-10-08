@@ -124,13 +124,28 @@ export interface UpdateInstructorSessionSettingsDto {
   acceptsRecordedSessions: boolean;
 }
 
+export enum SessionRequestStatusEnum {
+  Pending = 1,
+  AwaitingAdminReview = 2,
+  Active = 3,
+  Completed = 4,
+  Rejected = 5,
+  Cancelled = 6,
+}
+
 export type SessionRequestStatus =
   | 'Pending'
   | 'AwaitingAdminReview'
   | 'Active'
   | 'Completed'
   | 'Rejected'
-  | 'Cancelled';
+  | 'Cancelled'
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6;
 
 export type SessionType = 'Live' | 'Recorded';
 

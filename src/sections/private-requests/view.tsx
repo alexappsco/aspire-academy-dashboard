@@ -50,9 +50,36 @@ function formatRequestDate(dateStr?: string): string {
   }
 }
 
+// Normalize backend status (numbers 1..6 or string names) to canonical status
+export function normalizeSessionStatus(
+  status: unknown
+): 'Pending' | 'AwaitingAdminReview' | 'Active' | 'Completed' | 'Rejected' | 'Cancelled' {
+  if (status === 1 || status === '1' || String(status).toLowerCase() === 'pending') {
+    return 'Pending';
+  }
+  if (status === 2 || status === '2' || String(status).toLowerCase() === 'awaitingadminreview') {
+    return 'AwaitingAdminReview';
+  }
+  if (status === 3 || status === '3' || String(status).toLowerCase() === 'active') {
+    return 'Active';
+  }
+  if (status === 4 || status === '4' || String(status).toLowerCase() === 'completed') {
+    return 'Completed';
+  }
+  if (status === 5 || status === '5' || String(status).toLowerCase() === 'rejected') {
+    return 'Rejected';
+  }
+  if (status === 6 || status === '6' || String(status).toLowerCase() === 'cancelled') {
+    return 'Cancelled';
+  }
+  return 'Pending';
+}
+
 // Render status badge chip
-function renderStatusChip(status: SessionRequestStatus) {
-  switch (status) {
+function renderStatusChip(status: unknown) {
+  const normalized = normalizeSessionStatus(status);
+
+  switch (normalized) {
     case 'Pending':
       return (
         <Chip
@@ -146,7 +173,7 @@ function renderStatusChip(status: SessionRequestStatus) {
     default:
       return (
         <Chip
-          label={status}
+          label={String(status)}
           size="small"
           sx={{ bgcolor: '#F1F5F9', color: '#64748B', fontWeight: 700, fontSize: 12, height: 24 }}
         />
@@ -168,8 +195,10 @@ export default function PrivateRequestsListView() {
 
   // Tab state (mapped to StatusEnum or 'all')
   const initialTab = useMemo(() => {
-    if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(urlStatus)) {
-      return urlStatus as SessionRequestStatus;
+    if (!urlStatus || urlStatus === 'all') return 'all';
+    const norm = normalizeSessionStatus(urlStatus);
+    if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(norm)) {
+      return norm;
     }
     return 'all';
   }, [urlStatus]);
@@ -225,7 +254,7 @@ export default function PrivateRequestsListView() {
       currentTab !== 'all' ? currentTab : statusFilter !== 'all' ? statusFilter : null;
 
     if (effectiveStatus) {
-      params.set('Status', effectiveStatus);
+      params.set('Status', String(effectiveStatus));
     }
 
     if (serviceTypeFilter !== 'all') {
@@ -393,7 +422,7 @@ export default function PrivateRequestsListView() {
   // Tab change handler
   const handleTabChange = (_: React.SyntheticEvent, val: SessionRequestStatus | 'all') => {
     setCurrentTab(val);
-    setStatusFilter(val);
+    setStatusFilter(String(val));
     setPage(0);
   };
 
@@ -758,7 +787,7 @@ export default function PrivateRequestsListView() {
               ) : (
                 // Rows
                 requests.map((req) => {
-                  const isRec = req.type === 'Recorded';
+                  const isRec = req.type === 'Recorded' || (req.type as any) === 2 || (req.type as any) === '2';
 
                   return (
                     <Box

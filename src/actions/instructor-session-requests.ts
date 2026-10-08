@@ -23,7 +23,7 @@ export async function getSessionRequestsAction(
       const searchParams = new URLSearchParams();
 
       if (params.Status) {
-        searchParams.append('Status', params.Status);
+        searchParams.append('Status', String(params.Status));
       }
       if (params.Type) {
         searchParams.append('Type', params.Type);
