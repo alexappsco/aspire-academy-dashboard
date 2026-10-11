@@ -859,8 +859,15 @@ export default function PrivateRequestsListView() {
                             fontWeight: 700,
                             fontSize: 11.5,
                             borderRadius: 1.5,
+                            px: 1,
+                            height: 24,
                             '& .MuiChip-icon': {
                               color: isRec ? '#2563EB' : '#4F46E5',
+                              margin: '0 !important',
+                              marginInlineEnd: '5px !important',
+                            },
+                            '& .MuiChip-label': {
+                              px: 0.5,
                             },
                           }}
                         />

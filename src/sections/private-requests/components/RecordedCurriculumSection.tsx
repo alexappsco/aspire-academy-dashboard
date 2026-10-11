@@ -248,6 +248,10 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
               flexShrink: 0,
               width: { xs: '100%', sm: 'auto' },
               boxShadow: 'none',
+              '& .MuiButton-startIcon': {
+                margin: '0 !important',
+                marginInlineEnd: '8px !important',
+              },
               '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
             }}
           >
@@ -371,7 +375,15 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                               variant="text"
                               startIcon={<Iconify icon="solar:pen-new-square-linear" width={15} />}
                               onClick={() => handleOpenEditLesson(chapter.id, lesson)}
-                              sx={{ fontSize: 12, fontWeight: 700, color: '#64748B' }}
+                              sx={{
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: '#64748B',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                              }}
                             >
                               تعديل العنوان
                             </Button>
@@ -441,7 +453,7 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                         {att.title}
                                       </Typography>
                                       {att.statusText && (
-                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.75 }}>
                                           <Iconify icon="solar:check-circle-bold" width={13} />
                                           {att.statusText}
                                         </Typography>
@@ -485,6 +497,10 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                           bgcolor: '#0F172A',
                                           color: '#FFFFFF',
                                           boxShadow: 'none',
+                                          '& .MuiButton-startIcon': {
+                                            margin: '0 !important',
+                                            marginInlineEnd: '6px !important',
+                                          },
                                           '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
                                         }}
                                       >
@@ -510,7 +526,17 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                         variant="outlined"
                                         startIcon={<Iconify icon="solar:file-download-linear" width={15} />}
                                         onClick={() => toast.info('جاري فتح / تحميل المستند...')}
-                                        sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#CBD5E1', color: '#0F172A' }}
+                                        sx={{
+                                          borderRadius: 1.5,
+                                          fontSize: 11.5,
+                                          fontWeight: 700,
+                                          borderColor: '#CBD5E1',
+                                          color: '#0F172A',
+                                          '& .MuiButton-startIcon': {
+                                            margin: '0 !important',
+                                            marginInlineEnd: '6px !important',
+                                          },
+                                        }}
                                       >
                                         تحميل / عرض
                                       </Button>
@@ -541,6 +567,10 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                                           bgcolor: '#0F172A',
                                           color: '#FFFFFF',
                                           boxShadow: 'none',
+                                          '& .MuiButton-startIcon': {
+                                            margin: '0 !important',
+                                            marginInlineEnd: '6px !important',
+                                          },
                                           '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
                                         }}
                                       >
@@ -602,7 +632,17 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                               variant="outlined"
                               startIcon={<Iconify icon="solar:videocamera-record-linear" width={15} />}
                               onClick={() => handleAddAttachment(chapter.id, lesson.id, 'video')}
-                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                              }}
                             >
                               + فيديو إضافي
                             </Button>
@@ -612,7 +652,17 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                               variant="outlined"
                               startIcon={<Iconify icon="solar:document-linear" width={15} />}
                               onClick={() => handleAddAttachment(chapter.id, lesson.id, 'document')}
-                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                              }}
                             >
                               + مستند إضافي
                             </Button>
@@ -622,7 +672,17 @@ export default function RecordedCurriculumSection({ initialChapters }: Props) {
                               variant="outlined"
                               startIcon={<Iconify icon="solar:question-circle-linear" width={15} />}
                               onClick={() => handleAddAttachment(chapter.id, lesson.id, 'quiz')}
-                              sx={{ borderRadius: 1.5, fontSize: 11.5, fontWeight: 700, borderColor: '#E2E8F0', color: '#334155' }}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                              }}
                             >
                               + إضافة أسئلة
                             </Button>

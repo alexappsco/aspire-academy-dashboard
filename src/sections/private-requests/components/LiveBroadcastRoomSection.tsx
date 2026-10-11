@@ -170,7 +170,15 @@ export default function LiveBroadcastRoomSection({
                 fontWeight: 700,
                 fontSize: { xs: 11, sm: 12 },
                 borderRadius: 2,
-                px: 0.5,
+                px: 1,
+                height: 26,
+                '& .MuiChip-icon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '6px !important',
+                },
+                '& .MuiChip-label': {
+                  px: 0.5,
+                },
               }}
             />
 
@@ -186,7 +194,15 @@ export default function LiveBroadcastRoomSection({
                 fontWeight: 700,
                 fontSize: { xs: 11.5, sm: 12.5 },
                 borderRadius: 2,
-                px: 0.5,
+                px: 1,
+                height: 26,
+                '& .MuiChip-icon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '6px !important',
+                },
+                '& .MuiChip-label': {
+                  px: 0.5,
+                },
               }}
             />
           </Stack>
@@ -329,6 +345,10 @@ export default function LiveBroadcastRoomSection({
                 fontWeight: 800,
                 fontSize: 13,
                 px: 2,
+                '& .MuiButton-startIcon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '8px !important',
+                },
                 '&:hover': { bgcolor: '#B91C1C' },
               }}
             >

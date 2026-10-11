@@ -103,11 +103,11 @@ export default function StudentInfoCard({
             alignItems: 'center',
           }}
         >
-          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-            {country}
-          </Typography>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             الدولة:
+          </Typography>
+          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
+            {country}
           </Typography>
         </Box>
 
@@ -124,11 +124,11 @@ export default function StudentInfoCard({
               alignItems: 'center',
             }}
           >
-            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0284C7' }}>
-              {specializationName}
-            </Typography>
             <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
               التخصص الأكاديمي:
+            </Typography>
+            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0284C7' }}>
+              {specializationName}
             </Typography>
           </Box>
         )}
@@ -147,11 +147,11 @@ export default function StudentInfoCard({
               alignItems: 'center',
             }}
           >
-            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#2563EB', direction: 'ltr' }}>
-              {student.email}
-            </Typography>
             <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
               البريد الإلكتروني:
+            </Typography>
+            <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#2563EB', direction: 'ltr' }}>
+              {student.email}
             </Typography>
           </Box>
         )}

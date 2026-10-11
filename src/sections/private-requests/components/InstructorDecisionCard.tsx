@@ -87,6 +87,10 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             fontWeight: 800,
             fontSize: 15,
             boxShadow: 'none',
+            '& .MuiButton-startIcon': {
+              margin: '0 !important',
+              marginInlineEnd: '10px !important',
+            },
             '&:hover': {
               bgcolor: '#1E293B',
               boxShadow: 'none',
@@ -111,6 +115,10 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             fontWeight: 800,
             fontSize: 15,
             boxShadow: 'none',
+            '& .MuiButton-startIcon': {
+              margin: '0 !important',
+              marginInlineEnd: '10px !important',
+            },
             '&:hover': {
               bgcolor: '#E0E7FF',
               boxShadow: 'none',

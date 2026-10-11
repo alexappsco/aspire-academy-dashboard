@@ -188,8 +188,15 @@ export default function RequestHeaderCard({
                 fontWeight: 700,
                 fontSize: 12,
                 borderRadius: 1.5,
+                px: 1,
+                height: 26,
                 '& .MuiChip-icon': {
                   color: isRecorded ? '#2563EB' : '#4F46E5',
+                  margin: '0 !important',
+                  marginInlineEnd: '6px !important',
+                },
+                '& .MuiChip-label': {
+                  px: 0.5,
                 },
               }}
             />
@@ -203,6 +210,7 @@ export default function RequestHeaderCard({
                 height: 8,
                 borderRadius: '50%',
                 bgcolor: statusColor.dot,
+                flexShrink: 0,
               }}
             />
             <Typography
@@ -218,8 +226,8 @@ export default function RequestHeaderCard({
 
           {/* Date info subline for new and pending states */}
           {!isActive && (
-            <Stack direction="row" spacing={1.5} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-              <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Stack direction="row" spacing={1.5} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap', gap: 1.25 }}>
+              <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.85 }}>
                 <Iconify icon="solar:calendar-date-bold" width={16} />
                 تاريخ التقديم: {request.submittedAtFormatted || '5 أكتوبر 2026'}
               </Typography>
@@ -227,7 +235,7 @@ export default function RequestHeaderCard({
               {isPendingAdmin && request.acceptedAtFormatted && (
                 <>
                   <Typography sx={{ color: '#CBD5E1', fontSize: 12 }}>|</Typography>
-                  <Typography sx={{ fontSize: 12.5, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography sx={{ fontSize: 12.5, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.85 }}>
                     <Iconify icon="solar:check-circle-bold" width={16} />
                     تم قبول الطلب من المحاضر: {request.acceptedAtFormatted}
                   </Typography>
@@ -254,6 +262,10 @@ export default function RequestHeaderCard({
               px: 2.5,
               py: 0.85,
               flexShrink: 0,
+              '& .MuiButton-startIcon': {
+                margin: '0 !important',
+                marginInlineEnd: '8px !important',
+              },
               '&:hover': {
                 bgcolor: '#FEE2E2',
                 borderColor: '#F87171',
@@ -265,7 +277,7 @@ export default function RequestHeaderCard({
         )}
       </Box>
 
-      {/* Extended metadata bar for active requests (Images 1 & 2) */}
+      {/* Extended metadata bar for active requests */}
       {isActive && (
         <Box
           sx={{
@@ -281,31 +293,90 @@ export default function RequestHeaderCard({
           <Chip
             label={`رقم الطلب: ${request.id}`}
             size="small"
-            sx={{ bgcolor: '#F1F5F9', color: '#475569', fontWeight: 700, fontSize: 12 }}
+            sx={{ bgcolor: '#F1F5F9', color: '#475569', fontWeight: 700, fontSize: 12, px: 1, height: 26 }}
           />
           <Chip
             icon={<Iconify icon="solar:calendar-linear" width={15} />}
             label={`تاريخ التقديم: ${request.submittedAtFormatted || '5 أكتوبر 2026'}`}
             size="small"
-            sx={{ bgcolor: '#F1F5F9', color: '#475569', fontWeight: 600, fontSize: 12 }}
+            sx={{
+              bgcolor: '#F1F5F9',
+              color: '#475569',
+              fontWeight: 600,
+              fontSize: 12,
+              px: 1,
+              height: 26,
+              '& .MuiChip-icon': {
+                margin: '0 !important',
+                marginInlineEnd: '6px !important',
+              },
+              '& .MuiChip-label': {
+                px: 0.5,
+              },
+            }}
           />
           <Chip
             icon={<Iconify icon="solar:check-circle-bold" width={15} />}
             label="معتمد (Approved)"
             size="small"
-            sx={{ bgcolor: '#DCFCE7', color: '#15803D', fontWeight: 700, fontSize: 12 }}
+            sx={{
+              bgcolor: '#DCFCE7',
+              color: '#15803D',
+              fontWeight: 700,
+              fontSize: 12,
+              px: 1,
+              height: 26,
+              '& .MuiChip-icon': {
+                color: '#15803D',
+                margin: '0 !important',
+                marginInlineEnd: '6px !important',
+              },
+              '& .MuiChip-label': {
+                px: 0.5,
+              },
+            }}
           />
           <Chip
             icon={<Iconify icon="solar:clock-circle-bold" width={15} />}
             label="قيد التنفيذ (In Progress)"
             size="small"
-            sx={{ bgcolor: '#E0F2FE', color: '#0369A1', fontWeight: 700, fontSize: 12 }}
+            sx={{
+              bgcolor: '#E0F2FE',
+              color: '#0369A1',
+              fontWeight: 700,
+              fontSize: 12,
+              px: 1,
+              height: 26,
+              '& .MuiChip-icon': {
+                color: '#0369A1',
+                margin: '0 !important',
+                marginInlineEnd: '6px !important',
+              },
+              '& .MuiChip-label': {
+                px: 0.5,
+              },
+            }}
           />
           <Chip
             icon={<Iconify icon="solar:play-circle-bold" width={15} />}
             label={`نوع الخدمة: ${isRecorded ? 'محتوى مسجل معتمد' : 'جلسة مباشرة'}`}
             size="small"
-            sx={{ bgcolor: '#F8FAFC', color: '#334155', fontWeight: 700, fontSize: 12 }}
+            sx={{
+              bgcolor: '#F8FAFC',
+              color: '#334155',
+              fontWeight: 700,
+              fontSize: 12,
+              px: 1,
+              height: 26,
+              '& .MuiChip-icon': {
+                color: '#334155',
+                margin: '0 !important',
+                marginInlineEnd: '6px !important',
+              },
+              '& .MuiChip-label': {
+                px: 0.5,
+              },
+            }}
           />
         </Box>
       )}
