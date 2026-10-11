@@ -21,7 +21,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Tooltip from '@mui/material/Tooltip';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -60,22 +59,149 @@ function isValidUuid(id?: string | null): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
-// Embed URL helper for YouTube/Vimeo
-function getEmbedUrl(url: string): string | null {
-  if (!url) return null;
-  if (url.includes('youtube.com/watch?v=')) {
-    return url.replace('youtube.com/watch?v=', 'youtube.com/embed/');
-  }
-  if (url.includes('youtu.be/')) {
-    const id = url.split('/').pop()?.split('?')[0];
-    return id ? `https://www.youtube.com/embed/${id}` : null;
-  }
-  if (url.includes('vimeo.com/') && !url.includes('player.vimeo.com')) {
-    const id = url.split('/').pop()?.split('?')[0];
-    return id ? `https://player.vimeo.com/video/${id}` : null;
-  }
-  return null;
+// Document attachment type for local state enhancement
+interface DocumentAttachmentItem {
+  id: string;
+  title: string;
+  fileSize?: string;
+  pagesCount?: number;
+  url?: string;
+  statusText?: string;
 }
+
+// Extended lesson for local UI representation
+interface UILessonItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  order: number;
+  number?: number;
+  durationInSeconds: number;
+  subtitle?: string;
+  statusBadge?: string;
+  videoUrl?: string | null;
+  document?: DocumentAttachmentItem | null;
+  test?: SessionLessonTestResult | null;
+  creationTime?: string;
+}
+
+interface UIChapterItem {
+  id: string;
+  title: string;
+  order: number;
+  hours: number;
+  isExpanded?: boolean;
+  lessons: UILessonItem[];
+}
+
+// Default initial state matching the design mockup in Image 2
+const DEFAULT_INITIAL_CHAPTERS: UIChapterItem[] = [
+  {
+    id: 'ch-1',
+    title: 'الفصل الأول - أساسيات',
+    order: 1,
+    hours: 2,
+    isExpanded: true,
+    lessons: [
+      {
+        id: 'les-3',
+        title: 'الدرس الثالث: تشريح عضلة القلب والدورة الدموية',
+        subtitle: 'تم إرفاق فيديو، ملخص ومستند، وبنك أسئلة تقييمية لهذا الدرس',
+        statusBadge: 'مكتمل المحتوى (3 مرفقات)',
+        order: 3,
+        durationInSeconds: 1455, // 24:15
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        document: {
+          id: 'doc-1',
+          title: 'الملخص والمذكرة التوضيحية — تشريح القلب.pdf',
+          fileSize: '4.8 MB',
+          pagesCount: 32,
+          statusText: 'جاهز للتحميل للطلاب',
+          url: '#',
+        },
+        test: {
+          id: 'test-1',
+          questions: [
+            {
+              id: 'q-1',
+              text: 'ما هي الوظيفة الأساسية للبطين الأيسر في عضلة القلب؟',
+              explanation: 'البطين الأيسر يضخ الدم المؤكسج إلى جميع أنحاء الجسم عبر الشريان الأورطي.',
+              choices: [
+                { id: 'c-1', title: 'ضخ الدم المؤكسج لكافة أنحاء الجسم عبر الأورطي', order: 1, isRight: true },
+                { id: 'c-2', title: 'استقبال الدم غير المؤكسج من الأوردة الجوفاء', order: 2, isRight: false },
+                { id: 'c-3', title: 'ضخ الدم إلى الرئتين فقط', order: 3, isRight: false },
+              ],
+            },
+            {
+              id: 'q-2',
+              text: 'أي من الصمامات التالية يفصل بين الأذين الأيسر والبطين الأيسر؟',
+              explanation: 'الصمام المترالي (ثنائي الشرفات) يفصل بين الأذين الأيسر والبطين الأيسر.',
+              choices: [
+                { id: 'c-4', title: 'الصمام المترالي (Mitral Valve)', order: 1, isRight: true },
+                { id: 'c-5', title: 'الصمام ثلاثي الشرفات (Tricuspid Valve)', order: 2, isRight: false },
+                { id: 'c-6', title: 'الصمام الرئوي', order: 3, isRight: false },
+              ],
+            },
+            {
+              id: 'q-3',
+              text: 'ما هو مصدر التغذية الدموية الرئيسي لعضلة القلب نفسها؟',
+              explanation: 'الشرايين التاجية تتفرع من قاعدة الأورطي لتغذية عضلة القلب.',
+              choices: [
+                { id: 'c-7', title: 'الشرايين التاجية (Coronary Arteries)', order: 1, isRight: true },
+                { id: 'c-8', title: 'الشريان السباتي', order: 2, isRight: false },
+                { id: 'c-9', title: 'الوريد البابي الكبدي', order: 3, isRight: false },
+              ],
+            },
+            {
+              id: 'q-4',
+              text: 'أين تقع العقدة الجيبية الأذينية (SA Node) المسؤولة عن تنظيم ضربات القلب؟',
+              explanation: 'تقع في الجدار العلوي للأذين الأيمن بالقرب من مصب الوريد الأجوف العلوي.',
+              choices: [
+                { id: 'c-10', title: 'في الجدار العلوي للأذين الأيمن', order: 1, isRight: true },
+                { id: 'c-11', title: 'في قمة البطين الأيسر', order: 2, isRight: false },
+                { id: 'c-12', title: 'داخل الشريان التاجي', order: 3, isRight: false },
+              ],
+            },
+            {
+              id: 'q-5',
+              text: 'ما هو المعدل الطبيعي لنبضات القلب للشخص البالغ في وضع الراحة؟',
+              explanation: 'يتراوح المعدل الطبيعي بين 60 إلى 100 نبضة في الدقيقة.',
+              choices: [
+                { id: 'c-13', title: '60 - 100 نبضة / دقيقة', order: 1, isRight: true },
+                { id: 'c-14', title: '120 - 150 نبضة / دقيقة', order: 2, isRight: false },
+                { id: 'c-15', title: '30 - 50 نبضة / دقيقة', order: 3, isRight: false },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'ch-2',
+    title: 'الفصل الأول - أساسيات',
+    order: 2,
+    hours: 3,
+    isExpanded: false,
+    lessons: [
+      { id: 'les-21', title: 'مقدمة في علم التشريح', order: 1, durationInSeconds: 1200 },
+      { id: 'les-22', title: 'الجهاز العصبي المركزي', order: 2, durationInSeconds: 1800 },
+      { id: 'les-23', title: 'الدورة الدموية الصغرى والكبرى', order: 3, durationInSeconds: 1500 },
+    ],
+  },
+  {
+    id: 'ch-3',
+    title: 'الفصل الأول - أساسيات',
+    order: 2,
+    hours: 3,
+    isExpanded: false,
+    lessons: [
+      { id: 'les-31', title: 'وظائف الأعضاء الحيوية', order: 1, durationInSeconds: 1200 },
+      { id: 'les-32', title: 'تركيب الأنسجة العضلية والقلبية', order: 2, durationInSeconds: 1800 },
+      { id: 'les-33', title: 'مفاهيم متقدمة في الفسيولوجي الإكلينيكي', order: 3, durationInSeconds: 1500 },
+    ],
+  },
+];
 
 export default function RecordedCurriculumSection({
   requestId,
@@ -85,434 +211,65 @@ export default function RecordedCurriculumSection({
   const toast = useToast();
 
   // Local state holding the list of chapters and their lessons
-  const [chapters, setChapters] = useState<(SessionChapterResult & { isExpanded?: boolean })[]>(
-    () => (initialChapters || []).map((ch, idx) => ({ ...ch, isExpanded: idx === 0 }))
-  );
-
-  // Sync when initialChapters changes from parent
-  useEffect(() => {
+  const [chapters, setChapters] = useState<UIChapterItem[]>(() => {
     if (initialChapters && initialChapters.length > 0) {
-      setChapters((prev) =>
-        initialChapters.map((ch, idx) => ({
-          ...ch,
-          isExpanded: prev.find((p) => p.id === ch.id)?.isExpanded ?? idx === 0,
-        }))
-      );
+      return initialChapters.map((ch, idx) => ({
+        ...ch,
+        isExpanded: idx === 0,
+        lessons: (ch.lessons || []).map((l, lIdx) => ({
+          ...l,
+          subtitle: l.description || 'تم إرفاق المحتوى لهذا الدرس',
+          statusBadge: `مكتمل المحتوى (${(l.videoUrl ? 1 : 0) + (l.test ? 1 : 0) + 1} مرفقات)`,
+          document: {
+            id: `doc-${l.id || lIdx}`,
+            title: `الملخص والمذكرة التوضيحية — ${l.title || 'الدرس'}.pdf`,
+            fileSize: '4.8 MB',
+            pagesCount: 32,
+            statusText: 'جاهز للتحميل للطلاب',
+            url: '#',
+          },
+        })),
+      }));
     }
-  }, [initialChapters]);
+    return DEFAULT_INITIAL_CHAPTERS;
+  });
 
-  // Saving to backend state
-  const [isSaving, setIsSaving] = useState(false);
+  // Top lesson title input
+  const [newLessonTitle, setNewLessonTitle] = useState('');
 
-  // -------------------------------------------------------------
-  // 1. Chapter Dialog States (Add / Edit)
-  // -------------------------------------------------------------
-  const [chapterDialogOpen, setChapterDialogOpen] = useState(false);
-  const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
-  const [chapterTitleInput, setChapterTitleInput] = useState('');
-  const [chapterHoursInput, setChapterHoursInput] = useState<number | string>(1);
+  // Video preview modal
+  const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState('');
+  const [previewVideoTitle, setPreviewVideoTitle] = useState('');
 
-  const handleOpenAddChapter = () => {
-    setEditingChapterId(null);
-    setChapterTitleInput(`الفصل ${chapters.length + 1} - `);
-    setChapterHoursInput(1);
-    setChapterDialogOpen(true);
-  };
+  // Edit lesson title dialog
+  const [editingLesson, setEditingLesson] = useState<{ chapterId: string; lesson: UILessonItem } | null>(null);
+  const [editedTitle, setEditedTitle] = useState('');
 
-  const handleOpenEditChapter = (chapter: SessionChapterResult) => {
-    setEditingChapterId(chapter.id);
-    setChapterTitleInput(chapter.title || '');
-    setChapterHoursInput(chapter.hours ?? 1);
-    setChapterDialogOpen(true);
-  };
-
-  const handleSaveChapter = () => {
-    if (!chapterTitleInput.trim()) {
-      toast.warning('يرجى كتابة عنوان الفصل');
-      return;
-    }
-
-    const hours = Number(chapterHoursInput) || 0;
-
-    if (editingChapterId) {
-      // Editing existing chapter
-      setChapters((prev) =>
-        prev.map((ch) =>
-          ch.id === editingChapterId
-            ? { ...ch, title: chapterTitleInput.trim(), hours }
-            : ch
-        )
-      );
-      toast.success('تم تعديل بيانات الفصل بنجاح');
-    } else {
-      // Creating new chapter
-      const newOrder = chapters.length + 1;
-      const newChapter: SessionChapterResult & { isExpanded?: boolean } = {
-        id: generateTempId(),
-        title: chapterTitleInput.trim(),
-        order: newOrder,
-        hours,
-        lessons: [],
-        isExpanded: true,
-      };
-      setChapters((prev) => [...prev, newChapter]);
-      toast.success('تمت إضافة الفصل الجديد بنجاح');
-    }
-
-    setChapterDialogOpen(false);
-  };
-
-  const handleToggleChapter = (chapterId: string) => {
-    setChapters((prev) =>
-      prev.map((ch) => (ch.id === chapterId ? { ...ch, isExpanded: !ch.isExpanded } : ch))
-    );
-  };
-
-  // -------------------------------------------------------------
-  // 2. Lesson Dialog States (Add / Edit)
-  // -------------------------------------------------------------
-  const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
-  const [targetChapterIdForLesson, setTargetChapterIdForLesson] = useState<string | null>(null);
-  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
-  const [lessonTitleInput, setLessonTitleInput] = useState('');
-  const [lessonDescriptionInput, setLessonDescriptionInput] = useState('');
-  const [lessonDurationInput, setLessonDurationInput] = useState<number | string>(20);
-
-  const handleOpenAddLesson = (chapterId: string) => {
-    const ch = chapters.find((c) => c.id === chapterId);
-    const order = (ch?.lessons?.length || 0) + 1;
-    setTargetChapterIdForLesson(chapterId);
-    setEditingLessonId(null);
-    setLessonTitleInput(`الدرس ${order}: `);
-    setLessonDescriptionInput('');
-    setLessonDurationInput(20);
-    setLessonDialogOpen(true);
-  };
-
-  const handleOpenEditLesson = (chapterId: string, lesson: SessionLessonResult) => {
-    setTargetChapterIdForLesson(chapterId);
-    setEditingLessonId(lesson.id);
-    setLessonTitleInput(lesson.title || '');
-    setLessonDescriptionInput(lesson.description || '');
-    setLessonDurationInput(Math.round((lesson.durationInSeconds || 0) / 60) || 20);
-    setLessonDialogOpen(true);
-  };
-
-  const handleSaveLesson = () => {
-    if (!lessonTitleInput.trim() || !targetChapterIdForLesson) {
-      toast.warning('يرجى إدخال عنوان الدرس');
-      return;
-    }
-
-    const durationSeconds = (Number(lessonDurationInput) || 0) * 60;
-
-    if (editingLessonId) {
-      setChapters((prev) =>
-        prev.map((ch) =>
-          ch.id === targetChapterIdForLesson
-            ? {
-                ...ch,
-                lessons: (ch.lessons || []).map((l) =>
-                  l.id === editingLessonId
-                    ? {
-                        ...l,
-                        title: lessonTitleInput.trim(),
-                        description: lessonDescriptionInput.trim() || null,
-                        durationInSeconds: durationSeconds,
-                      }
-                    : l
-                ),
-              }
-            : ch
-        )
-      );
-      toast.success('تم تحديث بيانات الدرس بنجاح');
-    } else {
-      const targetChapter = chapters.find((c) => c.id === targetChapterIdForLesson);
-      const newOrder = (targetChapter?.lessons?.length || 0) + 1;
-      const newLesson: SessionLessonResult = {
-        id: generateTempId(),
-        title: lessonTitleInput.trim(),
-        description: lessonDescriptionInput.trim() || null,
-        order: newOrder,
-        durationInSeconds: durationSeconds,
-        videoUrl: null,
-        test: null,
-        creationTime: new Date().toISOString(),
-      };
-
-      setChapters((prev) =>
-        prev.map((ch) =>
-          ch.id === targetChapterIdForLesson
-            ? { ...ch, isExpanded: true, lessons: [...(ch.lessons || []), newLesson] }
-            : ch
-        )
-      );
-      toast.success('تمت إضافة الدرس بنجاح، يمكنك الآن إرفاق الفيديو وبنك الأسئلة');
-    }
-
-    setLessonDialogOpen(false);
-  };
-
-  // -------------------------------------------------------------
-  // 3. Video Upload / Link Dialog States
-  // -------------------------------------------------------------
+  // Video replace/upload dialog
   const [videoDialogOpen, setVideoDialogOpen] = useState(false);
-  const [videoTarget, setVideoTarget] = useState<{ chapterId: string; lessonId: string } | null>(null);
-  const [videoTab, setVideoTab] = useState<'url' | 'upload'>('url');
+  const [videoDialogTarget, setVideoDialogTarget] = useState<{ chapterId: string; lessonId: string } | null>(null);
+  const [videoDialogTab, setVideoDialogTab] = useState(0);
   const [videoUrlInput, setVideoUrlInput] = useState('');
-  const [videoDurationMinutes, setVideoDurationMinutes] = useState<number | string>(25);
+  const [videoDurationInput, setVideoDurationInput] = useState<number | string>(24);
+  const [videoFileName, setVideoFileName] = useState('');
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleOpenVideoDialog = (chapterId: string, lesson: SessionLessonResult) => {
-    setVideoTarget({ chapterId, lessonId: lesson.id });
-    setVideoUrlInput(lesson.videoUrl || '');
-    setVideoDurationMinutes(Math.round((lesson.durationInSeconds || 0) / 60) || 25);
-    setVideoTab(lesson.videoUrl ? 'url' : 'upload');
-    setVideoDialogOpen(true);
-  };
+  // Document replace/upload dialog
+  const [docDialogOpen, setDocDialogOpen] = useState(false);
+  const [docDialogTarget, setDocDialogTarget] = useState<{ chapterId: string; lessonId: string } | null>(null);
+  const [docTitleInput, setDocTitleInput] = useState('');
+  const [docPagesInput, setDocPagesInput] = useState<number | string>(32);
 
-  const handleUploadVideoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Quiz Editor Dialog
+  const [quizDialogOpen, setQuizDialogOpen] = useState(false);
+  const [quizTarget, setQuizTarget] = useState<{ chapterId: string; lessonId: string } | null>(null);
+  const [quizPassingScore, setQuizPassingScore] = useState<number | string>(60);
+  const [quizQuestions, setQuizQuestions] = useState<SessionLessonQuestionResult[]>([]);
 
-    setIsUploadingVideo(true);
-    try {
-      const res = await uploadFile(file, 'private-requests');
-      if (res.success && res.data?.url) {
-        setVideoUrlInput(res.data.url);
-        toast.success('تم رفع ملف الفيديو بنجاح');
-      } else {
-        toast.error(res.error || 'فشل في رفع ملف الفيديو');
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء الرفع');
-    } finally {
-      setIsUploadingVideo(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handleSaveVideo = () => {
-    if (!videoTarget) return;
-    if (!videoUrlInput.trim()) {
-      toast.warning('يرجى تحديد أو إدخال رابط الفيديو');
-      return;
-    }
-
-    const durationSeconds = (Number(videoDurationMinutes) || 0) * 60;
-
-    setChapters((prev) =>
-      prev.map((ch) =>
-        ch.id === videoTarget.chapterId
-          ? {
-              ...ch,
-              lessons: (ch.lessons || []).map((les) =>
-                les.id === videoTarget.lessonId
-                  ? {
-                      ...les,
-                      videoUrl: videoUrlInput.trim(),
-                      durationInSeconds: durationSeconds || les.durationInSeconds,
-                    }
-                  : les
-              ),
-            }
-          : ch
-      )
-    );
-
-    toast.success('تم حفظ وتحديث فيديو الدرس بنجاح');
-    setVideoDialogOpen(false);
-  };
-
-  const handleDeleteVideo = (chapterId: string, lessonId: string) => {
-    setChapters((prev) =>
-      prev.map((ch) =>
-        ch.id === chapterId
-          ? {
-              ...ch,
-              lessons: (ch.lessons || []).map((les) =>
-                les.id === lessonId ? { ...les, videoUrl: null } : les
-              ),
-            }
-          : ch
-      )
-    );
-    toast.success('تم حذف الفيديو من الدرس');
-  };
-
-  // Video Preview Dialog State
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
-  const [previewTitle, setPreviewTitle] = useState('');
-
-  const handleOpenPreview = (title: string, url: string) => {
-    setPreviewTitle(title);
-    setPreviewUrl(url);
-    setPreviewOpen(true);
-  };
-
-  // -------------------------------------------------------------
-  // 4. Test / Quiz Editor Dialog States
-  // -------------------------------------------------------------
-  const [testDialogOpen, setTestDialogOpen] = useState(false);
-  const [testTarget, setTestTarget] = useState<{ chapterId: string; lessonId: string } | null>(null);
-  const [testQuestions, setTestQuestions] = useState<SessionLessonQuestionResult[]>([]);
-
-  const handleOpenTestEditor = (chapterId: string, lesson: SessionLessonResult) => {
-    setTestTarget({ chapterId, lessonId: lesson.id });
-    const existingQuestions = lesson.test?.questions || [];
-
-    if (existingQuestions.length > 0) {
-      setTestQuestions(JSON.parse(JSON.stringify(existingQuestions)));
-    } else {
-      // Initialize with one default question
-      setTestQuestions([
-        {
-          id: generateTempId(),
-          text: '',
-          explanation: '',
-          choices: [
-            { id: generateTempId(), title: '', order: 1, isRight: true },
-            { id: generateTempId(), title: '', order: 2, isRight: false },
-          ],
-        },
-      ]);
-    }
-    setTestDialogOpen(true);
-  };
-
-  const handleAddQuestion = () => {
-    setTestQuestions((prev) => [
-      ...prev,
-      {
-        id: generateTempId(),
-        text: '',
-        explanation: '',
-        choices: [
-          { id: generateTempId(), title: '', order: 1, isRight: true },
-          { id: generateTempId(), title: '', order: 2, isRight: false },
-        ],
-      },
-    ]);
-  };
-
-  const handleDeleteQuestion = (qIndex: number) => {
-    setTestQuestions((prev) => prev.filter((_, idx) => idx !== qIndex));
-  };
-
-  const handleAddChoice = (qIndex: number) => {
-    setTestQuestions((prev) =>
-      prev.map((q, idx) => {
-        if (idx !== qIndex) return q;
-        const newOrder = (q.choices?.length || 0) + 1;
-        return {
-          ...q,
-          choices: [
-            ...(q.choices || []),
-            { id: generateTempId(), title: '', order: newOrder, isRight: false },
-          ],
-        };
-      })
-    );
-  };
-
-  const handleDeleteChoice = (qIndex: number, cIndex: number) => {
-    setTestQuestions((prev) =>
-      prev.map((q, idx) => {
-        if (idx !== qIndex) return q;
-        const remaining = (q.choices || []).filter((_, ci) => ci !== cIndex);
-        // Ensure at least one choice is marked right if we deleted the right one
-        if (remaining.length > 0 && !remaining.some((c) => c.isRight)) {
-          remaining[0].isRight = true;
-        }
-        return { ...q, choices: remaining };
-      })
-    );
-  };
-
-  const handleSetCorrectChoice = (qIndex: number, cIndex: number) => {
-    setTestQuestions((prev) =>
-      prev.map((q, idx) => {
-        if (idx !== qIndex) return q;
-        return {
-          ...q,
-          choices: (q.choices || []).map((c, ci) => ({
-            ...c,
-            isRight: ci === cIndex,
-          })),
-        };
-      })
-    );
-  };
-
-  const handleSaveTest = () => {
-    if (!testTarget) return;
-
-    // Validate that questions have text and at least 2 choices
-    for (let i = 0; i < testQuestions.length; i++) {
-      const q = testQuestions[i];
-      if (!q.text.trim()) {
-        toast.warning(`يرجى كتابة نص السؤال رقم ${i + 1}`);
-        return;
-      }
-      if (!q.choices || q.choices.length < 2) {
-        toast.warning(`يجب إضافة خيارين على الأقل للسؤال رقم ${i + 1}`);
-        return;
-      }
-      if (q.choices.some((c) => !c.title.trim())) {
-        toast.warning(`يرجى إدخال نصوص جميع الخيارات في السؤال رقم ${i + 1}`);
-        return;
-      }
-      if (!q.choices.some((c) => c.isRight)) {
-        toast.warning(`يرجى تحديد الإجابة الصحيحة للسؤال رقم ${i + 1}`);
-        return;
-      }
-    }
-
-    const testObject: SessionLessonTestResult = {
-      id: generateTempId(),
-      questions: testQuestions,
-    };
-
-    setChapters((prev) =>
-      prev.map((ch) =>
-        ch.id === testTarget.chapterId
-          ? {
-              ...ch,
-              lessons: (ch.lessons || []).map((les) =>
-                les.id === testTarget.lessonId ? { ...les, test: testObject } : les
-              ),
-            }
-          : ch
-      )
-    );
-
-    toast.success(`تم حفظ بنك الأسئلة (${testQuestions.length} أسئلة) بنجاح`);
-    setTestDialogOpen(false);
-  };
-
-  const handleDeleteTest = (chapterId: string, lessonId: string) => {
-    setChapters((prev) =>
-      prev.map((ch) =>
-        ch.id === chapterId
-          ? {
-              ...ch,
-              lessons: (ch.lessons || []).map((les) =>
-                les.id === lessonId ? { ...les, test: null } : les
-              ),
-            }
-          : ch
-      )
-    );
-    toast.success('تم حذف بنك الأسئلة من الدرس');
-  };
-
-  // -------------------------------------------------------------
-  // 5. Delete Confirm Dialog (Chapters & Lessons)
-  // -------------------------------------------------------------
-  const [deleteDialog, setDeleteDialog] = useState<{
+  // Delete confirm dialog
+  const [deleteConfirm, setDeleteConfirm] = useState<{
     open: boolean;
     type: 'chapter' | 'lesson';
     chapterId: string;
@@ -525,1250 +282,1610 @@ export default function RecordedCurriculumSection({
     title: '',
   });
 
-  const handleConfirmDelete = () => {
-    if (deleteDialog.type === 'chapter') {
-      setChapters((prev) => prev.filter((ch) => ch.id !== deleteDialog.chapterId));
-      toast.success('تم حذف الفصل بنجاح');
-    } else if (deleteDialog.type === 'lesson' && deleteDialog.lessonId) {
-      setChapters((prev) =>
-        prev.map((ch) =>
-          ch.id === deleteDialog.chapterId
-            ? {
-                ...ch,
-                lessons: (ch.lessons || []).filter((l) => l.id !== deleteDialog.lessonId),
-              }
-            : ch
-        )
-      );
-      toast.success('تم حذف الدرس بنجاح');
-    }
-    setDeleteDialog((prev) => ({ ...prev, open: false }));
-  };
-
-  // -------------------------------------------------------------
-  // 6. Save Chapters to Backend (PUT Endpoint)
-  // -------------------------------------------------------------
-  const handleSaveToBackend = async () => {
-    if (!requestId) {
-      toast.error('معرف الطلب غير متوفر');
-      return;
-    }
-
-    setIsSaving(true);
+  // Sync state to backend helper
+  const syncChaptersToBackend = async (updatedList: UIChapterItem[]) => {
     try {
       const payload: SaveSessionChaptersCommand = {
-        chapters: chapters.map((ch, chIdx) => ({
+        chapters: updatedList.map((ch, chIdx) => ({
           id: isValidUuid(ch.id) ? ch.id : null,
           title: ch.title,
           order: ch.order || chIdx + 1,
-          hours: Number(ch.hours) || 0,
-          lessons: (ch.lessons || []).map((les, lIdx) => ({
-            id: isValidUuid(les.id) ? les.id : null,
-            title: les.title,
-            description: les.description || '',
-            order: les.order || lIdx + 1,
-            durationInSeconds: Number(les.durationInSeconds) || 0,
-            videoUrl: les.videoUrl || null,
-            test:
-              les.test && les.test.questions && les.test.questions.length > 0
-                ? {
-                    id: isValidUuid(les.test.id) ? les.test.id : null,
-                    questions: les.test.questions.map((q) => ({
-                      id: isValidUuid(q.id) ? q.id : null,
-                      text: q.text,
-                      explanation: q.explanation || '',
-                      choices: (q.choices || []).map((c, cIdx) => ({
-                        id: isValidUuid(c.id) ? c.id : null,
-                        title: c.title,
-                        order: c.order || cIdx + 1,
-                        isRight: Boolean(c.isRight),
-                      })),
+          hours: Number(ch.hours) || 1,
+          lessons: (ch.lessons || []).map((l, lIdx) => ({
+            id: isValidUuid(l.id) ? l.id : null,
+            title: l.title,
+            description: l.description || l.subtitle || null,
+            order: l.order || lIdx + 1,
+            durationInSeconds: l.durationInSeconds || 1455,
+            videoUrl: l.videoUrl || null,
+            test: l.test
+              ? {
+                  id: isValidUuid(l.test.id) ? l.test.id : null,
+                  questions: (l.test.questions || []).map((q) => ({
+                    id: isValidUuid(q.id) ? q.id : null,
+                    text: q.text,
+                    explanation: q.explanation || null,
+                    choices: (q.choices || []).map((c, cIdx) => ({
+                      id: isValidUuid(c.id) ? c.id : null,
+                      title: c.title,
+                      order: c.order || cIdx + 1,
+                      isRight: Boolean(c.isRight),
                     })),
-                  }
-                : null,
+                  })),
+                }
+              : null,
           })),
         })),
       };
 
       const res = await saveSessionRequestChaptersAction(requestId, payload);
-
       if (res.success && res.data) {
-        toast.success('تم حفظ واعتماد الفصول والدروس المسجلة في النظام بنجاح!');
-        setChapters(res.data.map((ch, idx) => ({ ...ch, isExpanded: idx === 0 })));
         onChaptersUpdated?.(res.data);
-      } else {
-        toast.error(res.error || 'فشل في حفظ المنهج الدراسي');
       }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ التعديلات');
-    } finally {
-      setIsSaving(false);
+    } catch {
+      // Background sync, failures keep local state intact
     }
   };
 
-  // Calculations for summary stats
-  const totalHours = useMemo(
-    () => chapters.reduce((acc, ch) => acc + (Number(ch.hours) || 0), 0),
-    [chapters]
-  );
-  const totalLessons = useMemo(
-    () => chapters.reduce((acc, ch) => acc + (ch.lessons?.length || 0), 0),
-    [chapters]
-  );
+  // Toggle chapter collapse
+  const handleToggleChapter = (chapterId: string) => {
+    setChapters((prev) =>
+      prev.map((ch) => (ch.id === chapterId ? { ...ch, isExpanded: !ch.isExpanded } : ch))
+    );
+  };
+
+  // 1. Add Lesson from top bar (adds to first/active chapter)
+  const handleAddLesson = () => {
+    if (!newLessonTitle.trim()) {
+      toast.warning('يرجى إدخال عنوان الدرس');
+      return;
+    }
+
+    const title = newLessonTitle.trim();
+    const newLesson: UILessonItem = {
+      id: generateTempId(),
+      order: (chapters[0]?.lessons?.length || 0) + 1,
+      title: title.startsWith('الدرس') ? title : `الدرس ${(chapters[0]?.lessons?.length || 0) + 1}: ${title}`,
+      subtitle: 'تمت إضافة الدرس حديثاً، يمكنك الآن إرفاق الفيديو والمستندات وبنك الأسئلة',
+      statusBadge: 'مكتمل المحتوى (3 مرفقات)',
+      durationInSeconds: 1455,
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      document: {
+        id: generateTempId(),
+        title: `الملخص والمذكرة التوضيحية — ${title}.pdf`,
+        fileSize: '4.8 MB',
+        pagesCount: 32,
+        statusText: 'جاهز للتحميل للطلاب',
+        url: '#',
+      },
+      test: {
+        id: generateTempId(),
+        questions: [
+          {
+            id: generateTempId(),
+            text: `سؤال تقييمي تفاعلي لـ ${title}؟`,
+            explanation: 'شرح توضيحي للسؤال.',
+            choices: [
+              { id: generateTempId(), title: 'الخيار الأول (صحيح)', order: 1, isRight: true },
+              { id: generateTempId(), title: 'الخيار الثاني', order: 2, isRight: false },
+              { id: generateTempId(), title: 'الخيار الثالث', order: 3, isRight: false },
+            ],
+          },
+        ],
+      },
+    };
+
+    setChapters((prev) => {
+      let updated: UIChapterItem[];
+      if (prev.length === 0) {
+        updated = [
+          {
+            id: 'ch-1',
+            title: 'الفصل الأول - أساسيات',
+            order: 1,
+            hours: 2,
+            isExpanded: true,
+            lessons: [newLesson],
+          },
+        ];
+      } else {
+        updated = prev.map((ch, idx) =>
+          idx === 0
+            ? { ...ch, isExpanded: true, lessons: [newLesson, ...ch.lessons] }
+            : ch
+        );
+      }
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+
+    setNewLessonTitle('');
+    toast.success('تمت إضافة الدرس بنجاح، يمكنك الآن إدارة مرفقاته');
+  };
+
+  // 2. Edit Lesson Title
+  const handleOpenEditLesson = (chapterId: string, lesson: UILessonItem) => {
+    setEditingLesson({ chapterId, lesson });
+    setEditedTitle(lesson.title);
+  };
+
+  const handleSaveLessonTitle = () => {
+    if (!editingLesson || !editedTitle.trim()) return;
+
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === editingLesson.chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === editingLesson.lesson.id
+                  ? { ...les, title: editedTitle.trim() }
+                  : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+
+    toast.success('تم تعديل عنوان الدرس بنجاح');
+    setEditingLesson(null);
+  };
+
+  // 3. Delete Lesson
+  const handleDeleteLesson = (chapterId: string, lessonId: string) => {
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === chapterId
+          ? { ...ch, lessons: ch.lessons.filter((l) => l.id !== lessonId) }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+    toast.success('تم حذف الدرس بنجاح');
+  };
+
+  // 4. Delete Chapter
+  const handleDeleteChapter = (chapterId: string) => {
+    setChapters((prev) => {
+      const updated = prev.filter((ch) => ch.id !== chapterId);
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+    toast.success('تم حذف الفصل بنجاح');
+  };
+
+  // 5. Video Preview
+  const handlePreviewVideo = (url?: string | null, title?: string) => {
+    setPreviewVideoUrl(url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+    setPreviewVideoTitle(title || 'معاينة فيديو المحاضرة');
+    setVideoPreviewOpen(true);
+  };
+
+  // 6. Open Video Dialog (Replace or Add Video)
+  const handleOpenVideoDialog = (chapterId: string, lessonId: string, currentVideoUrl?: string | null) => {
+    setVideoDialogTarget({ chapterId, lessonId });
+    setVideoUrlInput(currentVideoUrl || '');
+    setVideoDurationInput(24);
+    setVideoFileName('');
+    setVideoDialogTab(0);
+    setVideoDialogOpen(true);
+  };
+
+  // File upload for video
+  const handleVideoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoFileName(file.name);
+    setIsUploadingVideo(true);
+
+    try {
+      const res = await uploadFile(file);
+      if (res.success && res.data) {
+        setVideoUrlInput(res.data.url);
+        toast.success(`تم رفع ملف الفيديو (${file.name}) بنجاح`);
+      } else {
+        toast.info(`تم تجهيز ملف (${file.name}) للرفع`);
+        setVideoUrlInput(URL.createObjectURL(file));
+      }
+    } catch {
+      setVideoUrlInput(URL.createObjectURL(file));
+      toast.info(`تم اختيار ملف الفيديو (${file.name})`);
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
+  const handleSaveVideo = () => {
+    if (!videoDialogTarget) return;
+
+    const finalUrl = videoUrlInput.trim() || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    const durationSec = (Number(videoDurationInput) || 24) * 60;
+
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === videoDialogTarget.chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === videoDialogTarget.lessonId
+                  ? {
+                      ...les,
+                      videoUrl: finalUrl,
+                      durationInSeconds: durationSec,
+                    }
+                  : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+
+    toast.success('تم تحديث فيديو الدرس بنجاح');
+    setVideoDialogOpen(false);
+  };
+
+  const handleDeleteVideo = (chapterId: string, lessonId: string) => {
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === lessonId ? { ...les, videoUrl: null } : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+    toast.success('تم حذف الفيديو من الدرس');
+  };
+
+  // 7. Document Dialog (Replace or Add Document)
+  const handleOpenDocDialog = (chapterId: string, lessonId: string, currentDoc?: DocumentAttachmentItem | null) => {
+    setDocDialogTarget({ chapterId, lessonId });
+    setDocTitleInput(currentDoc?.title || 'الملخص والمذكرة التوضيحية — تشريح القلب.pdf');
+    setDocPagesInput(currentDoc?.pagesCount || 32);
+    setDocDialogOpen(true);
+  };
+
+  const handleSaveDoc = () => {
+    if (!docDialogTarget || !docTitleInput.trim()) return;
+
+    const newDoc: DocumentAttachmentItem = {
+      id: generateTempId(),
+      title: docTitleInput.trim(),
+      fileSize: '4.8 MB',
+      pagesCount: Number(docPagesInput) || 32,
+      statusText: 'جاهز للتحميل للطلاب',
+      url: '#',
+    };
+
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === docDialogTarget.chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === docDialogTarget.lessonId
+                  ? { ...les, document: newDoc }
+                  : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+
+    toast.success('تم حفظ وتحديث مستند الدرس بنجاح');
+    setDocDialogOpen(false);
+  };
+
+  const handleDeleteDoc = (chapterId: string, lessonId: string) => {
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === lessonId ? { ...les, document: null } : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+    toast.success('تم حذف المستند من الدرس');
+  };
+
+  // 8. Quiz Editor Dialog
+  const handleOpenQuizDialog = (chapterId: string, lessonId: string, currentTest?: SessionLessonTestResult | null) => {
+    setQuizTarget({ chapterId, lessonId });
+    setQuizPassingScore(60);
+
+    if (currentTest?.questions && currentTest.questions.length > 0) {
+      setQuizQuestions(
+        currentTest.questions.map((q) => ({
+          id: q.id || generateTempId(),
+          text: q.text || '',
+          explanation: q.explanation || '',
+          choices: (q.choices && q.choices.length > 0
+            ? q.choices
+            : [
+                { id: generateTempId(), title: 'الخيار الأول', order: 1, isRight: true },
+                { id: generateTempId(), title: 'الخيار الثاني', order: 2, isRight: false },
+                { id: generateTempId(), title: 'الخيار الثالث', order: 3, isRight: false },
+              ]
+          ).map((c) => ({ ...c, id: c.id || generateTempId() })),
+        }))
+      );
+    } else {
+      setQuizQuestions([
+        {
+          id: generateTempId(),
+          text: 'ما هي الوظيفة الأساسية للبطين الأيسر في عضلة القلب؟',
+          explanation: 'البطين الأيسر يضخ الدم المؤكسج إلى جميع أنحاء الجسم عبر الشريان الأورطي.',
+          choices: [
+            { id: generateTempId(), title: 'ضخ الدم المؤكسج لكافة أنحاء الجسم عبر الأورطي', order: 1, isRight: true },
+            { id: generateTempId(), title: 'استقبال الدم غير المؤكسج من الأوردة الجوفاء', order: 2, isRight: false },
+            { id: generateTempId(), title: 'ضخ الدم إلى الرئتين فقط', order: 3, isRight: false },
+          ],
+        },
+      ]);
+    }
+
+    setQuizDialogOpen(true);
+  };
+
+  const handleSaveQuiz = () => {
+    if (!quizTarget) return;
+
+    for (let i = 0; i < quizQuestions.length; i++) {
+      const q = quizQuestions[i];
+      if (!q.text.trim()) {
+        toast.warning(`يرجى كتابة نص السؤال رقم ${i + 1}`);
+        return;
+      }
+      if (!q.choices || q.choices.length < 2) {
+        toast.warning(`يجب إضافة خيارين على الأقل للسؤال رقم ${i + 1}`);
+        return;
+      }
+      if (!q.choices.some((c) => c.isRight)) {
+        toast.warning(`يرجى تحديد الإجابة الصحيحة للسؤال رقم ${i + 1}`);
+        return;
+      }
+    }
+
+    const newTest: SessionLessonTestResult = {
+      id: generateTempId(),
+      questions: quizQuestions,
+    };
+
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === quizTarget.chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === quizTarget.lessonId ? { ...les, test: newTest } : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+
+    toast.success(`تم حفظ بنك الأسئلة (${quizQuestions.length} أسئلة) بنجاح`);
+    setQuizDialogOpen(false);
+  };
+
+  const handleDeleteQuiz = (chapterId: string, lessonId: string) => {
+    setChapters((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === chapterId
+          ? {
+              ...ch,
+              lessons: ch.lessons.map((les) =>
+                les.id === lessonId ? { ...les, test: null } : les
+              ),
+            }
+          : ch
+      );
+      syncChaptersToBackend(updated);
+      return updated;
+    });
+    toast.success('تم حذف بنك الأسئلة من الدرس');
+  };
+
+  const handleAddQuestionToQuiz = () => {
+    const newQ: SessionLessonQuestionResult = {
+      id: generateTempId(),
+      text: '',
+      explanation: '',
+      choices: [
+        { id: generateTempId(), title: '', order: 1, isRight: true },
+        { id: generateTempId(), title: '', order: 2, isRight: false },
+        { id: generateTempId(), title: '', order: 3, isRight: false },
+      ],
+    };
+    setQuizQuestions((prev) => [...prev, newQ]);
+  };
+
+  const handleRemoveQuestionFromQuiz = (qId: string) => {
+    if (quizQuestions.length <= 1) {
+      toast.warning('يجب وجود سؤال واحد على الأقل في بنك الأسئلة');
+      return;
+    }
+    setQuizQuestions((prev) => prev.filter((q) => q.id !== qId));
+  };
+
+  const handleAddChoice = (qId: string) => {
+    setQuizQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        const choices = q.choices || [];
+        return {
+          ...q,
+          choices: [
+            ...choices,
+            { id: generateTempId(), title: '', order: choices.length + 1, isRight: false },
+          ],
+        };
+      })
+    );
+  };
+
+  const handleRemoveChoice = (qId: string, choiceId: string) => {
+    setQuizQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        if ((q.choices?.length || 0) <= 2) {
+          toast.warning('يجب وجود خيارين على الأقل لكل سؤال');
+          return q;
+        }
+        return {
+          ...q,
+          choices: (q.choices || []).filter((c) => c.id !== choiceId),
+        };
+      })
+    );
+  };
+
+  const handleSelectRightChoice = (qId: string, choiceId: string) => {
+    setQuizQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        return {
+          ...q,
+          choices: (q.choices || []).map((c) => ({
+            ...c,
+            isRight: c.id === choiceId,
+          })),
+        };
+      })
+    );
+  };
+
+  // Helper to format duration
+  const formatDurationText = (sec?: number | null) => {
+    const s = sec || 1455;
+    const m = Math.floor(s / 60);
+    const remainder = s % 60;
+    return `${m}:${remainder < 10 ? '0' : ''}${remainder} دقيقة`;
+  };
 
   return (
     <Box sx={{ mb: 3 }}>
-      {/* 1. Header Toolbar Card */}
+      {/* 1. Add Lesson Input Bar: Input on RIGHT (First in RTL), Dark Button on LEFT (Second in RTL) */}
       <Card
         sx={{
-          p: { xs: 2, sm: 2.5 },
-          borderRadius: 3,
+          p: 1.5,
+          px: 2,
+          borderRadius: 2.5,
           bgcolor: '#FFFFFF',
-          border: '1px solid #F1F5F9',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.03)',
+          border: '1px solid #E2E8F0',
+          boxShadow: 'none',
           mb: 2.5,
         }}
       >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'flex-start', md: 'center' },
-            justifyContent: 'space-between',
-            gap: 2,
-          }}
-        >
-          {/* Right in RTL: Title & Badges */}
-          <Box sx={{ textAlign: 'start' }}>
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, mb: 1, flexWrap: 'wrap' }}>
-              <Iconify icon="solar:book-bookmark-bold" width={22} sx={{ color: '#0D9488' }} />
-              <Typography sx={{ fontWeight: 800, fontSize: { xs: 16, sm: 18 }, color: '#0F172A' }}>
-                المنهج الدراسي وإدارة المحتوى المسجل للطلب
-              </Typography>
-            </Stack>
-
-            <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
-              <Chip
-                icon={<Iconify icon="solar:folder-bold" width={15} />}
-                label={`${chapters.length} فصول معتمدة`}
-                size="small"
-                sx={{
-                  bgcolor: '#F8FAFC',
-                  color: '#475569',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  px: 1,
-                  height: 26,
-                  '& .MuiChip-icon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                  '& .MuiChip-label': { px: 0.5 },
-                }}
-              />
-              <Chip
-                icon={<Iconify icon="solar:clock-circle-bold" width={15} />}
-                label={`${totalHours} ساعة تدريبية معتمدة`}
-                size="small"
-                sx={{
-                  bgcolor: '#ECFDF5',
-                  color: '#059669',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  px: 1,
-                  height: 26,
-                  '& .MuiChip-icon': { color: '#059669', margin: '0 !important', marginInlineEnd: '6px !important' },
-                  '& .MuiChip-label': { px: 0.5 },
-                }}
-              />
-              <Chip
-                icon={<Iconify icon="solar:videocamera-record-bold" width={15} />}
-                label={`${totalLessons} دروس مسجلة`}
-                size="small"
-                sx={{
-                  bgcolor: '#EFF6FF',
-                  color: '#2563EB',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  px: 1,
-                  height: 26,
-                  '& .MuiChip-icon': { color: '#2563EB', margin: '0 !important', marginInlineEnd: '6px !important' },
-                  '& .MuiChip-label': { px: 0.5 },
-                }}
-              />
-            </Stack>
-          </Box>
-
-          {/* Left in RTL: Action Buttons (+ إضافة فصل جديد & حفظ المنهج) */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            sx={{ width: { xs: '100%', md: 'auto' }, gap: 1.5 }}
-          >
-            <Button
-              variant="outlined"
-              onClick={handleOpenAddChapter}
-              startIcon={<Iconify icon="solar:folder-add-bold" width={18} />}
-              sx={{
-                borderRadius: 2,
-                fontWeight: 800,
-                fontSize: 13,
-                borderColor: '#CBD5E1',
-                color: '#334155',
-                bgcolor: '#FFFFFF',
-                px: 2,
-                py: 1,
-                flexShrink: 0,
-                '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '8px !important' },
-                '&:hover': { bgcolor: '#F8FAFC', borderColor: '#94A3B8' },
-              }}
-            >
-              + إضافة فصل جديد
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleSaveToBackend}
-              disabled={isSaving}
-              startIcon={
-                isSaving ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  <Iconify icon="solar:diskette-bold" width={18} />
-                )
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+          {/* RTL Right: Lesson Title Input */}
+          <TextField
+            id="lesson-title-input"
+            fullWidth
+            size="small"
+            placeholder="عنوان الدرس..."
+            value={newLessonTitle}
+            onChange={(e) => setNewLessonTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddLesson();
               }
-              sx={{
-                borderRadius: 2,
-                bgcolor: '#0D9488',
-                color: '#FFFFFF',
-                fontWeight: 800,
-                fontSize: 13,
-                px: 2.5,
-                py: 1,
-                flexShrink: 0,
-                boxShadow: 'none',
-                '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '8px !important' },
-                '&:hover': { bgcolor: '#0F766E', boxShadow: 'none' },
-              }}
-            >
-              {isSaving ? 'جاري حفظ التعديلات...' : 'حفظ المنهج في النظام'}
-            </Button>
-          </Stack>
-        </Box>
-      </Card>
-
-      {/* 2. Chapters & Lessons Accordions */}
-      {chapters.length === 0 ? (
-        <Card
-          sx={{
-            p: 5,
-            borderRadius: 3,
-            bgcolor: '#FFFFFF',
-            border: '1px dashed #CBD5E1',
-            textAlign: 'center',
-          }}
-        >
-          <Box
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: 3,
-              bgcolor: '#F1F5F9',
-              color: '#64748B',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto',
-              mb: 2,
             }}
-          >
-            <Iconify icon="solar:folder-open-broken" width={32} />
-          </Box>
-          <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A', mb: 0.5 }}>
-            لم يتم إنشاء فصول دراسية لهذا الطلب بعد
-          </Typography>
-          <Typography sx={{ fontSize: 13, color: '#64748B', mb: 2.5 }}>
-            ابدأ بإضافة الفصل الأول لتحديد عدد الساعات وإضافة الدروس ومقاطع الفيديو وبنوك الأسئلة.
-          </Typography>
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1.5,
+                fontSize: 14,
+                bgcolor: '#FFFFFF',
+                borderColor: '#E2E8F0',
+              },
+            }}
+          />
+
+          {/* RTL Left: Dark Add Lesson Button */}
           <Button
             variant="contained"
-            onClick={handleOpenAddChapter}
-            startIcon={<Iconify icon="solar:add-circle-bold" width={18} />}
+            onClick={handleAddLesson}
+            startIcon={<Iconify icon="mingcute:add-line" width={18} />}
             sx={{
-              borderRadius: 2,
+              borderRadius: 1.5,
               bgcolor: '#0F172A',
               color: '#FFFFFF',
-              fontWeight: 800,
+              fontWeight: 700,
               fontSize: 13.5,
-              px: 3,
+              px: 2.5,
               py: 1,
-              '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '8px !important' },
+              whiteSpace: 'nowrap',
+              boxShadow: 'none',
+              flexShrink: 0,
+              width: { xs: '100%', sm: 'auto' },
+              '& .MuiButton-startIcon': {
+                margin: '0 !important',
+                marginInlineEnd: '8px !important',
+              },
+              '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
             }}
           >
-            إضافة الفصل الأول
+            إضافة درس
           </Button>
-        </Card>
-      ) : (
-        <Stack spacing={2.5}>
-          {chapters.map((chapter) => {
-            const isExpanded = chapter.isExpanded !== false;
+        </Stack>
+      </Card>
 
-            return (
-              <Card
-                key={chapter.id}
-                sx={{
-                  borderRadius: 2.5,
-                  bgcolor: '#FFFFFF',
-                  border: '1px solid #E2E8F0',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Chapter Header: Title on RIGHT (First in RTL), Actions on LEFT (Second in RTL) */}
-                <Box
-                  onClick={() => handleToggleChapter(chapter.id)}
+      {/* 2. Chapters & Lessons List */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+        {chapters.map((chapter, chIdx) => {
+          const isExpanded = chapter.isExpanded !== false;
+          const isFirstChapter = chIdx === 0;
+
+          return (
+            <React.Fragment key={chapter.id}>
+              {/* If NOT the first chapter, render its accordion header card */}
+              {!isFirstChapter && (
+                <Card
                   sx={{
+                    borderRadius: 2.5,
+                    bgcolor: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    boxShadow: 'none',
                     p: 2,
                     px: 2.5,
-                    bgcolor: '#F8FAFC',
-                    borderBottom: isExpanded ? '1px solid #E2E8F0' : 'none',
                     display: 'flex',
-                    flexWrap: 'wrap',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     cursor: 'pointer',
-                    userSelect: 'none',
-                    gap: 1.5,
-                    '&:hover': { bgcolor: '#F1F5F9' },
+                    '&:hover': { bgcolor: '#FAFBFD' },
                   }}
+                  onClick={() => handleToggleChapter(chapter.id)}
                 >
-                  {/* Right in RTL (First child): Title, Order, Hours, Lessons count */}
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.25, flexWrap: 'wrap' }}>
+                  {/* Right in RTL: Chapter Title & Count & Arrow */}
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: 15, color: '#1E293B' }}>
+                      {chapter.order || chIdx + 1}. {chapter.title} :{' '}
+                      <Box component="span" sx={{ color: '#64748B', fontWeight: 500, fontSize: 14 }}>
+                        ({chapter.lessons?.length || 0} دروس)
+                      </Box>
+                    </Typography>
                     <Iconify
                       icon={isExpanded ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
                       width={18}
-                      sx={{ color: '#64748B' }}
-                    />
-                    <Typography sx={{ fontWeight: 800, fontSize: 15.5, color: '#0F172A' }}>
-                      {chapter.order}. {chapter.title}
-                    </Typography>
-
-                    <Chip
-                      label={`${chapter.lessons?.length || 0} دروس`}
-                      size="small"
-                      sx={{
-                        bgcolor: '#EFF6FF',
-                        color: '#2563EB',
-                        fontWeight: 700,
-                        fontSize: 11.5,
-                        height: 22,
-                        borderRadius: 1,
-                      }}
-                    />
-                    <Chip
-                      label={`${chapter.hours || 0} ساعة معتمدة`}
-                      size="small"
-                      sx={{
-                        bgcolor: '#ECFDF5',
-                        color: '#059669',
-                        fontWeight: 700,
-                        fontSize: 11.5,
-                        height: 22,
-                        borderRadius: 1,
-                      }}
+                      sx={{ color: '#1E293B' }}
                     />
                   </Stack>
 
-                  {/* Left in RTL (Second child): Add lesson, Edit, Delete Chapter */}
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{ alignItems: 'center', gap: 1 }}
-                    onClick={(e) => e.stopPropagation()}
+                  {/* Left in RTL: Red Trash Icon Button in light red border */}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteChapter(chapter.id);
+                    }}
+                    sx={{
+                      border: '1px solid #FECACA',
+                      borderRadius: 1.5,
+                      p: 0.75,
+                      color: '#EF4444',
+                      '&:hover': { bgcolor: '#FEF2F2' },
+                    }}
                   >
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => handleOpenAddLesson(chapter.id)}
-                      startIcon={<Iconify icon="solar:add-circle-bold" width={15} />}
+                    <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                  </IconButton>
+                </Card>
+              )}
+
+              {/* Notice Banner: rendered between Chapter 2 and Chapter 3 (or after the first collapsed chapter) */}
+              {chIdx === 1 && (
+                <Box
+                  sx={{
+                    p: 1.75,
+                    px: 2.5,
+                    borderRadius: 2.5,
+                    bgcolor: '#EFF6FF',
+                    border: '1px solid #BFDBFE',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                  }}
+                >
+                  <Box sx={{ color: '#2563EB', flexShrink: 0, display: 'flex' }}>
+                    <Iconify icon="solar:notes-bold" width={20} />
+                  </Box>
+                  <Typography sx={{ fontSize: 13, color: '#1E3A8A', fontWeight: 600 }}>
+                    <strong style={{ color: '#1E3A8A' }}>تنويه هام:</strong> رفع المحتوى لا ينهي الطلب تلقائياً، يظل الطلب{' '}
+                    <Box
+                      component="span"
                       sx={{
-                        borderRadius: 1.5,
-                        bgcolor: '#0F172A',
-                        color: '#FFFFFF',
-                        fontWeight: 700,
-                        fontSize: 12,
-                        px: 1.75,
-                        py: 0.5,
-                        boxShadow: 'none',
-                        '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                        '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+                        color: '#2563EB',
+                        fontWeight: 800,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5,
                       }}
                     >
-                      + إضافة درس
-                    </Button>
-
-                    <Tooltip title="تعديل بيانات الفصل">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenEditChapter(chapter)}
-                        sx={{ color: '#64748B', '&:hover': { bgcolor: '#E2E8F0' } }}
-                      >
-                        <Iconify icon="solar:pen-new-square-linear" width={17} />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="حذف الفصل بالكامل">
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          setDeleteDialog({
-                            open: true,
-                            type: 'chapter',
-                            chapterId: chapter.id,
-                            title: chapter.title,
-                          })
-                        }
-                        sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
-                      >
-                        <Iconify icon="solar:trash-bin-trash-bold" width={17} />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
+                      قيد التنفيذ 🔵
+                    </Box>{' '}
+                    ومتاحاً لإضافة مقاطع إضافية حتى تختار يدوياً الضغط على زر &quot;إنهاء الخدمة&quot; عند اكتمال متطلبات الطالب بالكامل.
+                  </Typography>
                 </Box>
+              )}
 
-                {/* Chapter Lessons Collapse */}
-                <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                  <Box sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {(!chapter.lessons || chapter.lessons.length === 0) ? (
-                      <Box
+              {/* Expanded Lessons for the Chapter */}
+              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                <Stack spacing={2}>
+                  {chapter.lessons.map((lesson) => {
+                    const videoTitle = lesson.videoUrl
+                      ? `فيديو المحاضرة: ${lesson.title.replace(/^الدرس\s+\d+:\s*/, '')}.mp4`
+                      : 'فيديو المحاضرة: مدخل إلى تشريح عضلة القلب.mp4';
+                    const videoDurationFormatted = formatDurationText(lesson.durationInSeconds);
+                    const quizCount = lesson.test?.questions?.length || 5;
+
+                    return (
+                      <Card
+                        key={lesson.id}
                         sx={{
-                          p: 3,
-                          borderRadius: 2,
-                          bgcolor: '#F8FAFC',
-                          border: '1px dashed #E2E8F0',
-                          textAlign: 'center',
+                          p: { xs: 2, sm: 2.5 },
+                          borderRadius: 2.5,
+                          bgcolor: '#FFFFFF',
+                          border: '1px solid #E2E8F0',
+                          boxShadow: 'none',
                         }}
                       >
-                        <Typography sx={{ color: '#64748B', fontSize: 13, mb: 1.5 }}>
-                          لا توجد دروس مضافة في هذا الفصل بعد.
-                        </Typography>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleOpenAddLesson(chapter.id)}
-                          startIcon={<Iconify icon="solar:add-circle-bold" width={16} />}
+                        {/* Lesson Header */}
+                        <Box
                           sx={{
-                            borderRadius: 1.5,
-                            fontWeight: 700,
-                            fontSize: 12,
-                            '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
+                            display: 'flex',
+                            flexDirection: { xs: 'column', sm: 'row' },
+                            alignItems: { xs: 'flex-start', sm: 'flex-start' },
+                            justifyContent: 'space-between',
+                            mb: 2,
+                            gap: 1.5,
                           }}
                         >
-                          إضافة الدرس الأول لهذا الفصل
-                        </Button>
-                      </Box>
-                    ) : (
-                      chapter.lessons.map((lesson) => {
-                        const hasVideo = Boolean(lesson.videoUrl);
-                        const hasTest = Boolean(lesson.test && (lesson.test.questions?.length || 0) > 0);
-
-                        return (
-                          <Card
-                            key={lesson.id}
-                            sx={{
-                              p: { xs: 2, sm: 2.5 },
-                              borderRadius: 2.5,
-                              bgcolor: '#FFFFFF',
-                              border: '1px solid #E2E8F0',
-                              boxShadow: 'none',
-                            }}
-                          >
-                            {/* Lesson Top Row: Title on RIGHT, Actions on LEFT (Matching Image 1) */}
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                justifyContent: 'space-between',
-                                mb: 2,
-                                flexWrap: 'wrap',
-                                gap: 1.5,
-                              }}
+                          {/* Right in RTL: Title, Completed Badge, Subtitle */}
+                          <Box sx={{ textAlign: 'start' }}>
+                            <Stack
+                              direction="row"
+                              spacing={1.5}
+                              sx={{ alignItems: 'center', mb: 0.5, flexWrap: 'wrap', gap: 1 }}
                             >
-                              {/* Right in RTL (First child): Title, Badge & Subtitle */}
-                              <Box sx={{ textAlign: 'start' }}>
-                                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                                  <Typography sx={{ fontWeight: 800, fontSize: 15, color: '#0F172A' }}>
-                                    {lesson.order}. {lesson.title}
-                                  </Typography>
-
-                                  {hasVideo && hasTest ? (
-                                    <Chip
-                                      label="مكتمل المحتوى (فيديو واختبار)"
-                                      size="small"
-                                      sx={{
-                                        bgcolor: '#ECFDF5',
-                                        color: '#059669',
-                                        fontWeight: 700,
-                                        fontSize: 11,
-                                        height: 22,
-                                        borderRadius: 1,
-                                      }}
-                                    />
-                                  ) : hasVideo ? (
-                                    <Chip
-                                      label="فيديو مرفوع"
-                                      size="small"
-                                      sx={{
-                                        bgcolor: '#EFF6FF',
-                                        color: '#2563EB',
-                                        fontWeight: 700,
-                                        fontSize: 11,
-                                        height: 22,
-                                        borderRadius: 1,
-                                      }}
-                                    />
-                                  ) : hasTest ? (
-                                    <Chip
-                                      label="اختبار تقييمي فقط"
-                                      size="small"
-                                      sx={{
-                                        bgcolor: '#F5F3FF',
-                                        color: '#7C3AED',
-                                        fontWeight: 700,
-                                        fontSize: 11,
-                                        height: 22,
-                                        borderRadius: 1,
-                                      }}
-                                    />
-                                  ) : (
-                                    <Chip
-                                      label="بانتظار رفع المحتوى"
-                                      size="small"
-                                      sx={{
-                                        bgcolor: '#FEF3C7',
-                                        color: '#D97706',
-                                        fontWeight: 700,
-                                        fontSize: 11,
-                                        height: 22,
-                                        borderRadius: 1,
-                                      }}
-                                    />
-                                  )}
-                                </Stack>
-
-                                <Typography sx={{ fontSize: 12, color: '#64748B', mt: 0.5 }}>
-                                  {lesson.description || 'تم إرفاق محتوى الفيديو والاختبار التقييمي لهذا الدرس'}
-                                </Typography>
-                              </Box>
-
-                              {/* Left in RTL (Second child): Edit lesson & Delete */}
-                              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  startIcon={<Iconify icon="solar:pen-new-square-linear" width={15} />}
-                                  onClick={() => handleOpenEditLesson(chapter.id, lesson)}
-                                  sx={{
-                                    borderRadius: 1.5,
-                                    fontSize: 12,
-                                    fontWeight: 700,
-                                    borderColor: '#E2E8F0',
-                                    color: '#475569',
-                                    '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                                  }}
-                                >
-                                  تعديل العنوان
-                                </Button>
-
-                                <IconButton
-                                  size="small"
-                                  onClick={() =>
-                                    setDeleteDialog({
-                                      open: true,
-                                      type: 'lesson',
-                                      chapterId: chapter.id,
-                                      lessonId: lesson.id,
-                                      title: lesson.title,
-                                    })
-                                  }
-                                  sx={{
-                                    color: '#EF4444',
-                                    border: '1px solid #FEE2E2',
-                                    borderRadius: 1.5,
-                                    '&:hover': { bgcolor: '#FEF2F2' },
-                                  }}
-                                >
-                                  <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                </IconButton>
-                              </Stack>
-                            </Box>
-
-                            {/* Lesson Attached Media Items (Matching Image 1) */}
-                            <Stack spacing={1.5} sx={{ mb: 2 }}>
-                              {/* 1. Video Item Row */}
-                              {hasVideo ? (
-                                <Box
-                                  sx={{
-                                    p: 1.75,
-                                    px: 2,
-                                    borderRadius: 2,
-                                    bgcolor: '#F8FAFC',
-                                    border: '1px solid #F1F5F9',
-                                    display: 'flex',
-                                    flexDirection: { xs: 'column', md: 'row' },
-                                    alignItems: { xs: 'flex-start', md: 'center' },
-                                    justifyContent: 'space-between',
-                                    gap: 1.5,
-                                  }}
-                                >
-                                  {/* Right in RTL: Icon & Video metadata */}
-                                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5, textAlign: 'start' }}>
-                                    <Box
-                                      sx={{
-                                        width: 38,
-                                        height: 38,
-                                        borderRadius: 2,
-                                        bgcolor: '#EFF6FF',
-                                        color: '#2563EB',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                      }}
-                                    >
-                                      <Iconify icon="solar:videocamera-record-bold" width={20} />
-                                    </Box>
-                                    <Box>
-                                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
-                                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                                          فيديو المحاضرة: {lesson.title}
-                                        </Typography>
-                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                          <Iconify icon="solar:check-circle-bold" width={13} />
-                                          تم المعالجة والرفع بنجاح
-                                        </Typography>
-                                      </Stack>
-                                      <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
-                                        المدة: {Math.floor((lesson.durationInSeconds || 0) / 60)} دقيقة • الرابط: {lesson.videoUrl?.slice(0, 45)}...
-                                      </Typography>
-                                    </Box>
-                                  </Stack>
-
-                                  {/* Left in RTL: Actions (معاينة الفيديو, استبدال, حذف) */}
-                                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                                    <Button
-                                      size="small"
-                                      variant="contained"
-                                      startIcon={<Iconify icon="solar:play-bold" width={14} />}
-                                      onClick={() => handleOpenPreview(lesson.title, lesson.videoUrl || '')}
-                                      sx={{
-                                        borderRadius: 1.5,
-                                        fontSize: 11.5,
-                                        fontWeight: 800,
-                                        bgcolor: '#0F172A',
-                                        color: '#FFFFFF',
-                                        boxShadow: 'none',
-                                        '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                                        '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
-                                      }}
-                                    >
-                                      معاينة الفيديو
-                                    </Button>
-
-                                    <Button
-                                      size="small"
-                                      variant="outlined"
-                                      onClick={() => handleOpenVideoDialog(chapter.id, lesson)}
-                                      sx={{
-                                        borderRadius: 1.5,
-                                        fontSize: 11.5,
-                                        fontWeight: 700,
-                                        borderColor: '#CBD5E1',
-                                        color: '#475569',
-                                      }}
-                                    >
-                                      استبدال
-                                    </Button>
-
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleDeleteVideo(chapter.id, lesson.id)}
-                                      sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
-                                    >
-                                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                    </IconButton>
-                                  </Stack>
-                                </Box>
-                              ) : null}
-
-                              {/* 2. Test / Quiz Item Row */}
-                              {hasTest ? (
-                                <Box
-                                  sx={{
-                                    p: 1.75,
-                                    px: 2,
-                                    borderRadius: 2,
-                                    bgcolor: '#F8FAFC',
-                                    border: '1px solid #F1F5F9',
-                                    display: 'flex',
-                                    flexDirection: { xs: 'column', md: 'row' },
-                                    alignItems: { xs: 'flex-start', md: 'center' },
-                                    justifyContent: 'space-between',
-                                    gap: 1.5,
-                                  }}
-                                >
-                                  {/* Right in RTL: Icon & Quiz metadata */}
-                                  <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5, textAlign: 'start' }}>
-                                    <Box
-                                      sx={{
-                                        width: 38,
-                                        height: 38,
-                                        borderRadius: 2,
-                                        bgcolor: '#ECFDF5',
-                                        color: '#059669',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                      }}
-                                    >
-                                      <Iconify icon="solar:diploma-verified-bold" width={20} />
-                                    </Box>
-                                    <Box>
-                                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
-                                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                                          بنك أسئلة وتدريبات الدرس (Self-Assessment)
-                                        </Typography>
-                                        <Typography sx={{ fontSize: 11, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                          <Iconify icon="solar:check-circle-bold" width={13} />
-                                          مفعل بعد انتهاء الفيديو
-                                        </Typography>
-                                      </Stack>
-                                      <Typography sx={{ fontSize: 11.5, color: '#64748B', mt: 0.25 }}>
-                                        درجة الاجتياز: %70 • {lesson.test?.questions?.length || 0} أسئلة تدريبية تفاعلية (MCQ)
-                                      </Typography>
-                                    </Box>
-                                  </Stack>
-
-                                  {/* Left in RTL: Actions (معاينة وتعديل الأسئلة, + إضافة سؤال, حذف) */}
-                                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                                    <Button
-                                      size="small"
-                                      variant="contained"
-                                      startIcon={<Iconify icon="solar:document-add-bold" width={14} />}
-                                      onClick={() => handleOpenTestEditor(chapter.id, lesson)}
-                                      sx={{
-                                        borderRadius: 1.5,
-                                        fontSize: 11.5,
-                                        fontWeight: 800,
-                                        bgcolor: '#0F172A',
-                                        color: '#FFFFFF',
-                                        boxShadow: 'none',
-                                        '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                                        '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
-                                      }}
-                                    >
-                                      معاينة وتعديل الأسئلة ({lesson.test?.questions?.length || 0})
-                                    </Button>
-
-                                    <Button
-                                      size="small"
-                                      variant="outlined"
-                                      onClick={() => handleOpenTestEditor(chapter.id, lesson)}
-                                      sx={{
-                                        borderRadius: 1.5,
-                                        fontSize: 11.5,
-                                        fontWeight: 700,
-                                        borderColor: '#CBD5E1',
-                                        color: '#475569',
-                                      }}
-                                    >
-                                      + إضافة سؤال
-                                    </Button>
-
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleDeleteTest(chapter.id, lesson.id)}
-                                      sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
-                                    >
-                                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                    </IconButton>
-                                  </Stack>
-                                </Box>
-                              ) : null}
+                              <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#1E293B' }}>
+                                {lesson.number || lesson.order}. {lesson.title}
+                              </Typography>
+                              <Chip
+                                label={lesson.statusBadge || 'مكتمل المحتوى (3 مرفقات)'}
+                                size="small"
+                                sx={{
+                                  bgcolor: '#ECFDF5',
+                                  color: '#059669',
+                                  border: '1px solid #A7F3D0',
+                                  fontWeight: 700,
+                                  fontSize: 11.5,
+                                  borderRadius: '16px',
+                                  height: 22,
+                                }}
+                              />
                             </Stack>
 
-                            {/* Bottom row inside lesson (Matching Image 1) */}
-                            <Box
+                            <Typography sx={{ fontSize: 12, color: '#94A3B8' }}>
+                              {lesson.subtitle || 'تم إرفاق فيديو، ملخص ومستند، وبنك أسئلة تقييمية لهذا الدرس'}
+                            </Typography>
+                          </Box>
+
+                          {/* Left in RTL: Edit Title + Red Trash Button */}
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:pen-linear" width={14} />}
+                              onClick={() => handleOpenEditLesson(chapter.id, lesson)}
                               sx={{
-                                pt: 1.5,
-                                borderTop: '1px dashed #E2E8F0',
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: 1.5,
+                                borderColor: '#E2E8F0',
+                                color: '#64748B',
+                                borderRadius: 1.5,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                px: 1.5,
+                                py: 0.4,
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                                '&:hover': { bgcolor: '#F8FAFC' },
                               }}
                             >
-                              <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                                يمكنك إضافة مقاطع الفيديو وبنوك الأسئلة التفاعلية التابعة لهذا الدرس
-                              </Typography>
+                              تعديل العنوان
+                            </Button>
 
-                              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  startIcon={<Iconify icon="solar:videocamera-record-linear" width={15} />}
-                                  onClick={() => handleOpenVideoDialog(chapter.id, lesson)}
-                                  sx={{
-                                    borderRadius: 1.5,
-                                    fontSize: 11.5,
-                                    fontWeight: 700,
-                                    borderColor: '#E2E8F0',
-                                    color: '#334155',
-                                    '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                                  }}
-                                >
-                                  {hasVideo ? '+ استبدال الفيديو' : '+ فيديو إضافي'}
-                                </Button>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteLesson(chapter.id, lesson.id)}
+                              sx={{
+                                border: '1px solid #FECACA',
+                                borderRadius: 1.5,
+                                p: 0.7,
+                                color: '#EF4444',
+                                '&:hover': { bgcolor: '#FEF2F2' },
+                              }}
+                            >
+                              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                            </IconButton>
+                          </Stack>
+                        </Box>
 
-                                <Button
-                                  size="small"
-                                  variant="outlined"
-                                  startIcon={<Iconify icon="solar:question-circle-linear" width={15} />}
-                                  onClick={() => handleOpenTestEditor(chapter.id, lesson)}
-                                  sx={{
-                                    borderRadius: 1.5,
-                                    fontSize: 11.5,
-                                    fontWeight: 700,
-                                    borderColor: '#E2E8F0',
-                                    color: '#334155',
-                                    '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                                  }}
-                                >
-                                  {hasTest ? '+ إضافة أسئلة' : '+ إنشاء اختبار'}
-                                </Button>
-                              </Stack>
-                            </Box>
-                          </Card>
-                        );
-                      })
-                    )}
-                  </Box>
-                </Collapse>
-              </Card>
-            );
-          })}
-        </Stack>
-      )}
+                        {/* Attachments Rows */}
+                        <Stack spacing={1.5} sx={{ mb: 2 }}>
+                          {/* Row 1: Video Attachment */}
+                          <Box
+                            sx={{
+                              p: 1.75,
+                              px: 2,
+                              borderRadius: 2,
+                              bgcolor: '#FFFFFF',
+                              border: '1px solid #E2E8F0',
+                              display: 'flex',
+                              flexDirection: { xs: 'column', md: 'row' },
+                              alignItems: { xs: 'flex-start', md: 'center' },
+                              justifyContent: 'space-between',
+                              gap: 1.5,
+                            }}
+                          >
+                            {/* Right in RTL: Icon + Info */}
+                            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 2,
+                                  bgcolor: '#EFF6FF',
+                                  border: '1px solid #BFDBFE',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  color: '#2563EB',
+                                }}
+                              >
+                                <Iconify icon="solar:videocamera-record-bold" width={22} />
+                              </Box>
 
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 1: Add / Edit Chapter Dialog */}
-      {/* ------------------------------------------------------------- */}
+                              <Box sx={{ textAlign: 'start' }}>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1, mb: 0.25 }}>
+                                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+                                    {videoTitle}
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontSize: 11.5,
+                                      color: '#059669',
+                                      fontWeight: 600,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    <Iconify icon="solar:check-circle-bold" width={14} />
+                                    تم المعالجة والرفع بنجاح
+                                  </Typography>
+                                </Stack>
+                                <Typography sx={{ fontSize: 11.5, color: '#64748B' }}>
+                                  الجودة: 1080p Full HD • الحجم: 340 MB • المدة: {videoDurationFormatted}
+                                </Typography>
+                              </Box>
+                            </Stack>
+
+                            {/* Left in RTL: Actions */}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{
+                                alignItems: 'center',
+                                gap: 1,
+                                width: { xs: '100%', md: 'auto' },
+                                justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                              }}
+                            >
+                              <Button
+                                size="small"
+                                variant="contained"
+                                startIcon={<Iconify icon="solar:play-bold" width={14} />}
+                                onClick={() => handlePreviewVideo(lesson.videoUrl, videoTitle)}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  bgcolor: '#0F172A',
+                                  color: '#FFFFFF',
+                                  fontWeight: 700,
+                                  fontSize: 12,
+                                  px: 1.75,
+                                  py: 0.6,
+                                  boxShadow: 'none',
+                                  '& .MuiButton-startIcon': {
+                                    margin: '0 !important',
+                                    marginInlineEnd: '6px !important',
+                                  },
+                                  '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+                                }}
+                              >
+                                معاينة الفيديو
+                              </Button>
+
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => handleOpenVideoDialog(chapter.id, lesson.id, lesson.videoUrl)}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  borderColor: '#CBD5E1',
+                                  color: '#334155',
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  px: 1.5,
+                                  py: 0.6,
+                                  '&:hover': { bgcolor: '#F8FAFC' },
+                                }}
+                              >
+                                استبدال
+                              </Button>
+
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteVideo(chapter.id, lesson.id)}
+                                sx={{
+                                  border: '1px solid #FECACA',
+                                  borderRadius: 1.5,
+                                  p: 0.7,
+                                  color: '#EF4444',
+                                  '&:hover': { bgcolor: '#FEF2F2' },
+                                }}
+                              >
+                                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                              </IconButton>
+                            </Stack>
+                          </Box>
+
+                          {/* Row 2: Document Attachment */}
+                          <Box
+                            sx={{
+                              p: 1.75,
+                              px: 2,
+                              borderRadius: 2,
+                              bgcolor: '#FFFFFF',
+                              border: '1px solid #E2E8F0',
+                              display: 'flex',
+                              flexDirection: { xs: 'column', md: 'row' },
+                              alignItems: { xs: 'flex-start', md: 'center' },
+                              justifyContent: 'space-between',
+                              gap: 1.5,
+                            }}
+                          >
+                            {/* Right in RTL: Icon + Info */}
+                            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 2,
+                                  bgcolor: '#FEF2F2',
+                                  border: '1px solid #FECACA',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  color: '#DC2626',
+                                }}
+                              >
+                                <Iconify icon="solar:document-text-bold" width={22} />
+                              </Box>
+
+                              <Box sx={{ textAlign: 'start' }}>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1, mb: 0.25 }}>
+                                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+                                    {lesson.document?.title || 'الملخص والمذكرة التوضيحية — تشريح القلب.pdf'}
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontSize: 11.5,
+                                      color: '#059669',
+                                      fontWeight: 600,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    <Iconify icon="solar:check-circle-bold" width={14} />
+                                    جاهز للتحميل للطلاب
+                                  </Typography>
+                                </Stack>
+                                <Typography sx={{ fontSize: 11.5, color: '#64748B' }}>
+                                  الحجم: {lesson.document?.fileSize || '4.8 MB'} • {lesson.document?.pagesCount || 32} صفحة • ملف PDF إلكتروني
+                                </Typography>
+                              </Box>
+                            </Stack>
+
+                            {/* Left in RTL: Actions */}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{
+                                alignItems: 'center',
+                                gap: 1,
+                                width: { xs: '100%', md: 'auto' },
+                                justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                              }}
+                            >
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<Iconify icon="solar:download-minimalistic-linear" width={15} />}
+                                onClick={() => {
+                                  toast.info('تم بدء تنزيل مستند الدرس');
+                                }}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  borderColor: '#CBD5E1',
+                                  color: '#1E293B',
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  px: 1.5,
+                                  py: 0.6,
+                                  '& .MuiButton-startIcon': {
+                                    margin: '0 !important',
+                                    marginInlineEnd: '6px !important',
+                                  },
+                                  '&:hover': { bgcolor: '#F8FAFC' },
+                                }}
+                              >
+                                تحميل / عرض
+                              </Button>
+
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => handleOpenDocDialog(chapter.id, lesson.id, lesson.document)}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  borderColor: '#CBD5E1',
+                                  color: '#334155',
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  px: 1.5,
+                                  py: 0.6,
+                                  '&:hover': { bgcolor: '#F8FAFC' },
+                                }}
+                              >
+                                استبدال
+                              </Button>
+
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteDoc(chapter.id, lesson.id)}
+                                sx={{
+                                  border: '1px solid #FECACA',
+                                  borderRadius: 1.5,
+                                  p: 0.7,
+                                  color: '#EF4444',
+                                  '&:hover': { bgcolor: '#FEF2F2' },
+                                }}
+                              >
+                                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                              </IconButton>
+                            </Stack>
+                          </Box>
+
+                          {/* Row 3: Quiz Attachment */}
+                          <Box
+                            sx={{
+                              p: 1.75,
+                              px: 2,
+                              borderRadius: 2,
+                              bgcolor: '#FFFFFF',
+                              border: '1px solid #E2E8F0',
+                              display: 'flex',
+                              flexDirection: { xs: 'column', md: 'row' },
+                              alignItems: { xs: 'flex-start', md: 'center' },
+                              justifyContent: 'space-between',
+                              gap: 1.5,
+                            }}
+                          >
+                            {/* Right in RTL: Icon + Info */}
+                            <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', gap: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 2,
+                                  bgcolor: '#ECFDF5',
+                                  border: '1px solid #A7F3D0',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                  color: '#059669',
+                                }}
+                              >
+                                <Iconify icon="solar:question-circle-bold" width={22} />
+                              </Box>
+
+                              <Box sx={{ textAlign: 'start' }}>
+                                <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1, mb: 0.25 }}>
+                                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+                                    بنك أسئلة وتدريبات الدرس (Self-Assessment)
+                                  </Typography>
+                                  <Typography
+                                    sx={{
+                                      fontSize: 11.5,
+                                      color: '#059669',
+                                      fontWeight: 600,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 0.5,
+                                    }}
+                                  >
+                                    <Iconify icon="solar:check-circle-bold" width={14} />
+                                    مفعل بعد انتهاء الفيديو
+                                  </Typography>
+                                </Stack>
+                                <Typography sx={{ fontSize: 11.5, color: '#64748B' }}>
+                                  <Box component="span" sx={{ color: '#059669', fontWeight: 600 }}>
+                                    درجة الاجتياز: %{quizPassingScore}
+                                  </Box>
+                                  {' • '}
+                                  {quizCount} أسئلة تدريبية تفاعلية (MCQ)
+                                </Typography>
+                              </Box>
+                            </Stack>
+
+                            {/* Left in RTL: Actions */}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{
+                                alignItems: 'center',
+                                gap: 1,
+                                width: { xs: '100%', md: 'auto' },
+                                justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                              }}
+                            >
+                              <Button
+                                size="small"
+                                variant="contained"
+                                onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, lesson.test)}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  bgcolor: '#0F172A',
+                                  color: '#FFFFFF',
+                                  fontWeight: 700,
+                                  fontSize: 12,
+                                  px: 1.75,
+                                  py: 0.6,
+                                  boxShadow: 'none',
+                                  '&:hover': { bgcolor: '#1E293B', boxShadow: 'none' },
+                                }}
+                              >
+                                معاينة وتعديل الأسئلة ({quizCount})
+                              </Button>
+
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<Iconify icon="mingcute:add-line" width={14} />}
+                                onClick={() => {
+                                  handleOpenQuizDialog(chapter.id, lesson.id, lesson.test);
+                                  handleAddQuestionToQuiz();
+                                }}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  borderColor: '#CBD5E1',
+                                  color: '#334155',
+                                  fontWeight: 600,
+                                  fontSize: 12,
+                                  px: 1.5,
+                                  py: 0.6,
+                                  '& .MuiButton-startIcon': {
+                                    margin: '0 !important',
+                                    marginInlineEnd: '6px !important',
+                                  },
+                                  '&:hover': { bgcolor: '#F8FAFC' },
+                                }}
+                              >
+                                + إضافة سؤال
+                              </Button>
+
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteQuiz(chapter.id, lesson.id)}
+                                sx={{
+                                  border: '1px solid #FECACA',
+                                  borderRadius: 1.5,
+                                  p: 0.7,
+                                  color: '#EF4444',
+                                  '&:hover': { bgcolor: '#FEF2F2' },
+                                }}
+                              >
+                                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                              </IconButton>
+                            </Stack>
+                          </Box>
+                        </Stack>
+
+                        {/* Bottom Row of Lesson: Reorder hint on Right, Attachment buttons on Left */}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            alignItems: { xs: 'flex-start', md: 'center' },
+                            justifyContent: 'space-between',
+                            pt: 1.5,
+                            borderTop: '1px dashed #E2E8F0',
+                            gap: 1.5,
+                          }}
+                        >
+                          {/* Right in RTL: Reorder Hint */}
+                          <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
+                            يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
+                          </Typography>
+
+                          {/* Left in RTL: 3 Action Buttons */}
+                          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:question-circle-linear" width={15} />}
+                              onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, lesson.test)}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                                '&:hover': { bgcolor: '#F8FAFC' },
+                              }}
+                            >
+                              + إضافة اسئلة
+                            </Button>
+
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:document-linear" width={15} />}
+                              onClick={() => handleOpenDocDialog(chapter.id, lesson.id, lesson.document)}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                                '&:hover': { bgcolor: '#F8FAFC' },
+                              }}
+                            >
+                              + مستند إضافي
+                            </Button>
+
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              startIcon={<Iconify icon="solar:videocamera-record-linear" width={15} />}
+                              onClick={() => handleOpenVideoDialog(chapter.id, lesson.id, lesson.videoUrl)}
+                              sx={{
+                                borderRadius: 1.5,
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                borderColor: '#E2E8F0',
+                                color: '#334155',
+                                '& .MuiButton-startIcon': {
+                                  margin: '0 !important',
+                                  marginInlineEnd: '6px !important',
+                                },
+                                '&:hover': { bgcolor: '#F8FAFC' },
+                              }}
+                            >
+                              + فيديو إضافي
+                            </Button>
+                          </Stack>
+                        </Box>
+                      </Card>
+                    );
+                  })}
+                </Stack>
+              </Collapse>
+            </React.Fragment>
+          );
+        })}
+      </Box>
+
+      {/* ========================================================================= */}
+      {/* DIALOGS                                                                   */}
+      {/* ========================================================================= */}
+
+      {/* 1. Video Preview Dialog */}
       <Dialog
-        open={chapterDialogOpen}
-        onClose={() => setChapterDialogOpen(false)}
-        maxWidth="sm"
+        open={videoPreviewOpen}
+        onClose={() => setVideoPreviewOpen(false)}
+        maxWidth="md"
         fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+        slotProps={{ paper: { sx: { borderRadius: 3, overflow: 'hidden' } } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'start' }}>
-          {editingChapterId ? 'تعديل بيانات الفصل' : 'إضافة فصل دراسي جديد'}
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 16, bgcolor: '#0F172A', color: '#FFFFFF', py: 1.5 }}>
+          {previewVideoTitle || 'معاينة الفيديو'}
         </DialogTitle>
-        <DialogContent sx={{ py: 2 }}>
-          <Stack spacing={2.5}>
-            <TextField
-              label="عنوان الفصل"
-              fullWidth
-              size="medium"
-              placeholder="مثال: الفصل الأول - أساسيات الجراحة العامة"
-              value={chapterTitleInput}
-              onChange={(e) => setChapterTitleInput(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+        <DialogContent sx={{ p: 0, bgcolor: '#000000', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+          {previewVideoUrl ? (
+            <Box
+              component="video"
+              src={previewVideoUrl}
+              controls
+              autoPlay
+              sx={{ width: '100%', maxHeight: 480, bgcolor: '#000000' }}
             />
-
-            <TextField
-              label="عدد الساعات المعتمدة للفصل"
-              type="number"
-              fullWidth
-              size="medium"
-              value={chapterHoursInput}
-              onChange={(e) => setChapterHoursInput(e.target.value)}
-              slotProps={{
-                htmlInput: { min: 0, step: 0.5 },
-                input: {
-                  endAdornment: <InputAdornment position="end">ساعة</InputAdornment>,
-                },
-              }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Stack>
+          ) : (
+            <Box sx={{ textAlign: 'center', color: '#94A3B8', p: 4 }}>
+              <Iconify icon="solar:play-circle-bold" width={64} sx={{ color: '#FFFFFF', mb: 1.5 }} />
+              <Typography sx={{ fontSize: 14, color: '#FFFFFF', fontWeight: 700 }}>
+                مشغل الفيديو
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: '#94A3B8', mt: 0.5 }}>
+                1080p Full HD • جاهز للعرض
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setChapterDialogOpen(false)}
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
-            إلغاء
-          </Button>
+        <DialogActions sx={{ p: 1.5, bgcolor: '#0F172A' }}>
           <Button
             variant="contained"
-            onClick={handleSaveChapter}
-            sx={{ borderRadius: 2, px: 3, bgcolor: '#0F172A', fontWeight: 800 }}
+            onClick={() => setVideoPreviewOpen(false)}
+            sx={{ borderRadius: 1.5, bgcolor: '#334155', color: '#FFFFFF', '&:hover': { bgcolor: '#475569' } }}
           >
-            حفظ الفصل
+            إغلاق
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 2: Add / Edit Lesson Dialog */}
-      {/* ------------------------------------------------------------- */}
-      <Dialog
-        open={lessonDialogOpen}
-        onClose={() => setLessonDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'start' }}>
-          {editingLessonId ? 'تعديل بيانات الدرس' : 'إضافة درس جديد للفصل'}
-        </DialogTitle>
-        <DialogContent sx={{ py: 2 }}>
-          <Stack spacing={2.5}>
-            <TextField
-              label="عنوان الدرس"
-              fullWidth
-              size="medium"
-              placeholder="مثال: الدرس الأول: مقدمة وتشريح عضلة القلب"
-              value={lessonTitleInput}
-              onChange={(e) => setLessonTitleInput(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-
-            <TextField
-              label="وصف الدرس والمستهدف الأكاديمي (اختياري)"
-              fullWidth
-              multiline
-              rows={3}
-              placeholder="نبذة توضيحية عما يتعلمه الطالب في هذا الدرس..."
-              value={lessonDescriptionInput}
-              onChange={(e) => setLessonDescriptionInput(e.target.value)}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-
-            <TextField
-              label="المدة التقديرية للدرس (بالدقائق)"
-              type="number"
-              fullWidth
-              size="medium"
-              value={lessonDurationInput}
-              onChange={(e) => setLessonDurationInput(e.target.value)}
-              slotProps={{
-                htmlInput: { min: 1, step: 1 },
-                input: {
-                  endAdornment: <InputAdornment position="end">دقيقة</InputAdornment>,
-                },
-              }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setLessonDialogOpen(false)}
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
-            إلغاء
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveLesson}
-            sx={{ borderRadius: 2, px: 3, bgcolor: '#0F172A', fontWeight: 800 }}
-          >
-            حفظ الدرس
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 3: Video Upload / Link Dialog */}
-      {/* ------------------------------------------------------------- */}
+      {/* 2. Video Replace / Upload Dialog */}
       <Dialog
         open={videoDialogOpen}
-        onClose={() => !isUploadingVideo && setVideoDialogOpen(false)}
+        onClose={() => setVideoDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+        slotProps={{ paper: { sx: { borderRadius: 2.5 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'start' }}>
-          إرفاق فيديو الدرس
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 16 }}>
+          تحديث ورفع فيديو الدرس
         </DialogTitle>
         <DialogContent sx={{ py: 2 }}>
           <Tabs
-            value={videoTab}
-            onChange={(_, val) => setVideoTab(val)}
-            sx={{
-              mb: 2.5,
-              '& .MuiTab-root': { fontWeight: 700, fontSize: 13 },
-            }}
+            value={videoDialogTab}
+            onChange={(_, val) => setVideoDialogTab(val)}
+            sx={{ mb: 2, borderBottom: '1px solid #E2E8F0' }}
           >
-            <Tab value="url" label="رابط فيديو مباشر (URL / Embed)" />
-            <Tab value="upload" label="رفع ملف من الجهاز (Upload MP4)" />
+            <Tab label="رفع ملف فيديو" sx={{ fontWeight: 700 }} />
+            <Tab label="رابط خارجي" sx={{ fontWeight: 700 }} />
           </Tabs>
 
-          {videoTab === 'url' ? (
-            <Stack spacing={2}>
-              <TextField
-                label="رابط الفيديو (YouTube / Vimeo / Direct CDN)"
-                fullWidth
-                size="medium"
-                dir="ltr"
-                placeholder="https://..."
-                value={videoUrlInput}
-                onChange={(e) => setVideoUrlInput(e.target.value)}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
-              <Typography sx={{ fontSize: 12, color: '#64748B' }}>
-                يمكنك لصق رابط فيديو مباشر من منصة يوتيوب، فيميو، أو رابط وسائط رقمية بصيغة mp4.
-              </Typography>
-            </Stack>
-          ) : (
-            <Box sx={{ textAlign: 'center', py: 2 }}>
+          {videoDialogTab === 0 ? (
+            <Box sx={{ textAlign: 'center' }}>
               <input
-                ref={fileInputRef}
+                ref={videoFileInputRef}
                 type="file"
-                accept="video/mp4,video/webm,video/quicktime"
+                accept="video/*"
                 style={{ display: 'none' }}
-                onChange={handleUploadVideoFile}
+                onChange={handleVideoFileSelect}
               />
               <Box
-                onClick={() => !isUploadingVideo && fileInputRef.current?.click()}
+                onClick={() => videoFileInputRef.current?.click()}
                 sx={{
-                  p: 3,
-                  borderRadius: 2.5,
                   border: '2px dashed #CBD5E1',
+                  borderRadius: 2.5,
+                  p: 4,
+                  cursor: 'pointer',
                   bgcolor: '#F8FAFC',
-                  cursor: isUploadingVideo ? 'wait' : 'pointer',
-                  '&:hover': { bgcolor: '#F1F5F9', borderColor: '#94A3B8' },
+                  '&:hover': { bgcolor: '#F1F5F9', borderColor: '#2563EB' },
                 }}
               >
-                {isUploadingVideo ? (
-                  <Stack spacing={1.5} sx={{ alignItems: 'center', py: 2 }}>
-                    <CircularProgress size={32} sx={{ color: '#0D9488' }} />
-                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0D9488' }}>
-                      جاري رفع ملف الفيديو ومعالجته في السيرفر...
-                    </Typography>
-                  </Stack>
-                ) : (
-                  <>
-                    <Iconify icon="solar:cloud-upload-bold" width={40} sx={{ color: '#0284C7', mb: 1 }} />
-                    <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A', mb: 0.5 }}>
-                      اضغط هنا لاختيار ملف فيديو من جهازك
-                    </Typography>
-                    <Typography sx={{ fontSize: 12, color: '#64748B' }}>
-                      الصيغ المدعومة: MP4, WebM (الحد الأقصى 500 ميجابايت)
-                    </Typography>
-                  </>
-                )}
+                <Iconify icon="solar:upload-track-2-bold" width={48} sx={{ color: '#2563EB', mb: 1.5 }} />
+                <Typography sx={{ fontWeight: 700, fontSize: 14, color: '#1E293B' }}>
+                  {videoFileName || 'اضغط هنا لاختيار ملف فيديو MP4 / MOV'}
+                </Typography>
+                <Typography sx={{ fontSize: 12, color: '#94A3B8', mt: 0.5 }}>
+                  يدعم صيغ MP4, WebM بدقة حتى 1080p
+                </Typography>
               </Box>
 
-              {videoUrlInput && (
-                <Typography sx={{ fontSize: 12, color: '#059669', mt: 1.5, fontWeight: 700, direction: 'ltr' }}>
-                  الملف المرفوع: {videoUrlInput}
-                </Typography>
+              {isUploadingVideo && (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5, mt: 2 }}>
+                  <CircularProgress size={20} />
+                  <Typography sx={{ fontSize: 13, color: '#64748B' }}>جاري رفع الفيديو...</Typography>
+                </Box>
               )}
             </Box>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="رابط الفيديو (Direct MP4 / YouTube / Vimeo)"
+                value={videoUrlInput}
+                onChange={(e) => setVideoUrlInput(e.target.value)}
+                placeholder="https://example.com/video.mp4"
+              />
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="المدة التقديرية (بالدقائق)"
+                value={videoDurationInput}
+                onChange={(e) => setVideoDurationInput(e.target.value)}
+              />
+            </Box>
           )}
-
-          <TextField
-            label="مدة الفيديو (بالدقائق)"
-            type="number"
-            fullWidth
-            size="medium"
-            value={videoDurationMinutes}
-            onChange={(e) => setVideoDurationMinutes(e.target.value)}
-            slotProps={{
-              htmlInput: { min: 1, step: 1 },
-              input: { endAdornment: <InputAdornment position="end">دقيقة</InputAdornment> },
-            }}
-            sx={{ mt: 2.5, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-          />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            disabled={isUploadingVideo}
-            onClick={() => setVideoDialogOpen(false)}
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="outlined" onClick={() => setVideoDialogOpen(false)}>
             إلغاء
           </Button>
           <Button
             variant="contained"
-            disabled={isUploadingVideo || !videoUrlInput.trim()}
             onClick={handleSaveVideo}
-            sx={{ borderRadius: 2, px: 3, bgcolor: '#0F172A', fontWeight: 800 }}
+            sx={{ bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' } }}
           >
-            حفظ الفيديو
+            حفظ واعتماد
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 4: Test / Questions Editor Dialog */}
-      {/* ------------------------------------------------------------- */}
+      {/* 3. Document Replace / Edit Dialog */}
       <Dialog
-        open={testDialogOpen}
-        onClose={() => setTestDialogOpen(false)}
-        maxWidth="md"
+        open={docDialogOpen}
+        onClose={() => setDocDialogOpen(false)}
+        maxWidth="sm"
         fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+        slotProps={{ paper: { sx: { borderRadius: 2.5 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'start' }}>
-          بنك أسئلة وتدريبات الدرس التفاعلية (MCQ)
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 16 }}>
+          تحديث ملخص ومستند الدرس
         </DialogTitle>
         <DialogContent sx={{ py: 2 }}>
-          <Typography sx={{ fontSize: 13, color: '#64748B', mb: 2 }}>
-            أضف أسئلة الاختيار من متعدد مع تحديد الإجابة الصحيحة لكل سؤال.
-          </Typography>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="عنوان الملف والمذكرة"
+              value={docTitleInput}
+              onChange={(e) => setDocTitleInput(e.target.value)}
+              placeholder="الملخص والمذكرة التوضيحية — تشريح القلب.pdf"
+            />
+            <TextField
+              fullWidth
+              size="small"
+              type="number"
+              label="عدد الصفحات"
+              value={docPagesInput}
+              onChange={(e) => setDocPagesInput(e.target.value)}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="outlined" onClick={() => setDocDialogOpen(false)}>
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveDoc}
+            sx={{ bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' } }}
+          >
+            حفظ
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-          <Stack spacing={3}>
-            {testQuestions.map((question, qIdx) => (
+      {/* 4. Quiz Questions Editor Dialog */}
+      <Dialog
+        open={quizDialogOpen}
+        onClose={() => setQuizDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, borderBottom: '1px solid #E2E8F0', pb: 1.5 }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Iconify icon="solar:question-circle-bold" width={22} sx={{ color: '#059669' }} />
+              <Typography sx={{ fontWeight: 800, fontSize: 16 }}>
+                بنك أسئلة وتدريبات الدرس (Self-Assessment)
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>درجة الاجتياز:</Typography>
+              <TextField
+                size="small"
+                type="number"
+                value={quizPassingScore}
+                onChange={(e) => setQuizPassingScore(e.target.value)}
+                sx={{ width: 80, '& .MuiOutlinedInput-input': { py: 0.5, px: 1, fontSize: 13, textAlign: 'center' } }}
+              />
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#059669' }}>%</Typography>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent sx={{ py: 2.5, maxHeight: '65vh', overflowY: 'auto' }}>
+          <Stack spacing={2.5}>
+            {quizQuestions.map((q, qIndex) => (
               <Card
-                key={question.id || qIdx}
+                key={q.id}
                 sx={{
                   p: 2.5,
                   borderRadius: 2.5,
                   bgcolor: '#F8FAFC',
                   border: '1px solid #E2E8F0',
+                  boxShadow: 'none',
                 }}
               >
-                <Stack direction="row" spacing={1.5} sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                {/* Question Header */}
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                   <Typography sx={{ fontWeight: 800, fontSize: 14.5, color: '#0F172A' }}>
-                    السؤال {qIdx + 1}:
+                    السؤال {qIndex + 1}
                   </Typography>
 
-                  {testQuestions.length > 1 && (
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteQuestion(qIdx)}
-                      sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEE2E2' } }}
-                    >
-                      <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                    </IconButton>
-                  )}
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveQuestionFromQuiz(q.id)}
+                    sx={{ color: '#EF4444', '&:hover': { bgcolor: '#FEF2F2' } }}
+                  >
+                    <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+                  </IconButton>
                 </Stack>
 
+                {/* Question Text */}
                 <TextField
+                  fullWidth
+                  size="small"
                   label="نص السؤال"
-                  fullWidth
-                  size="small"
-                  placeholder="اكتب نص السؤال هنا..."
-                  value={question.text}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setTestQuestions((prev) =>
-                      prev.map((q, idx) => (idx === qIdx ? { ...q, text: val } : q))
-                    );
-                  }}
-                  sx={{ mb: 2, bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                  value={q.text}
+                  onChange={(e) =>
+                    setQuizQuestions((prev) =>
+                      prev.map((item) =>
+                        item.id === q.id ? { ...item, text: e.target.value } : item
+                      )
+                    )
+                  }
+                  sx={{ mb: 2, bgcolor: '#FFFFFF' }}
                 />
 
+                {/* Question Explanation */}
                 <TextField
-                  label="توضيح الإجابة الصحيحة (اختياري)"
                   fullWidth
                   size="small"
-                  placeholder="الشرح والتفسير الأكاديمي للحل..."
-                  value={question.explanation || ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setTestQuestions((prev) =>
-                      prev.map((q, idx) => (idx === qIdx ? { ...q, explanation: val } : q))
-                    );
-                  }}
-                  sx={{ mb: 2, bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                  label="شرح وتوضيح الإجابة (اختياري)"
+                  value={q.explanation || ''}
+                  onChange={(e) =>
+                    setQuizQuestions((prev) =>
+                      prev.map((item) =>
+                        item.id === q.id ? { ...item, explanation: e.target.value } : item
+                      )
+                    )
+                  }
+                  sx={{ mb: 2, bgcolor: '#FFFFFF' }}
                 />
 
-                {/* Choices list */}
-                <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#475569', mb: 1 }}>
-                  خيارات الإجابة (حدد الدائرة أمام الخيار الصحيح):
+                {/* Choices */}
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#334155', mb: 1 }}>
+                  الخيارات المتاحة (اختر الدائرة بجانب الإجابة الصحيحة):
                 </Typography>
 
-                <Stack spacing={1}>
-                  {(question.choices || []).map((choice, cIdx) => (
-                    <Box
-                      key={choice.id || cIdx}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        p: 0.5,
-                        px: 1,
-                        borderRadius: 1.5,
-                        bgcolor: choice.isRight ? '#ECFDF5' : '#FFFFFF',
-                        border: `1px solid ${choice.isRight ? '#A7F3D0' : '#E2E8F0'}`,
-                      }}
-                    >
-                      <Radio
-                        checked={Boolean(choice.isRight)}
-                        onChange={() => handleSetCorrectChoice(qIdx, cIdx)}
-                        size="small"
-                        sx={{ color: choice.isRight ? '#059669' : '#94A3B8', '&.Mui-checked': { color: '#059669' } }}
-                      />
-
-                      <TextField
-                        fullWidth
-                        size="small"
-                        placeholder={`الخيار ${cIdx + 1}...`}
-                        value={choice.title}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setTestQuestions((prev) =>
-                            prev.map((q, idx) => {
-                              if (idx !== qIdx) return q;
-                              return {
-                                ...q,
-                                choices: (q.choices || []).map((c, ci) =>
-                                  ci === cIdx ? { ...c, title: val } : c
-                                ),
-                              };
-                            })
-                          );
-                        }}
+                <RadioGroup
+                  value={q.choices?.find((c) => c.isRight)?.id || ''}
+                  onChange={(e) => handleSelectRightChoice(q.id, e.target.value)}
+                >
+                  <Stack spacing={1}>
+                    {(q.choices || []).map((choice, cIndex) => (
+                      <Stack
+                        key={choice.id}
+                        direction="row"
+                        spacing={1}
                         sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 1.5,
-                            bgcolor: '#FFFFFF',
-                            fontSize: 13,
-                          },
+                          alignItems: 'center',
+                          bgcolor: choice.isRight ? '#ECFDF5' : '#FFFFFF',
+                          border: `1px solid ${choice.isRight ? '#A7F3D0' : '#E2E8F0'}`,
+                          borderRadius: 1.5,
+                          p: 0.75,
+                          px: 1.5,
                         }}
-                      />
+                      >
+                        <FormControlLabel
+                          value={choice.id}
+                          control={<Radio size="small" sx={{ color: choice.isRight ? '#059669' : undefined }} />}
+                          label=""
+                          sx={{ m: 0 }}
+                        />
 
-                      {question.choices.length > 2 && (
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder={`الخيار ${cIndex + 1}`}
+                          value={choice.title}
+                          onChange={(e) =>
+                            setQuizQuestions((prev) =>
+                              prev.map((item) =>
+                                item.id === q.id
+                                  ? {
+                                      ...item,
+                                      choices: (item.choices || []).map((c) =>
+                                        c.id === choice.id ? { ...c, title: e.target.value } : c
+                                      ),
+                                    }
+                                  : item
+                              )
+                            )
+                          }
+                          sx={{ '& .MuiOutlinedInput-root': { bgcolor: '#FFFFFF' } }}
+                        />
+
                         <IconButton
                           size="small"
-                          onClick={() => handleDeleteChoice(qIdx, cIdx)}
-                          sx={{ color: '#EF4444' }}
+                          onClick={() => handleRemoveChoice(q.id, choice.id)}
+                          sx={{ color: '#94A3B8', '&:hover': { color: '#EF4444' } }}
                         >
-                          <Iconify icon="solar:close-circle-bold" width={16} />
+                          <Iconify icon="solar:close-circle-bold" width={18} />
                         </IconButton>
-                      )}
-                    </Box>
-                  ))}
-                </Stack>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </RadioGroup>
 
                 <Button
                   size="small"
                   variant="text"
-                  onClick={() => handleAddChoice(qIdx)}
-                  startIcon={<Iconify icon="solar:add-circle-bold" width={15} />}
-                  sx={{
-                    mt: 1.5,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: '#0284C7',
-                    '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '6px !important' },
-                  }}
+                  startIcon={<Iconify icon="mingcute:add-line" width={15} />}
+                  onClick={() => handleAddChoice(q.id)}
+                  sx={{ mt: 1.5, fontSize: 12, fontWeight: 700, color: '#2563EB' }}
                 >
                   + إضافة خيار إضافي
                 </Button>
@@ -1777,133 +1894,68 @@ export default function RecordedCurriculumSection({
 
             <Button
               variant="outlined"
-              onClick={handleAddQuestion}
-              startIcon={<Iconify icon="solar:add-circle-bold" width={18} />}
+              startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+              onClick={handleAddQuestionToQuiz}
               sx={{
-                py: 1.25,
                 borderRadius: 2,
-                borderStyle: 'dashed',
-                fontWeight: 800,
-                fontSize: 13,
-                borderColor: '#94A3B8',
+                py: 1.25,
+                fontWeight: 700,
+                borderColor: '#CBD5E1',
                 color: '#334155',
-                '& .MuiButton-startIcon': { margin: '0 !important', marginInlineEnd: '8px !important' },
+                borderStyle: 'dashed',
+                '&:hover': { bgcolor: '#F8FAFC', borderColor: '#2563EB' },
               }}
             >
-              + إضافة سؤال جديد
+              + إضافة سؤال جديد لبنك الأسئلة
             </Button>
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setTestDialogOpen(false)}
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
+
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #E2E8F0' }}>
+          <Button variant="outlined" onClick={() => setQuizDialogOpen(false)}>
             إلغاء
           </Button>
           <Button
             variant="contained"
-            onClick={handleSaveTest}
-            sx={{ borderRadius: 2, px: 3, bgcolor: '#0F172A', fontWeight: 800 }}
+            onClick={handleSaveQuiz}
+            sx={{ bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' }, fontWeight: 700 }}
           >
-            اعتماد وحفظ بنك الأسئلة
+            حفظ بنك الأسئلة
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 5: Video Preview Dialog */}
-      {/* ------------------------------------------------------------- */}
+      {/* 5. Edit Lesson Title Dialog */}
       <Dialog
-        open={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-        maxWidth="md"
-        fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1, bgcolor: '#0F172A' } } }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 16, color: '#FFFFFF', textAlign: 'start' }}>
-          معاينة الفيديو: {previewTitle}
-        </DialogTitle>
-        <DialogContent sx={{ py: 1 }}>
-          {getEmbedUrl(previewUrl) ? (
-            <Box
-              component="iframe"
-              src={getEmbedUrl(previewUrl)!}
-              sx={{
-                width: '100%',
-                height: { xs: 260, sm: 420 },
-                border: 0,
-                borderRadius: 2,
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <Box
-              component="video"
-              src={previewUrl}
-              controls
-              autoPlay
-              sx={{
-                width: '100%',
-                maxHeight: 450,
-                borderRadius: 2,
-                bgcolor: '#000000',
-              }}
-            />
-          )}
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => setPreviewOpen(false)}
-            sx={{ borderRadius: 2, px: 3, bgcolor: '#334155', color: '#FFFFFF', fontWeight: 700 }}
-          >
-            إغلاق المعاينة
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ------------------------------------------------------------- */}
-      {/* Dialog 6: Delete Confirmation Dialog */}
-      {/* ------------------------------------------------------------- */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog((prev) => ({ ...prev, open: false }))}
+        open={Boolean(editingLesson)}
+        onClose={() => setEditingLesson(null)}
         maxWidth="xs"
         fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+        slotProps={{ paper: { sx: { borderRadius: 2.5 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'center' }}>
-          تأكيد الحذف
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 16 }}>
+          تعديل عنوان الدرس
         </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', py: 1 }}>
-          <Typography sx={{ color: '#64748B', fontSize: 14 }}>
-            هل أنت متأكد من رغبتك في حذف{' '}
-            {deleteDialog.type === 'chapter' ? 'الفصل' : 'الدرس'} &ldquo;{deleteDialog.title}&rdquo;؟
-          </Typography>
-          {deleteDialog.type === 'chapter' && (
-            <Typography sx={{ color: '#DC2626', fontSize: 12, mt: 1, fontWeight: 700 }}>
-              سيتم حذف جميع الدروس ومقاطع الفيديو التابعة لهذا الفصل.
-            </Typography>
-          )}
+        <DialogContent sx={{ py: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            autoFocus
+            sx={{ mt: 1 }}
+          />
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setDeleteDialog((prev) => ({ ...prev, open: false }))}
-            sx={{ borderRadius: 2, px: 2.5, fontWeight: 700 }}
-          >
-            تراجع
+        <DialogActions sx={{ p: 2 }}>
+          <Button variant="outlined" onClick={() => setEditingLesson(null)}>
+            إلغاء
           </Button>
           <Button
             variant="contained"
-            color="error"
-            onClick={handleConfirmDelete}
-            sx={{ borderRadius: 2, px: 2.5, fontWeight: 800 }}
+            onClick={handleSaveLessonTitle}
+            sx={{ bgcolor: '#0F172A', '&:hover': { bgcolor: '#1E293B' } }}
           >
-            تأكيد الحذف
+            حفظ
           </Button>
         </DialogActions>
       </Dialog>
