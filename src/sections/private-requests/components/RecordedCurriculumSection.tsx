@@ -272,12 +272,8 @@ function mapRichChaptersToBackendPayload(
         };
       });
 
-      // Chapter hours: at least 1 or calculated from lesson durations
-      const totalSeconds = lessons.reduce(
-        (acc, l) => acc + (Number(l.durationInSeconds) || 0),
-        0
-      );
-      const chapterHours = Math.max(1, Math.round(totalSeconds / 3600) || 1);
+      // Chapter hours: respect ch.hours if provided, otherwise 0
+      const chapterHours = typeof ch.hours === 'number' ? ch.hours : 0;
 
       return {
         id: chapterId,
@@ -392,7 +388,7 @@ export default function RecordedCurriculumSection({
       id: crypto.randomUUID(),
       number: richChapters.length + 1,
       title: newChapterTitle.trim(),
-      hours: 1,
+      hours: 0,
       isExpanded: true,
       lessons: [],
     };

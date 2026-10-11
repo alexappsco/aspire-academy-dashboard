@@ -52,6 +52,17 @@ const commonErrorMessages = new Map([
   ['503', 'service_not_available'],
 ]);
 const commonErrorStatus = new Set([500, 503, 404]);
+
+const KNOWN_BACKEND_ERRORS: Record<string, string> = {
+  InsufficientWalletBalance: 'رصيد محفظة الطالب غير كافٍ لتغطية تكلفة ساعات هذا المنهج',
+  SessionRequestNotFound: 'لم يتم العثور على الطلب الخاص المطلوب',
+  UnauthorizedAccess: 'ليس لديك صلاحية لتعديل هذا الطلب',
+};
+
+function formatBackendMessage(msg?: string | null): string {
+  if (!msg) return '';
+  return KNOWN_BACKEND_ERRORS[msg.trim()] || msg;
+}
 // generic function to make API requests
 async function apiRequest<TResponse, TBody = undefined>(
   endpoint: string,
@@ -126,7 +137,7 @@ async function apiRequest<TResponse, TBody = undefined>(
           }
           if (msg) {
             return errorObject(
-              msg,
+              formatBackendMessage(msg),
               response.status,
               body.code ?? abpError?.code ?? null,
               body.details ?? abpError?.details ?? null,
@@ -201,7 +212,7 @@ async function apiRequest<TResponse, TBody = undefined>(
       const resDetails = responseData?.details ?? abpError?.details ?? null;
       const resData = responseData?.data ?? {};
       const resVErrors = responseData?.validationErrors ?? abpError?.validationErrors ?? null;
-      return errorObject(errMsg, response.status, resCode, resDetails, resData, resVErrors);
+      return errorObject(formatBackendMessage(errMsg), response.status, resCode, resDetails, resData, resVErrors);
     }
 
     return {
