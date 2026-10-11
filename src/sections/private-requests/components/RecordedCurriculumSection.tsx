@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -14,13 +14,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { uploadFile, uploadAttachment } from 'src/actions/courses';
 import QuizDialog, { QuizConfig } from 'src/sections/courses/components/QuizDialog';
 import { saveSessionRequestChaptersAction } from 'src/actions/instructor-session-requests';
-import type { AttachmentItem, RichChapter, LessonQuiz } from 'src/sections/courses/types';
+import type { LessonQuiz } from 'src/sections/courses/types';
 import type {
   SessionChapterResult,
   SaveSessionChaptersCommand,
@@ -45,39 +45,94 @@ const inputRootSx = {
   },
 };
 
-// Check if an ID is a valid GUID from backend
+// Check if an ID is a valid GUID
 function isValidUuid(id?: string | null): boolean {
   if (!id) return false;
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
-// Map backend chapters into rich UI chapters (Zero fake data)
-function mapBackendChaptersToRich(backendChapters?: SessionChapterResult[] | null): RichChapter[] {
+// Guarantee a valid GUID: keep existing if valid, otherwise generate a new RFC4122 UUID
+function ensureUuid(id?: string | null): string {
+  if (isValidUuid(id)) return id!;
+  return crypto.randomUUID();
+}
+
+// Extract embed URL for video preview (YouTube, Vimeo, etc.)
+function getEmbedUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  const ytMatch = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/
+  );
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  return null;
+}
+
+// Internal UI types - strictly video and quiz attachments, zero mock data
+export interface CurriculumAttachmentItem {
+  id: string;
+  type: 'video' | 'quiz';
+  title: string;
+  badgeText: string;
+  metaText: string;
+  questionsCount?: number;
+  url?: string;
+  durationInSeconds?: number;
+  quiz?: LessonQuiz;
+}
+
+export interface CurriculumLesson {
+  id: string;
+  number: number;
+  title: string;
+  subtitle?: string;
+  isCompleted?: boolean;
+  attachments: CurriculumAttachmentItem[];
+}
+
+export interface CurriculumChapter {
+  id: string;
+  number: number;
+  title: string;
+  hours?: number;
+  isExpanded: boolean;
+  lessons: CurriculumLesson[];
+}
+
+// Map backend response chapters to rich UI representation
+function mapBackendChaptersToRich(
+  backendChapters?: SessionChapterResult[] | null
+): CurriculumChapter[] {
   if (!backendChapters || backendChapters.length === 0) return [];
 
   return backendChapters.map((ch, chIdx) => ({
-    id: ch.id || `ch-${chIdx + 1}`,
+    id: ensureUuid(ch.id),
     number: ch.order || chIdx + 1,
     title: ch.title || `الفصل ${chIdx + 1}`,
+    hours: ch.hours || 1,
     isExpanded: chIdx === 0,
     lessons: (ch.lessons || []).map((les, lIdx) => {
-      const attachments: AttachmentItem[] = [];
+      const attachments: CurriculumAttachmentItem[] = [];
 
       if (les.videoUrl) {
+        const durationMin = Math.max(1, Math.round((les.durationInSeconds || 0) / 60));
         attachments.push({
-          id: `vid-${les.id || lIdx}`,
+          id: ensureUuid(les.id ? `vid-${les.id}` : null),
           type: 'video',
           title: `فيديو المحاضرة: ${les.title}`,
-          badgeText: 'تم المعالجة والرفع بنجاح',
-          metaText: `الجودة: 1080p Full HD • المدة: ${Math.floor((les.durationInSeconds || 0) / 60)} دقيقة`,
+          badgeText: 'تم الربط بنجاح',
+          metaText: `المدة: ${durationMin} دقيقة • رابط الفيديو`,
           url: les.videoUrl,
+          durationInSeconds: les.durationInSeconds || durationMin * 60,
         });
       }
 
-      if (les.test) {
-        const questionsCount = les.test.questions?.length || 0;
+      if (les.test && les.test.questions && les.test.questions.length > 0) {
+        const questionsCount = les.test.questions.length;
         attachments.push({
-          id: `quiz-${les.test.id || les.id || lIdx}`,
+          id: ensureUuid(les.test.id),
           type: 'quiz',
           title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
           badgeText: 'مفعل بعد انتهاء الفيديو',
@@ -85,14 +140,14 @@ function mapBackendChaptersToRich(backendChapters?: SessionChapterResult[] | nul
           questionsCount,
           quiz: {
             title: 'بنك أسئلة وتدريبات الدرس',
-            questions: (les.test.questions || []).map((q, qIdx) => ({
-              id: q.id,
+            questions: les.test.questions.map((q, qIdx) => ({
+              id: ensureUuid(q.id),
               number: qIdx + 1,
               title: q.text,
               points: 1,
               explanation: q.explanation || '',
               options: (q.choices || []).map((c, cIdx) => ({
-                id: c.id,
+                id: ensureUuid(c.id),
                 letter: ARABIC_LETTERS[cIdx] || `${cIdx + 1}`,
                 text: c.title,
                 isCorrect: Boolean(c.isRight),
@@ -103,7 +158,7 @@ function mapBackendChaptersToRich(backendChapters?: SessionChapterResult[] | nul
       }
 
       return {
-        id: les.id || `les-${lIdx + 1}`,
+        id: ensureUuid(les.id),
         number: les.order || lIdx + 1,
         title: les.title || `الدرس ${lIdx + 1}`,
         subtitle: les.description || undefined,
@@ -114,29 +169,30 @@ function mapBackendChaptersToRich(backendChapters?: SessionChapterResult[] | nul
   }));
 }
 
-// Map rich UI chapters to backend save payload
-function mapRichChaptersToBackendPayload(rich: RichChapter[]): SaveSessionChaptersCommand {
+// Map rich UI chapters into exact backend Save payload with guaranteed RFC4122 GUIDs
+function mapRichChaptersToBackendPayload(
+  rich: CurriculumChapter[]
+): SaveSessionChaptersCommand {
   return {
-    chapters: rich.map((ch, chIdx) => ({
-      id: isValidUuid(ch.id) ? ch.id : null,
-      title: ch.title,
-      order: ch.number || chIdx + 1,
-      hours: 1,
-      lessons: ch.lessons.map((les, lIdx) => {
+    chapters: rich.map((ch, chIdx) => {
+      const chapterId = ensureUuid(ch.id);
+
+      const lessons = ch.lessons.map((les, lIdx) => {
+        const lessonId = ensureUuid(les.id);
         const videoAtt = les.attachments.find((a) => a.type === 'video');
         const quizAtt = les.attachments.find((a) => a.type === 'quiz');
 
         let testInput = null;
         if (quizAtt?.quiz?.questions && quizAtt.quiz.questions.length > 0) {
           testInput = {
-            id: null,
+            id: ensureUuid(quizAtt.quiz.questions[0]?.id ? `test-${lessonId}` : null),
             questions: quizAtt.quiz.questions.map((q) => ({
-              id: isValidUuid(q.id) ? q.id : null,
-              text: q.title,
+              id: ensureUuid(q.id),
+              text: q.title || '',
               explanation: q.explanation || null,
               choices: q.options.map((opt, optIdx) => ({
-                id: isValidUuid(opt.id) ? opt.id : null,
-                title: opt.text,
+                id: ensureUuid(opt.id),
+                title: opt.text || '',
                 order: optIdx + 1,
                 isRight: Boolean(opt.isCorrect),
               })),
@@ -144,17 +200,34 @@ function mapRichChaptersToBackendPayload(rich: RichChapter[]): SaveSessionChapte
           };
         }
 
+        const durationSeconds = Number(videoAtt?.durationInSeconds) || 1200;
+
         return {
-          id: isValidUuid(les.id) ? les.id : null,
-          title: les.title,
-          description: les.subtitle || null,
+          id: lessonId,
+          title: les.title.trim(),
+          description: les.subtitle?.trim() || null,
           order: les.number || lIdx + 1,
-          durationInSeconds: 1200,
-          videoUrl: videoAtt?.url || null,
+          durationInSeconds: durationSeconds,
+          videoUrl: videoAtt?.url?.trim() || null,
           test: testInput,
         };
-      }),
-    })),
+      });
+
+      // Chapter hours: at least 1 or calculated from lesson durations
+      const totalSeconds = lessons.reduce(
+        (acc, l) => acc + (Number(l.durationInSeconds) || 0),
+        0
+      );
+      const chapterHours = Math.max(1, Math.round(totalSeconds / 3600) || 1);
+
+      return {
+        id: chapterId,
+        title: ch.title.trim(),
+        order: ch.number || chIdx + 1,
+        hours: chapterHours,
+        lessons,
+      };
+    }),
   };
 }
 
@@ -166,54 +239,89 @@ export default function RecordedCurriculumSection({
   const toast = useToast();
 
   // State strictly initialized with backend data - ZERO fake data
-  const [richChapters, setRichChapters] = useState<RichChapter[]>(() =>
+  const [richChapters, setRichChapters] = useState<CurriculumChapter[]>(() =>
     mapBackendChaptersToRich(initialChapters)
   );
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [lessonTitles, setLessonTitles] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
 
   // Sync state if initialChapters changes from parent
   useEffect(() => {
     if (initialChapters) {
       setRichChapters(mapBackendChaptersToRich(initialChapters));
+      setHasUnsavedChanges(false);
     }
   }, [initialChapters]);
 
-  // Dialog states
+  // Quiz Dialog state
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
-  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('الفصل الأول - مقدمة');
+  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('');
   const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
+
+  // Video Link Dialog state (Backend expects videoUrl + durationInSeconds)
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoModalTarget, setVideoModalTarget] = useState<{
+    chapterId: string;
+    lessonId: string;
+    lessonTitle: string;
+    existingAttachmentId?: string;
+  } | null>(null);
+  const [videoModalUrl, setVideoModalUrl] = useState('');
+  const [videoModalMinutes, setVideoModalMinutes] = useState<number>(20);
+
+  // Video Preview Dialog state
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [previewVideoTitle, setPreviewVideoTitle] = useState('');
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string | null>(null);
 
   // Editing lesson title state
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [editingLessonTitle, setEditingLessonTitle] = useState<string>('');
 
-  const videoFileInputRef = useRef<HTMLInputElement | null>(null);
-  const docFileInputRef = useRef<HTMLInputElement | null>(null);
-  const [targetLessonForUpload, setTargetLessonForUpload] = useState<{
-    chapterId: string;
-    lessonId: string;
-  } | null>(null);
+  // ── Explicit Save Handler (Persists to Backend Database) ──────────────────────────
+  const handleSaveCurriculum = async () => {
+    if (richChapters.length === 0) {
+      toast.warning('يرجى إضافة فصل واحد على الأقل قبل الحفظ');
+      return;
+    }
 
-  // Sync with backend API
-  const syncChaptersToBackend = useCallback(
-    async (next: RichChapter[]) => {
-      setRichChapters(next);
-      try {
-        const payload = mapRichChaptersToBackendPayload(next);
-        const res = await saveSessionRequestChaptersAction(requestId, payload);
-        if (res.success && res.data) {
-          onChaptersUpdated?.(res.data);
-        }
-      } catch {
-        // Keeps local UI state consistent
+    // Validation
+    for (const ch of richChapters) {
+      if (!ch.title.trim()) {
+        toast.error('يوجد فصل بدون عنوان، يرجى كتابة عنوان الفصل');
+        return;
       }
-    },
-    [requestId, onChaptersUpdated]
-  );
+      for (const les of ch.lessons) {
+        if (!les.title.trim()) {
+          toast.error(`يوجد درس بدون عنوان داخل ${ch.title}`);
+          return;
+        }
+      }
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = mapRichChaptersToBackendPayload(richChapters);
+      const res = await saveSessionRequestChaptersAction(requestId, payload);
+
+      if (res.success && res.data) {
+        toast.success('تم حفظ واعتماد المنهج في النظام بنجاح');
+        setHasUnsavedChanges(false);
+        const mappedFromBackend = mapBackendChaptersToRich(res.data);
+        setRichChapters(mappedFromBackend);
+        onChaptersUpdated?.(res.data);
+      } else {
+        toast.error(res.error || 'فشل حفظ المنهج في النظام، يرجى المحاولة مرة أخرى');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ غير متوقع أثناء حفظ المنهج');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // 1. Add new chapter
   const handleAddChapter = () => {
@@ -221,27 +329,30 @@ export default function RecordedCurriculumSection({
       toast.warning('يرجى كتابة عنوان الفصل');
       return;
     }
-    const newChapter: RichChapter = {
-      id: `ch-${Date.now()}`,
+    const newChapter: CurriculumChapter = {
+      id: crypto.randomUUID(),
       number: richChapters.length + 1,
       title: newChapterTitle.trim(),
+      hours: 1,
       isExpanded: true,
       lessons: [],
     };
-    syncChaptersToBackend([...richChapters, newChapter]);
+    setRichChapters((prev) => [...prev, newChapter]);
     setNewChapterTitle('');
-    toast.success('تمت إضافة الفصل بنجاح');
+    setHasUnsavedChanges(true);
+    toast.success('تمت إضافة الفصل محلياً. لا تنسَ الضغط على "حفظ المنهج" لتثبيته في النظام.');
   };
 
   // 2. Delete chapter
   const handleDeleteChapter = (chapterId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    syncChaptersToBackend(
-      richChapters
+    setRichChapters((prev) =>
+      prev
         .filter((ch) => ch.id !== chapterId)
         .map((ch, idx) => ({ ...ch, number: idx + 1 }))
     );
-    toast.success('تم حذف الفصل بنجاح');
+    setHasUnsavedChanges(true);
+    toast.info('تم حذف الفصل محلياً');
   };
 
   // 3. Toggle chapter accordion
@@ -261,41 +372,44 @@ export default function RecordedCurriculumSection({
       return;
     }
 
-    const updated = richChapters.map((ch) => {
-      if (ch.id !== chapterId) return ch;
-      return {
-        ...ch,
-        lessons: [
-          ...ch.lessons,
-          {
-            id: `les-${Date.now()}`,
-            number: ch.lessons.length + 1,
-            title,
-            attachments: [],
-          },
-        ],
-      };
-    });
+    setRichChapters((prev) =>
+      prev.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        return {
+          ...ch,
+          lessons: [
+            ...ch.lessons,
+            {
+              id: crypto.randomUUID(),
+              number: ch.lessons.length + 1,
+              title,
+              attachments: [],
+            },
+          ],
+        };
+      })
+    );
 
-    syncChaptersToBackend(updated);
     setLessonTitles((prev) => ({ ...prev, [chapterId]: '' }));
-    toast.success('تمت إضافة الدرس بنجاح');
+    setHasUnsavedChanges(true);
+    toast.success('تمت إضافة الدرس محلياً');
   };
 
   // 5. Delete lesson
   const handleDeleteLesson = (chapterId: string, lessonId: string) => {
-    const updated = richChapters.map((ch) => {
-      if (ch.id !== chapterId) return ch;
-      return {
-        ...ch,
-        lessons: ch.lessons
-          .filter((l) => l.id !== lessonId)
-          .map((l, idx) => ({ ...l, number: idx + 1 })),
-      };
-    });
-
-    syncChaptersToBackend(updated);
-    toast.success('تم حذف الدرس بنجاح');
+    setRichChapters((prev) =>
+      prev.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        return {
+          ...ch,
+          lessons: ch.lessons
+            .filter((les) => les.id !== lessonId)
+            .map((les, idx) => ({ ...les, number: idx + 1 })),
+        };
+      })
+    );
+    setHasUnsavedChanges(true);
+    toast.info('تم حذف الدرس');
   };
 
   // 6. Delete attachment
@@ -304,27 +418,96 @@ export default function RecordedCurriculumSection({
     lessonId: string,
     attachmentId: string
   ) => {
-    const updated = richChapters.map((ch) => {
-      if (ch.id !== chapterId) return ch;
-      return {
-        ...ch,
-        lessons: ch.lessons.map((les) => {
-          if (les.id !== lessonId) return les;
-          const nextAtts = les.attachments.filter((a) => a.id !== attachmentId);
-          return {
-            ...les,
-            isCompleted: nextAtts.length > 0,
-            attachments: nextAtts,
-          };
-        }),
-      };
-    });
-
-    syncChaptersToBackend(updated);
-    toast.success('تم حذف المرفق بنجاح');
+    setRichChapters((prev) =>
+      prev.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        return {
+          ...ch,
+          lessons: ch.lessons.map((les) => {
+            if (les.id !== lessonId) return les;
+            const nextAtts = les.attachments.filter((a) => a.id !== attachmentId);
+            return {
+              ...les,
+              isCompleted: nextAtts.length > 0,
+              attachments: nextAtts,
+            };
+          }),
+        };
+      })
+    );
+    setHasUnsavedChanges(true);
+    toast.info('تم حذف المرفق');
   };
 
-  // 7. Open Quiz Dialog
+  // 7. Video Link Dialog Handlers
+  const handleOpenVideoModal = (
+    chapterId: string,
+    lessonId: string,
+    lessonTitle: string,
+    existingAtt?: CurriculumAttachmentItem
+  ) => {
+    setVideoModalTarget({
+      chapterId,
+      lessonId,
+      lessonTitle,
+      existingAttachmentId: existingAtt?.id,
+    });
+    setVideoModalUrl(existingAtt?.url || '');
+    setVideoModalMinutes(
+      existingAtt?.durationInSeconds
+        ? Math.max(1, Math.round(existingAtt.durationInSeconds / 60))
+        : 20
+    );
+    setVideoModalOpen(true);
+  };
+
+  const handleSaveVideoModal = () => {
+    if (!videoModalTarget) return;
+    const url = videoModalUrl.trim();
+    if (!url) {
+      toast.warning('يرجى إدخال رابط الفيديو');
+      return;
+    }
+
+    const durationMinutes = Number(videoModalMinutes) > 0 ? Number(videoModalMinutes) : 15;
+    const durationInSeconds = durationMinutes * 60;
+
+    const newVideoAtt: CurriculumAttachmentItem = {
+      id: videoModalTarget.existingAttachmentId || crypto.randomUUID(),
+      type: 'video',
+      title: `فيديو المحاضرة: ${videoModalTarget.lessonTitle}`,
+      badgeText: 'تم الربط بنجاح',
+      metaText: `المدة: ${durationMinutes} دقيقة • رابط الفيديو`,
+      url,
+      durationInSeconds,
+    };
+
+    setRichChapters((prev) =>
+      prev.map((ch) => {
+        if (ch.id !== videoModalTarget.chapterId) return ch;
+        return {
+          ...ch,
+          lessons: ch.lessons.map((les) => {
+            if (les.id !== videoModalTarget.lessonId) return les;
+            const otherAtts = les.attachments.filter((a) => a.type !== 'video');
+            return {
+              ...les,
+              isCompleted: true,
+              subtitle: les.subtitle || 'تم ربط فيديو الشرح للمحاضرة',
+              attachments: [...otherAtts, newVideoAtt],
+            };
+          }),
+        };
+      })
+    );
+
+    setVideoModalOpen(false);
+    setVideoModalTarget(null);
+    setHasUnsavedChanges(true);
+    toast.success('تم ربط رابط الفيديو بالدرس محلياً');
+  };
+
+  // 8. Quiz Dialog Handlers
   const handleOpenQuizDialog = (
     chapterId: string,
     lessonId: string,
@@ -335,153 +518,66 @@ export default function RecordedCurriculumSection({
     setQuizDialogOpen(true);
   };
 
-  // Save the quiz config back onto the target lesson
   const handleSaveQuiz = useCallback(
     (config: QuizConfig) => {
       if (!quizLessonId) return;
 
-      const quizAtt: AttachmentItem = {
-        id: `att-${Date.now()}`,
+      const mappedQuestions = config.questions.map((q, qIdx) => ({
+        id: ensureUuid(q.id),
+        number: qIdx + 1,
+        title: q.title,
+        points: q.points || 1,
+        explanation: q.explanation || '',
+        options: q.options.map((opt, optIdx) => ({
+          id: ensureUuid(opt.id),
+          letter: ARABIC_LETTERS[optIdx] || `${optIdx + 1}`,
+          text: opt.text,
+          isCorrect: Boolean(opt.isCorrect),
+        })),
+      }));
+
+      const quizData: LessonQuiz = {
+        title: config.title || 'بنك أسئلة وتدريبات الدرس',
+        questions: mappedQuestions,
+      };
+
+      const quizAtt: CurriculumAttachmentItem = {
+        id: crypto.randomUUID(),
         type: 'quiz',
         title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
         badgeText: 'مفعل بعد انتهاء الفيديو',
-        metaText: `${config.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
-        questionsCount: config.questions.length,
-        quiz: config as LessonQuiz,
+        metaText: `${mappedQuestions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        questionsCount: mappedQuestions.length,
+        quiz: quizData,
       };
 
-      const updated = richChapters.map((ch) => ({
-        ...ch,
-        lessons: ch.lessons.map((les) => {
-          if (les.id !== quizLessonId) return les;
-          return {
-            ...les,
-            isCompleted: true,
-            subtitle: les.subtitle || 'تم إرفاق اختبار تقييمي لهذا الدرس',
-            attachments: [...les.attachments.filter((a) => a.type !== 'quiz'), quizAtt],
-          };
-        }),
-      }));
+      setRichChapters((prev) =>
+        prev.map((ch) => ({
+          ...ch,
+          lessons: ch.lessons.map((les) => {
+            if (les.id !== quizLessonId) return les;
+            return {
+              ...les,
+              isCompleted: true,
+              subtitle: les.subtitle || 'تم إرفاق اختبار تقييمي لهذا الدرس',
+              attachments: [
+                ...les.attachments.filter((a) => a.type !== 'quiz'),
+                quizAtt,
+              ],
+            };
+          }),
+        }))
+      );
 
-      syncChaptersToBackend(updated);
       setQuizLessonId(null);
       setQuizDialogOpen(false);
-      toast.success('تم حفظ وتحديث بنك الأسئلة بنجاح');
+      setHasUnsavedChanges(true);
+      toast.success('تم حفظ وتحديث بنك الأسئلة محلياً');
     },
-    [quizLessonId, richChapters, syncChaptersToBackend, toast]
+    [quizLessonId, toast]
   );
 
-  // 8. Handle video upload
-  const handleTriggerVideoUpload = (chapterId: string, lessonId: string) => {
-    setTargetLessonForUpload({ chapterId, lessonId });
-    if (videoFileInputRef.current) {
-      videoFileInputRef.current.value = '';
-      videoFileInputRef.current.click();
-    }
-  };
-
-  const handleVideoFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload || uploading) return;
-
-    setUploading(true);
-    try {
-      const res = await uploadFile(file, 'videos');
-      if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع الفيديو');
-        return;
-      }
-
-      const newAtt: AttachmentItem = {
-        id: `att-${Date.now()}`,
-        type: 'video',
-        title: `فيديو المحاضرة: ${file.name}`,
-        badgeText: 'تم المعالجة والرفع بنجاح',
-        metaText: `الجودة: 1080p Full HD • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        url: res.data.url,
-      };
-
-      const updated = richChapters.map((ch) => {
-        if (ch.id !== targetLessonForUpload.chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== targetLessonForUpload.lessonId) return les;
-            return {
-              ...les,
-              isCompleted: true,
-              subtitle: les.subtitle || 'تم إرفاق محتوى تعليمي لهذا الدرس',
-              attachments: [...les.attachments.filter((a) => a.type !== 'video'), newAtt],
-            };
-          }),
-        };
-      });
-
-      syncChaptersToBackend(updated);
-      toast.success('تم رفع الفيديو بنجاح');
-    } catch {
-      toast.error('فشل رفع الفيديو');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // 9. Handle doc upload
-  const handleTriggerDocUpload = (chapterId: string, lessonId: string) => {
-    setTargetLessonForUpload({ chapterId, lessonId });
-    if (docFileInputRef.current) {
-      docFileInputRef.current.value = '';
-      docFileInputRef.current.click();
-    }
-  };
-
-  const handleDocFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload || uploading) return;
-
-    setUploading(true);
-    try {
-      const res = await uploadAttachment(file, file.name);
-      if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع المستند');
-        return;
-      }
-
-      const newAtt: AttachmentItem = {
-        id: `att-${Date.now()}`,
-        type: 'pdf',
-        attachmentId: res.data.id,
-        title: res.data.name || file.name,
-        badgeText: 'جاهز للتحميل للطلاب',
-        metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
-        url: res.data.url,
-      };
-
-      const updated = richChapters.map((ch) => {
-        if (ch.id !== targetLessonForUpload.chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== targetLessonForUpload.lessonId) return les;
-            return {
-              ...les,
-              isCompleted: true,
-              attachments: [...les.attachments, newAtt],
-            };
-          }),
-        };
-      });
-
-      syncChaptersToBackend(updated);
-      toast.success('تم إرفاق المستند بنجاح');
-    } catch {
-      toast.error('فشل رفع المستند');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // 10. Edit lesson title
+  // 9. Edit lesson title
   const handleStartEditLessonTitle = (lessonId: string, currentTitle: string) => {
     setEditingLessonId(lessonId);
     setEditingLessonTitle(currentTitle);
@@ -489,18 +585,19 @@ export default function RecordedCurriculumSection({
 
   const handleSaveLessonTitle = (chapterId: string, lessonId: string) => {
     if (!editingLessonTitle.trim()) return;
-    const updated = richChapters.map((ch) => {
-      if (ch.id !== chapterId) return ch;
-      return {
-        ...ch,
-        lessons: ch.lessons.map((l) =>
-          l.id === lessonId ? { ...l, title: editingLessonTitle.trim() } : l
-        ),
-      };
-    });
-
-    syncChaptersToBackend(updated);
+    setRichChapters((prev) =>
+      prev.map((ch) => {
+        if (ch.id !== chapterId) return ch;
+        return {
+          ...ch,
+          lessons: ch.lessons.map((l) =>
+            l.id === lessonId ? { ...l, title: editingLessonTitle.trim() } : l
+          ),
+        };
+      })
+    );
     setEditingLessonId(null);
+    setHasUnsavedChanges(true);
     toast.success('تم تعديل عنوان الدرس');
   };
 
@@ -515,41 +612,93 @@ export default function RecordedCurriculumSection({
         mb: 3,
       }}
     >
-      {/* Hidden file inputs */}
-      <input
-        ref={videoFileInputRef}
-        type="file"
-        accept="video/*"
-        hidden
-        onChange={handleVideoFileSelected}
-      />
-      <input
-        ref={docFileInputRef}
-        type="file"
-        accept=".pdf,.doc,.docx"
-        hidden
-        onChange={handleDocFileSelected}
-      />
+      {/* ── Section Header with Prominent Save Button ─────────────────────── */}
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: 2.5,
+        }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: 2,
+              bgcolor: '#F0F9FF',
+              border: '1px solid #BAE6FD',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#0284C7',
+            }}
+          >
+            <Iconify icon="solar:folder-with-files-bold" width={24} />
+          </Box>
+          <Box>
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700, color: '#1C252E', fontSize: 18 }}
+              >
+                منهج ومحتوى الجلسات المسجلة
+              </Typography>
+              {hasUnsavedChanges && (
+                <Chip
+                  label="توجد تعديلات غير محفوظة"
+                  size="small"
+                  sx={{
+                    bgcolor: '#FEF3C7',
+                    color: '#D97706',
+                    fontWeight: 700,
+                    fontSize: 11.5,
+                    borderRadius: 1,
+                  }}
+                />
+              )}
+            </Stack>
+            <Typography sx={{ color: '#64748B', fontSize: 13, mt: 0.2 }}>
+              قم بإعداد الفصول والدروس وإرفاق روابط الفيديوهات وبنوك الأسئلة، ثم اضغط حفظ لاعتماد المنهج.
+            </Typography>
+          </Box>
+        </Stack>
 
-      {/* Card Header matching /courses/new */}
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 2.5 }}>
-        <Iconify
-          icon="solar:info-circle-bold"
-          width={24}
-          sx={{ color: '#1C252E' }}
-        />
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 700, color: '#1C252E', fontSize: 18 }}
+        {/* Prominent Save Button */}
+        <Button
+          variant="contained"
+          onClick={handleSaveCurriculum}
+          disabled={isSaving}
+          startIcon={
+            isSaving ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <Iconify icon="solar:diskette-bold" width={20} />
+            )
+          }
+          sx={{
+            bgcolor: '#1C252E',
+            color: '#FFFFFF',
+            borderRadius: 1.75,
+            px: 2.8,
+            py: 1.1,
+            fontWeight: 700,
+            fontSize: 14,
+            boxShadow: 'none',
+            whiteSpace: 'nowrap',
+            '&:hover': { bgcolor: '#2C353E' },
+          }}
         >
-          معلومات الكورس
-        </Typography>
+          {isSaving ? 'جاري الحفظ في النظام...' : 'حفظ المنهج في النظام'}
+        </Button>
       </Stack>
 
       <Divider sx={{ mb: 3.5, borderColor: '#F1F5F9' }} />
 
       <Stack spacing={3}>
-        {/* 1. Add New Chapter Box */}
+        {/* ── 1. Add New Chapter Box ────────────────────────────────────────── */}
         <Box
           sx={{
             border: '1.5px solid #C6DCFC',
@@ -573,7 +722,7 @@ export default function RecordedCurriculumSection({
             <TextField
               fullWidth
               size="small"
-              placeholder="عنوان الفصل (مثال : الفصل الأول - مقدمة)"
+              placeholder="اكتب عنوان الفصل الجديد هنا..."
               value={newChapterTitle}
               onChange={(e) => setNewChapterTitle(e.target.value)}
               onKeyDown={(e) => {
@@ -611,7 +760,32 @@ export default function RecordedCurriculumSection({
           </Stack>
         </Box>
 
-        {/* 2. Chapters Accordion List */}
+        {/* ── Empty State If Zero Chapters from Backend ─────────────────────── */}
+        {richChapters.length === 0 && (
+          <Box
+            sx={{
+              p: 4.5,
+              textAlign: 'center',
+              border: '1.5px dashed #CBD5E1',
+              borderRadius: 2.5,
+              bgcolor: '#F8FAFC',
+            }}
+          >
+            <Iconify
+              icon="solar:folder-open-bold"
+              width={52}
+              sx={{ color: '#94A3B8', mb: 1.5 }}
+            />
+            <Typography sx={{ fontWeight: 700, fontSize: 16, color: '#334155', mb: 0.5 }}>
+              لا توجد فصول مضافة بعد لهذا الطلب
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: '#64748B', maxWidth: 460, mx: 'auto' }}>
+              لم يتم إنشاء أي محتوى دراسي بعد. يمكنك البدء فوراً بكتابة عنوان الفصل الأول في الحقل أعلاه والضغط على "إضافة فصل".
+            </Typography>
+          </Box>
+        )}
+
+        {/* ── 2. Chapters Accordion List ────────────────────────────────────── */}
         {richChapters.map((chapter) => (
           <Box
             key={chapter.id}
@@ -691,7 +865,7 @@ export default function RecordedCurriculumSection({
                   <TextField
                     fullWidth
                     size="small"
-                    placeholder="عنوان الدرس"
+                    placeholder="اكتب عنوان الدرس الجديد..."
                     value={lessonTitles[chapter.id] || ''}
                     onChange={(e) =>
                       setLessonTitles((prev) => ({
@@ -737,6 +911,8 @@ export default function RecordedCurriculumSection({
                 <Stack spacing={2}>
                   {chapter.lessons.map((lesson) => {
                     const hasAttachments = lesson.attachments.length > 0;
+                    const videoAtt = lesson.attachments.find((a) => a.type === 'video');
+                    const quizAtt = lesson.attachments.find((a) => a.type === 'quiz');
 
                     return (
                       <Card
@@ -857,7 +1033,6 @@ export default function RecordedCurriculumSection({
                           <Stack spacing={1.5} sx={{ mb: 2 }}>
                             {lesson.attachments.map((att) => {
                               const isVideo = att.type === 'video';
-                              const isPdf = att.type === 'pdf';
                               const isQuiz = att.type === 'quiz';
 
                               return (
@@ -886,8 +1061,8 @@ export default function RecordedCurriculumSection({
                                           width: 40,
                                           height: 40,
                                           borderRadius: 2,
-                                          bgcolor: isVideo ? '#EFF6FF' : isPdf ? '#FEF2F2' : '#ECFDF5',
-                                          border: `1px solid ${isVideo ? '#BFDBFE' : isPdf ? '#FECACA' : '#BBF7D0'}`,
+                                          bgcolor: isVideo ? '#EFF6FF' : '#ECFDF5',
+                                          border: `1px solid ${isVideo ? '#BFDBFE' : '#BBF7D0'}`,
                                           display: 'flex',
                                           alignItems: 'center',
                                           justifyContent: 'center',
@@ -895,13 +1070,7 @@ export default function RecordedCurriculumSection({
                                       >
                                         <Box
                                           component="img"
-                                          src={
-                                            isVideo
-                                              ? '/icons/vedio.svg'
-                                              : isPdf
-                                              ? '/icons/file.svg'
-                                              : '/icons/exam.svg'
-                                          }
+                                          src={isVideo ? '/icons/vedio.svg' : '/icons/exam.svg'}
                                           alt={att.type}
                                           sx={{ width: 22, height: 22 }}
                                         />
@@ -934,61 +1103,59 @@ export default function RecordedCurriculumSection({
                                     {/* Attachment Actions */}
                                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                                       {isVideo && (
-                                        <Button
-                                          size="small"
-                                          variant="contained"
-                                          onClick={() => {
-                                            setPreviewVideoTitle(att.title);
-                                            setVideoPreviewOpen(true);
-                                          }}
-                                          sx={{
-                                            bgcolor: '#1C252E',
-                                            color: '#FFFFFF',
-                                            borderRadius: 1.5,
-                                            fontWeight: 700,
-                                            fontSize: 12.5,
-                                            px: 1.8,
-                                            py: 0.6,
-                                            boxShadow: 'none',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            '&:hover': { bgcolor: '#2C353E' },
-                                          }}
-                                        >
-                                          <Iconify icon="solar:play-bold" width={15} />
-                                          <span>معاينة الفيديو</span>
-                                        </Button>
-                                      )}
+                                        <>
+                                          <Button
+                                            size="small"
+                                            variant="contained"
+                                            onClick={() => {
+                                              setPreviewVideoTitle(att.title);
+                                              setPreviewVideoUrl(att.url || null);
+                                              setVideoPreviewOpen(true);
+                                            }}
+                                            sx={{
+                                              bgcolor: '#1C252E',
+                                              color: '#FFFFFF',
+                                              borderRadius: 1.5,
+                                              fontWeight: 700,
+                                              fontSize: 12.5,
+                                              px: 1.8,
+                                              py: 0.6,
+                                              boxShadow: 'none',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              gap: 1,
+                                              '&:hover': { bgcolor: '#2C353E' },
+                                            }}
+                                          >
+                                            <Iconify icon="solar:play-bold" width={15} />
+                                            <span>معاينة الفيديو</span>
+                                          </Button>
 
-                                      {isPdf && (
-                                        <Button
-                                          size="small"
-                                          variant="outlined"
-                                          onClick={() => {
-                                            if (att.url) {
-                                              window.open(att.url, '_blank', 'noopener,noreferrer');
-                                            } else {
-                                              toast.warning('لا يوجد رابط للمرفق');
+                                          <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() =>
+                                              handleOpenVideoModal(
+                                                chapter.id,
+                                                lesson.id,
+                                                lesson.title,
+                                                att
+                                              )
                                             }
-                                          }}
-                                          sx={{
-                                            borderColor: '#E2E8F0',
-                                            color: '#1C252E',
-                                            borderRadius: 1.5,
-                                            fontWeight: 600,
-                                            fontSize: 12.5,
-                                            px: 1.8,
-                                            py: 0.6,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            '&:hover': { bgcolor: '#F8FAFC' },
-                                          }}
-                                        >
-                                          <Iconify icon="solar:download-minimalistic-linear" width={16} />
-                                          <span>تحميل / عرض</span>
-                                        </Button>
+                                            sx={{
+                                              borderColor: '#E2E8F0',
+                                              color: '#475569',
+                                              borderRadius: 1.5,
+                                              fontWeight: 600,
+                                              fontSize: 12.5,
+                                              px: 1.5,
+                                              py: 0.6,
+                                              '&:hover': { bgcolor: '#E2E8F0' },
+                                            }}
+                                          >
+                                            تعديل الرابط
+                                          </Button>
+                                        </>
                                       )}
 
                                       {isQuiz && (
@@ -1040,29 +1207,6 @@ export default function RecordedCurriculumSection({
                                         </>
                                       )}
 
-                                      {(isVideo || isPdf) && (
-                                        <Button
-                                          size="small"
-                                          variant="outlined"
-                                          onClick={() => {
-                                            if (isVideo) handleTriggerVideoUpload(chapter.id, lesson.id);
-                                            else handleTriggerDocUpload(chapter.id, lesson.id);
-                                          }}
-                                          sx={{
-                                            borderColor: '#E2E8F0',
-                                            color: '#475569',
-                                            borderRadius: 1.5,
-                                            fontWeight: 600,
-                                            fontSize: 12.5,
-                                            px: 1.5,
-                                            py: 0.6,
-                                            '&:hover': { bgcolor: '#E2E8F0' },
-                                          }}
-                                        >
-                                          استبدال
-                                        </Button>
-                                      )}
-
                                       <IconButton
                                         size="small"
                                         onClick={() =>
@@ -1086,7 +1230,7 @@ export default function RecordedCurriculumSection({
                           </Stack>
                         )}
 
-                        {/* Lesson Action Buttons (Quick upload or Sub-actions) */}
+                        {/* Lesson Action Buttons (Exact /courses/new style without document upload) */}
                         <Stack
                           direction={{ xs: 'column', sm: 'row' }}
                           spacing={1.5}
@@ -1098,15 +1242,23 @@ export default function RecordedCurriculumSection({
                           }}
                         >
                           <Stack direction="row" spacing={1.2} sx={{ flexWrap: 'wrap', gap: 1 }}>
+                            {/* Video Button */}
                             <Button
                               size="small"
-                              variant={hasAttachments ? 'outlined' : 'contained'}
-                              onClick={() => handleTriggerVideoUpload(chapter.id, lesson.id)}
+                              variant={videoAtt ? 'outlined' : 'contained'}
+                              onClick={() =>
+                                handleOpenVideoModal(
+                                  chapter.id,
+                                  lesson.id,
+                                  lesson.title,
+                                  videoAtt
+                                )
+                              }
                               sx={{
-                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
-                                color: hasAttachments ? '#0284C7' : '#FFFFFF',
-                                borderColor: hasAttachments ? '#BAE6FD' : 'transparent',
-                                borderStyle: hasAttachments ? 'dashed' : 'solid',
+                                bgcolor: videoAtt ? '#FFFFFF' : '#1C252E',
+                                color: videoAtt ? '#0284C7' : '#FFFFFF',
+                                borderColor: videoAtt ? '#BAE6FD' : 'transparent',
+                                borderStyle: videoAtt ? 'dashed' : 'solid',
                                 borderRadius: 1.5,
                                 fontWeight: 700,
                                 fontSize: 12.5,
@@ -1117,52 +1269,34 @@ export default function RecordedCurriculumSection({
                                 alignItems: 'center',
                                 gap: 1,
                                 '&:hover': {
-                                  bgcolor: hasAttachments ? '#F0F9FF' : '#2C353E',
+                                  bgcolor: videoAtt ? '#F0F9FF' : '#2C353E',
                                   borderColor: '#0284C7',
                                 },
                               }}
                             >
-                              <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ فيديو إضافي' : '+ رفع فيديو'}</span>
+                              <Box
+                                component="img"
+                                src="/icons/vedio.svg"
+                                alt="video"
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                  ...(videoAtt ? {} : { filter: 'brightness(0) invert(1)' }),
+                                }}
+                              />
+                              <span>{videoAtt ? 'تعديل رابط الفيديو' : '+ إضافة رابط الفيديو'}</span>
                             </Button>
 
+                            {/* Quiz Button */}
                             <Button
                               size="small"
-                              variant={hasAttachments ? 'outlined' : 'contained'}
-                              onClick={() => handleTriggerDocUpload(chapter.id, lesson.id)}
-                              sx={{
-                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
-                                color: hasAttachments ? '#E11D48' : '#FFFFFF',
-                                borderColor: hasAttachments ? '#FECDD3' : 'transparent',
-                                borderStyle: hasAttachments ? 'dashed' : 'solid',
-                                borderRadius: 1.5,
-                                fontWeight: 700,
-                                fontSize: 12.5,
-                                px: 1.8,
-                                py: 0.6,
-                                boxShadow: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1,
-                                '&:hover': {
-                                  bgcolor: hasAttachments ? '#FFF1F2' : '#2C353E',
-                                  borderColor: '#E11D48',
-                                },
-                              }}
-                            >
-                              <Box component="img" src="/icons/file.svg" alt="file" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
-                            </Button>
-
-                            <Button
-                              size="small"
-                              variant={hasAttachments ? 'outlined' : 'contained'}
+                              variant={quizAtt ? 'outlined' : 'contained'}
                               onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                               sx={{
-                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
-                                color: hasAttachments ? '#16A34A' : '#FFFFFF',
-                                borderColor: hasAttachments ? '#BBF7D0' : 'transparent',
-                                borderStyle: hasAttachments ? 'dashed' : 'solid',
+                                bgcolor: quizAtt ? '#FFFFFF' : '#1C252E',
+                                color: quizAtt ? '#16A34A' : '#FFFFFF',
+                                borderColor: quizAtt ? '#BBF7D0' : 'transparent',
+                                borderStyle: quizAtt ? 'dashed' : 'solid',
                                 borderRadius: 1.5,
                                 fontWeight: 700,
                                 fontSize: 12.5,
@@ -1173,19 +1307,28 @@ export default function RecordedCurriculumSection({
                                 alignItems: 'center',
                                 gap: 1,
                                 '&:hover': {
-                                  bgcolor: hasAttachments ? '#F0FDF4' : '#2C353E',
+                                  bgcolor: quizAtt ? '#F0FDF4' : '#2C353E',
                                   borderColor: '#16A34A',
                                 },
                               }}
                             >
-                              <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ اضافة اسئلة' : '+ اضافة سؤال'}</span>
+                              <Box
+                                component="img"
+                                src="/icons/exam.svg"
+                                alt="exam"
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                  ...(quizAtt ? {} : { filter: 'brightness(0) invert(1)' }),
+                                }}
+                              />
+                              <span>{quizAtt ? 'معاينة بنك الأسئلة' : '+ بنك أسئلة وتدريبات'}</span>
                             </Button>
                           </Stack>
 
                           {hasAttachments && (
                             <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                              يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
+                              تم ربط المحتوى التعليمي للدرس بنجاح
                             </Typography>
                           )}
                         </Stack>
@@ -1197,9 +1340,159 @@ export default function RecordedCurriculumSection({
             )}
           </Box>
         ))}
+
+        {/* ── Bottom Save Action When Chapters Exist ──────────────────────── */}
+        {richChapters.length > 0 && (
+          <Box
+            sx={{
+              mt: 2,
+              p: 2,
+              borderRadius: 2,
+              bgcolor: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2,
+            }}
+          >
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Iconify icon="solar:info-circle-bold" width={20} sx={{ color: '#0284C7' }} />
+              <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>
+                إجمالي الفصول المجهزة: {richChapters.length} • إجمالي الدروس:{' '}
+                {richChapters.reduce((acc, c) => acc + c.lessons.length, 0)}
+              </Typography>
+            </Stack>
+
+            <Button
+              variant="contained"
+              onClick={handleSaveCurriculum}
+              disabled={isSaving}
+              startIcon={
+                isSaving ? (
+                  <CircularProgress size={18} color="inherit" />
+                ) : (
+                  <Iconify icon="solar:diskette-bold" width={20} />
+                )
+              }
+              sx={{
+                bgcolor: '#1C252E',
+                color: '#FFFFFF',
+                borderRadius: 1.75,
+                px: 3,
+                py: 1,
+                fontWeight: 700,
+                fontSize: 14,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#2C353E' },
+              }}
+            >
+              {isSaving ? 'جاري الحفظ في النظام...' : 'حفظ واعتماد المنهج في النظام'}
+            </Button>
+          </Box>
+        )}
       </Stack>
 
-      {/* 3. Quiz Dialog Modal - Matches Image 2 */}
+      {/* ── 3. Video Link Modal (Backend-compatible videoUrl + durationInSeconds) ── */}
+      <Dialog
+        open={videoModalOpen}
+        onClose={() => setVideoModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: { sx: { borderRadius: 2.5, p: 1 } },
+        }}
+      >
+        <DialogTitle sx={{ px: 2.5, pt: 2, pb: 1 }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: 1.5,
+                bgcolor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 20, height: 20 }} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: 16, color: '#1C252E' }}>
+                ربط رابط فيديو الدرس
+              </Typography>
+              <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
+                {videoModalTarget?.lessonTitle}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={2.5}>
+            <Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B', mb: 1 }}>
+                رابط الفيديو (Video URL) *
+              </Typography>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
+                value={videoModalUrl}
+                onChange={(e) => setVideoModalUrl(e.target.value)}
+                sx={inputRootSx}
+                helperText="أدخل رابط الفيديو المباشر أو من منصات مثل YouTube أو Vimeo أو Cloudflare"
+              />
+            </Box>
+
+            <Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B', mb: 1 }}>
+                مدة المحاضرة (بالدقائق) *
+              </Typography>
+              <TextField
+                fullWidth
+                type="number"
+                size="small"
+                placeholder="20"
+                value={videoModalMinutes}
+                onChange={(e) => setVideoModalMinutes(Math.max(1, Number(e.target.value)))}
+                sx={inputRootSx}
+                helperText="يتم تحويل الدقائق تلقائياً إلى ثوانٍ للتوافق مع الباك إند"
+              />
+            </Box>
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 2.5, pb: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setVideoModalOpen(false)}
+            sx={{ borderRadius: 1.5, borderColor: '#CBD5E1', color: '#64748B' }}
+          >
+            إلغاء
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveVideoModal}
+            disabled={!videoModalUrl.trim()}
+            sx={{
+              bgcolor: '#1C252E',
+              color: '#FFFFFF',
+              borderRadius: 1.5,
+              fontWeight: 700,
+              px: 3,
+              '&:hover': { bgcolor: '#2C353E' },
+            }}
+          >
+            تأكيد وربط الفيديو
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── 4. Quiz Dialog Modal - Matches /courses/new QuizDialog ───────── */}
       <QuizDialog
         key={quizLessonId ?? 'closed'}
         open={quizDialogOpen}
@@ -1219,7 +1512,7 @@ export default function RecordedCurriculumSection({
         onSave={handleSaveQuiz}
       />
 
-      {/* 4. Video Preview Dialog Modal */}
+      {/* ── 5. Video Preview Dialog Modal ─────────────────────────────────── */}
       <Dialog
         open={videoPreviewOpen}
         onClose={() => setVideoPreviewOpen(false)}
@@ -1246,38 +1539,95 @@ export default function RecordedCurriculumSection({
             <Iconify icon="eva:close-fill" width={20} />
           </IconButton>
         </DialogTitle>
+
         <DialogContent sx={{ px: 2.5, py: 2 }}>
-          <Box
-            sx={{
-              height: 380,
-              bgcolor: '#1E293B',
-              borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2,
-            }}
-          >
+          {getEmbedUrl(previewVideoUrl) ? (
+            <Box
+              component="iframe"
+              src={getEmbedUrl(previewVideoUrl)!}
+              title={previewVideoTitle}
+              sx={{
+                width: '100%',
+                height: 400,
+                border: 'none',
+                borderRadius: 2,
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : previewVideoUrl ? (
             <Box
               sx={{
-                width: 68,
-                height: 68,
-                borderRadius: '50%',
-                bgcolor: '#0284C7',
+                minHeight: 280,
+                bgcolor: '#1E293B',
+                borderRadius: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 3,
+                gap: 2,
+                textAlign: 'center',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  bgcolor: '#0284C7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 0 24px rgba(2, 132, 199, 0.5)',
+                }}
+              >
+                <Iconify icon="solar:link-bold" width={32} sx={{ color: '#FFFFFF' }} />
+              </Box>
+              <Typography sx={{ color: '#F8FAFC', fontSize: 15, fontWeight: 600 }}>
+                رابط الفيديو المربوط:
+              </Typography>
+              <Typography
+                sx={{
+                  color: '#38BDF8',
+                  fontSize: 13,
+                  wordBreak: 'break-all',
+                  maxWidth: 600,
+                  bgcolor: '#0F172A',
+                  p: 1.5,
+                  borderRadius: 1.5,
+                  border: '1px solid #334155',
+                }}
+              >
+                {previewVideoUrl}
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={() => window.open(previewVideoUrl, '_blank', 'noopener,noreferrer')}
+                startIcon={<Iconify icon="solar:square-top-down-bold" width={18} />}
+                sx={{ bgcolor: '#0284C7', color: '#FFFFFF', borderRadius: 1.5, mt: 1 }}
+              >
+                فتح رابط الفيديو في نافذة جديدة
+              </Button>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: 280,
+                bgcolor: '#1E293B',
+                borderRadius: 2,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 0 24px rgba(2, 132, 199, 0.5)',
               }}
             >
-              <Iconify icon="solar:play-bold" width={34} sx={{ color: '#FFFFFF' }} />
+              <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
+                لا يوجد رابط مسجل لهذا الفيديو
+              </Typography>
             </Box>
-            <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
-              معاينة تشغيل الفيديو (1080p Full HD)
-            </Typography>
-          </Box>
+          )}
         </DialogContent>
+
         <DialogActions sx={{ px: 2.5, pb: 2 }}>
           <Button
             variant="outlined"
