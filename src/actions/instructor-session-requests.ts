@@ -1,6 +1,6 @@
 'use server';
 
-import { getData, postData } from 'src/utils/crud-fetch-api';
+import { getData, postData, editData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
@@ -8,6 +8,8 @@ import type {
   SessionRequestInstructorResult,
   GetSessionRequestsParams,
   SessionRequestTransactionResult,
+  SessionChapterResult,
+  SaveSessionChaptersCommand,
 } from 'src/types/private-request';
 
 /**
@@ -175,6 +177,36 @@ export async function getSessionRequestTransactionsAction(
       success: false,
       error:
         error instanceof Error ? error.message : 'Failed to fetch session request transactions',
+    };
+  }
+}
+
+/**
+ * Save chapters and curriculum for a session request
+ * PUT /api/v1/instructor/session-requests/{id}/chapters
+ */
+export async function saveSessionRequestChaptersAction(
+  id: string,
+  payload: SaveSessionChaptersCommand
+): Promise<ApiSingleResponse<SessionChapterResult[]>> {
+  try {
+    const res = await editData<SessionChapterResult[], SaveSessionChaptersCommand>(
+      endpoints.instructorSessionRequests.chapters(id),
+      'PUT',
+      payload
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to save session chapters';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to save session chapters',
     };
   }
 }

@@ -449,7 +449,26 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
       {isActive && (
         <>
           {/* If Recorded Content: Curriculum / Upload Lessons Section */}
-          {isRecorded && <RecordedCurriculumSection initialChapters={mappedChapters} />}
+          {isRecorded && (
+            <RecordedCurriculumSection
+              requestId={request.id}
+              initialChapters={request.chapters || []}
+              onChaptersUpdated={(newChapters) => {
+                setRequest((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        chapters: newChapters,
+                        totalChapterHours: newChapters.reduce(
+                          (acc, c) => acc + (Number(c.hours) || 0),
+                          0
+                        ),
+                      }
+                    : null
+                );
+              }}
+            />
+          )}
 
           {/* If Live Session: Live Broadcast Room Preview */}
           {isLive && (

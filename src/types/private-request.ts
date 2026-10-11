@@ -249,4 +249,46 @@ export interface SessionRequestTransactionResult {
   creationTime: string;
 }
 
+// Input command interfaces for saving chapters
+export interface SaveSessionChoiceInput {
+  id?: string | null;
+  title?: string | null;
+  order: number;
+  isRight: boolean;
+}
+
+export interface SaveSessionQuestionInput {
+  id?: string | null;
+  text?: string | null;
+  explanation?: string | null;
+  choices?: SaveSessionChoiceInput[] | null;
+}
+
+export interface SaveSessionTestInput {
+  id?: string | null;
+  questions?: SaveSessionQuestionInput[] | null;
+}
+
+export interface SaveSessionLessonInput {
+  id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  order: number;
+  durationInSeconds: number;
+  videoUrl?: string | null;
+  test?: SaveSessionTestInput | null;
+}
+
+export interface SaveSessionChapterInput {
+  id?: string | null;
+  title?: string | null;
+  order: number;
+  hours: number;
+  lessons?: SaveSessionLessonInput[] | null;
+}
+
+export interface SaveSessionChaptersCommand {
+  chapters?: SaveSessionChapterInput[] | null;
+}
+
 
