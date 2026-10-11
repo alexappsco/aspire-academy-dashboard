@@ -35,6 +35,7 @@ import AdminReviewNoticeCard from './components/AdminReviewNoticeCard';
 import FinancialTermsCards from './components/FinancialTermsCards';
 import RecordedCurriculumSection from './components/RecordedCurriculumSection';
 import LiveBroadcastRoomSection from './components/LiveBroadcastRoomSection';
+import FinancialTransactionsTable from './components/FinancialTransactionsTable';
 
 interface Props {
   requestId: string;
@@ -448,6 +449,12 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
               onEndLiveSession={handleFinishService}
             />
           )}
+
+          {/* Financial Transactions Table */}
+          <FinancialTransactionsTable
+            requestId={request.id}
+            currency={request.currencySymbol || request.currencyCode || 'جنيه'}
+          />
         </>
       )}
     </Box>
