@@ -20,7 +20,6 @@ import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import QuizDialog, { QuizConfig } from 'src/sections/courses/components/QuizDialog';
 import { saveSessionRequestChaptersAction } from 'src/actions/instructor-session-requests';
-import type { LessonQuiz } from 'src/sections/courses/types';
 import type {
   SessionChapterResult,
   SaveSessionChaptersCommand,
@@ -45,19 +44,17 @@ const inputRootSx = {
   },
 };
 
-// Check if an ID is a valid GUID
+/**
+ * Validates whether a string is a standard RFC 4122 GUID/UUID.
+ */
 function isValidUuid(id?: string | null): boolean {
   if (!id) return false;
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
-// Guarantee a valid GUID: keep existing if valid, otherwise generate a new RFC4122 UUID
-function ensureUuid(id?: string | null): string {
-  if (isValidUuid(id)) return id!;
-  return crypto.randomUUID();
-}
-
-// Extract embed URL for video preview (YouTube, Vimeo, etc.)
+/**
+ * Extracts a playable embed URL from popular streaming links (YouTube, Vimeo).
+ */
 function getEmbedUrl(url?: string | null): string | null {
   if (!url) return null;
   const trimmed = url.trim();
