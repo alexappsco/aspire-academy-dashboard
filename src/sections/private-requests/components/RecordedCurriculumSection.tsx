@@ -71,8 +71,33 @@ function getEmbedUrl(url?: string | null): string | null {
 }
 
 // Internal UI types - strictly video and quiz attachments, zero mock data
+export interface CurriculumChoice {
+  id: string;
+  dbId?: string;
+  letter: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface CurriculumQuestion {
+  id: string;
+  dbId?: string;
+  number: number;
+  title: string;
+  points: number;
+  options: CurriculumChoice[];
+  explanation: string;
+}
+
+export interface CurriculumQuiz {
+  dbId?: string;
+  title: string;
+  questions: CurriculumQuestion[];
+}
+
 export interface CurriculumAttachmentItem {
   id: string;
+  dbId?: string;
   type: 'video' | 'quiz';
   title: string;
   badgeText: string;
@@ -80,11 +105,12 @@ export interface CurriculumAttachmentItem {
   questionsCount?: number;
   url?: string;
   durationInSeconds?: number;
-  quiz?: LessonQuiz;
+  quiz?: CurriculumQuiz;
 }
 
 export interface CurriculumLesson {
   id: string;
+  dbId?: string;
   number: number;
   title: string;
   subtitle?: string;
@@ -94,6 +120,7 @@ export interface CurriculumLesson {
 
 export interface CurriculumChapter {
   id: string;
+  dbId?: string;
   number: number;
   title: string;
   hours?: number;
@@ -107,100 +134,132 @@ function mapBackendChaptersToRich(
 ): CurriculumChapter[] {
   if (!backendChapters || backendChapters.length === 0) return [];
 
-  return backendChapters.map((ch, chIdx) => ({
-    id: ensureUuid(ch.id),
-    number: ch.order || chIdx + 1,
-    title: ch.title || `الفصل ${chIdx + 1}`,
-    hours: ch.hours || 1,
-    isExpanded: chIdx === 0,
-    lessons: (ch.lessons || []).map((les, lIdx) => {
-      const attachments: CurriculumAttachmentItem[] = [];
+  return backendChapters.map((ch, chIdx) => {
+    const chapterDbId = isValidUuid(ch.id) ? ch.id : undefined;
 
-      if (les.videoUrl) {
-        const durationMin = Math.max(1, Math.round((les.durationInSeconds || 0) / 60));
-        attachments.push({
-          id: ensureUuid(les.id ? `vid-${les.id}` : null),
-          type: 'video',
-          title: `فيديو المحاضرة: ${les.title}`,
-          badgeText: 'تم الربط بنجاح',
-          metaText: `المدة: ${durationMin} دقيقة • رابط الفيديو`,
-          url: les.videoUrl,
-          durationInSeconds: les.durationInSeconds || durationMin * 60,
-        });
-      }
+    return {
+      id: chapterDbId || `ch-local-${chIdx + 1}`,
+      dbId: chapterDbId,
+      number: ch.order || chIdx + 1,
+      title: ch.title || `الفصل ${chIdx + 1}`,
+      hours: ch.hours || 1,
+      isExpanded: chIdx === 0,
+      lessons: (ch.lessons || []).map((les, lIdx) => {
+        const lessonDbId = isValidUuid(les.id) ? les.id : undefined;
+        const attachments: CurriculumAttachmentItem[] = [];
 
-      if (les.test && les.test.questions && les.test.questions.length > 0) {
-        const questionsCount = les.test.questions.length;
-        attachments.push({
-          id: ensureUuid(les.test.id),
-          type: 'quiz',
-          title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
-          badgeText: 'مفعل بعد انتهاء الفيديو',
-          metaText: `${questionsCount} أسئلة تدريبية تفاعلية (MCQ)`,
-          questionsCount,
-          quiz: {
-            title: 'بنك أسئلة وتدريبات الدرس',
-            questions: les.test.questions.map((q, qIdx) => ({
-              id: ensureUuid(q.id),
-              number: qIdx + 1,
-              title: q.text,
-              points: 1,
-              explanation: q.explanation || '',
-              options: (q.choices || []).map((c, cIdx) => ({
-                id: ensureUuid(c.id),
-                letter: ARABIC_LETTERS[cIdx] || `${cIdx + 1}`,
-                text: c.title,
-                isCorrect: Boolean(c.isRight),
-              })),
-            })),
-          },
-        });
-      }
+        if (les.videoUrl) {
+          const durationMin = Math.max(1, Math.round((les.durationInSeconds || 0) / 60));
+          attachments.push({
+            id: `vid-${les.id || lIdx}`,
+            dbId: lessonDbId,
+            type: 'video',
+            title: `فيديو المحاضرة: ${les.title}`,
+            badgeText: 'تم الربط بنجاح',
+            metaText: `المدة: ${durationMin} دقيقة • رابط الفيديو`,
+            url: les.videoUrl,
+            durationInSeconds: les.durationInSeconds || durationMin * 60,
+          });
+        }
 
-      return {
-        id: ensureUuid(les.id),
-        number: les.order || lIdx + 1,
-        title: les.title || `الدرس ${lIdx + 1}`,
-        subtitle: les.description || undefined,
-        isCompleted: attachments.length > 0,
-        attachments,
-      };
-    }),
-  }));
+        if (les.test && les.test.questions && les.test.questions.length > 0) {
+          const testDbId = isValidUuid(les.test.id) ? les.test.id : undefined;
+          const questionsCount = les.test.questions.length;
+          attachments.push({
+            id: `quiz-${les.test.id || les.id || lIdx}`,
+            dbId: testDbId,
+            type: 'quiz',
+            title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
+            badgeText: 'مفعل بعد انتهاء الفيديو',
+            metaText: `${questionsCount} أسئلة تدريبية تفاعلية (MCQ)`,
+            questionsCount,
+            quiz: {
+              dbId: testDbId,
+              title: 'بنك أسئلة وتدريبات الدرس',
+              questions: les.test.questions.map((q, qIdx) => {
+                const questionDbId = isValidUuid(q.id) ? q.id : undefined;
+                return {
+                  id: questionDbId || `q-local-${qIdx + 1}`,
+                  dbId: questionDbId,
+                  number: qIdx + 1,
+                  title: q.text,
+                  points: 1,
+                  explanation: q.explanation || '',
+                  options: (q.choices || []).map((c, cIdx) => {
+                    const choiceDbId = isValidUuid(c.id) ? c.id : undefined;
+                    return {
+                      id: choiceDbId || `c-local-${cIdx + 1}`,
+                      dbId: choiceDbId,
+                      letter: ARABIC_LETTERS[cIdx] || `${cIdx + 1}`,
+                      text: c.title,
+                      isCorrect: Boolean(c.isRight),
+                    };
+                  }),
+                };
+              }),
+            },
+          });
+        }
+
+        return {
+          id: lessonDbId || `les-local-${lIdx + 1}`,
+          dbId: lessonDbId,
+          number: les.order || lIdx + 1,
+          title: les.title || `الدرس ${lIdx + 1}`,
+          subtitle: les.description || undefined,
+          isCompleted: attachments.length > 0,
+          attachments,
+        };
+      }),
+    };
+  });
 }
 
-// Map rich UI chapters into exact backend Save payload with guaranteed RFC4122 GUIDs
+// Map rich UI chapters into exact backend Save payload:
+// Existing items send their dbId, new items send null so EF Core inserts them cleanly
 function mapRichChaptersToBackendPayload(
   rich: CurriculumChapter[]
 ): SaveSessionChaptersCommand {
   return {
     chapters: rich.map((ch, chIdx) => {
-      const chapterId = ensureUuid(ch.id);
+      const chapterId = ch.dbId && isValidUuid(ch.dbId) ? ch.dbId : null;
 
       const lessons = ch.lessons.map((les, lIdx) => {
-        const lessonId = ensureUuid(les.id);
+        const lessonId = les.dbId && isValidUuid(les.dbId) ? les.dbId : null;
         const videoAtt = les.attachments.find((a) => a.type === 'video');
         const quizAtt = les.attachments.find((a) => a.type === 'quiz');
 
         let testInput = null;
         if (quizAtt?.quiz?.questions && quizAtt.quiz.questions.length > 0) {
-          testInput = {
-            id: ensureUuid(quizAtt.quiz.questions[0]?.id ? `test-${lessonId}` : null),
-            questions: quizAtt.quiz.questions.map((q) => ({
-              id: ensureUuid(q.id),
-              text: q.title || '',
-              explanation: q.explanation || null,
-              choices: q.options.map((opt, optIdx) => ({
-                id: ensureUuid(opt.id),
-                title: opt.text || '',
-                order: optIdx + 1,
-                isRight: Boolean(opt.isCorrect),
-              })),
-            })),
-          };
+          const validQuestions = quizAtt.quiz.questions.filter((q) => q.title && q.title.trim() !== '');
+
+          if (validQuestions.length > 0) {
+            const testId = quizAtt.quiz.dbId && isValidUuid(quizAtt.quiz.dbId) ? quizAtt.quiz.dbId : null;
+            testInput = {
+              id: testId,
+              questions: validQuestions.map((q) => {
+                const questionId = q.dbId && isValidUuid(q.dbId) ? q.dbId : null;
+                const validChoices = q.options.filter((opt) => opt.text && opt.text.trim() !== '');
+                const hasCorrect = validChoices.some((opt) => opt.isCorrect);
+
+                return {
+                  id: questionId,
+                  text: q.title.trim(),
+                  explanation: q.explanation?.trim() || null,
+                  choices: validChoices.map((opt, optIdx) => ({
+                    id: opt.dbId && isValidUuid(opt.dbId) ? opt.dbId : null,
+                    title: opt.text.trim(),
+                    order: optIdx + 1,
+                    isRight: hasCorrect ? Boolean(opt.isCorrect) : optIdx === 0,
+                  })),
+                };
+              }),
+            };
+          }
         }
 
-        const durationSeconds = Number(videoAtt?.durationInSeconds) || 1200;
+        const hasVideo = Boolean(videoAtt?.url?.trim());
+        const durationSeconds = hasVideo ? Number(videoAtt?.durationInSeconds) || 900 : 0;
 
         return {
           id: lessonId,
@@ -208,7 +267,7 @@ function mapRichChaptersToBackendPayload(
           description: les.subtitle?.trim() || null,
           order: les.number || lIdx + 1,
           durationInSeconds: durationSeconds,
-          videoUrl: videoAtt?.url?.trim() || null,
+          videoUrl: hasVideo ? videoAtt!.url!.trim() : null,
           test: testInput,
         };
       });
@@ -522,23 +581,23 @@ export default function RecordedCurriculumSection({
     (config: QuizConfig) => {
       if (!quizLessonId) return;
 
-      const mappedQuestions = config.questions.map((q, qIdx) => ({
-        id: ensureUuid(q.id),
-        number: qIdx + 1,
-        title: q.title,
-        points: q.points || 1,
-        explanation: q.explanation || '',
-        options: q.options.map((opt, optIdx) => ({
-          id: ensureUuid(opt.id),
-          letter: ARABIC_LETTERS[optIdx] || `${optIdx + 1}`,
-          text: opt.text,
-          isCorrect: Boolean(opt.isCorrect),
-        })),
-      }));
-
-      const quizData: LessonQuiz = {
+      const quizData: CurriculumQuiz = {
         title: config.title || 'بنك أسئلة وتدريبات الدرس',
-        questions: mappedQuestions,
+        questions: config.questions.map((q, qIdx) => ({
+          id: isValidUuid(q.id) ? q.id : crypto.randomUUID(),
+          dbId: isValidUuid(q.id) ? q.id : undefined,
+          number: qIdx + 1,
+          title: q.title,
+          points: q.points || 1,
+          explanation: q.explanation || '',
+          options: q.options.map((opt, optIdx) => ({
+            id: isValidUuid(opt.id) ? opt.id : crypto.randomUUID(),
+            dbId: isValidUuid(opt.id) ? opt.id : undefined,
+            letter: ARABIC_LETTERS[optIdx] || `${optIdx + 1}`,
+            text: opt.text,
+            isCorrect: Boolean(opt.isCorrect),
+          })),
+        })),
       };
 
       const quizAtt: CurriculumAttachmentItem = {
@@ -546,8 +605,8 @@ export default function RecordedCurriculumSection({
         type: 'quiz',
         title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
         badgeText: 'مفعل بعد انتهاء الفيديو',
-        metaText: `${mappedQuestions.length} أسئلة تدريبية تفاعلية (MCQ)`,
-        questionsCount: mappedQuestions.length,
+        metaText: `${quizData.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        questionsCount: quizData.questions.length,
         quiz: quizData,
       };
 

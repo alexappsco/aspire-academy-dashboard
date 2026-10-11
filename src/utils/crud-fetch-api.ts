@@ -103,18 +103,35 @@ async function apiRequest<TResponse, TBody = undefined>(
     if (commonErrorStatus.has(response.status)) {
       try {
         const body = await response.json();
+        console.error(`[API Error ${response.status}] ${method} ${url}:`, JSON.stringify(body, null, 2));
         if (body && typeof body === 'object') {
-          const msg = Array.isArray(body.message)
-            ? body.message.join(' | ')
-            : body.message;
+          const abpError = body.error;
+          let msg = '';
+          if (abpError) {
+            msg = abpError.message || abpError.details;
+            if (abpError.validationErrors && Array.isArray(abpError.validationErrors)) {
+              const validationMsgs = abpError.validationErrors
+                .map((v: any) => v.message || (Array.isArray(v.members) ? v.members.join(',') : ''))
+                .filter(Boolean)
+                .join(' | ');
+              if (validationMsgs) {
+                msg = msg ? `${msg}: ${validationMsgs}` : validationMsgs;
+              }
+            }
+          }
+          if (!msg) {
+            msg = Array.isArray(body.message)
+              ? body.message.join(' | ')
+              : body.message || body.title;
+          }
           if (msg) {
             return errorObject(
               msg,
               response.status,
-              body.code ?? null,
-              body.details ?? null,
+              body.code ?? abpError?.code ?? null,
+              body.details ?? abpError?.details ?? null,
               body.data ?? {},
-              body.validationErrors ?? null
+              body.validationErrors ?? abpError?.validationErrors ?? null
             );
           }
         }
@@ -160,13 +177,30 @@ async function apiRequest<TResponse, TBody = undefined>(
 
     // Response check after parsing so i can get the error message
     if (!response.ok) {
-      const errMsg = Array.isArray(responseData?.message)
-        ? responseData?.message.join(' | ')
-        : responseData?.message || t;
-      const resCode = responseData?.code || null;
-      const resDetails = responseData?.details || null;
-      const resData = responseData?.data || {};
-      const resVErrors = responseData?.validationErrors || null;
+      console.error(`[API Error ${response.status}] ${method} ${url}:`, JSON.stringify(responseData, null, 2));
+      const abpError = responseData?.error;
+      let errMsg = '';
+      if (abpError) {
+        errMsg = abpError.message || abpError.details;
+        if (abpError.validationErrors && Array.isArray(abpError.validationErrors)) {
+          const validationMsgs = abpError.validationErrors
+            .map((v: any) => v.message || (Array.isArray(v.members) ? v.members.join(',') : ''))
+            .filter(Boolean)
+            .join(' | ');
+          if (validationMsgs) {
+            errMsg = errMsg ? `${errMsg}: ${validationMsgs}` : validationMsgs;
+          }
+        }
+      }
+      if (!errMsg) {
+        errMsg = Array.isArray(responseData?.message)
+          ? responseData?.message.join(' | ')
+          : responseData?.message || responseData?.title || t('unexpected_error');
+      }
+      const resCode = responseData?.code ?? abpError?.code ?? null;
+      const resDetails = responseData?.details ?? abpError?.details ?? null;
+      const resData = responseData?.data ?? {};
+      const resVErrors = responseData?.validationErrors ?? abpError?.validationErrors ?? null;
       return errorObject(errMsg, response.status, resCode, resDetails, resData, resVErrors);
     }
 
