@@ -17,11 +17,13 @@ import { useToast } from 'src/components/toast';
 
 import {
   getSessionRequestDetailsAction,
+  getSessionRequestTransactionsAction,
   acceptSessionRequestAction,
   rejectSessionRequestAction,
 } from 'src/actions/instructor-session-requests';
 import {
   SessionRequestInstructorResult,
+  SessionRequestTransactionResult,
   SessionRequestStatusEnum,
   RequestChapter,
   PrivateRequestItem,
@@ -46,26 +48,40 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
   const toast = useToast();
 
   const [request, setRequest] = useState<SessionRequestInstructorResult | null>(null);
+  const [transactions, setTransactions] = useState<SessionRequestTransactionResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch request details from backend API
+  // Fetch request details and financial transactions from backend API
   const fetchRequestDetails = useCallback(async () => {
     if (!requestId) return;
     setLoading(true);
+    setLoadingTransactions(true);
     setError(null);
     try {
-      const res = await getSessionRequestDetailsAction(requestId);
-      if (res.success && res.data) {
-        setRequest(res.data);
+      const [detailsRes, txRes] = await Promise.all([
+        getSessionRequestDetailsAction(requestId),
+        getSessionRequestTransactionsAction(requestId),
+      ]);
+
+      if (detailsRes.success && detailsRes.data) {
+        setRequest(detailsRes.data);
       } else {
-        setError(res.error || 'فشل في تحميل تفاصيل الطلب');
+        setError(detailsRes.error || 'فشل في تحميل تفاصيل الطلب');
+      }
+
+      if (txRes.success && txRes.data) {
+        setTransactions(txRes.data);
+      } else {
+        setTransactions([]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات الطلب');
     } finally {
       setLoading(false);
+      setLoadingTransactions(false);
     }
   }, [requestId]);
 
@@ -453,7 +469,9 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           {/* Financial Transactions Table */}
           <FinancialTransactionsTable
             requestId={request.id}
-            currency={request.currencySymbol || request.currencyCode || 'جنيه'}
+            transactions={transactions}
+            currency={request.currencySymbol || request.currencyCode || ''}
+            loading={loadingTransactions}
           />
         </>
       )}

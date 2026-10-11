@@ -7,6 +7,7 @@ import type {
   SessionRequestListResponse,
   SessionRequestInstructorResult,
   GetSessionRequestsParams,
+  SessionRequestTransactionResult,
 } from 'src/types/private-request';
 
 /**
@@ -147,4 +148,35 @@ export async function rejectSessionRequestAction(
     };
   }
 }
+
+/**
+ * Fetch session request transactions
+ * GET /api/v1/instructor/session-requests/{id}/transactions
+ */
+export async function getSessionRequestTransactionsAction(
+  id: string
+): Promise<ApiSingleResponse<SessionRequestTransactionResult[]>> {
+  try {
+    const res = await getData<SessionRequestTransactionResult[]>(
+      endpoints.instructorSessionRequests.transactions(id)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res
+        ? (res as { error: string }).error
+        : 'Failed to fetch session request transactions';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch session request transactions',
+    };
+  }
+}
+
 

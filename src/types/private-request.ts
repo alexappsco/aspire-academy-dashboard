@@ -233,4 +233,20 @@ export interface GetSessionRequestsParams {
   MaxResultCount?: number;
 }
 
+export interface SessionRequestTransactionResult {
+  id: string;
+  transactionNumber: string;
+  sessionChapterId?: string | null;
+  chapterTitle?: string | null;
+  hours: number;
+  pricePerHour: number;
+  totalAmount: number;
+  instructorHours: number;
+  instructorAmount: number;
+  currencyId?: string | null;
+  currencyCode?: string | null;
+  currencySymbol?: string | null;
+  creationTime: string;
+}
+
 
