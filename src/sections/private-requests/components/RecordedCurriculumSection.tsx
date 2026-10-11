@@ -272,8 +272,9 @@ function mapRichChaptersToBackendPayload(
         };
       });
 
-      // Chapter hours: respect ch.hours if provided, otherwise 0
-      const chapterHours = typeof ch.hours === 'number' ? ch.hours : 0;
+      // Chapter hours: strictly required by backend to be > 0 (minimum 1 hour)
+      const chapterHours =
+        typeof ch.hours === 'number' && ch.hours > 0 ? Math.round(ch.hours) : 1;
 
       return {
         id: chapterId,
@@ -388,7 +389,7 @@ export default function RecordedCurriculumSection({
       id: crypto.randomUUID(),
       number: richChapters.length + 1,
       title: newChapterTitle.trim(),
-      hours: 0,
+      hours: 1,
       isExpanded: true,
       lessons: [],
     };
@@ -893,23 +894,56 @@ export default function RecordedCurriculumSection({
                 </Typography>
               </Stack>
 
-              {/* Delete Chapter Button */}
-              <IconButton
-                size="small"
-                onClick={(e) => handleDeleteChapter(chapter.id, e)}
-                sx={{
-                  border: '1px solid #FECACA',
-                  borderRadius: 1.5,
-                  p: 0.75,
-                  color: '#EF4444',
-                  '&:hover': {
-                    bgcolor: 'rgba(239, 68, 68, 0.08)',
-                    borderColor: '#EF4444',
-                  },
-                }}
+              {/* Chapter Actions (Hours input & Delete) */}
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{ alignItems: 'center' }}
+                onClick={(e) => e.stopPropagation()}
               >
-                <Iconify icon="solar:trash-bin-trash-bold" width={18} />
-              </IconButton>
+                <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
+                  <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    عدد الساعات:
+                  </Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    slotProps={{
+                      htmlInput: {
+                        min: 1,
+                        style: { textAlign: 'center', padding: '3px 6px', fontSize: 13 },
+                      },
+                    }}
+                    value={chapter.hours || 1}
+                    onChange={(e) => {
+                      const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+                      setRichChapters((prev) =>
+                        prev.map((c) => (c.id === chapter.id ? { ...c, hours: val } : c))
+                      );
+                      setHasUnsavedChanges(true);
+                    }}
+                    sx={{ width: 68, ...inputRootSx }}
+                  />
+                </Stack>
+
+                {/* Delete Chapter Button */}
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleDeleteChapter(chapter.id, e)}
+                  sx={{
+                    border: '1px solid #FECACA',
+                    borderRadius: 1.5,
+                    p: 0.75,
+                    color: '#EF4444',
+                    '&:hover': {
+                      bgcolor: 'rgba(239, 68, 68, 0.08)',
+                      borderColor: '#EF4444',
+                    },
+                  }}
+                >
+                  <Iconify icon="solar:trash-bin-trash-bold" width={18} />
+                </IconButton>
+              </Stack>
             </Box>
 
             {/* Chapter Content (Lessons) */}
