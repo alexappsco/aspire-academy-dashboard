@@ -794,34 +794,6 @@ export default function RecordedCurriculumSection({
             </Typography>
           </Box>
         </Stack>
-
-        {/* Prominent Save Button */}
-        <Button
-          variant="contained"
-          onClick={handleSaveCurriculum}
-          disabled={isSaving}
-          startIcon={
-            isSaving ? (
-              <CircularProgress size={18} color="inherit" />
-            ) : (
-              <Iconify icon="solar:diskette-bold" width={20} />
-            )
-          }
-          sx={{
-            bgcolor: '#1C252E',
-            color: '#FFFFFF',
-            borderRadius: 1.75,
-            px: 2.8,
-            py: 1.1,
-            fontWeight: 700,
-            fontSize: 14,
-            boxShadow: 'none',
-            whiteSpace: 'nowrap',
-            '&:hover': { bgcolor: '#2C353E' },
-          }}
-        >
-          {isSaving ? 'جاري الحفظ في النظام...' : 'حفظ المنهج في النظام'}
-        </Button>
       </Stack>
 
       <Divider sx={{ mb: 3.5, borderColor: '#F1F5F9' }} />
