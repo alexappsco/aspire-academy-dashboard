@@ -18,6 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
+import ConfirmationDialog from 'src/components/dialog/ConfirmationDialog';
 import QuizDialog, { QuizConfig } from 'src/sections/courses/components/QuizDialog';
 import {
   saveSessionRequestChaptersAction,
@@ -567,34 +568,7 @@ export default function RecordedCurriculumSection({
     }
   };
 
-  // 6. Delete attachment
-  const handleDeleteAttachment = (
-    chapterId: string,
-    lessonId: string,
-    attachmentId: string
-  ) => {
-    setRichChapters((prev) =>
-      prev.map((ch) => {
-        if (ch.id !== chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== lessonId) return les;
-            const nextAtts = les.attachments.filter((a) => a.id !== attachmentId);
-            return {
-              ...les,
-              isCompleted: nextAtts.length > 0,
-              attachments: nextAtts,
-            };
-          }),
-        };
-      })
-    );
-    setHasUnsavedChanges(true);
-    toast.info('تم حذف المرفق');
-  };
-
-  // 7. Video Link Dialog Handlers
+  // 6. Video Link Dialog Handlers
   const handleOpenVideoModal = (
     chapterId: string,
     lessonId: string,
@@ -1395,21 +1369,6 @@ export default function RecordedCurriculumSection({
                                         </>
                                       )}
 
-                                      <IconButton
-                                        size="small"
-                                        onClick={() =>
-                                          handleDeleteAttachment(chapter.id, lesson.id, att.id)
-                                        }
-                                        sx={{
-                                          border: '1px solid #FECACA',
-                                          borderRadius: 1.5,
-                                          p: 0.7,
-                                          color: '#EF4444',
-                                          '&:hover': { bgcolor: '#FEF2F2' },
-                                        }}
-                                      >
-                                        <Iconify icon="solar:trash-bin-trash-bold" width={16} />
-                                      </IconButton>
                                     </Stack>
                                   </Stack>
                                 </Card>
@@ -1828,146 +1787,36 @@ export default function RecordedCurriculumSection({
       </Dialog>
 
       {/* ── 6. Confirm Delete Chapter Dialog ─────────────────────────────────── */}
-      <Dialog
+      <ConfirmationDialog
         open={Boolean(chapterToDelete)}
         onClose={() => !isDeletingChapter && setChapterToDelete(null)}
-        maxWidth="xs"
-        fullWidth
-        slotProps={{
-          paper: { sx: { borderRadius: 3, p: 2, textAlign: 'center' } },
-        }}
-      >
-        <DialogTitle sx={{ px: 2, pt: 1, pb: 1 }}>
-          <Box
-            sx={{
-              width: 52,
-              height: 52,
-              borderRadius: '50%',
-              bgcolor: '#FEF2F2',
-              color: '#EF4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto',
-              mb: 1.5,
-            }}
-          >
-            <Iconify icon="solar:trash-bin-trash-bold" width={28} />
-          </Box>
-          <Typography sx={{ fontWeight: 700, fontSize: 18, color: '#1E293B' }}>
-            حذف الفصل من النظام
-          </Typography>
-        </DialogTitle>
-        <DialogContent sx={{ px: 2, py: 1 }}>
-          <Typography sx={{ fontSize: 14, color: '#64748B', lineHeight: 1.6 }}>
-            هل أنت متأكد من رغبتك في حذف{' '}
-            <strong style={{ color: '#1E293B' }}>{chapterToDelete?.title}</strong>؟
-            <br />
-            سيتم حذف هذا الفصل وجميع الدروس والمرفقات التابعة له من السيرفر نهائياً.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, pb: 1.5, pt: 1.5, justifyContent: 'center', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmDeleteChapter}
-            disabled={isDeletingChapter}
-            startIcon={isDeletingChapter ? <CircularProgress size={16} color="inherit" /> : undefined}
-            sx={{
-              borderRadius: 1.5,
-              fontWeight: 700,
-              px: 3,
-              boxShadow: 'none',
-            }}
-          >
-            {isDeletingChapter ? 'جاري الحذف...' : 'تأكيد الحذف'}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => setChapterToDelete(null)}
-            disabled={isDeletingChapter}
-            sx={{
-              borderRadius: 1.5,
-              borderColor: '#CBD5E1',
-              color: '#64748B',
-              fontWeight: 600,
-            }}
-          >
-            إلغاء
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmDeleteChapter}
+        variant="warning"
+        title={
+          chapterToDelete?.title
+            ? `هل أنت متأكد من حذف "${chapterToDelete.title}"؟`
+            : 'هل أنت متأكد من حذف هذا الفصل؟'
+        }
+        confirmLabel={isDeletingChapter ? 'جاري الحذف...' : 'حذف'}
+        cancelLabel="إلغاء"
+        cancelVariant="gray"
+      />
 
       {/* ── 7. Confirm Delete Lesson Dialog ──────────────────────────────────── */}
-      <Dialog
+      <ConfirmationDialog
         open={Boolean(lessonToDelete)}
         onClose={() => !isDeletingLesson && setLessonToDelete(null)}
-        maxWidth="xs"
-        fullWidth
-        slotProps={{
-          paper: { sx: { borderRadius: 3, p: 2, textAlign: 'center' } },
-        }}
-      >
-        <DialogTitle sx={{ px: 2, pt: 1, pb: 1 }}>
-          <Box
-            sx={{
-              width: 52,
-              height: 52,
-              borderRadius: '50%',
-              bgcolor: '#FEF2F2',
-              color: '#EF4444',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto',
-              mb: 1.5,
-            }}
-          >
-            <Iconify icon="solar:trash-bin-trash-bold" width={28} />
-          </Box>
-          <Typography sx={{ fontWeight: 700, fontSize: 18, color: '#1E293B' }}>
-            حذف الدرس من النظام
-          </Typography>
-        </DialogTitle>
-        <DialogContent sx={{ px: 2, py: 1 }}>
-          <Typography sx={{ fontSize: 14, color: '#64748B', lineHeight: 1.6 }}>
-            هل أنت متأكد من رغبتك في حذف{' '}
-            <strong style={{ color: '#1E293B' }}>{lessonToDelete?.lessonTitle}</strong>؟
-            <br />
-            سيتم حذف هذا الدرس وجميع مرفقاته (الفيديو والاختبارات) من السيرفر نهائياً.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, pb: 1.5, pt: 1.5, justifyContent: 'center', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmDeleteLesson}
-            disabled={isDeletingLesson}
-            startIcon={isDeletingLesson ? <CircularProgress size={16} color="inherit" /> : undefined}
-            sx={{
-              borderRadius: 1.5,
-              fontWeight: 700,
-              px: 3,
-              boxShadow: 'none',
-            }}
-          >
-            {isDeletingLesson ? 'جاري الحذف...' : 'تأكيد الحذف'}
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => setLessonToDelete(null)}
-            disabled={isDeletingLesson}
-            sx={{
-              borderRadius: 1.5,
-              borderColor: '#CBD5E1',
-              color: '#64748B',
-              fontWeight: 600,
-            }}
-          >
-            إلغاء
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmDeleteLesson}
+        variant="warning"
+        title={
+          lessonToDelete?.lessonTitle
+            ? `هل أنت متأكد من حذف "${lessonToDelete.lessonTitle}"؟`
+            : 'هل أنت متأكد من حذف هذا الدرس؟'
+        }
+        confirmLabel={isDeletingLesson ? 'جاري الحذف...' : 'حذف'}
+        cancelLabel="إلغاء"
+        cancelVariant="gray"
+      />
     </Card>
   );
 }
