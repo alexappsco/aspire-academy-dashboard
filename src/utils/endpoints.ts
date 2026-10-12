@@ -187,6 +187,8 @@ export const endpoints = {
     chapters: (id: string) => `/instructor/session-requests/${id}/chapters`,
     deleteChapter: (id: string, chapterId: string) =>
       `/instructor/session-requests/${id}/chapters/${chapterId}`,
+    deleteLesson: (id: string, chapterId: string, lessonId: string) =>
+      `/instructor/session-requests/${id}/chapters/${chapterId}/lessons/${lessonId}`,
     transactions: (id: string) => `/instructor/session-requests/${id}/transactions`,
   },
 };

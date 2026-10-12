@@ -239,4 +239,33 @@ export async function deleteSessionRequestChapterAction(
   }
 }
 
+/**
+ * Delete a lesson from a chapter in a session request
+ * DELETE /api/v1/instructor/session-requests/{id}/chapters/{chapterId}/lessons/{lessonId}
+ */
+export async function deleteSessionRequestLessonAction(
+  id: string,
+  chapterId: string,
+  lessonId: string
+): Promise<ApiSingleResponse<void>> {
+  try {
+    const res = await deleteData<void>(
+      endpoints.instructorSessionRequests.deleteLesson(id, chapterId, lessonId)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to delete lesson';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete lesson',
+    };
+  }
+}
+
 

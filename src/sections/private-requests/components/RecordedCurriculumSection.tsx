@@ -22,6 +22,7 @@ import QuizDialog, { QuizConfig } from 'src/sections/courses/components/QuizDial
 import {
   saveSessionRequestChaptersAction,
   deleteSessionRequestChapterAction,
+  deleteSessionRequestLessonAction,
 } from 'src/actions/instructor-session-requests';
 import type {
   SessionChapterResult,
@@ -341,6 +342,16 @@ export default function RecordedCurriculumSection({
   const [chapterToDelete, setChapterToDelete] = useState<CurriculumChapter | null>(null);
   const [isDeletingChapter, setIsDeletingChapter] = useState(false);
 
+  // Delete Lesson Dialog state
+  const [lessonToDelete, setLessonToDelete] = useState<{
+    chapterId: string;
+    chapterDbId: string;
+    lessonId: string;
+    lessonDbId: string;
+    lessonTitle: string;
+  } | null>(null);
+  const [isDeletingLesson, setIsDeletingLesson] = useState(false);
+
   // ── Explicit Save Handler (Persists to Backend Database) ──────────────────────────
   const handleSaveCurriculum = async () => {
     if (richChapters.length === 0) {
@@ -488,21 +499,72 @@ export default function RecordedCurriculumSection({
     toast.success('تمت إضافة الدرس محلياً');
   };
 
-  // 5. Delete lesson
-  const handleDeleteLesson = (chapterId: string, lessonId: string) => {
-    setRichChapters((prev) =>
-      prev.map((ch) => {
-        if (ch.id !== chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons
-            .filter((les) => les.id !== lessonId)
-            .map((les, idx) => ({ ...les, number: idx + 1 })),
-        };
-      })
-    );
-    setHasUnsavedChanges(true);
-    toast.info('تم حذف الدرس');
+  // 5. Delete lesson (local vs backend)
+  const handleRequestDeleteLesson = (
+    chapter: CurriculumChapter,
+    lesson: CurriculumLesson
+  ) => {
+    if (!chapter.dbId || !lesson.dbId) {
+      // Local lesson (not yet saved to backend) -> delete directly from state
+      setRichChapters((prev) =>
+        prev.map((ch) => {
+          if (ch.id !== chapter.id) return ch;
+          return {
+            ...ch,
+            lessons: ch.lessons
+              .filter((les) => les.id !== lesson.id)
+              .map((les, idx) => ({ ...les, number: idx + 1 })),
+          };
+        })
+      );
+      setHasUnsavedChanges(true);
+      toast.info('تم حذف الدرس محلياً');
+      return;
+    }
+
+    // Persisted on backend -> open confirmation modal
+    setLessonToDelete({
+      chapterId: chapter.id,
+      chapterDbId: chapter.dbId,
+      lessonId: lesson.id,
+      lessonDbId: lesson.dbId,
+      lessonTitle: lesson.title,
+    });
+  };
+
+  const handleConfirmDeleteLesson = async () => {
+    if (!lessonToDelete) return;
+
+    setIsDeletingLesson(true);
+    try {
+      const res = await deleteSessionRequestLessonAction(
+        requestId,
+        lessonToDelete.chapterDbId,
+        lessonToDelete.lessonDbId
+      );
+
+      if (res.success) {
+        toast.success('تم حذف الدرس من النظام بنجاح');
+        setRichChapters((prev) =>
+          prev.map((ch) => {
+            if (ch.id !== lessonToDelete.chapterId) return ch;
+            return {
+              ...ch,
+              lessons: ch.lessons
+                .filter((les) => les.id !== lessonToDelete.lessonId)
+                .map((les, idx) => ({ ...les, number: idx + 1 })),
+            };
+          })
+        );
+        setLessonToDelete(null);
+      } else {
+        toast.error(res.error || 'فشل حذف الدرس من النظام');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء حذف الدرس');
+    } finally {
+      setIsDeletingLesson(false);
+    }
   };
 
   // 6. Delete attachment
@@ -1137,7 +1199,7 @@ export default function RecordedCurriculumSection({
 
                             <IconButton
                               size="small"
-                              onClick={() => handleDeleteLesson(chapter.id, lesson.id)}
+                              onClick={() => handleRequestDeleteLesson(chapter, lesson)}
                               sx={{
                                 border: '1px solid #FECACA',
                                 borderRadius: 1.5,
@@ -1824,6 +1886,77 @@ export default function RecordedCurriculumSection({
             variant="outlined"
             onClick={() => setChapterToDelete(null)}
             disabled={isDeletingChapter}
+            sx={{
+              borderRadius: 1.5,
+              borderColor: '#CBD5E1',
+              color: '#64748B',
+              fontWeight: 600,
+            }}
+          >
+            إلغاء
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── 7. Confirm Delete Lesson Dialog ──────────────────────────────────── */}
+      <Dialog
+        open={Boolean(lessonToDelete)}
+        onClose={() => !isDeletingLesson && setLessonToDelete(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: { sx: { borderRadius: 3, p: 2, textAlign: 'center' } },
+        }}
+      >
+        <DialogTitle sx={{ px: 2, pt: 1, pb: 1 }}>
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              bgcolor: '#FEF2F2',
+              color: '#EF4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 1.5,
+            }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" width={28} />
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 18, color: '#1E293B' }}>
+            حذف الدرس من النظام
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ px: 2, py: 1 }}>
+          <Typography sx={{ fontSize: 14, color: '#64748B', lineHeight: 1.6 }}>
+            هل أنت متأكد من رغبتك في حذف{' '}
+            <strong style={{ color: '#1E293B' }}>{lessonToDelete?.lessonTitle}</strong>؟
+            <br />
+            سيتم حذف هذا الدرس وجميع مرفقاته (الفيديو والاختبارات) من السيرفر نهائياً.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 2, pb: 1.5, pt: 1.5, justifyContent: 'center', gap: 1.5 }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDeleteLesson}
+            disabled={isDeletingLesson}
+            startIcon={isDeletingLesson ? <CircularProgress size={16} color="inherit" /> : undefined}
+            sx={{
+              borderRadius: 1.5,
+              fontWeight: 700,
+              px: 3,
+              boxShadow: 'none',
+            }}
+          >
+            {isDeletingLesson ? 'جاري الحذف...' : 'تأكيد الحذف'}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setLessonToDelete(null)}
+            disabled={isDeletingLesson}
             sx={{
               borderRadius: 1.5,
               borderColor: '#CBD5E1',
