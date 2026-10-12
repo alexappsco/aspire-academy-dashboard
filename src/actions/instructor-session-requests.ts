@@ -1,6 +1,6 @@
 'use server';
 
-import { getData, postData, editData } from 'src/utils/crud-fetch-api';
+import { getData, postData, editData, deleteData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
@@ -207,6 +207,34 @@ export async function saveSessionRequestChaptersAction(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to save session chapters',
+    };
+  }
+}
+
+/**
+ * Delete a chapter from a session request
+ * DELETE /api/v1/instructor/session-requests/{id}/chapters/{chapterId}
+ */
+export async function deleteSessionRequestChapterAction(
+  id: string,
+  chapterId: string
+): Promise<ApiSingleResponse<void>> {
+  try {
+    const res = await deleteData<void>(
+      endpoints.instructorSessionRequests.deleteChapter(id, chapterId)
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to delete chapter';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete chapter',
     };
   }
 }

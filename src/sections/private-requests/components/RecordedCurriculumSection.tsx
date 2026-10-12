@@ -19,7 +19,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import QuizDialog, { QuizConfig } from 'src/sections/courses/components/QuizDialog';
-import { saveSessionRequestChaptersAction } from 'src/actions/instructor-session-requests';
+import {
+  saveSessionRequestChaptersAction,
+  deleteSessionRequestChapterAction,
+} from 'src/actions/instructor-session-requests';
 import type {
   SessionChapterResult,
   SaveSessionChaptersCommand,
@@ -334,6 +337,10 @@ export default function RecordedCurriculumSection({
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [editingLessonTitle, setEditingLessonTitle] = useState<string>('');
 
+  // Delete Chapter Dialog state
+  const [chapterToDelete, setChapterToDelete] = useState<CurriculumChapter | null>(null);
+  const [isDeletingChapter, setIsDeletingChapter] = useState(false);
+
   // ── Explicit Save Handler (Persists to Backend Database) ──────────────────────────
   const handleSaveCurriculum = async () => {
     if (richChapters.length === 0) {
@@ -396,16 +403,49 @@ export default function RecordedCurriculumSection({
     toast.success('تمت إضافة الفصل محلياً. لا تنسَ الضغط على "حفظ المنهج" لتثبيته في النظام.');
   };
 
-  // 2. Delete chapter
-  const handleDeleteChapter = (chapterId: string, e?: React.MouseEvent) => {
+  // 2. Delete chapter (local vs backend)
+  const handleRequestDeleteChapter = (chapter: CurriculumChapter, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setRichChapters((prev) =>
-      prev
-        .filter((ch) => ch.id !== chapterId)
-        .map((ch, idx) => ({ ...ch, number: idx + 1 }))
-    );
-    setHasUnsavedChanges(true);
-    toast.info('تم حذف الفصل محلياً');
+    if (!chapter.dbId) {
+      // Local chapter not yet saved to backend
+      setRichChapters((prev) =>
+        prev
+          .filter((ch) => ch.id !== chapter.id)
+          .map((ch, idx) => ({ ...ch, number: idx + 1 }))
+      );
+      setHasUnsavedChanges(true);
+      toast.info('تم حذف الفصل محلياً');
+      return;
+    }
+    // Saved in backend -> open confirm dialog
+    setChapterToDelete(chapter);
+  };
+
+  const handleConfirmDeleteChapter = async () => {
+    if (!chapterToDelete?.dbId) return;
+
+    setIsDeletingChapter(true);
+    try {
+      const res = await deleteSessionRequestChapterAction(requestId, chapterToDelete.dbId);
+      if (res.success) {
+        toast.success('تم حذف الفصل من النظام بنجاح');
+        const updatedChapters = richChapters
+          .filter((ch) => ch.id !== chapterToDelete.id)
+          .map((ch, idx) => ({ ...ch, number: idx + 1 }));
+        setRichChapters(updatedChapters);
+        setChapterToDelete(null);
+
+        // Notify parent of updated state
+        const payload = mapRichChaptersToBackendPayload(updatedChapters);
+        onChaptersUpdated?.(payload.chapters as any);
+      } else {
+        toast.error(res.error || 'فشل حذف الفصل من النظام');
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء حذف الفصل');
+    } finally {
+      setIsDeletingChapter(false);
+    }
   };
 
   // 3. Toggle chapter accordion
@@ -926,7 +966,7 @@ export default function RecordedCurriculumSection({
                 {/* Delete Chapter Button */}
                 <IconButton
                   size="small"
-                  onClick={(e) => handleDeleteChapter(chapter.id, e)}
+                  onClick={(e) => handleRequestDeleteChapter(chapter, e)}
                   sx={{
                     border: '1px solid #FECACA',
                     borderRadius: 1.5,
@@ -1721,6 +1761,77 @@ export default function RecordedCurriculumSection({
             sx={{ color: '#F8FAFC', borderColor: '#334155' }}
           >
             إغلاق
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── 6. Confirm Delete Chapter Dialog ─────────────────────────────────── */}
+      <Dialog
+        open={Boolean(chapterToDelete)}
+        onClose={() => !isDeletingChapter && setChapterToDelete(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: { sx: { borderRadius: 3, p: 2, textAlign: 'center' } },
+        }}
+      >
+        <DialogTitle sx={{ px: 2, pt: 1, pb: 1 }}>
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              borderRadius: '50%',
+              bgcolor: '#FEF2F2',
+              color: '#EF4444',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 1.5,
+            }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" width={28} />
+          </Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 18, color: '#1E293B' }}>
+            حذف الفصل من النظام
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ px: 2, py: 1 }}>
+          <Typography sx={{ fontSize: 14, color: '#64748B', lineHeight: 1.6 }}>
+            هل أنت متأكد من رغبتك في حذف{' '}
+            <strong style={{ color: '#1E293B' }}>{chapterToDelete?.title}</strong>؟
+            <br />
+            سيتم حذف هذا الفصل وجميع الدروس والمرفقات التابعة له من السيرفر نهائياً.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 2, pb: 1.5, pt: 1.5, justifyContent: 'center', gap: 1.5 }}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmDeleteChapter}
+            disabled={isDeletingChapter}
+            startIcon={isDeletingChapter ? <CircularProgress size={16} color="inherit" /> : undefined}
+            sx={{
+              borderRadius: 1.5,
+              fontWeight: 700,
+              px: 3,
+              boxShadow: 'none',
+            }}
+          >
+            {isDeletingChapter ? 'جاري الحذف...' : 'تأكيد الحذف'}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setChapterToDelete(null)}
+            disabled={isDeletingChapter}
+            sx={{
+              borderRadius: 1.5,
+              borderColor: '#CBD5E1',
+              color: '#64748B',
+              fontWeight: 600,
+            }}
+          >
+            إلغاء
           </Button>
         </DialogActions>
       </Dialog>
