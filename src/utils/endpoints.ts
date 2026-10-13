@@ -175,4 +175,20 @@ export const endpoints = {
     details: (studentId: string) => `/instructor/students/${studentId}`,
     courses: (studentId: string) => `/instructor/students/${studentId}/courses`,
   },
+  instructorSessionSettings: {
+    get: '/instructor/session-settings',
+    update: '/instructor/session-settings',
+  },
+  instructorSessionRequests: {
+    list: '/instructor/session-requests',
+    details: (id: string) => `/instructor/session-requests/${id}`,
+    accept: (id: string) => `/instructor/session-requests/${id}/accept`,
+    reject: (id: string) => `/instructor/session-requests/${id}/reject`,
+    chapters: (id: string) => `/instructor/session-requests/${id}/chapters`,
+    deleteChapter: (id: string, chapterId: string) =>
+      `/instructor/session-requests/${id}/chapters/${chapterId}`,
+    deleteLesson: (id: string, chapterId: string, lessonId: string) =>
+      `/instructor/session-requests/${id}/chapters/${chapterId}/lessons/${lessonId}`,
+    transactions: (id: string) => `/instructor/session-requests/${id}/transactions`,
+  },
 };

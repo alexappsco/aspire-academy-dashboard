@@ -109,7 +109,13 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/finance.svg",
     path: "/currencies",
   },
-  // 6. أكواد الخصم
+  // 6. الطلبات الخاصة (للمحاضر)
+  {
+    key: "private_requests",
+    icon: "/icons/package.svg",
+    path: "/private-requests",
+  },
+  // 7. أكواد الخصم
   {
     key: "discount_codes",
     icon: "/icons/bxs--discount.svg",
@@ -174,6 +180,10 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "categories",
   "banners",
   "legal_info",
+]);
+
+const ADMIN_HIDDEN_KEYS = new Set([
+  "private_requests",
 ]);
 
 function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): SidebarItem[] {
@@ -471,7 +481,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         }}
       >
         <List disablePadding>
-          {(isInstructor ? filterItemsForRole(sidebarItems, INSTRUCTOR_HIDDEN_KEYS) : sidebarItems).map((item) => {
+          {(isInstructor
+            ? filterItemsForRole(sidebarItems, INSTRUCTOR_HIDDEN_KEYS)
+            : filterItemsForRole(sidebarItems, ADMIN_HIDDEN_KEYS)
+          ).map((item) => {
             const expanded = expandedItems.includes(item.key);
 
             return (

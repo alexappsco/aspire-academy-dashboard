@@ -24,3 +24,6 @@ export * from './instructor-reports';
 export * from './admin-notifications';
 export * from './instructor-notifications';
 export * from './instructor-students';
+export * from './instructor-session-settings';
+export * from './instructor-session-requests';
+

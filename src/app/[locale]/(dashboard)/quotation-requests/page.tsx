@@ -1,5 +1,5 @@
-import EmptyPage from "@/components/EmptyPage";
+import PrivateRequestsListView from '@/sections/private-requests/view';
 
 export default function QuotationRequestsPage() {
-  return <EmptyPage tKey="quotation_requests" />;
+  return <PrivateRequestsListView />;
 }
