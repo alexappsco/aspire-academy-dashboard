@@ -63,46 +63,6 @@ function toHttps(url?: string | null): string | null {
   return url.replace(/^http:\/\//i, 'https://');
 }
 
-/**
- * Extracts a playable embed URL from popular streaming links (YouTube, Vimeo).
- */
-function getEmbedUrl(url?: string | null): string | null {
-  if (!url) return null;
-  const trimmed = url.trim();
-  const ytMatch = trimmed.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/
-  );
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
-  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  return null;
-}
-
-// Internal UI types - strictly video and quiz attachments, zero mock data
-export interface CurriculumChoice {
-  id: string;
-  dbId?: string;
-  letter: string;
-  text: string;
-  isCorrect: boolean;
-}
-
-export interface CurriculumQuestion {
-  id: string;
-  dbId?: string;
-  number: number;
-  title: string;
-  points: number;
-  options: CurriculumChoice[];
-  explanation: string;
-}
-
-export interface CurriculumQuiz {
-  dbId?: string;
-  title: string;
-  questions: CurriculumQuestion[];
-}
-
 export interface CurriculumAttachmentItem {
   id: string;
   dbId?: string;
@@ -114,8 +74,7 @@ export interface CurriculumAttachmentItem {
   questionsCount?: number;
   url?: string;
   durationInSeconds?: number;
-  quiz?: CurriculumQuiz;
-  isUploading?: boolean;
+  quiz?: QuizConfig;
 }
 
 export interface CurriculumLesson {
@@ -184,29 +143,20 @@ function mapBackendChaptersToRich(
             metaText: `${questionsCount} أسئلة تدريبية تفاعلية (MCQ)`,
             questionsCount,
             quiz: {
-              dbId: testDbId,
               title: 'بنك أسئلة وتدريبات الدرس',
-              questions: les.test.questions.map((q, qIdx) => {
-                const questionDbId = isValidUuid(q.id) ? q.id : undefined;
-                return {
-                  id: questionDbId || `q-local-${qIdx + 1}`,
-                  dbId: questionDbId,
-                  number: qIdx + 1,
-                  title: q.text,
-                  points: 1,
-                  explanation: q.explanation || '',
-                  options: (q.choices || []).map((c, cIdx) => {
-                    const choiceDbId = isValidUuid(c.id) ? c.id : undefined;
-                    return {
-                      id: choiceDbId || `c-local-${cIdx + 1}`,
-                      dbId: choiceDbId,
-                      letter: ARABIC_LETTERS[cIdx] || `${cIdx + 1}`,
-                      text: c.title,
-                      isCorrect: Boolean(c.isRight),
-                    };
-                  }),
-                };
-              }),
+              questions: les.test.questions.map((q, qIdx) => ({
+                id: q.id || `q-${qIdx + 1}`,
+                number: qIdx + 1,
+                title: q.text,
+                points: 1,
+                explanation: q.explanation || '',
+                options: (q.choices || []).map((c, cIdx) => ({
+                  id: c.id || `c-${cIdx + 1}`,
+                  letter: ARABIC_LETTERS[cIdx] || `${cIdx + 1}`,
+                  text: c.title,
+                  isCorrect: Boolean(c.isRight),
+                })),
+              })),
             },
           });
         }
@@ -274,11 +224,11 @@ function mapRichChaptersToBackendPayload(
           const validQuestions = quizAtt.quiz.questions.filter((q) => q.title && q.title.trim() !== '');
 
           if (validQuestions.length > 0) {
-            const testId = quizAtt.quiz.dbId && isValidUuid(quizAtt.quiz.dbId) ? quizAtt.quiz.dbId : null;
+            const testId = quizAtt.dbId && isValidUuid(quizAtt.dbId) ? quizAtt.dbId : null;
             testInput = {
               id: testId,
               questions: validQuestions.map((q) => {
-                const questionId = q.dbId && isValidUuid(q.dbId) ? q.dbId : null;
+                const questionId = isValidUuid(q.id) ? q.id : null;
                 const validChoices = q.options.filter((opt) => opt.text && opt.text.trim() !== '');
                 const hasCorrect = validChoices.some((opt) => opt.isCorrect);
 
@@ -287,7 +237,7 @@ function mapRichChaptersToBackendPayload(
                   text: q.title.trim(),
                   explanation: q.explanation?.trim() || null,
                   choices: validChoices.map((opt, optIdx) => ({
-                    id: opt.dbId && isValidUuid(opt.dbId) ? opt.dbId : null,
+                    id: isValidUuid(opt.id) ? opt.id : null,
                     title: opt.text.trim(),
                     order: optIdx + 1,
                     isRight: hasCorrect ? Boolean(opt.isCorrect) : optIdx === 0,
@@ -348,13 +298,6 @@ export default function RecordedCurriculumSection({
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [lessonTitles, setLessonTitles] = useState<Record<string, string>>({});
 
-  // Sync state if initialChapters changes from parent
-  useEffect(() => {
-    if (initialChapters) {
-      setRichChapters(mapBackendChaptersToRich(initialChapters));
-      setHasUnsavedChanges(false);
-    }
-  }, [initialChapters]);
 
   // Quiz Dialog state
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
@@ -392,20 +335,20 @@ export default function RecordedCurriculumSection({
     lessonId: string;
   } | null>(null);
   const [uploading, setUploading] = useState(false);
-  const fetchedAttachmentIdsRef = useRef<Set<string>>(new Set());
 
-  // Resolve any attachment details (name, url) for attachmentIds loaded from backend
+  // Sync state if initialChapters changes from parent & resolve attachment details
   useEffect(() => {
+    if (!initialChapters) return;
+
+    const mapped = mapBackendChaptersToRich(initialChapters);
+    setRichChapters(mapped);
+    setHasUnsavedChanges(false);
+
     const pendingIds = new Set<string>();
-    richChapters.forEach((ch) =>
+    mapped.forEach((ch) =>
       ch.lessons.forEach((les) =>
         les.attachments.forEach((att) => {
-          if (
-            att.type === 'pdf' &&
-            att.attachmentId &&
-            !att.url &&
-            !fetchedAttachmentIdsRef.current.has(att.attachmentId)
-          ) {
+          if (att.type === 'pdf' && att.attachmentId && !att.url) {
             pendingIds.add(att.attachmentId);
           }
         })
@@ -413,8 +356,6 @@ export default function RecordedCurriculumSection({
     );
 
     if (pendingIds.size === 0) return;
-
-    pendingIds.forEach((id) => fetchedAttachmentIdsRef.current.add(id));
 
     let active = true;
     (async () => {
@@ -458,7 +399,7 @@ export default function RecordedCurriculumSection({
     return () => {
       active = false;
     };
-  }, [richChapters]);
+  }, [initialChapters]);
 
   // ── Explicit Save Handler (Persists to Backend Database) ──────────────────────────
   const handleSaveCurriculum = async () => {
@@ -698,33 +639,14 @@ export default function RecordedCurriculumSection({
     (config: QuizConfig) => {
       if (!quizLessonId) return;
 
-      const quizData: CurriculumQuiz = {
-        title: config.title || 'بنك أسئلة وتدريبات الدرس',
-        questions: config.questions.map((q, qIdx) => ({
-          id: isValidUuid(q.id) ? q.id : crypto.randomUUID(),
-          dbId: isValidUuid(q.id) ? q.id : undefined,
-          number: qIdx + 1,
-          title: q.title,
-          points: q.points || 1,
-          explanation: q.explanation || '',
-          options: q.options.map((opt, optIdx) => ({
-            id: isValidUuid(opt.id) ? opt.id : crypto.randomUUID(),
-            dbId: isValidUuid(opt.id) ? opt.id : undefined,
-            letter: ARABIC_LETTERS[optIdx] || `${optIdx + 1}`,
-            text: opt.text,
-            isCorrect: Boolean(opt.isCorrect),
-          })),
-        })),
-      };
-
       const quizAtt: CurriculumAttachmentItem = {
         id: crypto.randomUUID(),
         type: 'quiz',
         title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
         badgeText: 'مفعل بعد انتهاء الفيديو',
-        metaText: `${quizData.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
-        questionsCount: quizData.questions.length,
-        quiz: quizData,
+        metaText: `${config.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        questionsCount: config.questions.length,
+        quiz: config,
       };
 
       setRichChapters((prev) =>
@@ -1907,59 +1829,18 @@ export default function RecordedCurriculumSection({
         </DialogTitle>
 
         <DialogContent sx={{ px: 2.5, py: 2 }}>
-          {getEmbedUrl(previewVideoUrl) ? (
+          {previewVideoUrl ? (
             <Box
-              component="iframe"
-              src={getEmbedUrl(previewVideoUrl)!}
-              title={previewVideoTitle}
+              component="video"
+              controls
+              src={previewVideoUrl}
               sx={{
                 width: '100%',
-                height: 400,
-                border: 'none',
+                maxHeight: 480,
                 borderRadius: 2,
+                bgcolor: '#000000',
               }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
             />
-          ) : previewVideoUrl ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box
-                component="video"
-                controls
-                src={previewVideoUrl}
-                sx={{
-                  width: '100%',
-                  maxHeight: 450,
-                  borderRadius: 2,
-                  bgcolor: '#000000',
-                }}
-              />
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1}
-                sx={{ justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' } }}
-              >
-                <Typography
-                  sx={{
-                    color: '#94A3B8',
-                    fontSize: 12,
-                    wordBreak: 'break-all',
-                    maxWidth: 500,
-                  }}
-                >
-                  {previewVideoUrl}
-                </Typography>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => window.open(previewVideoUrl, '_blank', 'noopener,noreferrer')}
-                  startIcon={<Iconify icon="solar:square-top-down-bold" width={16} />}
-                  sx={{ color: '#F8FAFC', borderColor: '#334155', whiteSpace: 'nowrap' }}
-                >
-                  فتح في نافذة جديدة
-                </Button>
-              </Stack>
-            </Box>
           ) : (
             <Box
               sx={{
