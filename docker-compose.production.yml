@@ -1,0 +1,14 @@
+services:
+  dashboard:
+    container_name: aspire-dashboard
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_HOST_API: ${NEXT_PUBLIC_HOST_API}
+    # Server actions read HOST_API at runtime too, so pass it to the container as well as the build.
+    environment:
+      NEXT_PUBLIC_HOST_API: ${NEXT_PUBLIC_HOST_API}
+    # Bound to localhost only — nginx terminates TLS for the dashboard domain and proxies here.
+    ports:
+      - "127.0.0.1:3002:3000"
+    restart: unless-stopped

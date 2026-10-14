@@ -4,7 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Self-hosted in Docker: the Dockerfile copies .next/standalone into the runtime image.
+  output: 'standalone',
 };
 
 export default withNextIntl(nextConfig);
