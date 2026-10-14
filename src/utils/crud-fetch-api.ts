@@ -57,11 +57,25 @@ const KNOWN_BACKEND_ERRORS: Record<string, string> = {
   InsufficientWalletBalance: 'رصيد محفظة الطالب غير كافٍ لتغطية تكلفة ساعات هذا المنهج',
   SessionRequestNotFound: 'لم يتم العثور على الطلب الخاص المطلوب',
   UnauthorizedAccess: 'ليس لديك صلاحية لتعديل هذا الطلب',
+  'Lesson video URL is required.': 'رابط الفيديو مطلوب لكل درس في المنهج',
+  'Lesson video URL is required': 'رابط الفيديو مطلوب لكل درس في المنهج',
+  'Video URL is required.': 'رابط الفيديو مطلوب لكل درس في المنهج',
+  'Validation failed.': 'فشل التحقق من صحة البيانات',
 };
 
 function formatBackendMessage(msg?: string | null): string {
   if (!msg) return '';
-  return KNOWN_BACKEND_ERRORS[msg.trim()] || msg;
+  const trimmed = msg.trim();
+  if (KNOWN_BACKEND_ERRORS[trimmed]) {
+    return KNOWN_BACKEND_ERRORS[trimmed];
+  }
+  if (trimmed.includes(' | ')) {
+    return trimmed
+      .split(' | ')
+      .map((part) => KNOWN_BACKEND_ERRORS[part.trim()] || part.trim())
+      .join(' | ');
+  }
+  return trimmed;
 }
 // generic function to make API requests
 async function apiRequest<TResponse, TBody = undefined>(
@@ -203,6 +217,18 @@ async function apiRequest<TResponse, TBody = undefined>(
           }
         }
       }
+      if (!errMsg || errMsg === 'Validation failed.') {
+        if (responseData?.errors && typeof responseData.errors === 'object') {
+          const errorEntries = Object.entries(responseData.errors)
+            .map(([, val]) => {
+              return Array.isArray(val) ? val.join(', ') : String(val);
+            })
+            .filter(Boolean);
+          if (errorEntries.length > 0) {
+            errMsg = errorEntries.join(' | ');
+          }
+        }
+      }
       if (!errMsg) {
         errMsg = Array.isArray(responseData?.message)
           ? responseData?.message.join(' | ')
@@ -211,7 +237,7 @@ async function apiRequest<TResponse, TBody = undefined>(
       const resCode = responseData?.code ?? abpError?.code ?? null;
       const resDetails = responseData?.details ?? abpError?.details ?? null;
       const resData = responseData?.data ?? {};
-      const resVErrors = responseData?.validationErrors ?? abpError?.validationErrors ?? null;
+      const resVErrors = responseData?.validationErrors ?? abpError?.validationErrors ?? responseData?.errors ?? null;
       return errorObject(formatBackendMessage(errMsg), response.status, resCode, resDetails, resData, resVErrors);
     }
 

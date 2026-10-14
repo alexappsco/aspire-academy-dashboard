@@ -482,6 +482,13 @@ export default function RecordedCurriculumSection({
           toast.error(`يوجد درس بدون عنوان داخل ${ch.title}`);
           return;
         }
+        const videoAtt = les.attachments.find((a) => a.type === 'video');
+        if (!videoAtt?.url?.trim()) {
+          toast.error(
+            `الدرس "${les.title}" داخل "${ch.title}" لا يحتوي على فيديو. نظام المنصة يشترط رفع فيديو أو إضافة رابط فيديو لكل درس قبل الحفظ.`
+          );
+          return;
+        }
       }
     }
 
@@ -868,8 +875,8 @@ export default function RecordedCurriculumSection({
       );
       setHasUnsavedChanges(true);
       toast.success('تم رفع الفيديو بنجاح');
-    } catch {
-      toast.error('فشل رفع الفيديو');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'فشل رفع الفيديو');
     } finally {
       setUploading(false);
     }
@@ -923,8 +930,8 @@ export default function RecordedCurriculumSection({
       );
       setHasUnsavedChanges(true);
       toast.success('تم إرفاق المستند بنجاح');
-    } catch {
-      toast.error('فشل رفع المستند');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'فشل رفع المستند');
     } finally {
       setUploading(false);
     }
