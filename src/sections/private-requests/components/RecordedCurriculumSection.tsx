@@ -58,6 +58,11 @@ function isValidUuid(id?: string | null): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
+function toHttps(url?: string | null): string | null {
+  if (!url) return null;
+  return url.replace(/^http:\/\//i, 'https://');
+}
+
 /**
  * Extracts a playable embed URL from popular streaming links (YouTube, Vimeo).
  */
@@ -162,7 +167,7 @@ function mapBackendChaptersToRich(
             title: `فيديو المحاضرة: ${les.title}`,
             badgeText: 'تم المعالجة والرفع بنجاح',
             metaText: `المدة: ${durationMin} دقيقة • فيديو الدرس`,
-            url: les.videoUrl,
+            url: toHttps(les.videoUrl) || les.videoUrl,
             durationInSeconds: les.durationInSeconds || durationMin * 60,
           });
         }
@@ -217,7 +222,7 @@ function mapBackendChaptersToRich(
               title: att.name || att.fileName || 'مستند مرفق',
               badgeText: 'جاهز للتحميل للطلاب',
               metaText: 'ملف إلكتروني',
-              url: att.url,
+              url: toHttps(att.url) || att.url,
             });
           });
         } else if (les.attachmentIds && les.attachmentIds.length > 0) {
@@ -294,7 +299,9 @@ function mapRichChaptersToBackendPayload(
         }
 
         const hasVideo = Boolean(videoAtt?.url?.trim());
-        const durationSeconds = hasVideo ? Number(videoAtt?.durationInSeconds) || 900 : 0;
+        const rawVideoUrl = hasVideo ? videoAtt!.url!.trim() : null;
+        const videoUrl = rawVideoUrl ? (toHttps(rawVideoUrl) || rawVideoUrl) : null;
+        const durationSeconds = hasVideo ? Number(videoAtt?.durationInSeconds) || 600 : 0;
         const attachmentIds = docAtts.map((d) => d.attachmentId!);
 
         return {
@@ -303,9 +310,9 @@ function mapRichChaptersToBackendPayload(
           description: les.subtitle?.trim() || null,
           order: les.number || lIdx + 1,
           durationInSeconds: durationSeconds,
-          videoUrl: hasVideo ? videoAtt!.url!.trim() : null,
+          videoUrl,
           test: testInput,
-          attachmentIds: attachmentIds.length > 0 ? attachmentIds : null,
+          attachmentIds: attachmentIds.length > 0 ? attachmentIds : [],
         };
       });
 
@@ -353,17 +360,6 @@ export default function RecordedCurriculumSection({
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
   const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('');
   const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
-
-  // Video Link Dialog state (Backend expects videoUrl + durationInSeconds)
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [videoModalTarget, setVideoModalTarget] = useState<{
-    chapterId: string;
-    lessonId: string;
-    lessonTitle: string;
-    existingAttachmentId?: string;
-  } | null>(null);
-  const [videoModalUrl, setVideoModalUrl] = useState('');
-  const [videoModalMinutes, setVideoModalMinutes] = useState<number>(20);
 
   // Video Preview Dialog state
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
@@ -485,7 +481,7 @@ export default function RecordedCurriculumSection({
         const videoAtt = les.attachments.find((a) => a.type === 'video');
         if (!videoAtt?.url?.trim()) {
           toast.error(
-            `الدرس "${les.title}" داخل "${ch.title}" لا يحتوي على فيديو. نظام المنصة يشترط رفع فيديو أو إضافة رابط فيديو لكل درس قبل الحفظ.`
+            `الدرس "${les.title}" داخل "${ch.title}" لا يحتوي على فيديو. يرجى رفع فيديو للدرس أولاً قبل الحفظ.`
           );
           return;
         }
@@ -686,73 +682,6 @@ export default function RecordedCurriculumSection({
     }
   };
 
-  // 6. Video Link Dialog Handlers
-  const handleOpenVideoModal = (
-    chapterId: string,
-    lessonId: string,
-    lessonTitle: string,
-    existingAtt?: CurriculumAttachmentItem
-  ) => {
-    setVideoModalTarget({
-      chapterId,
-      lessonId,
-      lessonTitle,
-      existingAttachmentId: existingAtt?.id,
-    });
-    setVideoModalUrl(existingAtt?.url || '');
-    setVideoModalMinutes(
-      existingAtt?.durationInSeconds
-        ? Math.max(1, Math.round(existingAtt.durationInSeconds / 60))
-        : 20
-    );
-    setVideoModalOpen(true);
-  };
-
-  const handleSaveVideoModal = () => {
-    if (!videoModalTarget) return;
-    const url = videoModalUrl.trim();
-    if (!url) {
-      toast.warning('يرجى إدخال رابط الفيديو');
-      return;
-    }
-
-    const durationMinutes = Number(videoModalMinutes) > 0 ? Number(videoModalMinutes) : 15;
-    const durationInSeconds = durationMinutes * 60;
-
-    const newVideoAtt: CurriculumAttachmentItem = {
-      id: videoModalTarget.existingAttachmentId || crypto.randomUUID(),
-      type: 'video',
-      title: `فيديو المحاضرة: ${videoModalTarget.lessonTitle}`,
-      badgeText: 'تم الربط بنجاح',
-      metaText: `المدة: ${durationMinutes} دقيقة • رابط الفيديو`,
-      url,
-      durationInSeconds,
-    };
-
-    setRichChapters((prev) =>
-      prev.map((ch) => {
-        if (ch.id !== videoModalTarget.chapterId) return ch;
-        return {
-          ...ch,
-          lessons: ch.lessons.map((les) => {
-            if (les.id !== videoModalTarget.lessonId) return les;
-            const otherAtts = les.attachments.filter((a) => a.type !== 'video');
-            return {
-              ...les,
-              isCompleted: true,
-              subtitle: les.subtitle || 'تم ربط فيديو الشرح للمحاضرة',
-              attachments: [...otherAtts, newVideoAtt],
-            };
-          }),
-        };
-      })
-    );
-
-    setVideoModalOpen(false);
-    setVideoModalTarget(null);
-    setHasUnsavedChanges(true);
-    toast.success('تم ربط رابط الفيديو بالدرس محلياً');
-  };
 
   // 8. Quiz Dialog Handlers
   const handleOpenQuizDialog = (
@@ -839,20 +768,43 @@ export default function RecordedCurriculumSection({
 
     setUploading(true);
     try {
+      // Extract video duration from file in browser if possible
+      let durationInSeconds = 600;
+      try {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        const durationPromise = new Promise<number>((resolve) => {
+          video.onloadedmetadata = () => {
+            window.URL.revokeObjectURL(video.src);
+            resolve(Math.round(video.duration) || 600);
+          };
+          video.onerror = () => resolve(600);
+        });
+        video.src = URL.createObjectURL(file);
+        durationInSeconds = await Promise.race([
+          durationPromise,
+          new Promise<number>((r) => setTimeout(() => r(600), 2000)),
+        ]);
+      } catch {
+        durationInSeconds = 600;
+      }
+
       const res = await uploadFile(file, 'videos');
       if (!res.success || !res.data) {
         toast.error(res.error || 'فشل رفع الفيديو');
         return;
       }
 
+      const cleanUrl = toHttps(res.data.url) || res.data.url;
+      const durationMin = Math.max(1, Math.round(durationInSeconds / 60));
       const newAtt: CurriculumAttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'video',
         title: `فيديو المحاضرة: ${file.name}`,
         badgeText: 'تم المعالجة والرفع بنجاح',
-        metaText: `الجودة: 1080p Full HD • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        url: res.data.url,
-        durationInSeconds: 900,
+        metaText: `المدة: ${durationMin} دقيقة • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        url: cleanUrl,
+        durationInSeconds,
       };
 
       setRichChapters((prev) =>
@@ -902,6 +854,7 @@ export default function RecordedCurriculumSection({
         return;
       }
 
+      const cleanUrl = toHttps(res.data.url) || res.data.url;
       const newAtt: CurriculumAttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'pdf',
@@ -909,7 +862,7 @@ export default function RecordedCurriculumSection({
         title: res.data.name || file.name,
         badgeText: 'جاهز للتحميل للطلاب',
         metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
-        url: res.data.url,
+        url: cleanUrl,
       };
 
       setRichChapters((prev) =>
@@ -1043,7 +996,7 @@ export default function RecordedCurriculumSection({
               )}
             </Stack>
             <Typography sx={{ color: '#64748B', fontSize: 13, mt: 0.2 }}>
-              قم بإعداد الفصول والدروس وإرفاق روابط الفيديوهات وبنوك الأسئلة، ثم اضغط حفظ لاعتماد المنهج.
+              قم بإعداد الفصول والدروس ورفع الفيديوهات والمستندات وبنوك الأسئلة، ثم اضغط حفظ لاعتماد المنهج.
             </Typography>
           </Box>
         </Stack>
@@ -1681,13 +1634,13 @@ export default function RecordedCurriculumSection({
                             {/* Video Button */}
                             <Button
                               size="small"
-                              variant={videoAtt ? 'outlined' : 'contained'}
+                              variant={hasAttachments ? 'outlined' : 'contained'}
                               onClick={() => handleTriggerVideoUpload(chapter.id, lesson.id)}
                               sx={{
-                                bgcolor: videoAtt ? '#FFFFFF' : '#1C252E',
-                                color: videoAtt ? '#0284C7' : '#FFFFFF',
-                                borderColor: videoAtt ? '#BAE6FD' : 'transparent',
-                                borderStyle: videoAtt ? 'dashed' : 'solid',
+                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
+                                color: hasAttachments ? '#0284C7' : '#FFFFFF',
+                                borderColor: hasAttachments ? '#BAE6FD' : 'transparent',
+                                borderStyle: hasAttachments ? 'dashed' : 'solid',
                                 borderRadius: 1.5,
                                 fontWeight: 700,
                                 fontSize: 12.5,
@@ -1698,7 +1651,7 @@ export default function RecordedCurriculumSection({
                                 alignItems: 'center',
                                 gap: 1,
                                 '&:hover': {
-                                  bgcolor: videoAtt ? '#F0F9FF' : '#2C353E',
+                                  bgcolor: hasAttachments ? '#F0F9FF' : '#2C353E',
                                   borderColor: '#0284C7',
                                 },
                               }}
@@ -1710,22 +1663,22 @@ export default function RecordedCurriculumSection({
                                 sx={{
                                   width: 16,
                                   height: 16,
-                                  ...(videoAtt ? {} : { filter: 'brightness(0) invert(1)' }),
+                                  ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
                                 }}
                               />
-                              <span>{videoAtt ? '+ استبدال الفيديو' : '+ رفع فيديو'}</span>
+                              <span>{hasAttachments ? '+ فيديو إضافي' : '+ رفع فيديو'}</span>
                             </Button>
 
                             {/* Document Button */}
                             <Button
                               size="small"
-                              variant={pdfAtt ? 'outlined' : 'contained'}
+                              variant={hasAttachments ? 'outlined' : 'contained'}
                               onClick={() => handleTriggerDocUpload(chapter.id, lesson.id)}
                               sx={{
-                                bgcolor: pdfAtt ? '#FFFFFF' : '#1C252E',
-                                color: pdfAtt ? '#E11D48' : '#FFFFFF',
-                                borderColor: pdfAtt ? '#FECDD3' : 'transparent',
-                                borderStyle: pdfAtt ? 'dashed' : 'solid',
+                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
+                                color: hasAttachments ? '#E11D48' : '#FFFFFF',
+                                borderColor: hasAttachments ? '#FECDD3' : 'transparent',
+                                borderStyle: hasAttachments ? 'dashed' : 'solid',
                                 borderRadius: 1.5,
                                 fontWeight: 700,
                                 fontSize: 12.5,
@@ -1736,7 +1689,7 @@ export default function RecordedCurriculumSection({
                                 alignItems: 'center',
                                 gap: 1,
                                 '&:hover': {
-                                  bgcolor: pdfAtt ? '#FFF1F2' : '#2C353E',
+                                  bgcolor: hasAttachments ? '#FFF1F2' : '#2C353E',
                                   borderColor: '#E11D48',
                                 },
                               }}
@@ -1748,22 +1701,22 @@ export default function RecordedCurriculumSection({
                                 sx={{
                                   width: 16,
                                   height: 16,
-                                  ...(pdfAtt ? {} : { filter: 'brightness(0) invert(1)' }),
+                                  ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
                                 }}
                               />
-                              <span>{pdfAtt ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
+                              <span>{hasAttachments ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
                             </Button>
 
                             {/* Quiz Button */}
                             <Button
                               size="small"
-                              variant={quizAtt ? 'outlined' : 'contained'}
+                              variant={hasAttachments ? 'outlined' : 'contained'}
                               onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                               sx={{
-                                bgcolor: quizAtt ? '#FFFFFF' : '#1C252E',
-                                color: quizAtt ? '#16A34A' : '#FFFFFF',
-                                borderColor: quizAtt ? '#BBF7D0' : 'transparent',
-                                borderStyle: quizAtt ? 'dashed' : 'solid',
+                                bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
+                                color: hasAttachments ? '#16A34A' : '#FFFFFF',
+                                borderColor: hasAttachments ? '#BBF7D0' : 'transparent',
+                                borderStyle: hasAttachments ? 'dashed' : 'solid',
                                 borderRadius: 1.5,
                                 fontWeight: 700,
                                 fontSize: 12.5,
@@ -1774,7 +1727,7 @@ export default function RecordedCurriculumSection({
                                 alignItems: 'center',
                                 gap: 1,
                                 '&:hover': {
-                                  bgcolor: quizAtt ? '#F0FDF4' : '#2C353E',
+                                  bgcolor: hasAttachments ? '#F0FDF4' : '#2C353E',
                                   borderColor: '#16A34A',
                                 },
                               }}
@@ -1786,34 +1739,10 @@ export default function RecordedCurriculumSection({
                                 sx={{
                                   width: 16,
                                   height: 16,
-                                  ...(quizAtt ? {} : { filter: 'brightness(0) invert(1)' }),
+                                  ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
                                 }}
                               />
-                              <span>{quizAtt ? 'معاينة بنك الأسئلة' : '+ بنك أسئلة وتدريبات'}</span>
-                            </Button>
-
-                            {/* Optional Video Link button */}
-                            <Button
-                              size="small"
-                              variant="text"
-                              onClick={() =>
-                                handleOpenVideoModal(
-                                  chapter.id,
-                                  lesson.id,
-                                  lesson.title,
-                                  videoAtt
-                                )
-                              }
-                              sx={{
-                                color: '#64748B',
-                                fontSize: 12,
-                                fontWeight: 500,
-                                px: 1,
-                                '&:hover': { color: '#1C252E', bgcolor: 'transparent' },
-                              }}
-                            >
-                              <Iconify icon="solar:link-linear" width={14} sx={{ mr: 0.5 }} />
-                              <span>{videoAtt ? 'تعديل الرابط' : 'إضافة رابط'}</span>
+                              <span>{hasAttachments ? '+ اضافة اسئلة' : '+ اضافة سؤال'}</span>
                             </Button>
                           </Stack>
 
@@ -1928,103 +1857,6 @@ export default function RecordedCurriculumSection({
         </Box>
       )}
 
-      {/* ── 3. Video Link Modal (Backend-compatible videoUrl + durationInSeconds) ── */}
-      <Dialog
-        open={videoModalOpen}
-        onClose={() => setVideoModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{
-          paper: { sx: { borderRadius: 2.5, p: 1 } },
-        }}
-      >
-        <DialogTitle sx={{ px: 2.5, pt: 2, pb: 1 }}>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 1.5,
-                bgcolor: '#EFF6FF',
-                border: '1px solid #BFDBFE',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 20, height: 20 }} />
-            </Box>
-            <Box>
-              <Typography sx={{ fontWeight: 700, fontSize: 16, color: '#1C252E' }}>
-                ربط رابط فيديو الدرس
-              </Typography>
-              <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                {videoModalTarget?.lessonTitle}
-              </Typography>
-            </Box>
-          </Stack>
-        </DialogTitle>
-
-        <DialogContent sx={{ px: 2.5, py: 2 }}>
-          <Stack spacing={2.5}>
-            <Box>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B', mb: 1 }}>
-                رابط الفيديو (Video URL) *
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="https://www.youtube.com/watch?v=... أو https://vimeo.com/..."
-                value={videoModalUrl}
-                onChange={(e) => setVideoModalUrl(e.target.value)}
-                sx={inputRootSx}
-                helperText="أدخل رابط الفيديو المباشر أو من منصات مثل YouTube أو Vimeo أو Cloudflare"
-              />
-            </Box>
-
-            <Box>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B', mb: 1 }}>
-                مدة المحاضرة (بالدقائق) *
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                size="small"
-                placeholder="20"
-                value={videoModalMinutes}
-                onChange={(e) => setVideoModalMinutes(Math.max(1, Number(e.target.value)))}
-                sx={inputRootSx}
-                helperText="يتم تحويل الدقائق تلقائياً إلى ثوانٍ للتوافق مع الباك إند"
-              />
-            </Box>
-          </Stack>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 2.5, pb: 2 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setVideoModalOpen(false)}
-            sx={{ borderRadius: 1.5, borderColor: '#CBD5E1', color: '#64748B' }}
-          >
-            إلغاء
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveVideoModal}
-            disabled={!videoModalUrl.trim()}
-            sx={{
-              bgcolor: '#1C252E',
-              color: '#FFFFFF',
-              borderRadius: 1.5,
-              fontWeight: 700,
-              px: 3,
-              '&:hover': { bgcolor: '#2C353E' },
-            }}
-          >
-            تأكيد وربط الفيديو
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       {/* ── 4. Quiz Dialog Modal - Matches /courses/new QuizDialog ───────── */}
       <QuizDialog
