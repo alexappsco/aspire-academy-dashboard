@@ -185,6 +185,14 @@ export interface SessionLessonResult {
   durationInSeconds: number;
   videoUrl?: string | null;
   test?: SessionLessonTestResult | null;
+  attachmentIds?: string[] | null;
+  attachments?: {
+    id?: string;
+    name?: string;
+    url?: string;
+    fileName?: string;
+    type?: string;
+  }[] | null;
   creationTime: string;
 }
 
@@ -277,6 +285,7 @@ export interface SaveSessionLessonInput {
   durationInSeconds: number;
   videoUrl?: string | null;
   test?: SaveSessionTestInput | null;
+  attachmentIds?: string[] | null;
 }
 
 export interface SaveSessionChapterInput {
