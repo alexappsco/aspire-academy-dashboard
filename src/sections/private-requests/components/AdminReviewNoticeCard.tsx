@@ -6,9 +6,12 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 export default function AdminReviewNoticeCard() {
+  const t = useTranslations('PrivateRequests.details.admin_review');
+
   return (
     <Card
       sx={{
@@ -51,10 +54,10 @@ export default function AdminReviewNoticeCard() {
           <Box sx={{ flex: 1, textAlign: 'start' }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.75, gap: 1, flexWrap: 'wrap' }}>
               <Typography sx={{ fontWeight: 800, fontSize: 16.5, color: '#0F172A' }}>
-                بانتظار مراجعة واعتماد الإدارة الأكاديمية
+                {t('title')}
               </Typography>
               <Chip
-                label="قيد التدقيق المؤسسي"
+                label={t('badge')}
                 size="small"
                 sx={{
                   bgcolor: '#FEF3C7',
@@ -67,11 +70,11 @@ export default function AdminReviewNoticeCard() {
             </Stack>
 
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#334155', mb: 0.75 }}>
-              تم قبول الطلب من المحاضر، والطلب الآن قيد التدقيق الإداري وتحديد الشروط المالية المعتمدة.
+              {t('subline')}
             </Typography>
 
             <Typography sx={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>
-              تقوم الإدارة حالياً بمراجعة ملائمة تفاصيل الطلب واعتماد تسعير الساعة وتحديد نسبة المحاضر المستحقة. بمجرد اكتمال الاعتماد الإداري، ستصلك إشعار فوري وستتمكن من البدء في تسجيل ورفع المحتوى المطلوب.
+              {t('desc')}
             </Typography>
           </Box>
         </Stack>
@@ -89,7 +92,7 @@ export default function AdminReviewNoticeCard() {
           }}
         >
           <Typography sx={{ fontSize: 12, color: '#92400E', fontWeight: 600, mb: 0.5 }}>
-            الوقت المتوقع للاعتماد
+            {t('expected_time_title')}
           </Typography>
           <Typography
             sx={{
@@ -103,7 +106,7 @@ export default function AdminReviewNoticeCard() {
             }}
           >
             <Iconify icon="solar:clock-circle-bold" width={18} />
-            خلال 24 ساعة عمل
+            {t('expected_time')}
           </Typography>
         </Box>
       </Stack>

@@ -11,6 +11,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import { PrivateRequestItem, PrivateRequestStatus, PrivateRequestServiceType } from 'src/types/private-request';
@@ -31,12 +32,13 @@ export default function RequestHeaderCard({
   onFinishService,
 }: Props) {
   const toast = useToast();
+  const t = useTranslations('PrivateRequests');
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
 
   const handleConfirmFinish = () => {
     setFinishDialogOpen(false);
     onFinishService?.();
-    toast.success('تم إنهاء الخدمة بنجاح وإرسال الإشعار للطالب والإدارة');
+    toast.success(t('notifications.finish_success'));
   };
 
   const isRecorded =
@@ -52,13 +54,13 @@ export default function RequestHeaderCard({
   const isCancelled = rawStatus === 'cancelled' || rawStatus === '6';
 
   const getStatusLabel = () => {
-    if (isNew) return 'طلب جديد';
-    if (isPendingAdmin) return 'بانتظار اعتماد الإدارة';
-    if (isActive) return 'طلب معتمد نشط';
-    if (isCompleted) return 'طلب منتهي ومكتمل';
-    if (isRejected) return 'تم الاعتذار عن الطلب';
-    if (isCancelled) return 'طلب ملغي';
-    return 'طلب جديد';
+    if (isNew) return t('details.header.status_new');
+    if (isPendingAdmin) return t('details.header.status_pending_admin');
+    if (isActive) return t('details.header.status_active');
+    if (isCompleted) return t('details.header.status_completed');
+    if (isRejected) return t('details.header.status_rejected');
+    if (isCancelled) return t('details.header.status_cancelled');
+    return t('details.header.status_new');
   };
 
   const getStatusColor = () => {
@@ -174,13 +176,13 @@ export default function RequestHeaderCard({
                 fontSize: { xs: 20, md: 24 },
               }}
             >
-              تفاصيل الطلب الخاص #{displayId}
+              {t('details.header.title', { id: displayId })}
             </Typography>
 
             {/* Service badge */}
             <Chip
               icon={<Iconify icon={isRecorded ? 'solar:videocamera-record-bold' : 'solar:users-group-rounded-bold'} width={16} />}
-              label={isRecorded ? 'محتوى مسجل' : 'جلسة مباشرة'}
+              label={isRecorded ? t('filters.recorded') : t('filters.live')}
               size="small"
               sx={{
                 bgcolor: isRecorded ? '#EFF6FF' : '#EEF2FF',
@@ -229,7 +231,7 @@ export default function RequestHeaderCard({
             <Stack direction="row" spacing={1.5} sx={{ mt: 1, alignItems: 'center', flexWrap: 'wrap', gap: 1.25 }}>
               <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.85 }}>
                 <Iconify icon="solar:calendar-date-bold" width={16} />
-                تاريخ التقديم: {request.submittedAtFormatted || '5 أكتوبر 2026'}
+                {t('details.header.submission_date_label', { date: request.submittedAtFormatted || '—' })}
               </Typography>
 
               {isPendingAdmin && request.acceptedAtFormatted && (
@@ -237,7 +239,7 @@ export default function RequestHeaderCard({
                   <Typography sx={{ color: '#CBD5E1', fontSize: 12 }}>|</Typography>
                   <Typography sx={{ fontSize: 12.5, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.85 }}>
                     <Iconify icon="solar:check-circle-bold" width={16} />
-                    تم قبول الطلب من المحاضر: {request.acceptedAtFormatted}
+                    {t('details.header.accepted_by_instructor_label', { date: request.acceptedAtFormatted })}
                   </Typography>
                 </>
               )}
@@ -272,7 +274,7 @@ export default function RequestHeaderCard({
               },
             }}
           >
-            إنهاء الخدمة
+            {t('details.finish_service')}
           </Button>
         )}
       </Box>
@@ -291,13 +293,13 @@ export default function RequestHeaderCard({
           }}
         >
           <Chip
-            label={`رقم الطلب: ${request.id}`}
+            label={t('details.header.request_id_label', { id: request.id })}
             size="small"
             sx={{ bgcolor: '#F1F5F9', color: '#475569', fontWeight: 700, fontSize: 12, px: 1, height: 26 }}
           />
           <Chip
             icon={<Iconify icon="solar:calendar-linear" width={15} />}
-            label={`تاريخ التقديم: ${request.submittedAtFormatted || '5 أكتوبر 2026'}`}
+            label={t('details.header.submission_date_label', { date: request.submittedAtFormatted || '—' })}
             size="small"
             sx={{
               bgcolor: '#F1F5F9',
@@ -317,7 +319,7 @@ export default function RequestHeaderCard({
           />
           <Chip
             icon={<Iconify icon="solar:check-circle-bold" width={15} />}
-            label="معتمد (Approved)"
+            label={t('details.header.approved')}
             size="small"
             sx={{
               bgcolor: '#DCFCE7',
@@ -338,7 +340,7 @@ export default function RequestHeaderCard({
           />
           <Chip
             icon={<Iconify icon="solar:clock-circle-bold" width={15} />}
-            label="قيد التنفيذ (In Progress)"
+            label={t('details.header.in_progress')}
             size="small"
             sx={{
               bgcolor: '#E0F2FE',
@@ -359,7 +361,9 @@ export default function RequestHeaderCard({
           />
           <Chip
             icon={<Iconify icon="solar:play-circle-bold" width={15} />}
-            label={`نوع الخدمة: ${isRecorded ? 'محتوى مسجل معتمد' : 'جلسة مباشرة'}`}
+            label={t('details.header.service_type_label', {
+              type: isRecorded ? t('details.header.recorded_approved') : t('details.header.live'),
+            })}
             size="small"
             sx={{
               bgcolor: '#F8FAFC',
@@ -390,14 +394,14 @@ export default function RequestHeaderCard({
         slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
       >
         <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'center' }}>
-          تأكيد إنهاء الخدمة للطلب
+          {t('details.header.finish_dialog_title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', py: 1 }}>
           <Typography sx={{ color: '#64748B', fontSize: 14, mb: 1 }}>
-            هل أنت متأكد من رغبتك في إنهاء خدمة هذا الطلب وإغلاقه؟
+            {t('details.header.finish_dialog_desc')}
           </Typography>
           <Typography sx={{ color: '#0F172A', fontSize: 13, fontWeight: 700, bgcolor: '#FEF2F2', p: 1.5, borderRadius: 2 }}>
-            سيتم اعتماد كافة الساعات المسجلة وصرف صافي المستحقات إلى محفظتك مباشرة.
+            {t('details.header.finish_dialog_note')}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 1.5 }}>
@@ -406,7 +410,7 @@ export default function RequestHeaderCard({
             onClick={() => setFinishDialogOpen(false)}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            تراجع
+            {t('details.header.finish_dialog_cancel')}
           </Button>
           <Button
             variant="contained"
@@ -414,7 +418,7 @@ export default function RequestHeaderCard({
             onClick={handleConfirmFinish}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            تأكيد الإنهاء
+            {t('details.header.finish_dialog_confirm')}
           </Button>
         </DialogActions>
       </Dialog>

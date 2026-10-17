@@ -15,6 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useTranslations } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -287,6 +288,7 @@ export default function RecordedCurriculumSection({
   onChaptersUpdated,
 }: Props) {
   const toast = useToast();
+  const t = useTranslations('PrivateRequests');
 
   // State strictly initialized with backend data - ZERO fake data
   const [richChapters, setRichChapters] = useState<CurriculumChapter[]>(() =>
@@ -444,16 +446,16 @@ export default function RecordedCurriculumSection({
       const res = await saveSessionRequestChaptersAction(requestId, payload);
 
       if (res.success && res.data) {
-        toast.success('تم حفظ واعتماد المنهج في النظام بنجاح');
+        toast.success(t('notifications.curriculum_saved'));
         setHasUnsavedChanges(false);
         const mappedFromBackend = mapBackendChaptersToRich(res.data);
         setRichChapters(mappedFromBackend);
         onChaptersUpdated?.(res.data);
       } else {
-        toast.error(res.error || 'فشل حفظ المنهج في النظام، يرجى المحاولة مرة أخرى');
+        toast.error(res.error || t('notifications.curriculum_save_error'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ غير متوقع أثناء حفظ المنهج');
+      toast.error(err instanceof Error ? err.message : t('notifications.curriculum_save_error'));
     } finally {
       setIsSaving(false);
     }
@@ -462,7 +464,7 @@ export default function RecordedCurriculumSection({
   // 1. Add new chapter
   const handleAddChapter = () => {
     if (!newChapterTitle.trim()) {
-      toast.warning('يرجى كتابة عنوان الفصل');
+      toast.warning(t('notifications.enter_chapter_title_warning'));
       return;
     }
     const newChapter: CurriculumChapter = {
@@ -476,7 +478,7 @@ export default function RecordedCurriculumSection({
     setRichChapters((prev) => [...prev, newChapter]);
     setNewChapterTitle('');
     setHasUnsavedChanges(true);
-    toast.success('تمت إضافة الفصل محلياً. لا تنسَ الضغط على "حفظ المنهج" لتثبيته في النظام.');
+    toast.success(t('notifications.chapter_added_local'));
   };
 
   // 2. Delete chapter (local vs backend)
@@ -490,7 +492,7 @@ export default function RecordedCurriculumSection({
           .map((ch, idx) => ({ ...ch, number: idx + 1 }))
       );
       setHasUnsavedChanges(true);
-      toast.info('تم حذف الفصل محلياً');
+      toast.info(t('notifications.chapter_deleted_local'));
       return;
     }
     // Saved in backend -> open confirm dialog
@@ -504,7 +506,7 @@ export default function RecordedCurriculumSection({
     try {
       const res = await deleteSessionRequestChapterAction(requestId, chapterToDelete.dbId);
       if (res.success) {
-        toast.success('تم حذف الفصل من النظام بنجاح');
+        toast.success(t('notifications.chapter_deleted'));
         const updatedChapters = richChapters
           .filter((ch) => ch.id !== chapterToDelete.id)
           .map((ch, idx) => ({ ...ch, number: idx + 1 }));
@@ -515,10 +517,10 @@ export default function RecordedCurriculumSection({
         const payload = mapRichChaptersToBackendPayload(updatedChapters);
         onChaptersUpdated?.(payload.chapters as any);
       } else {
-        toast.error(res.error || 'فشل حذف الفصل من النظام');
+        toast.error(res.error || t('notifications.chapter_deleted'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء حذف الفصل');
+      toast.error(err instanceof Error ? err.message : t('notifications.chapter_deleted'));
     } finally {
       setIsDeletingChapter(false);
     }
@@ -537,7 +539,7 @@ export default function RecordedCurriculumSection({
   const handleAddLesson = (chapterId: string) => {
     const title = lessonTitles[chapterId]?.trim();
     if (!title) {
-      toast.warning('يرجى كتابة عنوان الدرس');
+      toast.warning(t('notifications.enter_lesson_title_warning'));
       return;
     }
 
@@ -561,7 +563,7 @@ export default function RecordedCurriculumSection({
 
     setLessonTitles((prev) => ({ ...prev, [chapterId]: '' }));
     setHasUnsavedChanges(true);
-    toast.success('تمت إضافة الدرس محلياً');
+    toast.success(t('notifications.lesson_added_local'));
   };
 
   // 5. Delete lesson (local vs backend)
@@ -583,7 +585,7 @@ export default function RecordedCurriculumSection({
         })
       );
       setHasUnsavedChanges(true);
-      toast.info('تم حذف الدرس محلياً');
+      toast.info(t('notifications.lesson_deleted_local'));
       return;
     }
 
@@ -609,7 +611,7 @@ export default function RecordedCurriculumSection({
       );
 
       if (res.success) {
-        toast.success('تم حذف الدرس من النظام بنجاح');
+        toast.success(t('notifications.lesson_deleted'));
         setRichChapters((prev) =>
           prev.map((ch) => {
             if (ch.id !== lessonToDelete.chapterId) return ch;
@@ -623,10 +625,10 @@ export default function RecordedCurriculumSection({
         );
         setLessonToDelete(null);
       } else {
-        toast.error(res.error || 'فشل حذف الدرس من النظام');
+        toast.error(res.error || t('notifications.lesson_deleted'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء حذف الدرس');
+      toast.error(err instanceof Error ? err.message : t('notifications.lesson_deleted'));
     } finally {
       setIsDeletingLesson(false);
     }
@@ -651,9 +653,9 @@ export default function RecordedCurriculumSection({
       const quizAtt: CurriculumAttachmentItem = {
         id: crypto.randomUUID(),
         type: 'quiz',
-        title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
-        badgeText: 'مفعل بعد انتهاء الفيديو',
-        metaText: `${config.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        title: t('details.recorded_curriculum.quiz_att_title'),
+        badgeText: t('details.recorded_curriculum.quiz_badge'),
+        metaText: t('details.recorded_curriculum.quiz_meta', { count: config.questions.length }),
         questionsCount: config.questions.length,
         quiz: config,
       };
@@ -666,7 +668,7 @@ export default function RecordedCurriculumSection({
             return {
               ...les,
               isCompleted: true,
-              subtitle: les.subtitle || 'تم إرفاق اختبار تقييمي لهذا الدرس',
+              subtitle: les.subtitle || t('details.recorded_curriculum.quiz_attached_subtitle'),
               attachments: [
                 ...les.attachments.filter((a) => a.type !== 'quiz'),
                 quizAtt,
@@ -679,9 +681,9 @@ export default function RecordedCurriculumSection({
       setQuizLessonId(null);
       setQuizDialogOpen(false);
       setHasUnsavedChanges(true);
-      toast.success('تم حفظ وتحديث بنك الأسئلة محلياً');
+      toast.success(t('notifications.quiz_saved_local'));
     },
-    [quizLessonId, toast]
+    [quizLessonId, t, toast]
   );
 
   // 9. Video and Document Upload Handlers
@@ -723,7 +725,7 @@ export default function RecordedCurriculumSection({
 
       const res = await uploadFile(file, 'videos');
       if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع الفيديو');
+        toast.error(res.error || t('notifications.video_upload_failed'));
         return;
       }
 
@@ -732,9 +734,12 @@ export default function RecordedCurriculumSection({
       const newAtt: CurriculumAttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'video',
-        title: `فيديو المحاضرة: ${file.name}`,
-        badgeText: 'تم المعالجة والرفع بنجاح',
-        metaText: `المدة: ${durationMin} دقيقة • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        title: t('details.recorded_curriculum.video_att_title', { name: file.name }),
+        badgeText: t('details.recorded_curriculum.video_badge'),
+        metaText: t('details.recorded_curriculum.video_meta', {
+          duration: durationMin,
+          size: (file.size / (1024 * 1024)).toFixed(1),
+        }),
         url: cleanUrl,
         durationInSeconds,
       };
@@ -750,7 +755,7 @@ export default function RecordedCurriculumSection({
               return {
                 ...les,
                 isCompleted: true,
-                subtitle: les.subtitle || 'تم إرفاق محتوى تعليمي لهذا الدرس',
+                subtitle: les.subtitle || t('details.recorded_curriculum.video_attached_subtitle'),
                 attachments: [...otherAtts, newAtt],
               };
             }),
@@ -758,9 +763,9 @@ export default function RecordedCurriculumSection({
         })
       );
       setHasUnsavedChanges(true);
-      toast.success('تم رفع الفيديو بنجاح');
+      toast.success(t('notifications.video_upload_success'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'فشل رفع الفيديو');
+      toast.error(err instanceof Error ? err.message : t('notifications.video_upload_failed'));
     } finally {
       setUploadingState(null);
       setTargetLessonForUpload(null);
@@ -784,7 +789,7 @@ export default function RecordedCurriculumSection({
     try {
       const res = await uploadAttachment(file, file.name);
       if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع المستند');
+        toast.error(res.error || t('notifications.doc_upload_failed'));
         return;
       }
 
@@ -794,8 +799,10 @@ export default function RecordedCurriculumSection({
         type: 'pdf',
         attachmentId: res.data.id,
         title: res.data.name || file.name,
-        badgeText: 'جاهز للتحميل للطلاب',
-        metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
+        badgeText: t('details.recorded_curriculum.doc_badge'),
+        metaText: t('details.recorded_curriculum.doc_meta', {
+          size: (file.size / (1024 * 1024)).toFixed(1),
+        }),
         url: cleanUrl,
       };
 
@@ -816,9 +823,9 @@ export default function RecordedCurriculumSection({
         })
       );
       setHasUnsavedChanges(true);
-      toast.success('تم إرفاق المستند بنجاح');
+      toast.success(t('notifications.doc_upload_success'));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'فشل رفع المستند');
+      toast.error(err instanceof Error ? err.message : t('notifications.doc_upload_failed'));
     } finally {
       setUploadingState(null);
       setTargetLessonForUpload(null);
@@ -844,7 +851,7 @@ export default function RecordedCurriculumSection({
       })
     );
     setHasUnsavedChanges(true);
-    toast.success('تم حذف المرفق');
+    toast.success(t('notifications.attachment_deleted'));
   };
 
   // 10. Edit lesson title
@@ -868,7 +875,7 @@ export default function RecordedCurriculumSection({
     );
     setEditingLessonId(null);
     setHasUnsavedChanges(true);
-    toast.success('تم تعديل عنوان الدرس');
+    toast.success(t('notifications.lesson_title_updated'));
   };
 
   return (
@@ -914,11 +921,11 @@ export default function RecordedCurriculumSection({
                 variant="h6"
                 sx={{ fontWeight: 700, color: '#1C252E', fontSize: 18 }}
               >
-                منهج ومحتوى الجلسات المسجلة
+                {t('details.recorded_curriculum.title')}
               </Typography>
               {hasUnsavedChanges && (
                 <Chip
-                  label="توجد تعديلات غير محفوظة"
+                  label={t('details.recorded_curriculum.unsaved_changes')}
                   size="small"
                   sx={{
                     bgcolor: '#FEF3C7',
@@ -931,7 +938,7 @@ export default function RecordedCurriculumSection({
               )}
             </Stack>
             <Typography sx={{ color: '#64748B', fontSize: 13, mt: 0.2 }}>
-              قم بإعداد الفصول والدروس ورفع الفيديوهات والمستندات وبنوك الأسئلة، ثم اضغط حفظ لاعتماد المنهج.
+              {t('details.recorded_curriculum.subtitle')}
             </Typography>
           </Box>
         </Stack>
@@ -957,14 +964,14 @@ export default function RecordedCurriculumSection({
               mb: 2,
             }}
           >
-            إضافة فصل جديد
+            {t('details.recorded_curriculum.add_chapter_title')}
           </Typography>
 
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
             <TextField
               fullWidth
               size="small"
-              placeholder="اكتب عنوان الفصل الجديد هنا..."
+              placeholder={t('details.recorded_curriculum.chapter_placeholder')}
               value={newChapterTitle}
               onChange={(e) => setNewChapterTitle(e.target.value)}
               onKeyDown={(e) => {
@@ -997,7 +1004,7 @@ export default function RecordedCurriculumSection({
               }}
             >
               <Iconify icon="mingcute:add-line" width={18} />
-              <span>إضافة فصل</span>
+              <span>{t('details.recorded_curriculum.add_chapter_btn')}</span>
             </Button>
           </Stack>
         </Box>
@@ -1019,10 +1026,10 @@ export default function RecordedCurriculumSection({
               sx={{ color: '#94A3B8', mb: 1.5 }}
             />
             <Typography sx={{ fontWeight: 700, fontSize: 16, color: '#334155', mb: 0.5 }}>
-              لا توجد فصول مضافة بعد لهذا الطلب
+              {t('details.recorded_curriculum.empty_chapters_title')}
             </Typography>
             <Typography sx={{ fontSize: 13, color: '#64748B', maxWidth: 460, mx: 'auto' }}>
-              لم يتم إنشاء أي محتوى دراسي بعد. يمكنك البدء فوراً بكتابة عنوان الفصل الأول في الحقل أعلاه والضغط على "إضافة فصل".
+              {t('details.recorded_curriculum.empty_chapters_desc')}
             </Typography>
           </Box>
         )}
@@ -1075,7 +1082,7 @@ export default function RecordedCurriculumSection({
                     component="span"
                     sx={{ color: '#64748B', fontWeight: 500, fontSize: 14 }}
                   >
-                    ({chapter.lessons.length} دروس)
+                    {t('details.recorded_curriculum.lessons_count', { count: chapter.lessons.length })}
                   </Box>
                 </Typography>
               </Stack>
@@ -1089,7 +1096,7 @@ export default function RecordedCurriculumSection({
               >
                 <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                    عدد الساعات:
+                    {t('details.recorded_curriculum.hours_label')}
                   </Typography>
                   <TextField
                     type="number"
@@ -1140,7 +1147,7 @@ export default function RecordedCurriculumSection({
                   <TextField
                     fullWidth
                     size="small"
-                    placeholder="اكتب عنوان الدرس الجديد..."
+                    placeholder={t('details.recorded_curriculum.add_lesson_placeholder')}
                     value={lessonTitles[chapter.id] || ''}
                     onChange={(e) =>
                       setLessonTitles((prev) => ({
@@ -1178,7 +1185,7 @@ export default function RecordedCurriculumSection({
                     }}
                   >
                     <Iconify icon="mingcute:add-line" width={18} />
-                    <span>إضافة درس</span>
+                    <span>{t('details.recorded_curriculum.add_lesson_btn')}</span>
                   </Button>
                 </Stack>
 
@@ -1226,7 +1233,7 @@ export default function RecordedCurriculumSection({
                                   onClick={() => handleSaveLessonTitle(chapter.id, lesson.id)}
                                   sx={{ bgcolor: '#1C252E', color: '#FFFFFF', borderRadius: 1.5 }}
                                 >
-                                  حفظ
+                                  {t('details.recorded_curriculum.save')}
                                 </Button>
                               </Stack>
                             ) : (
@@ -1236,7 +1243,7 @@ export default function RecordedCurriculumSection({
                                 </Typography>
                                 {lesson.isCompleted && (
                                   <Chip
-                                    label={`مكتمل المحتوى (${lesson.attachments.length} مرفقات)`}
+                                    label={t('details.recorded_curriculum.content_completed', { count: lesson.attachments.length })}
                                     size="small"
                                     sx={{
                                       bgcolor: '#ECFDF5',
@@ -1281,7 +1288,7 @@ export default function RecordedCurriculumSection({
                                 }}
                               >
                                 <Iconify icon="solar:pen-linear" width={14} />
-                                <span>تعديل العنوان</span>
+                                <span>{t('details.recorded_curriculum.edit_title')}</span>
                               </Button>
                             )}
 
@@ -1411,7 +1418,7 @@ export default function RecordedCurriculumSection({
                                             }}
                                           >
                                             <Iconify icon="solar:play-bold" width={15} />
-                                            <span>معاينة الفيديو</span>
+                                            <span>{t('details.recorded_curriculum.preview_video')}</span>
                                           </Button>
 
                                           <Button
@@ -1433,10 +1440,10 @@ export default function RecordedCurriculumSection({
                                             {isVideoUploading(lesson.id) ? (
                                               <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
                                                 <CircularProgress size={14} sx={{ color: 'inherit' }} />
-                                                <span>جاري الرفع...</span>
+                                                <span>{t('details.recorded_curriculum.uploading')}</span>
                                               </Stack>
                                             ) : (
-                                              'استبدال'
+                                              t('details.recorded_curriculum.replace')
                                             )}
                                           </Button>
                                         </>
@@ -1451,7 +1458,7 @@ export default function RecordedCurriculumSection({
                                               if (att.url) {
                                                 window.open(att.url, '_blank', 'noopener,noreferrer');
                                               } else {
-                                                toast.warning('لا يوجد رابط للمرفق حالياً');
+                                                toast.warning(t('notifications.no_attachment_link'));
                                               }
                                             }}
                                             sx={{
@@ -1469,7 +1476,7 @@ export default function RecordedCurriculumSection({
                                             }}
                                           >
                                             <Iconify icon="solar:download-minimalistic-linear" width={16} />
-                                            <span>تحميل / عرض</span>
+                                            <span>{t('details.recorded_curriculum.download_view')}</span>
                                           </Button>
 
                                           <Button
@@ -1491,10 +1498,10 @@ export default function RecordedCurriculumSection({
                                             {isDocUploading(lesson.id) ? (
                                               <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
                                                 <CircularProgress size={14} sx={{ color: 'inherit' }} />
-                                                <span>جاري الرفع...</span>
+                                                <span>{t('details.recorded_curriculum.uploading')}</span>
                                               </Stack>
                                             ) : (
-                                              'استبدال'
+                                              t('details.recorded_curriculum.replace')
                                             )}
                                           </Button>
                                         </>
@@ -1522,7 +1529,7 @@ export default function RecordedCurriculumSection({
                                             }}
                                           >
                                             <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, filter: 'brightness(0) invert(1)' }} />
-                                            <span>معاينة وتعديل الأسئلة ({att.questionsCount || 0})</span>
+                                            <span>{t('details.recorded_curriculum.preview_edit_quiz', { count: att.questionsCount || 0 })}</span>
                                           </Button>
 
                                           <Button
@@ -1544,7 +1551,7 @@ export default function RecordedCurriculumSection({
                                             }}
                                           >
                                             <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 15, height: 15 }} />
-                                            <span>+ إضافة سؤال</span>
+                                            <span>{t('details.recorded_curriculum.add_question')}</span>
                                           </Button>
                                         </>
                                       )}
@@ -1624,10 +1631,10 @@ export default function RecordedCurriculumSection({
                               )}
                               <span>
                                 {isVideoUploading(lesson.id)
-                                  ? 'جاري رفع الفيديو...'
+                                  ? t('details.recorded_curriculum.uploading_video')
                                   : hasAttachments
-                                  ? '+ فيديو إضافي'
-                                  : '+ رفع فيديو'}
+                                  ? t('details.recorded_curriculum.extra_video')
+                                  : t('details.recorded_curriculum.upload_video')}
                               </span>
                             </Button>
 
@@ -1673,10 +1680,10 @@ export default function RecordedCurriculumSection({
                               )}
                               <span>
                                 {isDocUploading(lesson.id)
-                                  ? 'جاري رفع المستند...'
+                                  ? t('details.recorded_curriculum.uploading_doc')
                                   : hasAttachments
-                                  ? '+ مستند إضافي'
-                                  : '+ اضافة مستند'}
+                                  ? t('details.recorded_curriculum.extra_doc')
+                                  : t('details.recorded_curriculum.upload_doc')}
                               </span>
                             </Button>
 
@@ -1716,13 +1723,13 @@ export default function RecordedCurriculumSection({
                                   ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
                                 }}
                               />
-                              <span>{hasAttachments ? '+ اضافة اسئلة' : '+ اضافة سؤال'}</span>
+                              <span>{hasAttachments ? t('details.recorded_curriculum.extra_quiz') : t('details.recorded_curriculum.add_quiz')}</span>
                             </Button>
                           </Stack>
 
                           {hasAttachments && (
                             <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                              تم إرفاق المحتوى التعليمي للدرس بنجاح
+                              {t('details.recorded_curriculum.content_attached_success')}
                             </Typography>
                           )}
                         </Stack>
@@ -1754,8 +1761,10 @@ export default function RecordedCurriculumSection({
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Iconify icon="solar:info-circle-bold" width={20} sx={{ color: '#0284C7' }} />
               <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 600 }}>
-                إجمالي الفصول المجهزة: {richChapters.length} • إجمالي الدروس:{' '}
-                {richChapters.reduce((acc, c) => acc + c.lessons.length, 0)}
+                {t('details.recorded_curriculum.total_summary', {
+                  chapters: richChapters.length,
+                  lessons: richChapters.reduce((acc, c) => acc + c.lessons.length, 0),
+                })}
               </Typography>
             </Stack>
 
@@ -1782,7 +1791,7 @@ export default function RecordedCurriculumSection({
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
-              {isSaving ? 'جاري الحفظ في النظام...' : 'حفظ واعتماد المنهج في النظام'}
+              {isSaving ? t('details.recorded_curriculum.saving_curriculum') : t('details.recorded_curriculum.save_curriculum')}
             </Button>
           </Box>
         )}
@@ -1880,7 +1889,7 @@ export default function RecordedCurriculumSection({
               }}
             >
               <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
-                لا يوجد رابط مسجل لهذا الفيديو
+                {t('details.recorded_curriculum.no_video_link')}
               </Typography>
             </Box>
           )}
@@ -1892,7 +1901,7 @@ export default function RecordedCurriculumSection({
             onClick={() => setVideoPreviewOpen(false)}
             sx={{ color: '#F8FAFC', borderColor: '#334155' }}
           >
-            إغلاق
+            {t('details.recorded_curriculum.close')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1905,11 +1914,11 @@ export default function RecordedCurriculumSection({
         variant="warning"
         title={
           chapterToDelete?.title
-            ? `هل أنت متأكد من حذف "${chapterToDelete.title}"؟`
-            : 'هل أنت متأكد من حذف هذا الفصل؟'
+            ? t('details.recorded_curriculum.confirm_delete_chapter_named', { name: chapterToDelete.title })
+            : t('details.recorded_curriculum.confirm_delete_chapter')
         }
-        confirmLabel={isDeletingChapter ? 'جاري الحذف...' : 'حذف'}
-        cancelLabel="إلغاء"
+        confirmLabel={isDeletingChapter ? t('details.recorded_curriculum.deleting') : t('details.recorded_curriculum.delete')}
+        cancelLabel={t('details.recorded_curriculum.cancel')}
         cancelVariant="gray"
       />
 
@@ -1921,11 +1930,11 @@ export default function RecordedCurriculumSection({
         variant="warning"
         title={
           lessonToDelete?.lessonTitle
-            ? `هل أنت متأكد من حذف "${lessonToDelete.lessonTitle}"؟`
-            : 'هل أنت متأكد من حذف هذا الدرس؟'
+            ? t('details.recorded_curriculum.confirm_delete_lesson_named', { name: lessonToDelete.lessonTitle })
+            : t('details.recorded_curriculum.confirm_delete_lesson')
         }
-        confirmLabel={isDeletingLesson ? 'جاري الحذف...' : 'حذف'}
-        cancelLabel="إلغاء"
+        confirmLabel={isDeletingLesson ? t('details.recorded_curriculum.deleting') : t('details.recorded_curriculum.delete')}
+        cancelLabel={t('details.recorded_curriculum.cancel')}
         cancelVariant="gray"
       />
     </Card>

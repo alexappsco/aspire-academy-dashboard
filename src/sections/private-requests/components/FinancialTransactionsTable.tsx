@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Skeleton from '@mui/material/Skeleton';
+import { useTranslations, useLocale } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { SessionRequestTransactionResult } from 'src/types/private-request';
 
@@ -23,13 +24,15 @@ export default function FinancialTransactionsTable({
   currency = '',
   loading = false,
 }: Props) {
+  const t = useTranslations('PrivateRequests.details.transactions_table');
+  const locale = useLocale();
   const displayId = requestId.length > 12 ? `${requestId.slice(0, 8)}...` : requestId;
 
   // Format date and time
   const formatDateTime = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString('ar-EG', {
+      return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -41,10 +44,10 @@ export default function FinancialTransactionsTable({
     }
   };
 
-  const totalHours = transactions.reduce((acc, t) => acc + (Number(t.hours) || 0), 0);
-  const totalAmount = transactions.reduce((acc, t) => acc + (Number(t.totalAmount) || 0), 0);
+  const totalHours = transactions.reduce((acc, tItem) => acc + (Number(tItem.hours) || 0), 0);
+  const totalAmount = transactions.reduce((acc, tItem) => acc + (Number(tItem.totalAmount) || 0), 0);
   const totalInstructorEarnings = transactions.reduce(
-    (acc, t) => acc + (Number(t.instructorAmount) || 0),
+    (acc, tItem) => acc + (Number(tItem.instructorAmount) || 0),
     0
   );
 
@@ -74,12 +77,12 @@ export default function FinancialTransactionsTable({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
           <Iconify icon="solar:bill-list-bold" width={22} sx={{ color: '#0D9488' }} />
           <Typography sx={{ fontWeight: 800, fontSize: { xs: 15, sm: 16 }, color: '#0F172A' }}>
-            سجل حركات الساعات والعمليات المالية للطلب #{displayId}
+            {t('title', { id: displayId })}
           </Typography>
         </Stack>
 
         <Chip
-          label={`${transactions.length} حركات استهلاك مسجلة`}
+          label={t('records_count', { count: transactions.length })}
           size="small"
           sx={{ bgcolor: '#F8FAFC', color: '#64748B', fontWeight: 600, fontSize: 12 }}
         />
@@ -97,10 +100,10 @@ export default function FinancialTransactionsTable({
         <Box sx={{ p: 4, textAlign: 'center', color: '#64748B' }}>
           <Iconify icon="solar:bill-cross-linear" width={42} sx={{ color: '#CBD5E1', mb: 1 }} />
           <Typography sx={{ fontWeight: 700, fontSize: 14.5, color: '#334155' }}>
-            لا توجد حركات استهلاك مسجلة حتى الآن
+            {t('empty_title')}
           </Typography>
           <Typography sx={{ fontSize: 12.5, color: '#94A3B8', mt: 0.5 }}>
-            يتم احتساب وتسجيل الحركات المالية فور تنفيذ الساعات واعتماد الفصول الدراسية
+            {t('empty_desc')}
           </Typography>
         </Box>
       ) : (
@@ -130,15 +133,15 @@ export default function FinancialTransactionsTable({
                   },
                 }}
               >
-                <Box component="th">رقم الحركة</Box>
+                <Box component="th">{t('cols.tx_id')}</Box>
                 <Box component="th" sx={{ textAlign: 'start !important', pr: 3 }}>
-                  الفصل المستهدف / البيان
+                  {t('cols.description')}
                 </Box>
-                <Box component="th">التاريخ والوقت</Box>
-                <Box component="th">الساعات المنفذة</Box>
-                <Box component="th">سعر الساعة</Box>
-                <Box component="th">إجمالي القيمة</Box>
-                <Box component="th">صافي مستحق المحاضر</Box>
+                <Box component="th">{t('cols.datetime')}</Box>
+                <Box component="th">{t('cols.executed_hours')}</Box>
+                <Box component="th">{t('cols.price_per_hour')}</Box>
+                <Box component="th">{t('cols.total_value')}</Box>
+                <Box component="th">{t('cols.instructor_net')}</Box>
               </Box>
             </Box>
 
@@ -164,7 +167,7 @@ export default function FinancialTransactionsTable({
                     {/* Chapter Title */}
                     <Box component="td" sx={{ textAlign: 'start !important', pr: 3 }}>
                       <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                        {tx.chapterTitle || 'فصل تعليمي'}
+                        {tx.chapterTitle || '—'}
                       </Typography>
                     </Box>
 
@@ -175,7 +178,7 @@ export default function FinancialTransactionsTable({
 
                     {/* Hours */}
                     <Box component="td" sx={{ color: '#DC2626', fontWeight: 800 }}>
-                      {Number(tx.hours || 0).toFixed(2)} ساعة
+                      {t('summary.hours', { hours: Number(tx.hours || 0).toFixed(2) })}
                     </Box>
 
                     {/* Price Per Hour */}
@@ -210,11 +213,11 @@ export default function FinancialTransactionsTable({
                   colSpan={3}
                   sx={{ textAlign: 'start !important', pr: 3, color: '#0F172A' }}
                 >
-                  الإجمالي التراكمي للحركات:
+                  {t('summary.cumulative')}
                 </Box>
 
                 <Box component="td" sx={{ color: '#DC2626' }}>
-                  {totalHours.toFixed(2)} ساعة
+                  {t('summary.hours', { hours: totalHours.toFixed(2) })}
                 </Box>
 
                 <Box component="td" sx={{ color: '#94A3B8' }}>
@@ -226,7 +229,7 @@ export default function FinancialTransactionsTable({
                 </Box>
 
                 <Box component="td" sx={{ color: '#059669', fontSize: 14.5 }}>
-                  +{totalInstructorEarnings.toFixed(2)} {currency} صافي
+                  +{totalInstructorEarnings.toFixed(2)} {currency}
                 </Box>
               </Box>
             </Box>

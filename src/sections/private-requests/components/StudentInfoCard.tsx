@@ -6,6 +6,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 interface Props {
@@ -25,9 +26,10 @@ export default function StudentInfoCard({
   specializationName,
   showContactInfo = false,
 }: Props) {
-  const studentName = student?.name || 'طالب غير محدد';
+  const t = useTranslations('PrivateRequests.details.student_card');
+  const studentName = student?.name || t('student_unknown');
   const studentAvatar = student?.imageUrl || undefined;
-  const country = student?.countryName || 'غير محدد';
+  const country = student?.countryName || t('unspecified');
 
   return (
     <Card
@@ -46,7 +48,7 @@ export default function StudentInfoCard({
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 2.5, gap: 1 }}>
         <Iconify icon="solar:user-id-bold" width={20} sx={{ color: '#0D9488' }} />
         <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-          بيانات الطالب
+          {t('title')}
         </Typography>
       </Stack>
 
@@ -104,7 +106,7 @@ export default function StudentInfoCard({
           }}
         >
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-            الدولة:
+            {t('country')}
           </Typography>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
             {country}
@@ -125,7 +127,7 @@ export default function StudentInfoCard({
             }}
           >
             <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              التخصص الأكاديمي:
+              {t('specialization')}
             </Typography>
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0284C7' }}>
               {specializationName}
@@ -148,7 +150,7 @@ export default function StudentInfoCard({
             }}
           >
             <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              البريد الإلكتروني:
+              {t('email')}
             </Typography>
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#2563EB', direction: 'ltr' }}>
               {student.email}

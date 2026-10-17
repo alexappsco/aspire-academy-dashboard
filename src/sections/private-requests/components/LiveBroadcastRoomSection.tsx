@@ -15,6 +15,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 
@@ -36,6 +37,7 @@ export default function LiveBroadcastRoomSection({
   onEndLiveSession,
 }: Props) {
   const toast = useToast();
+  const t = useTranslations('PrivateRequests');
 
   const [activeTab, setActiveTab] = useState<'screen' | 'logs'>('screen');
   const [micOn, setMicOn] = useState(true);
@@ -45,23 +47,28 @@ export default function LiveBroadcastRoomSection({
 
   const handleToggleMic = () => {
     setMicOn(!micOn);
-    toast.info(!micOn ? 'تم تشغيل الميكروفون' : 'تم كتم الميكروفون');
+    toast.info(!micOn ? t('notifications.mic_on') : t('notifications.mic_off'));
   };
 
   const handleToggleCam = () => {
     setCamOn(!camOn);
-    toast.info(!camOn ? 'تم تشغيل الكاميرا' : 'تم إيقاف الكاميرا');
+    toast.info(!camOn ? t('notifications.cam_on') : t('notifications.cam_off'));
   };
 
   const handleToggleShare = () => {
     setScreenSharing(!screenSharing);
-    toast.info(!screenSharing ? 'بدء مشاركة الشاشة' : 'تم إيقاف مشاركة الشاشة');
+    toast.info(!screenSharing ? t('notifications.share_start') : t('notifications.share_stop'));
   };
 
   const handleConfirmEndSession = () => {
     setEndDialogOpen(false);
     onEndLiveSession?.();
-    toast.success(`تم إنهاء الجلسة بنجاح واعتماد ${expectedEarnings.toFixed(2)} ج.م في حسابك`);
+    toast.success(
+      t('notifications.session_ended', {
+        amount: expectedEarnings.toFixed(2),
+        currency,
+      })
+    );
   };
 
   return (
@@ -99,10 +106,10 @@ export default function LiveBroadcastRoomSection({
             }}
           />
           <Typography sx={{ fontWeight: 800, fontSize: { xs: 15, sm: 16 }, color: '#0F172A' }}>
-            المعاينة الحية لغرفة البث الأكاديمي
+            {t('details.live_room.title')}
           </Typography>
           <Chip
-            label="بث تجريبي"
+            label={t('details.live_room.test_broadcast')}
             size="small"
             sx={{ bgcolor: '#FEE2E2', color: '#DC2626', fontWeight: 700, fontSize: 11, height: 22 }}
           />
@@ -131,8 +138,8 @@ export default function LiveBroadcastRoomSection({
             },
           }}
         >
-          <Tab value="screen" label="شاشة البث" />
-          <Tab value="logs" label="سجل الجلسات" />
+          <Tab value="screen" label={t('details.live_room.tab_screen')} />
+          <Tab value="logs" label={t('details.live_room.tab_logs')} />
         </Tabs>
       </Stack>
 
@@ -162,7 +169,7 @@ export default function LiveBroadcastRoomSection({
             {/* Right in RTL: Connected Student status */}
             <Chip
               icon={<Iconify icon="solar:user-bold" width={15} sx={{ color: '#FFFFFF !important' }} />}
-              label={`مباشر الآن (${studentName} - طالب متصل)`}
+              label={t('details.live_room.live_now', { student: studentName })}
               size="small"
               sx={{
                 bgcolor: '#DC2626',
@@ -185,7 +192,7 @@ export default function LiveBroadcastRoomSection({
             {/* Left in RTL: Live Timer */}
             <Chip
               icon={<Iconify icon="solar:clock-circle-bold" width={16} sx={{ color: '#FFFFFF !important' }} />}
-              label={`زمن الجلسة: ${duration}`}
+              label={t('details.live_room.session_duration', { duration })}
               size="small"
               sx={{
                 bgcolor: 'rgba(0,0,0,0.6)',
@@ -252,7 +259,7 @@ export default function LiveBroadcastRoomSection({
                     color: '#FFFFFF',
                   }}
                 >
-                  د. خالد (أنت)
+                  {t('details.live_room.instructor_pip')}
                 </Box>
               </Box>
             ) : (
@@ -312,7 +319,7 @@ export default function LiveBroadcastRoomSection({
                 mx: 'auto',
               }}
             >
-              مراجعة الآليات الحيوية للمستقبلات الأدرينرجية ألفا وبيتا ودورها السريري في الحالات الطارئة.
+              {t('details.live_room.interactive_live')}
             </Typography>
           </Box>
 
@@ -352,7 +359,7 @@ export default function LiveBroadcastRoomSection({
                 '&:hover': { bgcolor: '#B91C1C' },
               }}
             >
-              إنهاء الجلسة الحالية
+              {t('details.live_room.end_current_session')}
             </Button>
 
             {/* Center: Controls (Mic, Cam, Share, Settings) */}
@@ -404,7 +411,7 @@ export default function LiveBroadcastRoomSection({
             {/* Left in RTL (Third child): Audio Waveform status */}
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
               <Typography sx={{ color: '#E2E8F0', fontSize: 12, fontWeight: 700 }}>
-                الصوت متصل
+                {t('details.live_room.audio_connected')}
               </Typography>
               <Box sx={{ color: '#10B981', display: 'flex' }}>
                 <Iconify icon="solar:soundwave-bold" width={22} />
@@ -417,10 +424,10 @@ export default function LiveBroadcastRoomSection({
         <Box sx={{ p: 4, textAlign: 'center', color: '#64748B' }}>
           <Iconify icon="solar:history-bold" width={40} sx={{ color: '#CBD5E1', mb: 1 }} />
           <Typography sx={{ fontWeight: 700, fontSize: 14 }}>
-            سجل الجلسات السابقة لهذا الطلب
+            {t('details.live_room.logs_title')}
           </Typography>
           <Typography sx={{ fontSize: 12.5, color: '#94A3B8', mt: 0.5 }}>
-            تم تسجيل جلستين سابقتين بنجاح بإجمالي 90 دقيقة.
+            {t('details.live_room.logs_desc')}
           </Typography>
         </Box>
       )}
@@ -445,13 +452,17 @@ export default function LiveBroadcastRoomSection({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
           <Iconify icon="solar:info-circle-bold" width={18} sx={{ color: '#2563EB' }} />
           <Typography sx={{ fontSize: 12.5, color: '#1E40AF', fontWeight: 600 }}>
-            الجلسة الحالية استغرقت {elapsedMinutes} دقيقة. عند الإنهاء سيتم اعتماد {expectedEarnings.toFixed(2)} {currency} بحسابك.
+            {t('details.live_room.elapsed_note', {
+              minutes: elapsedMinutes,
+              earnings: expectedEarnings.toFixed(2),
+              currency,
+            })}
           </Typography>
         </Stack>
 
         {/* Left in RTL (Second child): Connection status */}
         <Typography sx={{ fontSize: 12, color: '#059669', fontWeight: 700 }}>
-          حالة الاتصال: ممتازة (Ping: 24ms)
+          {t('details.live_room.ping_status')}
         </Typography>
       </Box>
 
@@ -464,19 +475,23 @@ export default function LiveBroadcastRoomSection({
         slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
       >
         <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'center' }}>
-          تأكيد إنهاء الجلسة المباشرة
+          {t('details.live_room.confirm_end_title')}
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', py: 1 }}>
           <Typography sx={{ color: '#64748B', fontSize: 13.5, mb: 1.5 }}>
-            هل أنت متأكد من رغبتك في إغلاق البث وإنهاء الجلسة الحالية مع الطالب {studentName}؟
+            {t('details.live_room.confirm_dialog_student_desc', { student: studentName })}
           </Typography>
           <Typography sx={{ color: '#047857', fontSize: 13, fontWeight: 700, bgcolor: '#ECFDF5', p: 1.5, borderRadius: 2 }}>
-            المدة المسجلة: {elapsedMinutes} دقيقة • المستحق: {expectedEarnings.toFixed(2)} جنيه
+            {t('details.live_room.confirm_dialog_recorded_metrics', {
+              minutes: elapsedMinutes,
+              amount: expectedEarnings.toFixed(2),
+              currency,
+            })}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 1.5 }}>
           <Button variant="outlined" onClick={() => setEndDialogOpen(false)} sx={{ borderRadius: 2, px: 3 }}>
-            تراجع
+            {t('details.live_room.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -484,7 +499,7 @@ export default function LiveBroadcastRoomSection({
             onClick={handleConfirmEndSession}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            تأكيد الإنهاء
+            {t('details.live_room.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

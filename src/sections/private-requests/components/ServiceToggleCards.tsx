@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Switch from '@mui/material/Switch';
 import Skeleton from '@mui/material/Skeleton';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { InstructorSessionSettingsDto } from 'src/types/private-request';
 
@@ -29,6 +30,7 @@ export default function ServiceToggleCards({
   isUpdatingRecorded = false,
   isUpdatingLive = false,
 }: Props) {
+  const t = useTranslations('PrivateRequests.service_toggle');
   const isRecordedActive = Boolean(settings?.acceptsRecordedSessions);
   const isLiveActive = Boolean(settings?.acceptsLiveSessions);
 
@@ -89,10 +91,10 @@ export default function ServiceToggleCards({
                     lineHeight: 1.3,
                   }}
                 >
-                  المحتوى المسجل – Private Recorded
+                  {t('recorded_title')}
                 </Typography>
                 <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: '#64748B', mt: 0.25 }}>
-                  محاضرات مجزأة / تفريغات وشروحات خاصة
+                  {t('recorded_subtitle')}
                 </Typography>
               </Box>
             </Stack>
@@ -158,8 +160,8 @@ export default function ServiceToggleCards({
                     }}
                   >
                     {isRecordedActive
-                      ? 'متاح ومفعل لاستقبال طلبات جديدة'
-                      : 'غير متاح حالياً لاستقبال طلبات جديدة'}
+                      ? t('recorded_active')
+                      : t('recorded_inactive')}
                   </Typography>
                 </>
               )}
@@ -167,20 +169,20 @@ export default function ServiceToggleCards({
 
             {/* Left in RTL (Second child): Estimated time */}
             <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-              زمن الاستجابة التقديري: خلال 2-4 ساعات
+              {t('response_time')}
             </Typography>
           </Box>
 
           {/* Bottom Counter (Right aligned) */}
           <Box sx={{ textAlign: 'start' }}>
             <Typography sx={{ fontSize: 11.5, color: '#94A3B8', fontWeight: 600 }}>
-              الطلبات المسجلة النشطة
+              {t('active_recorded_requests')}
             </Typography>
             {loading ? (
               <Skeleton width={120} height={28} sx={{ mt: 0.25 }} />
             ) : (
               <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
-                {recordedCount} طلبات قيد الإنجاز
+                {t('requests_in_progress', { count: recordedCount })}
               </Typography>
             )}
           </Box>
@@ -239,10 +241,10 @@ export default function ServiceToggleCards({
                     lineHeight: 1.3,
                   }}
                 >
-                  الجلسات المباشرة – Private Live
+                  {t('live_title')}
                 </Typography>
                 <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: '#64748B', mt: 0.25 }}>
-                  بث 1-على-1 تفاعلي / مناقشات حالات إكلينيكية
+                  {t('live_subtitle')}
                 </Typography>
               </Box>
             </Stack>
@@ -308,8 +310,8 @@ export default function ServiceToggleCards({
                     }}
                   >
                     {isLiveActive
-                      ? 'متاح ومفعل لاستقبال جلسات حية جديدة'
-                      : 'غير متاح حالياً لاستقبال جلسات حية جديدة'}
+                      ? t('live_active')
+                      : t('live_inactive')}
                   </Typography>
                 </>
               )}
@@ -317,20 +319,20 @@ export default function ServiceToggleCards({
 
             {/* Left in RTL (Second child): Status label */}
             <Typography sx={{ fontSize: 11.5, color: '#64748B', fontWeight: 600 }}>
-              الوضع: {isLiveActive ? 'متاح ومفعل (On-Air)' : 'مؤقت (Off-Air)'}
+              {isLiveActive ? t('status_on_air') : t('status_off_air')}
             </Typography>
           </Box>
 
           {/* Bottom Counter (Right aligned) */}
           <Box sx={{ textAlign: 'start' }}>
             <Typography sx={{ fontSize: 11.5, color: '#94A3B8', fontWeight: 600 }}>
-              الجلسات المتبقية قيد التنفيذ
+              {t('remaining_live_sessions')}
             </Typography>
             {loading ? (
               <Skeleton width={120} height={28} sx={{ mt: 0.25 }} />
             ) : (
               <Typography sx={{ fontSize: { xs: 16, sm: 18 }, fontWeight: 800, color: '#0F172A', mt: 0.25 }}>
-                {String(liveCount).padStart(2, '0')} جلسة نشطة
+                {t('active_sessions', { count: String(liveCount).padStart(2, '0') })}
               </Typography>
             )}
           </Box>

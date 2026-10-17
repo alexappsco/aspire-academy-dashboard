@@ -11,6 +11,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export default function InstructorDecisionCard({ onAccept, onReject, isSubmitting = false }: Props) {
+  const t = useTranslations('PrivateRequests.details.instructor_decision');
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [isAccepting, setIsAccepting] = useState(false);
@@ -58,10 +60,10 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
     >
       {/* Title & Subtitle */}
       <Typography sx={{ fontWeight: 800, fontSize: { xs: 16.5, sm: 18 }, color: '#0F172A', mb: 0.5 }}>
-        قرار المحاضر
+        {t('title')}
       </Typography>
       <Typography sx={{ fontSize: { xs: 12, sm: 13 }, color: '#64748B', fontWeight: 500, mb: 3 }}>
-        إجراءك ينقل الطلب فوراً إلى منسق الشؤون الأكاديمية لمراجعة التسعير والتواصل مع الطالب.
+        {t('subtitle')}
       </Typography>
 
       {/* Action Buttons */}
@@ -97,7 +99,7 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             },
           }}
         >
-          {isAccepting ? 'جاري قبول الطلب...' : 'قبول الطلب المبدئي (إلى التسعير الإداري)'}
+          {isAccepting ? t('accepting') : t('accept_btn')}
         </Button>
 
         <Button
@@ -125,7 +127,7 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             },
           }}
         >
-          الاعتذار عن الطلب
+          {t('reject_btn')}
         </Button>
       </Stack>
 
@@ -138,17 +140,17 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
         slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
       >
         <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'center' }}>
-          الاعتذار عن قبول الطلب
+          {t('dialog_title')}
         </DialogTitle>
         <DialogContent sx={{ py: 1 }}>
           <Typography sx={{ color: '#64748B', fontSize: 13.5, mb: 2, textAlign: 'center' }}>
-            يرجى توضيح سبب الاعتذار للطالب (اختياري، مثلاً: عدم توفر وقت كافٍ):
+            {t('dialog_desc')}
           </Typography>
           <TextField
             fullWidth
             multiline
             rows={3}
-            placeholder="سبب الاعتذار..."
+            placeholder={t('reason_placeholder')}
             value={rejectReason}
             disabled={isRejecting}
             onChange={(e) => setRejectReason(e.target.value)}
@@ -167,7 +169,7 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             onClick={() => setRejectDialogOpen(false)}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            إلغاء
+            {t('cancel')}
           </Button>
           <Button
             variant="contained"
@@ -177,7 +179,7 @@ export default function InstructorDecisionCard({ onAccept, onReject, isSubmittin
             startIcon={isRejecting ? <CircularProgress size={16} color="inherit" /> : undefined}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            {isRejecting ? 'جاري تسجيل الاعتذار...' : 'تأكيد الاعتذار'}
+            {isRejecting ? t('rejecting') : t('confirm_reject')}
           </Button>
         </DialogActions>
       </Dialog>

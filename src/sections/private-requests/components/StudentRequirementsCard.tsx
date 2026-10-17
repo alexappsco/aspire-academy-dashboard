@@ -6,6 +6,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export default function StudentRequirementsCard({ description }: Props) {
+  const t = useTranslations('PrivateRequests.details.requirements_card');
+
   return (
     <Card
       sx={{
@@ -42,13 +45,13 @@ export default function StudentRequirementsCard({ description }: Props) {
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
           <Iconify icon="solar:document-text-bold" width={20} sx={{ color: '#0284C7' }} />
           <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-            وصف متطلبات الطالب والمستهدف الأكاديمي
+            {t('title')}
           </Typography>
         </Stack>
 
         {/* Left in RTL (Second child): Literal quote badge */}
         <Chip
-          label="النص الحرفي للطلب"
+          label={t('literal_quote')}
           size="small"
           sx={{
             bgcolor: '#EFF6FF',

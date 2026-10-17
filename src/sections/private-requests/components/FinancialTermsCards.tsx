@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 import Chip from '@mui/material/Chip';
+import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 
 interface Props {
@@ -29,6 +30,7 @@ export default function FinancialTermsCards({
   currencyCode,
   currencySymbol,
 }: Props) {
+  const t = useTranslations('PrivateRequests.details.financial_terms');
   const currency = currencySymbol || currencyCode || '';
   const price = Number(pricePerHour) || 0;
   const platPercent = Number(platformPercentage) || 0;
@@ -78,7 +80,7 @@ export default function FinancialTermsCards({
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
                 <Iconify icon="solar:bill-check-bold" width={20} sx={{ color: '#0D9488' }} />
                 <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-                  الشروط المالية المعتمدة للطلب
+                  {t('title')}
                 </Typography>
               </Stack>
 
@@ -105,13 +107,13 @@ export default function FinancialTermsCards({
                   }}
                 >
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                    سعر الساعة المعتمد
+                    {t('hourly_price')}
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0F172A', mt: 0.5 }}>
-                    {price.toFixed(2)} {currency} / ساعة
+                    {price.toFixed(2)} {currency} / {t('per_hour')}
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: '#94A3B8', mt: 0.25 }}>
-                    سعر موحد ومثبت
+                    {t('fixed_price')}
                   </Typography>
                 </Box>
               </Grid>
@@ -132,16 +134,16 @@ export default function FinancialTermsCards({
                     <Iconify icon="solar:lock-bold" width={16} />
                   </Box>
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                    نسبة المحاضر المعتمدة
+                    {t('instructor_share')}
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#059669', mt: 0.5 }}>
                     %{instructorPercent}
                     <Typography component="span" sx={{ fontSize: 11.5, color: '#64748B', mr: 0.75 }}>
-                      (صافي استحقاقك)
+                      {t('net_earnings')}
                     </Typography>
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: '#94A3B8', mt: 0.25 }}>
-                    حصة المنصة: %{platPercent}
+                    {t('platform_share', { percent: platPercent })}
                   </Typography>
                 </Box>
               </Grid>
@@ -155,7 +157,7 @@ export default function FinancialTermsCards({
                 sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}
               >
                 <Typography sx={{ fontSize: 12.5, color: '#64748B', fontWeight: 600 }}>
-                  توزيع استحقاق الساعة الواحدة:
+                  {t('distribution_title')}
                 </Typography>
                 <Typography
                   sx={{
@@ -168,7 +170,7 @@ export default function FinancialTermsCards({
                     borderRadius: 1,
                   }}
                 >
-                  معتمد ومؤمن بالنظام
+                  {t('secured_in_system')}
                 </Typography>
               </Stack>
 
@@ -182,16 +184,16 @@ export default function FinancialTermsCards({
                 }}
               >
                 <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#059669' }}>
-                  قيمة المحاضر لكل ساعة منجزة:{' '}
+                  {t('instructor_per_hour_rate')}{' '}
                   <span>
-                    {instructorPerHour.toFixed(2)} {currency} / ساعة
+                    {instructorPerHour.toFixed(2)} {currency} / {t('per_hour')}
                   </span>
                 </Typography>
 
                 <Typography sx={{ fontSize: 12, color: '#64748B' }}>
-                  حصة المنصة لكل ساعة:{' '}
+                  {t('platform_per_hour_rate')}{' '}
                   <strong style={{ color: '#0F172A' }}>
-                    {platformPerHour.toFixed(2)} {currency} / ساعة
+                    {platformPerHour.toFixed(2)} {currency} / {t('per_hour')}
                   </strong>
                 </Typography>
               </Stack>
@@ -222,7 +224,7 @@ export default function FinancialTermsCards({
             >
               <Iconify icon="solar:wallet-money-bold" width={20} sx={{ color: '#059669' }} />
               <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#0F172A' }}>
-                استهلاك الساعات والأرباح الفعلية
+                {t('consumption_title')}
               </Typography>
             </Stack>
 
@@ -241,17 +243,17 @@ export default function FinancialTermsCards({
                   }}
                 >
                   <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                    إجمالي الساعات الفعلية
+                    {t('total_actual_hours')}
                   </Typography>
                   <Typography sx={{ fontSize: 24, fontWeight: 900, color: '#0F172A', mt: 0.5 }}>
                     {effHours}{' '}
                     <Typography component="span" sx={{ fontSize: 14, fontWeight: 700, color: '#64748B' }}>
-                      ساعة
+                      {t('hours_suffix')}
                     </Typography>
                   </Typography>
                   {chapHours > 0 && (
                     <Typography sx={{ fontSize: 11.5, color: '#94A3B8', mt: 0.25 }}>
-                      من إجمالي {chapHours} ساعة للفصول
+                      {t('of_total_hours', { count: chapHours })}
                     </Typography>
                   )}
                 </Box>
@@ -270,7 +272,7 @@ export default function FinancialTermsCards({
                   }}
                 >
                   <Typography sx={{ fontSize: 12, color: '#047857', fontWeight: 700 }}>
-                    صافي مستحق المحاضر (%{instructorPercent})
+                    {t('instructor_net_share_badge', { percent: instructorPercent })}
                   </Typography>
                   <Typography sx={{ fontSize: 24, fontWeight: 900, color: '#065F46', mt: 0.5 }}>
                     {instructorNetEarnings.toFixed(2)}{' '}
@@ -279,7 +281,7 @@ export default function FinancialTermsCards({
                     </Typography>
                   </Typography>
                   <Typography sx={{ fontSize: 11.5, color: '#059669', mt: 0.25, fontWeight: 600 }}>
-                    جاهزة للصرف بالمحفظة
+                    {t('ready_for_payout')}
                   </Typography>
                 </Box>
               </Grid>
@@ -308,13 +310,13 @@ export default function FinancialTermsCards({
                 sx={{ justifyContent: 'space-between', fontSize: 12, gap: 1 }}
               >
                 <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                  القيمة الإجمالية للخدمة المنفذة:{' '}
+                  {t('total_executed_service_value')}{' '}
                   <strong style={{ color: '#0F172A' }}>
                     {effValue.toFixed(2)} {currency}
                   </strong>
                 </Typography>
                 <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-                  حصة المنصة المحتجزة (%{platPercent}):{' '}
+                  {t('retained_platform_share', { percent: platPercent })}{' '}
                   <strong style={{ color: '#0F172A' }}>
                     {platformRetainedShare.toFixed(2)} {currency}
                   </strong>

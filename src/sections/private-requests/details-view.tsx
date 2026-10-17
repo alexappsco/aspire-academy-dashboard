@@ -11,7 +11,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 
@@ -46,6 +46,7 @@ interface Props {
 export default function PrivateRequestDetailsView({ requestId }: Props) {
   const locale = useLocale();
   const toast = useToast();
+  const t = useTranslations('PrivateRequests');
 
   const [request, setRequest] = useState<SessionRequestInstructorResult | null>(null);
   const [transactions, setTransactions] = useState<SessionRequestTransactionResult[]>([]);
@@ -69,7 +70,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
       if (detailsRes.success && detailsRes.data) {
         setRequest(detailsRes.data);
       } else {
-        setError(detailsRes.error || 'فشل في تحميل تفاصيل الطلب');
+        setError(detailsRes.error || t('details.not_found'));
       }
 
       if (txRes.success && txRes.data) {
@@ -78,12 +79,12 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         setTransactions([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'تعذر تحميل بيانات الطلب');
+      setError(err instanceof Error ? err.message : t('details.not_found'));
     } finally {
       setLoading(false);
       setLoadingTransactions(false);
     }
-  }, [requestId]);
+  }, [requestId, t]);
 
   useEffect(() => {
     fetchRequestDetails();
@@ -126,7 +127,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
     try {
       const res = await acceptSessionRequestAction(request.id);
       if (res.success) {
-        toast.success('تم قبول الطلب المبدئي بنجاح ونقله إلى مراجعة الإدارة الأكاديمية');
+        toast.success(t('notifications.accept_success'));
         setRequest((prev) =>
           prev
             ? {
@@ -137,10 +138,10 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
             : null
         );
       } else {
-        toast.error(res.error || 'فشل قبول الطلب');
+        toast.error(res.error || t('notifications.accept_failed'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء تنفيذ القبول');
+      toast.error(err instanceof Error ? err.message : t('notifications.accept_error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -153,22 +154,22 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
     try {
       const res = await rejectSessionRequestAction(request.id, reason || '');
       if (res.success) {
-        toast.info('تم تسجيل الاعتذار عن الطلب بنجاح وإخطار الطالب');
+        toast.info(t('notifications.reject_success'));
         setRequest((prev) =>
           prev
             ? {
                 ...prev,
                 status: SessionRequestStatusEnum.Rejected,
-                rejectionReason: reason || 'اعتذار المحاضر عن تقديم الجلسة',
+                rejectionReason: reason || t('details.rejected_default_reason'),
                 respondedAt: new Date().toISOString(),
               }
             : null
         );
       } else {
-        toast.error(res.error || 'فشل تسجيل الاعتذار عن الطلب');
+        toast.error(res.error || t('notifications.reject_failed'));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء تسجيل الاعتذار');
+      toast.error(err instanceof Error ? err.message : t('notifications.reject_error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -306,11 +307,11 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           sx={{ mb: 3, maxWidth: 600, mx: 'auto', borderRadius: 2 }}
           action={
             <Button color="inherit" size="small" onClick={fetchRequestDetails}>
-              إعادة المحاولة
+              {t('details.retry')}
             </Button>
           }
         >
-          {error || 'لم يتم العثور على بيانات الطلب المطلوب'}
+          {error || t('details.not_found')}
         </Alert>
 
         <Button
@@ -320,7 +321,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           startIcon={<Iconify icon={locale === 'ar' ? 'solar:alt-arrow-right-linear' : 'solar:alt-arrow-left-linear'} />}
           sx={{ borderRadius: 2 }}
         >
-          العودة لقائمة الطلبات الخاصة
+          {t('details.back_to_list')}
         </Button>
       </Box>
     );
@@ -348,10 +349,10 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           },
         }}
       >
-        <Link href="/">لوحة التحكم</Link>
-        <Link href="/private-requests">الطلبات الخاصة</Link>
+        <Link href="/">{t('details.breadcrumbs.dashboard')}</Link>
+        <Link href="/private-requests">{t('details.breadcrumbs.requests')}</Link>
         <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>
-          تفاصيل الطلب #{displayId}
+          {t('details.breadcrumbs.request_details', { id: displayId })}
         </Typography>
       </Breadcrumbs>
 
@@ -394,10 +395,10 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
             </Box>
             <Box sx={{ flex: 1, textAlign: 'start' }}>
               <Typography sx={{ fontWeight: 800, fontSize: 16.5, color: '#991B1B', mb: 0.5 }}>
-                تم الاعتذار عن قبول هذا الطلب
+                {t('details.rejected_banner_title')}
               </Typography>
               <Typography sx={{ fontSize: 13.5, color: '#B91C1C', fontWeight: 600 }}>
-                سبب الاعتذار المسجل: {request.rejectionReason || 'عدم توفر وقت كافٍ لدى المحاضر'}
+                {t('details.rejected_reason_label')} {request.rejectionReason || t('details.rejected_default_reason')}
               </Typography>
             </Box>
           </Stack>
@@ -418,7 +419,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         {/* Left in RTL (Second child): Requirements description */}
         <Grid size={{ xs: 12, md: 6 }}>
           <StudentRequirementsCard
-            description={request.description || 'لم يتم تقديم وصف إضافي من قبل الطالب'}
+            description={request.description || t('details.requirements_card.no_description')}
           />
         </Grid>
       </Grid>

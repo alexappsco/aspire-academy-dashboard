@@ -19,6 +19,7 @@ import Menu from '@mui/material/Menu';
 import TablePagination from '@mui/material/TablePagination';
 import Skeleton from '@mui/material/Skeleton';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -35,12 +36,12 @@ import {
 } from 'src/types/private-request';
 import ServiceToggleCards from './components/ServiceToggleCards';
 
-// Format backend ISO date to Arabic readable format
-function formatRequestDate(dateStr?: string): string {
+// Format backend ISO date to locale readable format
+function formatRequestDate(dateStr?: string, locale = 'ar'): string {
   if (!dateStr) return '—';
   try {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('ar-EG', {
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -76,14 +77,14 @@ export function normalizeSessionStatus(
 }
 
 // Render status badge chip
-function renderStatusChip(status: unknown) {
+function renderStatusChip(status: unknown, t: any) {
   const normalized = normalizeSessionStatus(status);
 
   switch (normalized) {
     case 'Pending':
       return (
         <Chip
-          label="جديد"
+          label={t('tabs.pending')}
           size="small"
           sx={{
             bgcolor: '#E0F2FE',
@@ -98,7 +99,7 @@ function renderStatusChip(status: unknown) {
     case 'AwaitingAdminReview':
       return (
         <Chip
-          label="بانتظار التأكيد"
+          label={t('tabs.awaiting_admin')}
           size="small"
           sx={{
             bgcolor: '#FEF3C7',
@@ -113,7 +114,7 @@ function renderStatusChip(status: unknown) {
     case 'Active':
       return (
         <Chip
-          label="نشط"
+          label={t('tabs.active')}
           size="small"
           sx={{
             bgcolor: '#DCFCE7',
@@ -128,7 +129,7 @@ function renderStatusChip(status: unknown) {
     case 'Completed':
       return (
         <Chip
-          label="منتهي"
+          label={t('tabs.completed')}
           size="small"
           sx={{
             bgcolor: '#E2E8F0',
@@ -143,7 +144,7 @@ function renderStatusChip(status: unknown) {
     case 'Rejected':
       return (
         <Chip
-          label="مرفوض"
+          label={t('tabs.rejected')}
           size="small"
           sx={{
             bgcolor: '#FEE2E2',
@@ -158,7 +159,7 @@ function renderStatusChip(status: unknown) {
     case 'Cancelled':
       return (
         <Chip
-          label="ملغي"
+          label={t('tabs.cancelled')}
           size="small"
           sx={{
             bgcolor: '#F1F5F9',
@@ -186,6 +187,8 @@ export default function PrivateRequestsListView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const toast = useToast();
+  const t = useTranslations('PrivateRequests');
+  const locale = useLocale();
 
   // Read initial values from URL query parameters
   const urlStatus = searchParams.get('Status') || 'all';
@@ -356,14 +359,14 @@ export default function PrivateRequestsListView() {
     if (res.success) {
       toast.success(
         nextVal
-          ? 'تم تفعيل استقبال طلبات المحتوى المسجل بنجاح'
-          : 'تم إيقاف استقبال طلبات المحتوى المسجل مؤقتاً'
+          ? t('notifications.recorded_enabled')
+          : t('notifications.recorded_disabled')
       );
     } else {
       setSessionSettings((prev) =>
         prev ? { ...prev, acceptsRecordedSessions: current } : prev
       );
-      toast.error(res.error || 'فشل تحديث إعدادات المحتوى المسجل');
+      toast.error(res.error || t('notifications.recorded_failed'));
     }
   };
 
@@ -388,14 +391,14 @@ export default function PrivateRequestsListView() {
     if (res.success) {
       toast.success(
         nextVal
-          ? 'تم تفعيل استقبال طلبات الجلسات المباشرة بنجاح'
-          : 'تم إيقاف استقبال طلبات الجلسات المباشرة مؤقتاً'
+          ? t('notifications.live_enabled')
+          : t('notifications.live_disabled')
       );
     } else {
       setSessionSettings((prev) =>
         prev ? { ...prev, acceptsLiveSessions: current } : prev
       );
-      toast.error(res.error || 'فشل تحديث إعدادات الجلسات المباشرة');
+      toast.error(res.error || t('notifications.live_failed'));
     }
   };
 
@@ -438,7 +441,7 @@ export default function PrivateRequestsListView() {
             fontSize: { xs: 22, md: 26 },
           }}
         >
-          الطلبات الخاصة
+          {t('title')}
         </Typography>
       </Stack>
 
@@ -503,7 +506,7 @@ export default function PrivateRequestsListView() {
                       }}
                     />
                   )}
-                  <span>الكل</span>
+                  <span>{t('tabs.all')}</span>
                 </Stack>
               }
             />
@@ -523,7 +526,7 @@ export default function PrivateRequestsListView() {
                       }}
                     />
                   )}
-                  <span>جديد</span>
+                  <span>{t('tabs.pending')}</span>
                 </Stack>
               }
             />
@@ -543,7 +546,7 @@ export default function PrivateRequestsListView() {
                       }}
                     />
                   )}
-                  <span>بانتظار التأكيد</span>
+                  <span>{t('tabs.awaiting_admin')}</span>
                 </Stack>
               }
             />
@@ -563,7 +566,7 @@ export default function PrivateRequestsListView() {
                       }}
                     />
                   )}
-                  <span>نشط</span>
+                  <span>{t('tabs.active')}</span>
                 </Stack>
               }
             />
@@ -583,7 +586,7 @@ export default function PrivateRequestsListView() {
                       }}
                     />
                   )}
-                  <span>منتهي</span>
+                  <span>{t('tabs.completed')}</span>
                 </Stack>
               }
             />
@@ -605,7 +608,7 @@ export default function PrivateRequestsListView() {
           {/* Search Input: Far Right in RTL */}
           <TextField
             size="small"
-            placeholder="بحث في الطلبات..."
+            placeholder={t('filters.search_placeholder')}
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -648,9 +651,9 @@ export default function PrivateRequestsListView() {
                 displayEmpty
                 sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
               >
-                <MenuItem value="all">كل أنواع الخدمات</MenuItem>
-                <MenuItem value="Recorded">محتوى مسجل</MenuItem>
-                <MenuItem value="Live">جلسة مباشرة</MenuItem>
+                <MenuItem value="all">{t('filters.all_types')}</MenuItem>
+                <MenuItem value="Recorded">{t('filters.recorded')}</MenuItem>
+                <MenuItem value="Live">{t('filters.live')}</MenuItem>
               </Select>
             </FormControl>
 
@@ -671,13 +674,13 @@ export default function PrivateRequestsListView() {
                 displayEmpty
                 sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
               >
-                <MenuItem value="all">جميع الحالات</MenuItem>
-                <MenuItem value="Pending">جديد</MenuItem>
-                <MenuItem value="AwaitingAdminReview">بانتظار التأكيد</MenuItem>
-                <MenuItem value="Active">نشط</MenuItem>
-                <MenuItem value="Completed">منتهي</MenuItem>
-                <MenuItem value="Rejected">مرفوض</MenuItem>
-                <MenuItem value="Cancelled">ملغي</MenuItem>
+                <MenuItem value="all">{t('filters.all_statuses')}</MenuItem>
+                <MenuItem value="Pending">{t('tabs.pending')}</MenuItem>
+                <MenuItem value="AwaitingAdminReview">{t('tabs.awaiting_admin')}</MenuItem>
+                <MenuItem value="Active">{t('tabs.active')}</MenuItem>
+                <MenuItem value="Completed">{t('tabs.completed')}</MenuItem>
+                <MenuItem value="Rejected">{t('tabs.rejected')}</MenuItem>
+                <MenuItem value="Cancelled">{t('tabs.cancelled')}</MenuItem>
               </Select>
             </FormControl>
           </Stack>
@@ -709,13 +712,19 @@ export default function PrivateRequestsListView() {
                   },
                 }}
               >
-                <Box component="th" sx={{ textAlign: 'start !important', pr: 3, width: 140 }}>رقم الطلب</Box>
-                <Box component="th" sx={{ textAlign: 'start !important' }}>الطالب والجهة</Box>
-                <Box component="th">تاريخ الطلب</Box>
-                <Box component="th">نوع الخدمة</Box>
-                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>الوصف والتخصص</Box>
-                <Box component="th">الحالة</Box>
-                <Box component="th" sx={{ width: 60 }}>الإجراءات</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', pr: 3, width: 140 }}>
+                  {t('columns.request_id')}
+                </Box>
+                <Box component="th" sx={{ textAlign: 'start !important' }}>
+                  {t('columns.student_scope')}
+                </Box>
+                <Box component="th">{t('columns.request_date')}</Box>
+                <Box component="th">{t('columns.service_type')}</Box>
+                <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>
+                  {t('columns.desc_specialization')}
+                </Box>
+                <Box component="th">{t('columns.status')}</Box>
+                <Box component="th" sx={{ width: 60 }}>{t('columns.actions')}</Box>
               </Box>
             </Box>
 
@@ -730,7 +739,7 @@ export default function PrivateRequestsListView() {
                     </Box>
                     <Box component="td" sx={{ p: 2 }}>
                       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                        <Skeleton variant="circular" width={36} height={36} />
+                         <Skeleton variant="circular" width={36} height={36} />
                         <Box>
                           <Skeleton width={120} height={18} />
                           <Skeleton width={80} height={14} />
@@ -776,10 +785,10 @@ export default function PrivateRequestsListView() {
                         <Iconify icon="solar:folder-open-broken" width={32} />
                       </Box>
                       <Typography sx={{ fontWeight: 800, fontSize: 16, color: '#1E293B' }}>
-                        لا توجد طلبات متطابقة
+                        {t('empty.title')}
                       </Typography>
                       <Typography sx={{ fontSize: 13, color: '#64748B', mt: 0.5 }}>
-                        لم نتمكن من العثور على أية طلبات خاصة مطابقة لمعايير الفلترة الحالية.
+                        {t('empty.desc')}
                       </Typography>
                     </Box>
                   </Box>
@@ -827,10 +836,10 @@ export default function PrivateRequestsListView() {
                           </Avatar>
                           <Box>
                             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-                              {req.student?.name || 'طالب مجهول'}
+                              {req.student?.name || t('student_unknown')}
                             </Typography>
                             <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                              {req.isBroadcast ? 'طلب موجه للجميع' : 'موجه لك خصيصاً'}
+                              {req.isBroadcast ? t('broadcast') : t('direct')}
                               {req.student?.countryName ? ` • ${req.student.countryName}` : ''}
                             </Typography>
                           </Box>
@@ -839,7 +848,7 @@ export default function PrivateRequestsListView() {
 
                       {/* 3. Submitted Date */}
                       <Box component="td" sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>
-                        {formatRequestDate(req.creationTime)}
+                        {formatRequestDate(req.creationTime, locale)}
                       </Box>
 
                       {/* 4. Service Type */}
@@ -851,7 +860,7 @@ export default function PrivateRequestsListView() {
                               width={14}
                             />
                           }
-                          label={isRec ? 'محتوى مسجل' : 'جلسة مباشرة'}
+                          label={isRec ? t('filters.recorded') : t('filters.live')}
                           size="small"
                           sx={{
                             bgcolor: isRec ? '#EFF6FF' : '#EEF2FF',
@@ -890,7 +899,7 @@ export default function PrivateRequestsListView() {
                             maxWidth: 280,
                           }}
                         >
-                          {req.description || 'لا يوجد وصف مدخل من الطالب'}
+                          {req.description || t('no_description')}
                         </Typography>
                         {req.specializationName && (
                           <Typography sx={{ fontSize: 11.5, color: '#0284C7', mt: 0.25 }}>
@@ -901,7 +910,7 @@ export default function PrivateRequestsListView() {
 
                       {/* 6. Status Badge */}
                       <Box component="td">
-                        {renderStatusChip(req.status)}
+                        {renderStatusChip(req.status, t)}
                       </Box>
 
                       {/* 7. Actions Three Dots (Far Left) */}
@@ -933,7 +942,7 @@ export default function PrivateRequestsListView() {
             setRowsPerPage(parseInt(e.target.value, 10));
             setPage(0);
           }}
-          labelRowsPerPage="عدد العناصر لكل صفحة:"
+          labelRowsPerPage={t('rows_per_page')}
           rowsPerPageOptions={[5, 10, 20, 50]}
           sx={{
             borderTop: '1px solid #F1F5F9',
@@ -970,7 +979,7 @@ export default function PrivateRequestsListView() {
           sx={{ fontSize: 13.5, fontWeight: 600, gap: 1.5 }}
         >
           <Iconify icon="solar:eye-bold" width={18} sx={{ color: '#2563EB' }} />
-          عرض تفاصيل الطلب
+          {t('view_details')}
         </MenuItem>
       </Menu>
     </Box>
