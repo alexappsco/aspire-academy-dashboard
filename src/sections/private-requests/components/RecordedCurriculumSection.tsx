@@ -334,7 +334,16 @@ export default function RecordedCurriculumSection({
     chapterId: string;
     lessonId: string;
   } | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingState, setUploadingState] = useState<{
+    lessonId: string;
+    type: 'video' | 'pdf';
+  } | null>(null);
+
+  const isUploading = Boolean(uploadingState);
+  const isVideoUploading = (lessonId: string) =>
+    uploadingState?.lessonId === lessonId && uploadingState?.type === 'video';
+  const isDocUploading = (lessonId: string) =>
+    uploadingState?.lessonId === lessonId && uploadingState?.type === 'pdf';
 
   // Sync state if initialChapters changes from parent & resolve attachment details
   useEffect(() => {
@@ -686,9 +695,10 @@ export default function RecordedCurriculumSection({
 
   const handleVideoFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload || uploading) return;
+    if (!file || !targetLessonForUpload || isUploading) return;
 
-    setUploading(true);
+    const currentTarget = targetLessonForUpload;
+    setUploadingState({ lessonId: currentTarget.lessonId, type: 'video' });
     try {
       // Extract video duration from file in browser if possible
       let durationInSeconds = 600;
@@ -731,11 +741,11 @@ export default function RecordedCurriculumSection({
 
       setRichChapters((prev) =>
         prev.map((ch) => {
-          if (ch.id !== targetLessonForUpload.chapterId) return ch;
+          if (ch.id !== currentTarget.chapterId) return ch;
           return {
             ...ch,
             lessons: ch.lessons.map((les) => {
-              if (les.id !== targetLessonForUpload.lessonId) return les;
+              if (les.id !== currentTarget.lessonId) return les;
               const otherAtts = les.attachments.filter((a) => a.type !== 'video');
               return {
                 ...les,
@@ -752,7 +762,8 @@ export default function RecordedCurriculumSection({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'فشل رفع الفيديو');
     } finally {
-      setUploading(false);
+      setUploadingState(null);
+      setTargetLessonForUpload(null);
     }
   };
 
@@ -766,9 +777,10 @@ export default function RecordedCurriculumSection({
 
   const handleDocFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !targetLessonForUpload || uploading) return;
+    if (!file || !targetLessonForUpload || isUploading) return;
 
-    setUploading(true);
+    const currentTarget = targetLessonForUpload;
+    setUploadingState({ lessonId: currentTarget.lessonId, type: 'pdf' });
     try {
       const res = await uploadAttachment(file, file.name);
       if (!res.success || !res.data) {
@@ -789,11 +801,11 @@ export default function RecordedCurriculumSection({
 
       setRichChapters((prev) =>
         prev.map((ch) => {
-          if (ch.id !== targetLessonForUpload.chapterId) return ch;
+          if (ch.id !== currentTarget.chapterId) return ch;
           return {
             ...ch,
             lessons: ch.lessons.map((les) => {
-              if (les.id !== targetLessonForUpload.lessonId) return les;
+              if (les.id !== currentTarget.lessonId) return les;
               return {
                 ...les,
                 isCompleted: true,
@@ -808,7 +820,8 @@ export default function RecordedCurriculumSection({
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'فشل رفع المستند');
     } finally {
-      setUploading(false);
+      setUploadingState(null);
+      setTargetLessonForUpload(null);
     }
   };
 
@@ -1404,6 +1417,7 @@ export default function RecordedCurriculumSection({
                                           <Button
                                             size="small"
                                             variant="outlined"
+                                            disabled={isUploading}
                                             onClick={() => handleTriggerVideoUpload(chapter.id, lesson.id)}
                                             sx={{
                                               borderColor: '#E2E8F0',
@@ -1416,7 +1430,14 @@ export default function RecordedCurriculumSection({
                                               '&:hover': { bgcolor: '#E2E8F0' },
                                             }}
                                           >
-                                            استبدال
+                                            {isVideoUploading(lesson.id) ? (
+                                              <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
+                                                <CircularProgress size={14} sx={{ color: 'inherit' }} />
+                                                <span>جاري الرفع...</span>
+                                              </Stack>
+                                            ) : (
+                                              'استبدال'
+                                            )}
                                           </Button>
                                         </>
                                       )}
@@ -1454,6 +1475,7 @@ export default function RecordedCurriculumSection({
                                           <Button
                                             size="small"
                                             variant="outlined"
+                                            disabled={isUploading}
                                             onClick={() => handleTriggerDocUpload(chapter.id, lesson.id)}
                                             sx={{
                                               borderColor: '#E2E8F0',
@@ -1466,7 +1488,14 @@ export default function RecordedCurriculumSection({
                                               '&:hover': { bgcolor: '#E2E8F0' },
                                             }}
                                           >
-                                            استبدال
+                                            {isDocUploading(lesson.id) ? (
+                                              <Stack direction="row" spacing={0.8} sx={{ alignItems: 'center' }}>
+                                                <CircularProgress size={14} sx={{ color: 'inherit' }} />
+                                                <span>جاري الرفع...</span>
+                                              </Stack>
+                                            ) : (
+                                              'استبدال'
+                                            )}
                                           </Button>
                                         </>
                                       )}
@@ -1557,6 +1586,7 @@ export default function RecordedCurriculumSection({
                             <Button
                               size="small"
                               variant={hasAttachments ? 'outlined' : 'contained'}
+                              disabled={isUploading}
                               onClick={() => handleTriggerVideoUpload(chapter.id, lesson.id)}
                               sx={{
                                 bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
@@ -1578,23 +1608,34 @@ export default function RecordedCurriculumSection({
                                 },
                               }}
                             >
-                              <Box
-                                component="img"
-                                src="/icons/vedio.svg"
-                                alt="video"
-                                sx={{
-                                  width: 16,
-                                  height: 16,
-                                  ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
-                                }}
-                              />
-                              <span>{hasAttachments ? '+ فيديو إضافي' : '+ رفع فيديو'}</span>
+                              {isVideoUploading(lesson.id) ? (
+                                <CircularProgress size={16} sx={{ color: 'inherit' }} />
+                              ) : (
+                                <Box
+                                  component="img"
+                                  src="/icons/vedio.svg"
+                                  alt="video"
+                                  sx={{
+                                    width: 16,
+                                    height: 16,
+                                    ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
+                                  }}
+                                />
+                              )}
+                              <span>
+                                {isVideoUploading(lesson.id)
+                                  ? 'جاري رفع الفيديو...'
+                                  : hasAttachments
+                                  ? '+ فيديو إضافي'
+                                  : '+ رفع فيديو'}
+                              </span>
                             </Button>
 
                             {/* Document Button */}
                             <Button
                               size="small"
                               variant={hasAttachments ? 'outlined' : 'contained'}
+                              disabled={isUploading}
                               onClick={() => handleTriggerDocUpload(chapter.id, lesson.id)}
                               sx={{
                                 bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
@@ -1616,23 +1657,34 @@ export default function RecordedCurriculumSection({
                                 },
                               }}
                             >
-                              <Box
-                                component="img"
-                                src="/icons/file.svg"
-                                alt="file"
-                                sx={{
-                                  width: 16,
-                                  height: 16,
-                                  ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
-                                }}
-                              />
-                              <span>{hasAttachments ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
+                              {isDocUploading(lesson.id) ? (
+                                <CircularProgress size={16} sx={{ color: 'inherit' }} />
+                              ) : (
+                                <Box
+                                  component="img"
+                                  src="/icons/file.svg"
+                                  alt="file"
+                                  sx={{
+                                    width: 16,
+                                    height: 16,
+                                    ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }),
+                                  }}
+                                />
+                              )}
+                              <span>
+                                {isDocUploading(lesson.id)
+                                  ? 'جاري رفع المستند...'
+                                  : hasAttachments
+                                  ? '+ مستند إضافي'
+                                  : '+ اضافة مستند'}
+                              </span>
                             </Button>
 
                             {/* Quiz Button */}
                             <Button
                               size="small"
                               variant={hasAttachments ? 'outlined' : 'contained'}
+                              disabled={isUploading}
                               onClick={() => handleOpenQuizDialog(chapter.id, lesson.id, chapter.title)}
                               sx={{
                                 bgcolor: hasAttachments ? '#FFFFFF' : '#1C252E',
@@ -1752,32 +1804,7 @@ export default function RecordedCurriculumSection({
         onChange={handleDocFileSelected}
       />
 
-      {/* ── Uploading Overlay ─────────────────────────────────────────────── */}
-      {uploading && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            bgcolor: 'rgba(15, 23, 42, 0.45)',
-            backdropFilter: 'blur(3px)',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 2,
-            color: '#FFFFFF',
-          }}
-        >
-          <CircularProgress size={48} sx={{ color: '#38BDF8' }} />
-          <Typography sx={{ fontSize: 15, fontWeight: 700 }}>
-            جاري رفع ومعالجة الملف...
-          </Typography>
-        </Box>
-      )}
+
 
 
       {/* ── 4. Quiz Dialog Modal - Matches /courses/new QuizDialog ───────── */}
