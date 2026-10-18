@@ -2411,7 +2411,8 @@
     "statuses": {
       "pending": "بانتظار المراجعة",
       "approved": "معتمد",
-      "rejected": "مرفوض"
+      "rejected": "مرفوض",
+      "unknown": "غير معروف"
     },
     "messages": {
       "load_error": "تعذر تحميل طلبات شحن الساعات"

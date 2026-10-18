@@ -15,7 +15,7 @@ import type { HoursChargeRequest } from 'src/types/hours-charge-request';
 
 import { STATUS_STYLES } from '../constants';
 import type { HoursChargeRequestRow } from '../types';
-import { formatRequestDate, toRequestRow } from '../utils';
+import { formatRequestDate, normalizeRequestStatus, toRequestRow } from '../utils';
 
 type Props = {
   requests: HoursChargeRequest[];
@@ -104,24 +104,33 @@ export default function HoursChargeRequestsTable({
         {formatRequestDate(row.creationTime, locale)}
       </Typography>
     ),
-    statusValue: (row: HoursChargeRequestRow) => (
-      <Box
-        component="span"
-        sx={{
-          display: 'inline-flex',
-          px: 1.25,
-          py: 0.5,
-          borderRadius: 1,
-          bgcolor: STATUS_STYLES[row.status].backgroundColor,
-          color: STATUS_STYLES[row.status].color,
-          fontSize: 12,
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {t('statuses.' + row.status.toLowerCase())}
-      </Box>
-    ),
+    statusValue: (row: HoursChargeRequestRow) => {
+      const normalizedStatus = normalizeRequestStatus(row.status);
+      const statusStyle = normalizedStatus
+        ? STATUS_STYLES[normalizedStatus]
+        : { backgroundColor: '#F1F5F9', color: '#64748B' };
+
+      return (
+        <Box
+          component="span"
+          sx={{
+            display: 'inline-flex',
+            px: 1.25,
+            py: 0.5,
+            borderRadius: 1,
+            bgcolor: statusStyle.backgroundColor,
+            color: statusStyle.color,
+            fontSize: 12,
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {normalizedStatus
+            ? t('statuses.' + normalizedStatus.toLowerCase())
+            : t('statuses.unknown')}
+        </Box>
+      );
+    },
   };
 
   return (

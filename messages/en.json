@@ -2411,7 +2411,8 @@
     "statuses": {
       "pending": "Pending review",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "unknown": "Unknown"
     },
     "messages": {
       "load_error": "Failed to load hours charge requests"

@@ -26,3 +26,13 @@ export function toRequestRow(request: HoursChargeRequest): HoursChargeRequestRow
     statusValue: request.status,
   };
 }
+
+export function normalizeRequestStatus(value: unknown): HoursChargeRequest['status'] | null {
+  const normalized = String(value ?? '').trim().toLowerCase();
+
+  if (normalized === 'pending' || normalized === '1') return 'Pending';
+  if (normalized === 'approved' || normalized === '2') return 'Approved';
+  if (normalized === 'rejected' || normalized === '3') return 'Rejected';
+
+  return null;
+}

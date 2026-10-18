@@ -80,7 +80,7 @@ export default function HoursChargeRequestFilters({
       <SelectField
         size="small"
         value={countryId}
-        SelectProps={{ displayEmpty: true }}
+        slotProps={{ select: { displayEmpty: true } }}
         onChange={(event) => onCountryChange(event.target.value)}
         sx={{ minWidth: { xs: '100%', lg: 170 } }}
       >
