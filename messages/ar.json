@@ -4,6 +4,7 @@
   },
   "Sidebar": {
     "home": "الرئيسية",
+    "hours_charge_requests": "طلبات شحن الساعات",
     "course_management": "إدارة الدورات التدريبية",
     "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
@@ -2378,6 +2379,101 @@
         "video_attached_subtitle": "تم إرفاق محتوى تعليمي لهذا الدرس",
         "doc_badge": "جاهز للتحميل للطلاب",
         "doc_meta": "الحجم: {size} MB • ملف إلكتروني"
+      }
+    }
+  },
+  "HoursChargeRequestActions": {
+    "actions": {
+      "approve": "اعتماد الإيصال وإضافة الساعات",
+      "reject": "رفض الإيصال",
+      "approve_success": "تم اعتماد الإيصال وإضافة الساعات بنجاح",
+      "approve_error": "تعذر اعتماد الإيصال"
+    },
+    "reject_dialog": {
+      "title": "رفض إيصال شحن المحفظة",
+      "description": "هل أنت متأكد من رفض عملية الشحن؟ لن تتم إضافة الساعات إلى محفظة الطالب.",
+      "reason_label": "سبب الرفض (مطلوب)",
+      "reason_placeholder": "اكتب سبب رفض عملية الشحن",
+      "reason_required": "يرجى كتابة سبب الرفض",
+      "note": "سيتم حفظ سبب الرفض ضمن سجل عملية الشحن.",
+      "confirm": "تأكيد الرفض",
+      "cancel": "إلغاء",
+      "success": "تم رفض طلب الشحن بنجاح",
+      "error": "تعذر رفض طلب الشحن"
+    }
+  },
+  "HoursChargeRequests": {
+    "title": "طلبات شحن الساعات",
+    "view_receipt": "عرض الإيصال",
+    "tabs": {
+      "all": "الكل",
+      "pending": "بانتظار المراجعة",
+      "approved": "معتمد",
+      "rejected": "مرفوض"
+    },
+    "filters": {
+      "search_placeholder": "بحث برقم الطلب أو اسم الطالب",
+      "date_placeholder": "التاريخ",
+      "all_countries": "كل الدول",
+      "all_statuses": "كل الحالات"
+    },
+    "columns": {
+      "request_number": "رقم الطلب",
+      "student": "الطالب",
+      "country": "الدولة",
+      "hours": "الساعات",
+      "price_per_hour": "سعر الساعة",
+      "total": "الإجمالي",
+      "receipt": "الإيصال",
+      "submitted_at": "تاريخ التقديم",
+      "status": "الحالة"
+    },
+    "statuses": {
+      "pending": "بانتظار المراجعة",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "unknown": "غير معروف"
+    },
+    "messages": {
+      "load_error": "تعذر تحميل طلبات شحن الساعات"
+    },
+    "details": {
+      "title": "مراجعة إيصال شحن المحفظة",
+      "subtitle": "راجع بيانات التحويل والإيصال قبل اعتماد الساعات المطلوبة.",
+      "back": "العودة إلى الطلبات",
+      "retry": "إعادة المحاولة",
+      "load_error": "تعذر تحميل تفاصيل الطلب",
+      "summary": {
+        "status": "حالة الطلب",
+        "requested_hours": "الساعات المطلوبة",
+        "transfer_total": "إجمالي مبلغ التحويل",
+        "hours_value": "{hours} ساعات",
+        "amount_value": "{amount} {currency}",
+        "hours_helper": "تضاف للمحفظة بعد الاعتماد",
+        "amount_formula": "{hours} ساعات x {price} {currency} / ساعة",
+        "status_helper_pending": "لم يتم إضافة الساعات بعد",
+        "status_helper_approved": "تمت إضافة الساعات المطلوبة",
+        "status_helper_rejected": "تم رفض الطلب",
+        "status_helper_unknown": "حالة الطلب غير متاحة"
+      },
+      "student": {
+        "title": "بيانات الطالب",
+        "name": "اسم الطالب",
+        "country": "الدولة",
+        "contact": "رقم الطالب / البريد الإلكتروني"
+      },
+      "charge": {
+        "title": "تفاصيل عملية الشحن",
+        "request_number": "رقم الطلب",
+        "submitted_at": "تاريخ تقديم الطلب"
+      },
+      "receipt": {
+        "title": "إيصال التحويل المرفوع",
+        "subtitle": "تأكد من وضوح بيانات المستفيد والمبلغ وتاريخ التحويل.",
+        "image_alt": "صورة إيصال التحويل المرفوع",
+        "attachment": "ملف الإيصال المرفق",
+        "empty": "لا توجد صورة إيصال مرفقة",
+        "load_error": "تعذر تحميل صورة الإيصال"
       }
     }
   }

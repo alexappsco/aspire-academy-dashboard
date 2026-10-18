@@ -109,6 +109,11 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/finance.svg",
     path: "/currencies",
   },
+  {
+    key: "hours_charge_requests",
+    icon: "/icons/invoice.svg",
+    path: "/hours-charge-requests",
+  },
   // 6. الطلبات الخاصة (للمحاضر)
   {
     key: "private_requests",
