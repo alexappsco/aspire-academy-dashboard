@@ -125,6 +125,8 @@ export const endpoints = {
     list: '/admin/wallet-charge-requests',
     statusCounts: '/admin/wallet-charge-requests/status-counts',
     details: (id: string) => `/admin/wallet-charge-requests/${id}`,
+    approve: (id: string) => `/admin/wallet-charge-requests/${id}/approve`,
+    reject: (id: string) => `/admin/wallet-charge-requests/${id}/reject`,
   },
   students: {
     list: '/admin/students',

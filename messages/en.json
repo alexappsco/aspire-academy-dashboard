@@ -2382,6 +2382,26 @@
       }
     }
   },
+  "HoursChargeRequestActions": {
+    "actions": {
+      "approve": "Approve receipt and add hours",
+      "reject": "Reject receipt",
+      "approve_success": "The receipt was approved and the hours were added successfully",
+      "approve_error": "Failed to approve the receipt"
+    },
+    "reject_dialog": {
+      "title": "Reject wallet charge receipt",
+      "description": "Are you sure you want to reject this charge? The hours will not be added to the student's wallet.",
+      "reason_label": "Rejection reason (required)",
+      "reason_placeholder": "Enter the rejection reason",
+      "reason_required": "Please enter the rejection reason",
+      "note": "The rejection reason will be saved in the charge history.",
+      "confirm": "Confirm rejection",
+      "cancel": "Cancel",
+      "success": "The charge request was rejected successfully",
+      "error": "Failed to reject the charge request"
+    }
+  },
   "HoursChargeRequests": {
     "title": "Hours Charge Requests",
     "view_receipt": "View receipt",

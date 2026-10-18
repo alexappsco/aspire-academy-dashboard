@@ -7,7 +7,7 @@ import type {
   HoursChargeRequestDetails,
   HoursChargeRequestStatusCounts,
 } from 'src/types/hours-charge-request';
-import { getData } from 'src/utils/crud-fetch-api';
+import { getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 
 function buildListQuery(params?: GetHoursChargeRequestsParams): string {
@@ -87,6 +87,49 @@ export async function getHoursChargeRequestById(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to load hours charge request',
+    };
+  }
+}
+
+export async function approveHoursChargeRequest(
+  id: string
+): Promise<ApiSingleResponse<HoursChargeRequestDetails>> {
+  try {
+    const response = await postData<HoursChargeRequestDetails, Record<string, never>>(
+      endpoints.hoursChargeRequests.approve(id),
+      {}
+    );
+    if ('success' in response && response.success) return { success: true, data: response.data };
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to approve hours charge request',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to approve hours charge request',
+    };
+  }
+}
+
+export async function rejectHoursChargeRequest(
+  id: string,
+  reason: string
+): Promise<ApiSingleResponse<HoursChargeRequestDetails>> {
+  try {
+    const response = await postData<HoursChargeRequestDetails, { reason: string }>(
+      endpoints.hoursChargeRequests.reject(id),
+      { reason: reason.trim() }
+    );
+    if ('success' in response && response.success) return { success: true, data: response.data };
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to reject hours charge request',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to reject hours charge request',
     };
   }
 }

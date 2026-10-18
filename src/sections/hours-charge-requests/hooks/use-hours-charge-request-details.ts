@@ -30,5 +30,5 @@ export default function useHoursChargeRequestDetails(requestId: string) {
     loadRequest();
   }, [loadRequest]);
 
-  return { request, loading, error, retry: loadRequest };
+  return { request, loading, error, retry: loadRequest, setRequest };
 }
