@@ -55,7 +55,6 @@ export default function HoursChargeRequestsView() {
 
         <HoursChargeRequestsTable
           requests={requests}
-          countries={countries}
           totalCount={totalCount}
           loading={loading}
         />

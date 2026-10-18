@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
-import type { CountryDto } from 'src/sections/countries/types';
 import type { HoursChargeRequestDetails } from 'src/types/hours-charge-request';
 
 import { STATUS_STYLES } from '../constants';
@@ -13,10 +12,9 @@ import { normalizeRequestStatus } from '../utils';
 
 type Props = {
   request: HoursChargeRequestDetails;
-  country: CountryDto | null;
 };
 
-export default function HoursChargeRequestSummaryCards({ request, country }: Props) {
+export default function HoursChargeRequestSummaryCards({ request }: Props) {
   const t = useTranslations('HoursChargeRequests');
   const locale = useLocale();
   const status = normalizeRequestStatus(request.status);
@@ -24,12 +22,7 @@ export default function HoursChargeRequestSummaryCards({ request, country }: Pro
     ? STATUS_STYLES[status]
     : { backgroundColor: '#F1F5F9', color: '#64748B' };
   const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
-  const currency = country?.currency;
-  const currencyLabel =
-    (locale === 'ar' ? currency?.nameAr : currency?.nameEn) ||
-    currency?.code ||
-    currency?.symbol ||
-    '';
+  const currencyLabel = request.currencySymbol || request.currencyCode || '';
 
   const cards = [
     {

@@ -19,7 +19,7 @@ type Props = {
 
 export default function HoursChargeRequestDetailsView({ requestId }: Props) {
   const t = useTranslations('HoursChargeRequests.details');
-  const { request, country, loading, error, retry } = useHoursChargeRequestDetails(requestId);
+  const { request, loading, error, retry } = useHoursChargeRequestDetails(requestId);
 
   if (loading) {
     return (
@@ -45,7 +45,7 @@ export default function HoursChargeRequestDetailsView({ requestId }: Props) {
   return (
     <Box sx={{ py: 2, display: 'grid', gap: 1.5 }}>
       <HoursChargeRequestDetailsHeader />
-      <HoursChargeRequestSummaryCards request={request} country={country} />
+      <HoursChargeRequestSummaryCards request={request} />
 
       <Box
         sx={{

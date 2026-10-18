@@ -2,10 +2,13 @@ export type HoursChargeRequestStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export type HoursChargeRequest = {
   id: string;
+  requestNumber: string;
   userName: string;
   hours: number;
   countryId: string;
   countryName: string;
+  currencyCode: string;
+  currencySymbol: string;
   pricePerHour: number;
   totalAmount: number;
   status: HoursChargeRequestStatus | 1 | 2 | 3;
@@ -41,6 +44,8 @@ export type HoursChargeRequestDetails = {
   hours: number;
   countryId: string;
   countryName: string;
+  currencyCode: string;
+  currencySymbol: string;
   pricePerHour: number;
   totalAmount: number;
   receiptUrl: string;

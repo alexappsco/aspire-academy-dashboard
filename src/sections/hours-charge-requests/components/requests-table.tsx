@@ -10,7 +10,6 @@ import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
-import type { CountryDto } from 'src/sections/countries/types';
 import type { HoursChargeRequest } from 'src/types/hours-charge-request';
 
 import { STATUS_STYLES } from '../constants';
@@ -19,14 +18,12 @@ import { formatRequestDate, normalizeRequestStatus, toRequestRow } from '../util
 
 type Props = {
   requests: HoursChargeRequest[];
-  countries: CountryDto[];
   totalCount: number;
   loading: boolean;
 };
 
 export default function HoursChargeRequestsTable({
   requests,
-  countries,
   totalCount,
   loading,
 }: Props) {
@@ -34,10 +31,6 @@ export default function HoursChargeRequestsTable({
   const locale = useLocale();
   const router = useRouter();
 
-  const countryById = useMemo(
-    () => new Map(countries.map((country) => [country.id, country])),
-    [countries]
-  );
   const rows = useMemo(() => requests.map(toRequestRow), [requests]);
 
   const tableHead = [
@@ -53,8 +46,7 @@ export default function HoursChargeRequestsTable({
   ];
 
   const renderAmount = (row: HoursChargeRequestRow, amount: number) => {
-    const country = countryById.get(row.countryId);
-    const currency = country?.currency?.code || country?.currency?.symbol || '';
+    const currency = row.currencySymbol || row.currencyCode || '';
 
     return (
       <Typography sx={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>
@@ -66,7 +58,7 @@ export default function HoursChargeRequestsTable({
   const customRender = {
     requestNumber: (row: HoursChargeRequestRow) => (
       <Typography sx={{ fontSize: 13, fontWeight: 800 }}>
-        {row.id.slice(0, 8).toUpperCase()}
+        {row.requestNumber || row.id.slice(0, 8).toUpperCase()}
       </Typography>
     ),
     student: (row: HoursChargeRequestRow) => (

@@ -16,7 +16,7 @@ export function formatRequestDate(value: string, locale: string): string {
 export function toRequestRow(request: HoursChargeRequest): HoursChargeRequestRow {
   return {
     ...request,
-    requestNumber: request.id,
+    requestNumber: request.requestNumber || request.id,
     student: request.userName,
     country: request.countryName,
     hoursValue: request.hours,
