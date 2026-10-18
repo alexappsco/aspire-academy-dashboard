@@ -20,6 +20,7 @@ import {
   getSessionRequestTransactionsAction,
   acceptSessionRequestAction,
   rejectSessionRequestAction,
+  completeSessionRequestAction,
 } from 'src/actions/instructor-session-requests';
 import {
   SessionRequestInstructorResult,
@@ -54,6 +55,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   // Fetch request details and financial transactions from backend API
   const fetchRequestDetails = useCallback(async () => {
@@ -175,15 +177,31 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
     }
   };
 
-  const handleFinishService = () => {
-    setRequest((prev) =>
-      prev
-        ? {
-            ...prev,
-            status: SessionRequestStatusEnum.Completed,
-          }
-        : null
-    );
+  const handleFinishService = async (): Promise<boolean> => {
+    if (!request) return false;
+    setIsFinishing(true);
+    try {
+      const res = await completeSessionRequestAction(request.id);
+      if (res.success && res.data) {
+        toast.success(t('notifications.finish_success'));
+        setRequest(res.data);
+
+        // Refresh transactions to show final financial calculations
+        const txRes = await getSessionRequestTransactionsAction(request.id);
+        if (txRes.success && txRes.data) {
+          setTransactions(txRes.data);
+        }
+        return true;
+      }
+
+      toast.error(res.error || t('notifications.finish_failed'));
+      return false;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('notifications.finish_error'));
+      return false;
+    } finally {
+      setIsFinishing(false);
+    }
   };
 
   // Map backend chapters to UI format
@@ -360,6 +378,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
       <RequestHeaderCard
         request={headerAdaptedRequest}
         onFinishService={handleFinishService}
+        isFinishing={isFinishing}
       />
 
       {/* 3. Notice Banner if Pending Admin */}
@@ -433,8 +452,8 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         />
       )}
 
-      {/* 7. Financial Terms Cards (When pricePerHour is approved / available or request is Active) */}
-      {(isActive || Boolean(request.pricePerHour && request.pricePerHour > 0)) && (
+      {/* 7. Financial Terms Cards (When pricePerHour is approved / available or request is Active or Completed) */}
+      {(isActive || isCompleted || Boolean(request.pricePerHour && request.pricePerHour > 0)) && (
         <FinancialTermsCards
           platformPercentage={request.platformPercentage}
           totalChapterHours={request.totalChapterHours}
@@ -446,8 +465,8 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         />
       )}
 
-      {/* 8. Active Content Sections */}
-      {isActive && (
+      {/* 8. Active / Completed Content Sections */}
+      {(isActive || isCompleted) && (
         <>
           {/* If Recorded Content: Curriculum / Upload Lessons Section */}
           {isRecorded && (
@@ -472,7 +491,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           )}
 
           {/* If Live Session: Live Broadcast Room Preview */}
-          {isLive && (
+          {isLive && isActive && (
             <LiveBroadcastRoomSection
               studentName={request.student?.name || 'الطالب'}
               duration="01:30:00"

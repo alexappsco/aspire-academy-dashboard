@@ -184,6 +184,7 @@ export const endpoints = {
     details: (id: string) => `/instructor/session-requests/${id}`,
     accept: (id: string) => `/instructor/session-requests/${id}/accept`,
     reject: (id: string) => `/instructor/session-requests/${id}/reject`,
+    complete: (id: string) => `/instructor/session-requests/${id}/complete`,
     chapters: (id: string) => `/instructor/session-requests/${id}/chapters`,
     deleteChapter: (id: string, chapterId: string) =>
       `/instructor/session-requests/${id}/chapters/${chapterId}`,

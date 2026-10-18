@@ -268,4 +268,32 @@ export async function deleteSessionRequestLessonAction(
   }
 }
 
+/**
+ * Complete session request (Finish Service)
+ * POST /api/v1/instructor/session-requests/{id}/complete
+ */
+export async function completeSessionRequestAction(
+  id: string
+): Promise<ApiSingleResponse<SessionRequestInstructorResult>> {
+  try {
+    const res = await postData<SessionRequestInstructorResult, Record<string, never>>(
+      endpoints.instructorSessionRequests.complete(id),
+      {}
+    );
+
+    if ('success' in res && res.success) {
+      return { success: true, data: res.data };
+    }
+
+    const errorMsg =
+      'error' in res ? (res as { error: string }).error : 'Failed to complete session request';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to complete session request',
+    };
+  }
+}
+
 
