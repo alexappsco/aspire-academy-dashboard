@@ -8,7 +8,7 @@ export type HoursChargeRequest = {
   countryName: string;
   pricePerHour: number;
   totalAmount: number;
-  status: HoursChargeRequestStatus;
+  status: HoursChargeRequestStatus | 1 | 2 | 3;
   creationTime: string;
 };
 
@@ -31,4 +31,19 @@ export type GetHoursChargeRequestsParams = {
   Filter?: string;
   SkipCount?: number;
   MaxResultCount?: number;
+};
+
+export type HoursChargeRequestDetails = {
+  id: string;
+  requestNumber: string;
+  userName: string;
+  userEmail: string;
+  hours: number;
+  countryId: string;
+  countryName: string;
+  pricePerHour: number;
+  totalAmount: number;
+  receiptUrl: string;
+  status: HoursChargeRequestStatus | 1 | 2 | 3;
+  creationTime: string;
 };

@@ -4,6 +4,7 @@ import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
   GetHoursChargeRequestsParams,
   HoursChargeRequestsListResponse,
+  HoursChargeRequestDetails,
   HoursChargeRequestStatusCounts,
 } from 'src/types/hours-charge-request';
 import { getData } from 'src/utils/crud-fetch-api';
@@ -62,6 +63,30 @@ export async function getHoursChargeRequestStatusCounts(): Promise<
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to load request status counts',
+    };
+  }
+}
+
+export async function getHoursChargeRequestById(
+  id: string
+): Promise<ApiSingleResponse<HoursChargeRequestDetails>> {
+  try {
+    const response = await getData<HoursChargeRequestDetails>(
+      endpoints.hoursChargeRequests.details(id)
+    );
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to load hours charge request',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load hours charge request',
     };
   }
 }

@@ -1,4 +1,4 @@
-import type { HoursChargeRequest } from 'src/types/hours-charge-request';
+import type { HoursChargeRequest, HoursChargeRequestStatus } from 'src/types/hours-charge-request';
 
 import type { HoursChargeRequestRow } from './types';
 
@@ -27,7 +27,7 @@ export function toRequestRow(request: HoursChargeRequest): HoursChargeRequestRow
   };
 }
 
-export function normalizeRequestStatus(value: unknown): HoursChargeRequest['status'] | null {
+export function normalizeRequestStatus(value: unknown): HoursChargeRequestStatus | null {
   const normalized = String(value ?? '').trim().toLowerCase();
 
   if (normalized === 'pending' || normalized === '1') return 'Pending';

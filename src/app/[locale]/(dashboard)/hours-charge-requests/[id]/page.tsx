@@ -1,5 +1,12 @@
-import HoursChargeRequestDetailsPlaceholder from 'src/sections/hours-charge-requests/details-placeholder';
+import HoursChargeRequestDetailsView from 'src/sections/hours-charge-requests/details-view';
 
-export default function HoursChargeRequestDetailsPage() {
-  return <HoursChargeRequestDetailsPlaceholder />;
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function HoursChargeRequestDetailsPage({ params }: PageProps) {
+  const { id } = await params;
+  return <HoursChargeRequestDetailsView requestId={id} />;
 }

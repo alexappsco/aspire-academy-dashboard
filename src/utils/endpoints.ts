@@ -124,6 +124,7 @@ export const endpoints = {
   hoursChargeRequests: {
     list: '/admin/wallet-charge-requests',
     statusCounts: '/admin/wallet-charge-requests/status-counts',
+    details: (id: string) => `/admin/wallet-charge-requests/${id}`,
   },
   students: {
     list: '/admin/students',

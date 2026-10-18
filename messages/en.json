@@ -2418,9 +2418,43 @@
       "load_error": "Failed to load hours charge requests"
     },
     "details": {
-      "title": "Hours charge request details",
-      "description": "The details page will be completed when its design and APIs are available.",
-      "back": "Back to requests"
+      "title": "Review wallet charge receipt",
+      "subtitle": "Review the transfer details and receipt before approving the requested hours.",
+      "back": "Back to requests",
+      "retry": "Retry",
+      "load_error": "Failed to load request details",
+      "summary": {
+        "status": "Request status",
+        "requested_hours": "Requested hours",
+        "transfer_total": "Transfer total",
+        "hours_value": "{hours} hours",
+        "amount_value": "{amount} {currency}",
+        "hours_helper": "Added to the wallet after approval",
+        "amount_formula": "{hours} hours x {price} {currency} / hour",
+        "status_helper_pending": "Hours have not been added yet",
+        "status_helper_approved": "The requested hours were added",
+        "status_helper_rejected": "The request was rejected",
+        "status_helper_unknown": "The request status is unavailable"
+      },
+      "student": {
+        "title": "Student details",
+        "name": "Student name",
+        "country": "Country",
+        "contact": "Student number / email"
+      },
+      "charge": {
+        "title": "Charge details",
+        "request_number": "Request number",
+        "submitted_at": "Submission date"
+      },
+      "receipt": {
+        "title": "Uploaded transfer receipt",
+        "subtitle": "Review the recipient, amount, and transfer date shown in the receipt.",
+        "image_alt": "Uploaded transfer receipt",
+        "attachment": "Attached receipt",
+        "empty": "No receipt image is attached",
+        "load_error": "The receipt image could not be loaded"
+      }
     }
   }
 }

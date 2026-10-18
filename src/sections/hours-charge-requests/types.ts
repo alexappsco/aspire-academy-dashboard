@@ -11,5 +11,5 @@ export type HoursChargeRequestRow = HoursChargeRequest & {
   total: number;
   receipt?: string;
   submittedAt: string;
-  statusValue: HoursChargeRequestStatus;
+  statusValue: HoursChargeRequest['status'];
 };
