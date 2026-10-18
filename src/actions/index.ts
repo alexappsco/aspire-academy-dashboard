@@ -26,4 +26,4 @@ export * from './instructor-notifications';
 export * from './instructor-students';
 export * from './instructor-session-settings';
 export * from './instructor-session-requests';
-
+export * from './hours-charge-requests';
