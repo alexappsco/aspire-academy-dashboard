@@ -4,6 +4,7 @@
   },
   "Sidebar": {
     "home": "Home",
+    "hours_charge_requests": "Hours Charge Requests",
     "course_management": "Course Management",
     "curriculum_management": "Curriculum Management",
     "booking_management": "Booking Management",
@@ -2379,6 +2380,46 @@
         "doc_badge": "Ready for student download",
         "doc_meta": "Size: {size} MB • Electronic document"
       }
+    }
+  },
+  "HoursChargeRequests": {
+    "title": "Hours Charge Requests",
+    "view_receipt": "View receipt",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "filters": {
+      "search_placeholder": "Search by request number or student name",
+      "date_placeholder": "Date",
+      "all_countries": "All countries",
+      "all_statuses": "All statuses"
+    },
+    "columns": {
+      "request_number": "Request No.",
+      "student": "Student",
+      "country": "Country",
+      "hours": "Hours",
+      "price_per_hour": "Price per hour",
+      "total": "Total",
+      "receipt": "Receipt",
+      "submitted_at": "Submission date",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "messages": {
+      "load_error": "Failed to load hours charge requests"
+    },
+    "details": {
+      "title": "Hours charge request details",
+      "description": "The details page will be completed when its design and APIs are available.",
+      "back": "Back to requests"
     }
   }
 }

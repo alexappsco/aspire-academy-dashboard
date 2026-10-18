@@ -4,6 +4,7 @@
   },
   "Sidebar": {
     "home": "الرئيسية",
+    "hours_charge_requests": "طلبات شحن الساعات",
     "course_management": "إدارة الدورات التدريبية",
     "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
@@ -2379,6 +2380,46 @@
         "doc_badge": "جاهز للتحميل للطلاب",
         "doc_meta": "الحجم: {size} MB • ملف إلكتروني"
       }
+    }
+  },
+  "HoursChargeRequests": {
+    "title": "طلبات شحن الساعات",
+    "view_receipt": "عرض الإيصال",
+    "tabs": {
+      "all": "الكل",
+      "pending": "بانتظار المراجعة",
+      "approved": "معتمد",
+      "rejected": "مرفوض"
+    },
+    "filters": {
+      "search_placeholder": "بحث برقم الطلب أو اسم الطالب",
+      "date_placeholder": "التاريخ",
+      "all_countries": "كل الدول",
+      "all_statuses": "كل الحالات"
+    },
+    "columns": {
+      "request_number": "رقم الطلب",
+      "student": "الطالب",
+      "country": "الدولة",
+      "hours": "الساعات",
+      "price_per_hour": "سعر الساعة",
+      "total": "الإجمالي",
+      "receipt": "الإيصال",
+      "submitted_at": "تاريخ التقديم",
+      "status": "الحالة"
+    },
+    "statuses": {
+      "pending": "بانتظار المراجعة",
+      "approved": "معتمد",
+      "rejected": "مرفوض"
+    },
+    "messages": {
+      "load_error": "تعذر تحميل طلبات شحن الساعات"
+    },
+    "details": {
+      "title": "تفاصيل طلب شحن الساعات",
+      "description": "سيتم استكمال صفحة التفاصيل بعد توفير التصميم والواجهات البرمجية الخاصة بها.",
+      "back": "العودة إلى الطلبات"
     }
   }
 }
