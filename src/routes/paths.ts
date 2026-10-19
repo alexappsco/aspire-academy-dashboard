@@ -4,4 +4,8 @@ export const paths = {
     root: '/hours-charge-requests',
     details: (id: string) => `/hours-charge-requests/${id}`,
   },
+  adminSessionRequests: {
+    root: '/session-requests',
+    details: (id: string) => `/session-requests/${id}`,
+  },
 };

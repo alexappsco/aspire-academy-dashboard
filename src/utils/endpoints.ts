@@ -128,6 +128,12 @@ export const endpoints = {
     approve: (id: string) => `/admin/wallet-charge-requests/${id}/approve`,
     reject: (id: string) => `/admin/wallet-charge-requests/${id}/reject`,
   },
+  adminSessionRequests: {
+    list: '/admin/session-requests',
+    details: (id: string) => `/admin/session-requests/${id}`,
+    review: (id: string) => `/admin/session-requests/${id}/review`,
+    groupDiscountSetting: '/admin/session-group-discount-setting',
+  },
   students: {
     list: '/admin/students',
     details: (id: string) => `/admin/students/${id}`,

@@ -31,6 +31,7 @@
     "currencies": "العملات",
     "discount_codes": "أكواد الخصم",
     "private_requests": "الطلبات الخاصة",
+    "admin_private_requests": "الطلبات الخاصة",
     "reports": "التقارير",
     "legal_info": "المعلومات القانونية",
     "terms_and_conditions": "الشروط والأحكام",
@@ -2383,6 +2384,161 @@
         "doc_badge": "جاهز للتحميل للطلاب",
         "doc_meta": "الحجم: {size} MB • ملف إلكتروني"
       }
+    }
+  },
+  "AdminSessionRequestDetails": {
+    "title": "مراجعة الطلب",
+    "back": "الرجوع إلى قائمة الطلبات",
+    "retry": "إعادة المحاولة",
+    "load_error": "تعذر تحميل تفاصيل الطلب",
+    "statuses": {
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة",
+      "unknown": "غير معروفة"
+    },
+    "information": {
+      "title": "معلومات الطلب",
+      "request_number": "رقم الطلب",
+      "creation_date": "تاريخ الإنشاء",
+      "request_kind": "نوع الطلب",
+      "service_type": "نوع الخدمة",
+      "student": "الطالب صاحب الطلب",
+      "country": "دولة الطالب",
+      "instructor": "المحاضر",
+      "specialization": "التخصص",
+      "responded_at": "تاريخ رد المحاضر",
+      "admin_reviewed_at": "تاريخ مراجعة الأدمن"
+    },
+    "request_kinds": {
+      "individual": "فردي",
+      "group": "جماعي"
+    },
+    "service_types": {
+      "Live": "لايف",
+      "Recorded": "مسجل"
+    },
+    "description": {
+      "title": "وصف الطالب للطلب",
+      "empty": "لم يضف الطالب وصفًا للطلب"
+    },
+    "participants": {
+      "title": "الطلاب المشاركون",
+      "student": "الطالب",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "balance": "رصيد الساعات",
+      "country": "الدولة",
+      "owner": "صاحب الطلب"
+    },
+    "review": {
+      "title": "تحديد نسبة المحاضر",
+      "notice": "لم يتم تحديد نسبة المحاضر بعد. أدخل النسبة لتفعيل زر الاعتماد.",
+      "platform_percentage": "نسبة المنصة",
+      "instructor_percentage": "نسبة المحاضر من قيمة الاستهلاك الفعلي",
+      "percentage_helper": "أدخل قيمة من 0 إلى 100.",
+      "percentage_error": "أدخل نسبة صحيحة من 0 إلى 100.",
+      "remainder_note": "نصيب المنصة هو المتبقي من 100% تلقائيًا. المحاضر لا يمكنه اقتراح النسبة أو تعديلها.",
+      "approve": "اعتماد الطلب",
+      "success": "تمت مراجعة الطلب بنجاح",
+      "error": "تعذر مراجعة الطلب",
+      "group_discount": {
+        "title": "إعداد خصم المجموعات",
+        "enabled": "خصم المجموعات مفعل",
+        "disabled": "خصم المجموعات غير مفعل",
+        "minimum": "الحد الأدنى للمشاركين: {count}",
+        "percentage": "نسبة الخصم: {value}%",
+        "unavailable": "إعداد خصم المجموعات غير متاح"
+      },
+      "example": {
+        "title": "مثال توضيحي وليس بيانات فعلية",
+        "consumption": "استهلاك قابل للفوترة: 1,000 جنيه مصري",
+        "instructor": "نسبة المحاضر 60% ← نصيب المحاضر 600 جنيه",
+        "platform": "نسبة المنصة 40% ← نصيب المنصة 400 جنيه",
+        "note": "الحساب الفعلي يعتمد على الساعات المستهلكة وسعر الساعة حسب دولة كل طالب."
+      },
+      "unsettled_rule": {
+        "title": "قاعدة غير محسومة",
+        "description": "أثر تعديل النسبة لاحقًا على المستحقات غير المستواة سابقًا لم يتحدد بعد."
+      },
+      "confirm": {
+        "instructor_percentage": "نسبة المحاضر",
+        "approve_title": "تأكيد اعتماد الطلب",
+        "update_title": "تأكيد تعديل النسبة",
+        "current": "النسبة الحالية",
+        "new": "النسبة الجديدة",
+        "unset": "لم تحدد",
+        "approve_warning": "سيؤدي الاعتماد إلى حفظ نسبة المحاضر ومراجعة هذا الطلب.",
+        "update_warning": "سيتم تطبيق النسبة الجديدة وفق قواعد مراجعة الطلب.",
+        "approve_submit": "تأكيد الاعتماد",
+        "update_submit": "تأكيد التعديل",
+        "cancel": "إلغاء"
+      }
+    },
+    "decision": {
+      "title": "القرار",
+      "approve": "اعتماد الطلب",
+      "update": "تعديل النسبة",
+      "approve_note": "لا يمكن الاعتماد قبل تحديد نسبة المحاضر. قبول المحاضر وحده لا يفعل الخدمة.",
+      "update_note": "يمكنك مراجعة النسبة الحالية وحفظ قيمة جديدة عند الحاجة."
+    }
+  },
+  "AdminSessionRequests": {
+    "title": "الطلبات الخاصة",
+    "tabs": {
+      "all": "الكل",
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة"
+    },
+    "filters": {
+      "search_placeholder": "ابحث برقم الطلب أو اسم الطالب أو المحاضر...",
+      "all_request_kinds": "كل أنواع الطلب",
+      "all_service_types": "كل أنواع الخدمة"
+    },
+    "columns": {
+      "request_number": "رقم الطلب",
+      "student": "الطالب صاحب الطلب",
+      "request_kind": "نوع الطلب",
+      "participants": "المشاركون",
+      "instructor": "المحاضر",
+      "service_type": "نوع الخدمة",
+      "creation_date": "تاريخ الإنشاء",
+      "status": "الحالة",
+      "instructor_percentage": "نسبة المحاضر"
+    },
+    "request_kinds": {
+      "individual": "فردي",
+      "group": "جماعي"
+    },
+    "service_types": {
+      "Live": "لايف",
+      "Recorded": "مسجل",
+      "unknown": "غير معروف"
+    },
+    "statuses": {
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "الخدمة نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة",
+      "unknown": "غير معروفة"
+    },
+    "percentage": {
+      "not_set": "لم تحدد"
+    },
+    "messages": {
+      "load_error": "تعذر تحميل الطلبات الخاصة"
+    },
+    "actions": {
+      "view_details": "عرض التفاصيل"
     }
   },
   "HoursChargeRequestActions": {

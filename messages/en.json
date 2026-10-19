@@ -31,6 +31,7 @@
     "subjects": "Subjects Management",
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
+    "admin_private_requests": "Private Requests",
     "reports": "Reports",
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
@@ -2383,6 +2384,153 @@
         "doc_badge": "Ready for student download",
         "doc_meta": "Size: {size} MB • Electronic document"
       }
+    }
+  },
+  "AdminSessionRequestDetails": {
+    "title": "Review request",
+    "back": "Back to requests",
+    "retry": "Retry",
+    "load_error": "Failed to load request details",
+    "statuses": {
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "information": {
+      "title": "Request information",
+      "request_number": "Request number",
+      "creation_date": "Creation date",
+      "request_kind": "Request type",
+      "service_type": "Service type",
+      "student": "Request owner",
+      "country": "Student country",
+      "instructor": "Instructor",
+      "specialization": "Specialization",
+      "responded_at": "Instructor response date",
+      "admin_reviewed_at": "Admin review date"
+    },
+    "request_kinds": {
+      "individual": "Individual",
+      "group": "Group"
+    },
+    "service_types": {
+      "Live": "Live",
+      "Recorded": "Recorded"
+    },
+    "description": {
+      "title": "Student request description",
+      "empty": "No description was provided"
+    },
+    "participants": {
+      "title": "Participating students",
+      "student": "Student",
+      "email": "Email",
+      "phone": "Phone number",
+      "balance": "Hours balance",
+      "country": "Country",
+      "owner": "Request owner"
+    },
+    "review": {
+      "title": "Set instructor percentage",
+      "notice": "The instructor percentage has not been set. Enter it to enable approval.",
+      "platform_percentage": "Platform percentage",
+      "instructor_percentage": "Instructor percentage of actual consumption",
+      "percentage_helper": "Enter a value from 0 to 100.",
+      "percentage_error": "Enter a valid percentage from 0 to 100.",
+      "remainder_note": "The platform receives the remaining percentage out of 100% automatically. The instructor cannot change or modify it.",
+      "approve": "Approve request",
+      "success": "The request was reviewed successfully",
+      "error": "Failed to review the request",
+      "group_discount": {
+        "title": "Group discount setting",
+        "enabled": "Group discount is enabled",
+        "disabled": "Group discount is disabled",
+        "minimum": "Minimum participants: {count}",
+        "percentage": "Discount percentage: {value}%",
+        "unavailable": "The group discount setting is unavailable"
+      },
+      "example": {
+        "title": "Illustrative example, not actual data",
+        "consumption": "Billable consumption: 1,000 EGP",
+        "instructor": "Instructor percentage 60% ← Instructor share 600 EGP",
+        "platform": "Platform percentage 40% ← Platform share 400 EGP",
+        "note": "The actual calculation depends on consumed hours and the hourly rate for each student."
+      },
+      "unsettled_rule": {
+        "title": "Unsettled rule",
+        "description": "Any percentage change only affects future dues that have not been determined yet."
+      },
+      "confirm": {
+        "approve_title": "Confirm request approval",
+        "instructor_percentage": "Instructor percentage",
+        "approve_warning": "Approving will save the instructor percentage and review this request.",
+        "approve_submit": "Confirm approval",
+        "cancel": "Cancel"
+      }
+    },
+    "decision": {
+      "title": "Decision",
+      "approve": "Approve request",
+      "approve_note": "Approval is only available while the request is awaiting admin review and after setting the instructor percentage."
+    }
+  },
+  "AdminSessionRequests": {
+    "title": "Private Requests",
+    "tabs": {
+      "all": "All",
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled"
+    },
+    "filters": {
+      "search_placeholder": "Search by request number, student, or instructor...",
+      "all_request_kinds": "All request types",
+      "all_service_types": "All service types"
+    },
+    "columns": {
+      "request_number": "Request No.",
+      "student": "Request owner",
+      "request_kind": "Request type",
+      "participants": "Participants",
+      "instructor": "Instructor",
+      "service_type": "Service type",
+      "creation_date": "Creation date",
+      "status": "Status",
+      "instructor_percentage": "Instructor percentage"
+    },
+    "request_kinds": {
+      "individual": "Individual",
+      "group": "Group"
+    },
+    "service_types": {
+      "Live": "Live",
+      "Recorded": "Recorded",
+      "unknown": "Unknown"
+    },
+    "statuses": {
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "percentage": {
+      "not_set": "Not set"
+    },
+    "messages": {
+      "load_error": "Failed to load private requests"
+    },
+    "actions": {
+      "view_details": "View details"
     }
   },
   "HoursChargeRequestActions": {
