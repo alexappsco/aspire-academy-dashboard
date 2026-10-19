@@ -210,6 +210,37 @@ export default function RequestHeaderCard({
                 },
               }}
             />
+
+            {/* Request Type badge (Individual vs Group) */}
+            {request.participants && request.participants.length > 0 ? (
+              <Chip
+                label={t('group_badge', { count: request.participants.length + 1 })}
+                size="small"
+                sx={{
+                  bgcolor: '#F3E8FF',
+                  color: '#9333EA',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  borderRadius: 1.5,
+                  px: 1,
+                  height: 26,
+                }}
+              />
+            ) : (
+              <Chip
+                label={t('individual_badge')}
+                size="small"
+                sx={{
+                  bgcolor: '#F1F5F9',
+                  color: '#475569',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  borderRadius: 1.5,
+                  px: 1,
+                  height: 26,
+                }}
+              />
+            )}
           </Stack>
 
           {/* Status Label & Dot (Directly under title) */}

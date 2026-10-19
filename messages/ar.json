@@ -2099,12 +2099,16 @@
       "all_types": "كل أنواع الخدمات",
       "recorded": "محتوى مسجل",
       "live": "جلسة مباشرة",
+      "request_type_all": "نوع الطلب: الكل",
+      "request_type_individual": "طلب فردي",
+      "request_type_group": "طلب جماعي",
       "all_statuses": "جميع الحالات"
     },
     "columns": {
       "request_id": "رقم الطلب",
       "student_scope": "الطالب والجهة",
       "request_date": "تاريخ الطلب",
+      "request_type": "نوع الطلب",
       "service_type": "نوع الخدمة",
       "desc_specialization": "الوصف والتخصص",
       "status": "الحالة",
@@ -2120,6 +2124,8 @@
     "broadcast": "طلب موجه للجميع",
     "direct": "موجه لك خصيصاً",
     "no_description": "لا يوجد وصف مدخل من الطالب",
+    "individual_badge": "طلب فردي",
+    "group_badge": "طلب جماعي — {count} طلاب",
     "service_toggle": {
       "recorded_title": "المحتوى المسجل – Private Recorded",
       "recorded_subtitle": "محاضرات مجزأة / تفريغات وشروحات خاصة",
@@ -2229,6 +2235,17 @@
         "title": "وصف متطلبات الطالب والمستهدف الأكاديمي",
         "literal_quote": "النص الحرفي للطلب",
         "no_description": "لم يتم تقديم وصف إضافي من قبل الطالب"
+      },
+      "participants_card": {
+        "title": "الطلاب المشاركون",
+        "count_badge": "{count} طلاب",
+        "subtitle": "صاحب الطلب ضمن المجموعة. بيانات باقي المشاركين مشفّرة حتى قبول الطلب واعتماد الإدارة.",
+        "col_student": "اسم الطالب",
+        "col_email": "البريد الإلكتروني",
+        "col_country": "الدولة",
+        "applicant_badge": "صاحب الطلب",
+        "participant_badge": "مشارك",
+        "email_hidden": "مخفى حتى الاعتماد"
       },
       "instructor_decision": {
         "title": "قرار المحاضر",
