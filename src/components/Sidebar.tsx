@@ -191,6 +191,7 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "banners",
   "legal_info",
   "admin_private_requests",
+  "hours_charge_requests",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([
