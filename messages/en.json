@@ -2100,12 +2100,16 @@
       "all_types": "All Service Types",
       "recorded": "Recorded Content",
       "live": "Live Session",
+      "request_type_all": "Request Type: All",
+      "request_type_individual": "Individual Request",
+      "request_type_group": "Group Request",
       "all_statuses": "All Statuses"
     },
     "columns": {
       "request_id": "Request ID",
       "student_scope": "Student & Scope",
       "request_date": "Request Date",
+      "request_type": "Request Type",
       "service_type": "Service Type",
       "desc_specialization": "Description & Specialization",
       "status": "Status",
@@ -2121,6 +2125,8 @@
     "broadcast": "Broadcast to all",
     "direct": "Direct to you",
     "no_description": "No description provided by student",
+    "individual_badge": "Individual Request",
+    "group_badge": "Group Request — {count} Students",
     "service_toggle": {
       "recorded_title": "Recorded Content – Private Recorded",
       "recorded_subtitle": "Segmented lectures / custom recordings & notes",
@@ -2230,6 +2236,17 @@
         "title": "Student Requirements & Academic Goal",
         "literal_quote": "Literal Request Text",
         "no_description": "No additional description provided by student"
+      },
+      "participants_card": {
+        "title": "Participating Students",
+        "count_badge": "{count} Students",
+        "subtitle": "The applicant is part of the group. Remaining participants' data is masked until approval.",
+        "col_student": "Student Name",
+        "col_email": "Email",
+        "col_country": "Country",
+        "applicant_badge": "Applicant",
+        "participant_badge": "Participant",
+        "email_hidden": "Hidden until approval"
       },
       "instructor_decision": {
         "title": "Instructor Decision",

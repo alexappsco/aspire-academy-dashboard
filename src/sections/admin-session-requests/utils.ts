@@ -59,7 +59,7 @@ export function toSessionRequestRow(request: AdminSessionRequest): AdminSessionR
     requestKindValue: '',
     participantsValue: '',
     instructorValue: request.assignedInstructorName || '—',
-    serviceTypeValue: request.type,
+    serviceTypeValue: String(request.type ?? ''),
     creationDateValue: request.creationTime,
     statusValue: request.status,
     instructorPercentageValue: '',
