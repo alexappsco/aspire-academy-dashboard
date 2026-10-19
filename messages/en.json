@@ -4,6 +4,7 @@
   },
   "Sidebar": {
     "home": "Home",
+    "hours_charge_requests": "Hours Charge Requests",
     "course_management": "Course Management",
     "curriculum_management": "Curriculum Management",
     "booking_management": "Booking Management",
@@ -2381,6 +2382,101 @@
         "video_attached_subtitle": "Educational content has been attached to this lesson",
         "doc_badge": "Ready for student download",
         "doc_meta": "Size: {size} MB • Electronic document"
+      }
+    }
+  },
+  "HoursChargeRequestActions": {
+    "actions": {
+      "approve": "Approve receipt and add hours",
+      "reject": "Reject receipt",
+      "approve_success": "The receipt was approved and the hours were added successfully",
+      "approve_error": "Failed to approve the receipt"
+    },
+    "reject_dialog": {
+      "title": "Reject wallet charge receipt",
+      "description": "Are you sure you want to reject this charge? The hours will not be added to the student's wallet.",
+      "reason_label": "Rejection reason (required)",
+      "reason_placeholder": "Enter the rejection reason",
+      "reason_required": "Please enter the rejection reason",
+      "note": "The rejection reason will be saved in the charge history.",
+      "confirm": "Confirm rejection",
+      "cancel": "Cancel",
+      "success": "The charge request was rejected successfully",
+      "error": "Failed to reject the charge request"
+    }
+  },
+  "HoursChargeRequests": {
+    "title": "Hours Charge Requests",
+    "view_receipt": "View receipt",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "filters": {
+      "search_placeholder": "Search by request number or student name",
+      "date_placeholder": "Date",
+      "all_countries": "All countries",
+      "all_statuses": "All statuses"
+    },
+    "columns": {
+      "request_number": "Request No.",
+      "student": "Student",
+      "country": "Country",
+      "hours": "Hours",
+      "price_per_hour": "Price per hour",
+      "total": "Total",
+      "receipt": "Receipt",
+      "submitted_at": "Submission date",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "unknown": "Unknown"
+    },
+    "messages": {
+      "load_error": "Failed to load hours charge requests"
+    },
+    "details": {
+      "title": "Review wallet charge receipt",
+      "subtitle": "Review the transfer details and receipt before approving the requested hours.",
+      "back": "Back to requests",
+      "retry": "Retry",
+      "load_error": "Failed to load request details",
+      "summary": {
+        "status": "Request status",
+        "requested_hours": "Requested hours",
+        "transfer_total": "Transfer total",
+        "hours_value": "{hours} hours",
+        "amount_value": "{amount} {currency}",
+        "hours_helper": "Added to the wallet after approval",
+        "amount_formula": "{hours} hours x {price} {currency} / hour",
+        "status_helper_pending": "Hours have not been added yet",
+        "status_helper_approved": "The requested hours were added",
+        "status_helper_rejected": "The request was rejected",
+        "status_helper_unknown": "The request status is unavailable"
+      },
+      "student": {
+        "title": "Student details",
+        "name": "Student name",
+        "country": "Country",
+        "contact": "Student number / email"
+      },
+      "charge": {
+        "title": "Charge details",
+        "request_number": "Request number",
+        "submitted_at": "Submission date"
+      },
+      "receipt": {
+        "title": "Uploaded transfer receipt",
+        "subtitle": "Review the recipient, amount, and transfer date shown in the receipt.",
+        "image_alt": "Uploaded transfer receipt",
+        "attachment": "Attached receipt",
+        "empty": "No receipt image is attached",
+        "load_error": "The receipt image could not be loaded"
       }
     }
   }

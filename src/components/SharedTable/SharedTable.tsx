@@ -24,6 +24,7 @@ function SharedTable<T extends { id: string }>({
   customRender,
   count,
   maxHeight,
+  serverPagination = false,
 }: SharedTableProps<T>) {
   const table = useTable();
   const searchParams = useSearchParams();
@@ -33,7 +34,7 @@ function SharedTable<T extends { id: string }>({
 
   const page = hasPage ? Number(searchParams.get('page')) - 1 : 0;
   const limit = Number(searchParams.get('limit')) || DEFAULT_LIMIT;
-  const paginatedData = data.slice(page * limit, page * limit + limit);
+  const paginatedData = serverPagination ? data : data.slice(page * limit, page * limit + limit);
   return (
     <Box>
       <TableContainer
