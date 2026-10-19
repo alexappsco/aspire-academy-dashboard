@@ -130,6 +130,7 @@ export const endpoints = {
   },
   adminSessionRequests: {
     list: '/admin/session-requests',
+    details: (id: string) => `/admin/session-requests/${id}`,
   },
   students: {
     list: '/admin/students',

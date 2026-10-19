@@ -2386,6 +2386,52 @@
       }
     }
   },
+  "AdminSessionRequestDetails": {
+    "title": "مراجعة الطلب",
+    "back": "الرجوع إلى قائمة الطلبات",
+    "retry": "إعادة المحاولة",
+    "load_error": "تعذر تحميل تفاصيل الطلب",
+    "statuses": {
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة",
+      "unknown": "غير معروفة"
+    },
+    "information": {
+      "title": "معلومات الطلب",
+      "request_number": "رقم الطلب",
+      "creation_date": "تاريخ الإنشاء",
+      "request_kind": "نوع الطلب",
+      "service_type": "نوع الخدمة",
+      "student": "الطالب صاحب الطلب",
+      "country": "دولة الطالب",
+      "instructor": "المحاضر",
+      "specialization": "التخصص",
+      "responded_at": "تاريخ رد المحاضر"
+    },
+    "request_kinds": {
+      "individual": "فردي",
+      "group": "جماعي"
+    },
+    "service_types": {
+      "Live": "لايف",
+      "Recorded": "مسجل"
+    },
+    "description": {
+      "title": "وصف الطالب للطلب",
+      "empty": "لم يضف الطالب وصفًا للطلب"
+    },
+    "participants": {
+      "title": "الطلاب المشاركون",
+      "student": "الطالب",
+      "email": "البريد الإلكتروني",
+      "country": "الدولة",
+      "owner": "صاحب الطلب"
+    }
+  },
   "AdminSessionRequests": {
     "title": "الطلبات الخاصة",
     "tabs": {
@@ -2435,6 +2481,9 @@
     },
     "messages": {
       "load_error": "تعذر تحميل الطلبات الخاصة"
+    },
+    "actions": {
+      "view_details": "عرض التفاصيل"
     }
   },
   "HoursChargeRequestActions": {

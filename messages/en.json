@@ -2386,6 +2386,52 @@
       }
     }
   },
+  "AdminSessionRequestDetails": {
+    "title": "Review request",
+    "back": "Back to requests",
+    "retry": "Retry",
+    "load_error": "Failed to load request details",
+    "statuses": {
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "information": {
+      "title": "Request information",
+      "request_number": "Request number",
+      "creation_date": "Creation date",
+      "request_kind": "Request type",
+      "service_type": "Service type",
+      "student": "Request owner",
+      "country": "Student country",
+      "instructor": "Instructor",
+      "specialization": "Specialization",
+      "responded_at": "Instructor response date"
+    },
+    "request_kinds": {
+      "individual": "Individual",
+      "group": "Group"
+    },
+    "service_types": {
+      "Live": "Live",
+      "Recorded": "Recorded"
+    },
+    "description": {
+      "title": "Student request description",
+      "empty": "No description was provided"
+    },
+    "participants": {
+      "title": "Participating students",
+      "student": "Student",
+      "email": "Email",
+      "country": "Country",
+      "owner": "Request owner"
+    }
+  },
   "AdminSessionRequests": {
     "title": "Private Requests",
     "tabs": {
@@ -2435,6 +2481,9 @@
     },
     "messages": {
       "load_error": "Failed to load private requests"
+    },
+    "actions": {
+      "view_details": "View details"
     }
   },
   "HoursChargeRequestActions": {

@@ -1,6 +1,5 @@
-import { getDashboardRole } from 'src/utils/role-access';
-import type { LocaleType } from 'src/i18n/config-locale';
-import { redirect } from 'src/i18n/routing';
+import AdminSessionRequestDetailsView from 'src/sections/admin-session-requests/details-view';
+import { requireAdminRole } from 'src/utils/role-access';
 
 interface PageProps {
   params: Promise<{
@@ -11,10 +10,7 @@ interface PageProps {
 
 export default async function SessionRequestDetailsPage({ params }: PageProps) {
   const { id, locale } = await params;
-  const role = await getDashboardRole();
+  await requireAdminRole(locale, `/private-requests/${id}`);
 
-  redirect({
-    href: role === 'instructor' ? `/private-requests/${id}` : '/session-requests',
-    locale: locale as LocaleType,
-  });
+  return <AdminSessionRequestDetailsView requestId={id} />;
 }

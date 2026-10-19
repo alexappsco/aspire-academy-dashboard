@@ -6,5 +6,6 @@ export const paths = {
   },
   adminSessionRequests: {
     root: '/session-requests',
+    details: (id: string) => `/session-requests/${id}`,
   },
 };

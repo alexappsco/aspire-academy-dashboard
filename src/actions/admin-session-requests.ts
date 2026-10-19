@@ -2,6 +2,7 @@
 
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type {
+  AdminSessionRequest,
   AdminSessionRequestsListResponse,
   GetAdminSessionRequestsParams,
 } from 'src/types/admin-session-request';
@@ -26,6 +27,30 @@ function buildQuery(params?: GetAdminSessionRequestsParams): string {
   append('MaxResultCount', params.MaxResultCount);
 
   return searchParams.toString();
+}
+
+export async function getAdminSessionRequestById(
+  id: string
+): Promise<ApiSingleResponse<AdminSessionRequest>> {
+  try {
+    const response = await getData<AdminSessionRequest>(
+      endpoints.adminSessionRequests.details(id)
+    );
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to load private request details',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load private request details',
+    };
+  }
 }
 
 export async function getAdminSessionRequests(

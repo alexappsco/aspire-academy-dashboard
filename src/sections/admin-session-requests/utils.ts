@@ -32,6 +32,14 @@ export function normalizeSessionRequestType(value: unknown): AdminSessionRequest
   return null;
 }
 
+export function isGroupSessionRequest(request: AdminSessionRequest): boolean {
+  const participants = request.participants || [];
+  return (
+    participants.length > 1 ||
+    participants.some((participant) => participant.studentId !== request.studentId)
+  );
+}
+
 export function formatSessionRequestDate(value: string, locale: string): string {
   if (!value) return '—';
   const date = new Date(value);

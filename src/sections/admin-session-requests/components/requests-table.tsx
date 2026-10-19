@@ -6,14 +6,18 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 
+import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
+import { useRouter } from 'src/i18n/routing';
+import { paths } from 'src/routes/paths';
 import type { AdminSessionRequest } from 'src/types/admin-session-request';
 
 import { STATUS_STYLES } from '../constants';
 import type { AdminSessionRequestRow } from '../types';
 import {
   formatSessionRequestDate,
+  isGroupSessionRequest,
   normalizeSessionRequestStatus,
   normalizeSessionRequestType,
   toSessionRequestRow,
@@ -28,6 +32,7 @@ type Props = {
 export default function AdminSessionRequestsTable({ requests, totalCount, loading }: Props) {
   const t = useTranslations('AdminSessionRequests');
   const locale = useLocale();
+  const router = useRouter();
   const rows = useMemo(() => requests.map(toSessionRequestRow), [requests]);
 
   const tableHead = [
@@ -54,7 +59,7 @@ export default function AdminSessionRequestsTable({ requests, totalCount, loadin
     requestNumberValue: (row: AdminSessionRequestRow) => text(row.requestNumberValue, true),
     studentValue: (row: AdminSessionRequestRow) => text(row.studentName || '—', true),
     requestKindValue: (row: AdminSessionRequestRow) =>
-      text(row.participants?.length ? t('request_kinds.group') : t('request_kinds.individual')),
+      text(isGroupSessionRequest(row) ? t('request_kinds.group') : t('request_kinds.individual')),
     participantsValue: (row: AdminSessionRequestRow) =>
       text(row.participants?.length ? String(row.participants.length) : '—'),
     instructorValue: (row: AdminSessionRequestRow) => text(row.assignedInstructorName || '—'),
@@ -116,6 +121,13 @@ export default function AdminSessionRequestsTable({ requests, totalCount, loadin
         data={rows}
         tableHead={tableHead}
         customRender={customRender}
+        actions={[
+          {
+            label: t('actions.view_details'),
+            icon: <Iconify icon="solar:eye-linear" width={20} />,
+            onClick: (row) => router.push(paths.adminSessionRequests.details(row.id)),
+          },
+        ]}
         count={totalCount}
         serverPagination
       />
