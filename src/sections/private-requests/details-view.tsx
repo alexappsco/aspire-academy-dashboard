@@ -39,6 +39,7 @@ import FinancialTermsCards from './components/FinancialTermsCards';
 import RecordedCurriculumSection from './components/RecordedCurriculumSection';
 import LiveBroadcastRoomSection from './components/LiveBroadcastRoomSection';
 import FinancialTransactionsTable from './components/FinancialTransactionsTable';
+import ParticipantsCard from './components/ParticipantsCard';
 
 interface Props {
   requestId: string;
@@ -275,6 +276,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
         imageUrl: request.student?.imageUrl || undefined,
         email: request.student?.email || undefined,
       },
+      participants: request.participants,
       description: request.description || '',
       createdAt: request.creationTime,
       submittedAtFormatted: request.creationTime
@@ -442,6 +444,17 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           />
         </Grid>
       </Grid>
+
+      {/* 5.1 Participating Students Card (When Group Request) */}
+      {Boolean(request.participants && request.participants.length > 0) && (
+        <Box sx={{ mb: 3 }}>
+          <ParticipantsCard
+            primaryStudent={request.student}
+            participants={request.participants || []}
+            isActive={isActive}
+          />
+        </Box>
+      )}
 
       {/* 6. State 1: Instructor Decision Card (When status is Pending / New) */}
       {isNew && (

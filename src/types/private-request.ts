@@ -81,6 +81,7 @@ export interface PrivateRequestItem {
   status: PrivateRequestStatus;
   targetAudience: PrivateRequestTargetAudience;
   student: StudentAcademicInfo;
+  participants?: SessionRequestStudentResult[] | null;
   description: string;
   createdAt: string; // e.g. "2026-10-06"
   submittedAtFormatted?: string; // e.g. "5 أكتوبر 2026"
@@ -207,6 +208,7 @@ export interface SessionChapterResult {
 export interface SessionRequestInstructorResult {
   id: string;
   student: SessionRequestStudentResult;
+  participants?: SessionRequestStudentResult[] | null;
   type: SessionType;
   specializationId?: string;
   specializationName?: string | null;
@@ -216,6 +218,8 @@ export interface SessionRequestInstructorResult {
   rejectionReason?: string | null;
   respondedAt?: string | null;
   platformPercentage?: number | null;
+  qualifiesForGroupDiscount?: boolean | null;
+  groupDiscountPercentage?: number | null;
   totalChapterHours?: number | null;
   effectiveHours?: number | null;
   pricePerHour?: number | null;
@@ -224,6 +228,7 @@ export interface SessionRequestInstructorResult {
   currencyCode?: string | null;
   currencySymbol?: string | null;
   chapters?: SessionChapterResult[] | null;
+  transactions?: SessionRequestTransactionResult[] | null;
   creationTime: string;
 }
 

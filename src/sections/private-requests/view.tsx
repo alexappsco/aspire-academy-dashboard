@@ -214,6 +214,7 @@ export default function PrivateRequestsListView() {
   const [serviceTypeFilter, setServiceTypeFilter] = useState<'all' | 'Recorded' | 'Live'>(
     urlType === 'Live' || urlType === 'Recorded' ? urlType : 'all'
   );
+  const [requestTypeFilter, setRequestTypeFilter] = useState<'all' | 'individual' | 'group'>('all');
   const [statusFilter, setStatusFilter] = useState<string>(urlStatus);
 
   // Backend session settings state (Top Cards)
@@ -337,6 +338,18 @@ export default function PrivateRequestsListView() {
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
+
+  // Client-side filtering by Request Type (Individual vs Group)
+  const filteredRequests = useMemo(() => {
+    if (requestTypeFilter === 'all') return requests;
+    if (requestTypeFilter === 'individual') {
+      return requests.filter((r) => !r.participants || r.participants.length === 0);
+    }
+    if (requestTypeFilter === 'group') {
+      return requests.filter((r) => r.participants && r.participants.length > 0);
+    }
+    return requests;
+  }, [requests, requestTypeFilter]);
 
   // Toggle Recorded Sessions (Optimistic UI)
   const handleToggleRecorded = async () => {
@@ -640,6 +653,23 @@ export default function PrivateRequestsListView() {
               width: { xs: '100%', md: 'auto' },
             }}
           >
+            {/* Request Type Select (Individual vs Group) */}
+            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 160 } }}>
+              <Select
+                value={requestTypeFilter}
+                onChange={(e) => {
+                  setRequestTypeFilter(e.target.value as any);
+                  setPage(0);
+                }}
+                displayEmpty
+                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
+              >
+                <MenuItem value="all">{t('filters.request_type_all')}</MenuItem>
+                <MenuItem value="individual">{t('filters.request_type_individual')}</MenuItem>
+                <MenuItem value="group">{t('filters.request_type_group')}</MenuItem>
+              </Select>
+            </FormControl>
+
             {/* Service Type Select */}
             <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 150 } }}>
               <Select
@@ -719,6 +749,7 @@ export default function PrivateRequestsListView() {
                   {t('columns.student_scope')}
                 </Box>
                 <Box component="th">{t('columns.request_date')}</Box>
+                <Box component="th">{t('columns.request_type')}</Box>
                 <Box component="th">{t('columns.service_type')}</Box>
                 <Box component="th" sx={{ textAlign: 'start !important', maxWidth: 300 }}>
                   {t('columns.desc_specialization')}
@@ -750,6 +781,9 @@ export default function PrivateRequestsListView() {
                       <Skeleton width={80} height={18} sx={{ mx: 'auto' }} />
                     </Box>
                     <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
+                      <Skeleton width={80} height={24} sx={{ mx: 'auto' }} />
+                    </Box>
+                    <Box component="td" sx={{ p: 2, textAlign: 'center' }}>
                       <Skeleton width={60} height={24} sx={{ mx: 'auto' }} />
                     </Box>
                     <Box component="td" sx={{ p: 2 }}>
@@ -763,10 +797,10 @@ export default function PrivateRequestsListView() {
                     </Box>
                   </Box>
                 ))
-              ) : requests.length === 0 ? (
+              ) : filteredRequests.length === 0 ? (
                 // Empty state
                 <Box component="tr">
-                  <Box component="td" colSpan={7} sx={{ py: 8, textAlign: 'center' }}>
+                  <Box component="td" colSpan={8} sx={{ py: 8, textAlign: 'center' }}>
                     <Box sx={{ maxWidth: 360, mx: 'auto', textAlign: 'center' }}>
                       <Box
                         sx={{
@@ -795,8 +829,16 @@ export default function PrivateRequestsListView() {
                 </Box>
               ) : (
                 // Rows
-                requests.map((req) => {
+                filteredRequests.map((req) => {
                   const isRec = req.type === 'Recorded' || (req.type as any) === 2 || (req.type as any) === '2';
+                  const isGroup = Boolean(req.participants && req.participants.length > 0);
+                  const hasPrimaryInParticipants =
+                    isGroup && req.participants?.some((p) => p.studentId === req.student?.studentId);
+                  const totalStudents = isGroup
+                    ? hasPrimaryInParticipants
+                      ? req.participants!.length
+                      : req.participants!.length + 1
+                    : 1;
 
                   return (
                     <Box
@@ -851,7 +893,40 @@ export default function PrivateRequestsListView() {
                         {formatRequestDate(req.creationTime, locale)}
                       </Box>
 
-                      {/* 4. Service Type */}
+                      {/* 4. Request Type */}
+                      <Box component="td">
+                        {isGroup ? (
+                          <Chip
+                            label={t('group_badge', { count: totalStudents })}
+                            size="small"
+                            sx={{
+                              bgcolor: '#F3E8FF',
+                              color: '#9333EA',
+                              fontWeight: 700,
+                              fontSize: 12,
+                              height: 24,
+                              borderRadius: 1.5,
+                              px: 1,
+                            }}
+                          />
+                        ) : (
+                          <Chip
+                            label={t('individual_badge')}
+                            size="small"
+                            sx={{
+                              bgcolor: '#F1F5F9',
+                              color: '#475569',
+                              fontWeight: 700,
+                              fontSize: 12,
+                              height: 24,
+                              borderRadius: 1.5,
+                              px: 1,
+                            }}
+                          />
+                        )}
+                      </Box>
+
+                      {/* 5. Service Type */}
                       <Box component="td">
                         <Chip
                           icon={
