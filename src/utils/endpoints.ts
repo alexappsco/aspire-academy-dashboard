@@ -128,6 +128,9 @@ export const endpoints = {
     approve: (id: string) => `/admin/wallet-charge-requests/${id}/approve`,
     reject: (id: string) => `/admin/wallet-charge-requests/${id}/reject`,
   },
+  adminSessionRequests: {
+    list: '/admin/session-requests',
+  },
   students: {
     list: '/admin/students',
     details: (id: string) => `/admin/students/${id}`,

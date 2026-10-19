@@ -31,6 +31,7 @@
     "subjects": "Subjects Management",
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
+    "admin_private_requests": "Private Requests",
     "reports": "Reports",
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
@@ -2383,6 +2384,56 @@
         "doc_badge": "Ready for student download",
         "doc_meta": "Size: {size} MB • Electronic document"
       }
+    }
+  },
+  "AdminSessionRequests": {
+    "title": "Private Requests",
+    "tabs": {
+      "all": "All",
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled"
+    },
+    "filters": {
+      "search_placeholder": "Search by request number, student, or instructor...",
+      "all_service_types": "All service types"
+    },
+    "columns": {
+      "request_number": "Request No.",
+      "student": "Request owner",
+      "request_kind": "Request type",
+      "participants": "Participants",
+      "instructor": "Instructor",
+      "service_type": "Service type",
+      "creation_date": "Creation date",
+      "status": "Status",
+      "instructor_percentage": "Instructor percentage"
+    },
+    "request_kinds": {
+      "individual": "Individual",
+      "group": "Group"
+    },
+    "service_types": {
+      "Live": "Live",
+      "Recorded": "Recorded"
+    },
+    "statuses": {
+      "Pending": "Pending",
+      "AwaitingAdminReview": "Awaiting admin review",
+      "Active": "Active",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "Cancelled": "Cancelled",
+      "unknown": "Unknown"
+    },
+    "percentage": {
+      "not_set": "Not set"
+    },
+    "messages": {
+      "load_error": "Failed to load private requests"
     }
   },
   "HoursChargeRequestActions": {

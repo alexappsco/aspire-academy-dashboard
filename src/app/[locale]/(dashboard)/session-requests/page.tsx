@@ -1,5 +1,5 @@
-import PrivateRequestsListView from '@/sections/private-requests/view';
+import AdminSessionRequestsView from 'src/sections/admin-session-requests/view';
 
 export default function SessionRequestsPage() {
-  return <PrivateRequestsListView />;
+  return <AdminSessionRequestsView />;
 }

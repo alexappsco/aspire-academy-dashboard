@@ -31,6 +31,7 @@
     "currencies": "العملات",
     "discount_codes": "أكواد الخصم",
     "private_requests": "الطلبات الخاصة",
+    "admin_private_requests": "الطلبات الخاصة",
     "reports": "التقارير",
     "legal_info": "المعلومات القانونية",
     "terms_and_conditions": "الشروط والأحكام",
@@ -2383,6 +2384,56 @@
         "doc_badge": "جاهز للتحميل للطلاب",
         "doc_meta": "الحجم: {size} MB • ملف إلكتروني"
       }
+    }
+  },
+  "AdminSessionRequests": {
+    "title": "الطلبات الخاصة",
+    "tabs": {
+      "all": "الكل",
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة"
+    },
+    "filters": {
+      "search_placeholder": "ابحث برقم الطلب أو اسم الطالب أو المحاضر...",
+      "all_service_types": "كل أنواع الخدمة"
+    },
+    "columns": {
+      "request_number": "رقم الطلب",
+      "student": "الطالب صاحب الطلب",
+      "request_kind": "نوع الطلب",
+      "participants": "المشاركون",
+      "instructor": "المحاضر",
+      "service_type": "نوع الخدمة",
+      "creation_date": "تاريخ الإنشاء",
+      "status": "الحالة",
+      "instructor_percentage": "نسبة المحاضر"
+    },
+    "request_kinds": {
+      "individual": "فردي",
+      "group": "جماعي"
+    },
+    "service_types": {
+      "Live": "لايف",
+      "Recorded": "مسجل"
+    },
+    "statuses": {
+      "Pending": "قيد الانتظار",
+      "AwaitingAdminReview": "بانتظار اعتماد الأدمن",
+      "Active": "الخدمة نشطة",
+      "Completed": "مغلقة",
+      "Rejected": "مرفوضة",
+      "Cancelled": "ملغاة",
+      "unknown": "غير معروفة"
+    },
+    "percentage": {
+      "not_set": "لم تحدد"
+    },
+    "messages": {
+      "load_error": "تعذر تحميل الطلبات الخاصة"
     }
   },
   "HoursChargeRequestActions": {
