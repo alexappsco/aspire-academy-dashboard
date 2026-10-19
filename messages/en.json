@@ -2418,7 +2418,8 @@
     },
     "service_types": {
       "Live": "Live",
-      "Recorded": "Recorded"
+      "Recorded": "Recorded",
+      "unknown": "Unknown"
     },
     "statuses": {
       "Pending": "Pending",

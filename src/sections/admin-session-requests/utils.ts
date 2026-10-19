@@ -1,6 +1,7 @@
 import type {
   AdminSessionRequest,
   AdminSessionRequestStatus,
+  AdminSessionRequestType,
 } from 'src/types/admin-session-request';
 
 import type { AdminSessionRequestRow } from './types';
@@ -22,6 +23,13 @@ const STATUS_MAP: Record<string, AdminSessionRequestStatus> = {
 
 export function normalizeSessionRequestStatus(value: unknown): AdminSessionRequestStatus | null {
   return STATUS_MAP[String(value).replaceAll('_', '').toLowerCase()] || null;
+}
+
+export function normalizeSessionRequestType(value: unknown): AdminSessionRequestType | null {
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === '1' || normalized === 'live') return 'Live';
+  if (normalized === '2' || normalized === 'recorded') return 'Recorded';
+  return null;
 }
 
 export function formatSessionRequestDate(value: string, locale: string): string {

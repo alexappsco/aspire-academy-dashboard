@@ -2418,7 +2418,8 @@
     },
     "service_types": {
       "Live": "لايف",
-      "Recorded": "مسجل"
+      "Recorded": "مسجل",
+      "unknown": "غير معروف"
     },
     "statuses": {
       "Pending": "قيد الانتظار",

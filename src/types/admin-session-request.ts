@@ -24,7 +24,7 @@ export type AdminSessionRequest = {
   studentName: string;
   studentEmail: string;
   participants: AdminSessionRequestParticipant[];
-  type: AdminSessionRequestType;
+  type: AdminSessionRequestType | 1 | 2;
   specializationId: string;
   specializationName: string;
   description: string;

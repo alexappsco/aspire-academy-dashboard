@@ -15,6 +15,7 @@ import type { AdminSessionRequestRow } from '../types';
 import {
   formatSessionRequestDate,
   normalizeSessionRequestStatus,
+  normalizeSessionRequestType,
   toSessionRequestRow,
 } from '../utils';
 
@@ -57,7 +58,10 @@ export default function AdminSessionRequestsTable({ requests, totalCount, loadin
     participantsValue: (row: AdminSessionRequestRow) =>
       text(row.participants?.length ? String(row.participants.length) : '—'),
     instructorValue: (row: AdminSessionRequestRow) => text(row.assignedInstructorName || '—'),
-    serviceTypeValue: (row: AdminSessionRequestRow) => text(t(`service_types.${row.type}`)),
+    serviceTypeValue: (row: AdminSessionRequestRow) => {
+      const type = normalizeSessionRequestType(row.type);
+      return text(type ? t(`service_types.${type}`) : t('service_types.unknown'));
+    },
     creationDateValue: (row: AdminSessionRequestRow) =>
       text(formatSessionRequestDate(row.creationTime, locale)),
     statusValue: (row: AdminSessionRequestRow) => {
