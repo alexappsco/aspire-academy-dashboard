@@ -17,10 +17,12 @@ export default function AdminSessionRequestsView() {
     counts,
     totalCount,
     status,
+    requestKind,
     type,
     search,
     loading,
     changeStatus,
+    changeRequestKind,
     changeType,
     changeSearch,
   } = useAdminSessionRequests();
@@ -39,8 +41,10 @@ export default function AdminSessionRequestsView() {
         />
         <AdminSessionRequestFilters
           search={search}
+          requestKind={requestKind}
           type={type}
           onSearchChange={changeSearch}
+          onRequestKindChange={changeRequestKind}
           onTypeChange={changeType}
         />
         <AdminSessionRequestsTable

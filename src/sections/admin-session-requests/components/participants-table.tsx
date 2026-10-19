@@ -18,6 +18,8 @@ type ParticipantRow = AdminSessionRequestParticipant & {
   studentValue: string;
   emailValue: string;
   countryValue: string;
+  phoneValue: string;
+  balanceValue: string;
 };
 
 type Props = { request: AdminSessionRequest };
@@ -37,6 +39,8 @@ export default function ParticipantsTable({ request }: Props) {
             imageUrl: '',
             countryId: '',
             countryName: '',
+            phone: request.studentPhone,
+            walletHoursBalance: request.studentWalletHoursBalance,
           },
           ...participants,
         ];
@@ -47,12 +51,16 @@ export default function ParticipantsTable({ request }: Props) {
       studentValue: item.name || '—',
       emailValue: item.email || '—',
       countryValue: item.countryName || '—',
+      phoneValue: item.phone || '—',
+      balanceValue: String(item.walletHoursBalance ?? '—'),
     }));
   }, [request]);
 
   const tableHead = [
     { id: 'studentValue', label: t('student'), align: cellAlignment.center },
     { id: 'emailValue', label: t('email'), align: cellAlignment.center },
+    { id: 'phoneValue', label: t('phone'), align: cellAlignment.center },
+    { id: 'balanceValue', label: t('balance'), align: cellAlignment.center },
     { id: 'countryValue', label: t('country'), align: cellAlignment.center },
   ];
 
@@ -72,6 +80,12 @@ export default function ParticipantsTable({ request }: Props) {
     ),
     emailValue: (row: ParticipantRow) => (
       <Typography sx={{ fontSize: 13 }}>{row.emailValue}</Typography>
+    ),
+    phoneValue: (row: ParticipantRow) => (
+      <Typography sx={{ fontSize: 13 }}>{row.phoneValue}</Typography>
+    ),
+    balanceValue: (row: ParticipantRow) => (
+      <Typography sx={{ fontSize: 13 }}>{row.balanceValue}</Typography>
     ),
     countryValue: (row: ParticipantRow) => (
       <Typography sx={{ fontSize: 13 }}>{row.countryValue}</Typography>

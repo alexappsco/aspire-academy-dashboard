@@ -7,14 +7,17 @@ export type AdminSessionRequestStatus =
   | 'Cancelled';
 
 export type AdminSessionRequestType = 'Live' | 'Recorded';
+export type AdminSessionRequestPartyType = 'Individual' | 'Group';
 
 export type AdminSessionRequestParticipant = {
   studentId: string;
   name: string;
   email: string;
+  phone: string;
   imageUrl: string;
   countryId: string;
   countryName: string;
+  walletHoursBalance: number;
 };
 
 export type AdminSessionRequest = {
@@ -23,6 +26,8 @@ export type AdminSessionRequest = {
   studentId: string;
   studentName: string;
   studentEmail: string;
+  studentPhone: string;
+  studentWalletHoursBalance: number;
   participants: AdminSessionRequestParticipant[];
   type: AdminSessionRequestType | 1 | 2;
   specializationId: string;
@@ -49,6 +54,7 @@ export type AdminSessionRequestsListResponse = {
 export type GetAdminSessionRequestsParams = {
   Status?: AdminSessionRequestStatus;
   Type?: AdminSessionRequestType;
+  PartyType?: AdminSessionRequestPartyType;
   Filter?: string;
   Sorting?: string;
   SkipCount?: number;
@@ -57,4 +63,10 @@ export type GetAdminSessionRequestsParams = {
 
 export type AdminSessionRequestStatusCounts = Record<AdminSessionRequestStatus, number> & {
   total: number;
+};
+
+export type SessionGroupDiscountSetting = {
+  isEnabled: boolean;
+  minParticipants: number;
+  discountPercentage: number;
 };

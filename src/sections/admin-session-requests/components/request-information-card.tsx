@@ -27,13 +27,11 @@ export default function RequestInformationCard({ request }: Props) {
     { label: t('information.request_kind'), value: t(isGroup ? 'request_kinds.group' : 'request_kinds.individual') },
     { label: t('information.service_type'), value: serviceType ? t(`service_types.${serviceType}`) : '—' },
     { label: t('information.student'), value: request.studentName || '—' },
-    {
-      label: t('information.country'),
-      value: request.participants?.find((item) => item.studentId === request.studentId)?.countryName || '—',
-    },
+    { label: t('information.country'), value: request.participants?.find((item) => item.studentId === request.studentId)?.countryName || '—' },
     { label: t('information.instructor'), value: request.assignedInstructorName || '—' },
     { label: t('information.specialization'), value: request.specializationName || '—' },
     { label: t('information.responded_at'), value: request.respondedAt ? formatSessionRequestDate(request.respondedAt, locale) : '—' },
+    { label: t('information.admin_reviewed_at'), value: request.adminReviewedAt ? formatSessionRequestDate(request.adminReviewedAt, locale) : '—' },
   ];
 
   return (

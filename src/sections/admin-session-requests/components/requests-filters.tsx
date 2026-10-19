@@ -13,15 +13,19 @@ import type { AdminSessionRequestType } from 'src/types/admin-session-request';
 
 type Props = {
   search: string;
+  requestKind: 'all' | 'Individual' | 'Group';
   type: 'all' | AdminSessionRequestType;
   onSearchChange: (value: string) => void;
+  onRequestKindChange: (value: 'all' | 'Individual' | 'Group') => void;
   onTypeChange: (value: 'all' | AdminSessionRequestType) => void;
 };
 
 export default function AdminSessionRequestFilters({
   search,
+  requestKind,
   type,
   onSearchChange,
+  onRequestKindChange,
   onTypeChange,
 }: Props) {
   const t = useTranslations('AdminSessionRequests');
@@ -29,7 +33,6 @@ export default function AdminSessionRequestFilters({
   return (
     <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ p: 2 }}>
       <TextField
-        fullWidth
         size="small"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
@@ -50,14 +53,29 @@ export default function AdminSessionRequestFilters({
             ) : null,
           },
         }}
+        sx={{ width: { xs: '100%', md: 'auto' }, flex: { md: 1 }, minWidth: 0 }}
       />
+
+      <SelectField
+        size="small"
+        value={requestKind}
+        slotProps={{ select: { displayEmpty: true } }}
+        onChange={(event) =>
+          onRequestKindChange(event.target.value as 'all' | 'Individual' | 'Group')
+        }
+        sx={{ width: { xs: '100%', md: 190 }, flexShrink: 0 }}
+      >
+        <MenuItem value="all">{t('filters.all_request_kinds')}</MenuItem>
+        <MenuItem value="Individual">{t('request_kinds.individual')}</MenuItem>
+        <MenuItem value="Group">{t('request_kinds.group')}</MenuItem>
+      </SelectField>
 
       <SelectField
         size="small"
         value={type}
         slotProps={{ select: { displayEmpty: true } }}
         onChange={(event) => onTypeChange(event.target.value as 'all' | AdminSessionRequestType)}
-        sx={{ minWidth: { xs: '100%', md: 190 } }}
+        sx={{ width: { xs: '100%', md: 190 }, flexShrink: 0 }}
       >
         <MenuItem value="all">{t('filters.all_service_types')}</MenuItem>
         <MenuItem value="Live">{t('service_types.Live')}</MenuItem>

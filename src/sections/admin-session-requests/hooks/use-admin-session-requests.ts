@@ -31,6 +31,7 @@ export default function useAdminSessionRequests() {
   const [counts, setCounts] = useState<AdminSessionRequestStatusCounts>(EMPTY_COUNTS);
   const [totalCount, setTotalCount] = useState(0);
   const [status, setStatus] = useState<AdminSessionStatusFilter>('all');
+  const [requestKind, setRequestKind] = useState<'all' | 'Individual' | 'Group'>('all');
   const [type, setType] = useState<'all' | AdminSessionRequestType>('all');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -76,6 +77,7 @@ export default function useAdminSessionRequests() {
     const response = await getAdminSessionRequests({
       Status: status === 'all' ? undefined : status,
       Type: type === 'all' ? undefined : type,
+      PartyType: requestKind === 'all' ? undefined : requestKind,
       Filter: debouncedSearch || undefined,
       SkipCount: page * limit,
       MaxResultCount: limit,
@@ -90,7 +92,7 @@ export default function useAdminSessionRequests() {
       toast.error(response.error || t('messages.load_error'));
     }
     setLoading(false);
-  }, [debouncedSearch, limit, page, status, t, toast, type]);
+  }, [debouncedSearch, limit, page, requestKind, status, t, toast, type]);
 
   useEffect(() => {
     void fetchRequests();
@@ -106,6 +108,11 @@ export default function useAdminSessionRequests() {
     resetPage();
   };
 
+  const changeRequestKind = (value: 'all' | 'Individual' | 'Group') => {
+    setRequestKind(value);
+    resetPage();
+  };
+
   const changeSearch = (value: string) => {
     setSearch(value);
     resetPage();
@@ -116,10 +123,12 @@ export default function useAdminSessionRequests() {
     counts,
     totalCount,
     status,
+    requestKind,
     type,
     search,
     loading,
     changeStatus,
+    changeRequestKind,
     changeType,
     changeSearch,
   };

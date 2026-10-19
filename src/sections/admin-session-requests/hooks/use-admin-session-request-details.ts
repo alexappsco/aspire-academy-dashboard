@@ -29,5 +29,5 @@ export default function useAdminSessionRequestDetails(requestId: string) {
     void loadRequest();
   }, [loadRequest]);
 
-  return { request, loading, error, retry: loadRequest };
+  return { request, loading, error, retry: loadRequest, setRequest };
 }
