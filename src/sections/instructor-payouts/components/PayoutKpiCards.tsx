@@ -11,11 +11,10 @@ import { InstructorDuesSummaryResponse } from 'src/types/instructor-payout';
 
 interface Props {
   summary: InstructorDuesSummaryResponse | null;
-  currency?: string;
   loading?: boolean;
 }
 
-export default function PayoutKpiCards({ summary, currency = 'EGP', loading = false }: Props) {
+export default function PayoutKpiCards({ summary, loading = false }: Props) {
   const t = useTranslations('InstructorPayouts.kpi');
 
   const dueNow = summary?.totalDueNow ?? 0;
@@ -54,9 +53,7 @@ export default function PayoutKpiCards({ summary, currency = 'EGP', loading = fa
                 textAlign: 'start',
               }}
             >
-              <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                {dueNow.toLocaleString()} {currency}
-              </Box>
+              {dueNow.toLocaleString()}
             </Typography>
           )}
           <Typography sx={{ fontSize: 12.5, color: '#94A3B8', textAlign: 'start' }}>
@@ -93,9 +90,7 @@ export default function PayoutKpiCards({ summary, currency = 'EGP', loading = fa
                 textAlign: 'start',
               }}
             >
-              <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                {transferredThisPeriod.toLocaleString()} {currency}
-              </Box>
+              {transferredThisPeriod.toLocaleString()}
             </Typography>
           )}
           <Typography sx={{ fontSize: 12.5, color: '#64748B', textAlign: 'start' }}>

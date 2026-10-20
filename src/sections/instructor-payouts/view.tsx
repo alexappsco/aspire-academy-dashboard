@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 
@@ -44,6 +46,16 @@ export default function InstructorPayoutsView() {
   const t = useTranslations('InstructorPayouts');
   const locale = useLocale();
   const toast = useToast();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read initial values from URL query parameters
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlCountry = searchParams.get('CountryId') || 'all';
+  const urlUniversity = searchParams.get('UniversityId') || 'all';
+  const urlPeriod = searchParams.get('period') || 'all';
+  const urlPage = parseInt(searchParams.get('page') || '0', 10);
 
   // Summary State
   const [summary, setSummary] = useState<InstructorDuesSummaryResponse | null>(null);
@@ -58,17 +70,17 @@ export default function InstructorPayoutsView() {
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
   const [universities, setUniversities] = useState<{ id: string; name: string }[]>([]);
 
-  // Filter States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  // Filter States initialized from URL
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedQuery, setDebouncedQuery] = useState(urlFilter);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [periodFilter, setPeriodFilter] = useState('all');
-  const [universityFilter, setUniversityFilter] = useState('all');
-  const [countryFilter, setCountryFilter] = useState('all');
+  const [periodFilter, setPeriodFilter] = useState(urlPeriod);
+  const [universityFilter, setUniversityFilter] = useState(urlUniversity);
+  const [countryFilter, setCountryFilter] = useState(urlCountry);
 
   // Pagination State
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(isNaN(urlPage) ? 0 : urlPage);
   const [rowsPerPage, setRowsPerPage] = useState(8);
 
   // Handle Search Debounce (400ms)
@@ -82,6 +94,41 @@ export default function InstructorPayoutsView() {
       setPage(0);
     }, 400);
   };
+
+  // Sync active filters to URL query string
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (debouncedQuery.trim()) {
+      params.set('Filter', debouncedQuery.trim());
+    }
+    if (countryFilter !== 'all') {
+      params.set('CountryId', countryFilter);
+    }
+    if (universityFilter !== 'all') {
+      params.set('UniversityId', universityFilter);
+    }
+    if (periodFilter !== 'all') {
+      params.set('period', periodFilter);
+    }
+    if (page > 0) {
+      params.set('page', String(page));
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedQuery, countryFilter, universityFilter, periodFilter, page, pathname, router, searchParams]);
 
   // Fetch Countries & Universities on Mount for Dropdowns
   useEffect(() => {
@@ -177,9 +224,6 @@ export default function InstructorPayoutsView() {
     fetchDuesList();
   }, [fetchDuesList]);
 
-  // Determine active currency from first list item or fallback to 'EGP'
-  const activeCurrency = items[0]?.currencySymbol || items[0]?.currencyCode || 'EGP';
-
   return (
     <Box sx={{ py: 3, px: { xs: 2, sm: 3, md: 4 } }}>
       {/* 1. Page Title */}
@@ -224,7 +268,6 @@ export default function InstructorPayoutsView() {
       {/* 3. Top 3 KPI Summary Cards */}
       <PayoutKpiCards
         summary={summary}
-        currency={activeCurrency}
         loading={summaryLoading}
       />
 

@@ -142,16 +142,44 @@ export default function PayoutTable({
 
                     {/* 4. Total Earnings */}
                     <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                        {row.totalProfits.toLocaleString()} {currency}
-                      </Box>
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'baseline',
+                          gap: 0.5,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <Box component="span">{row.totalProfits.toLocaleString()}</Box>
+                        {currency && (
+                          <Box component="span" sx={{ color: '#64748B', fontSize: '0.85em', fontWeight: 500 }}>
+                            {currency}
+                          </Box>
+                        )}
+                      </Stack>
                     </Box>
 
                     {/* 5. Transferred */}
                     <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                        {row.transferredThisPeriod.toLocaleString()} {currency}
-                      </Box>
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'baseline',
+                          gap: 0.5,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <Box component="span">{row.transferredThisPeriod.toLocaleString()}</Box>
+                        {currency && (
+                          <Box component="span" sx={{ color: '#64748B', fontSize: '0.85em', fontWeight: 500 }}>
+                            {currency}
+                          </Box>
+                        )}
+                      </Stack>
                     </Box>
 
                     {/* 6. Due Now */}
@@ -162,9 +190,23 @@ export default function PayoutTable({
                         color: row.dueNow > 0 ? '#0F172A' : '#64748B',
                       }}
                     >
-                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                        {row.dueNow.toLocaleString()} {currency}
-                      </Box>
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'baseline',
+                          gap: 0.5,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <Box component="span">{row.dueNow.toLocaleString()}</Box>
+                        {currency && (
+                          <Box component="span" sx={{ color: '#64748B', fontSize: '0.85em', fontWeight: 500 }}>
+                            {currency}
+                          </Box>
+                        )}
+                      </Stack>
                     </Box>
 
                     {/* 7. Last Transfer Date */}
