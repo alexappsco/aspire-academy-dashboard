@@ -506,15 +506,15 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           {/* If Live Session: Live Broadcast Room Preview */}
           {isLive && isActive && (
             <LiveBroadcastRoomSection
+              requestId={request.id}
+              sessionTitle={request.specializationName || request.description || ''}
               studentName={request.student?.name || 'الطالب'}
-              duration="01:30:00"
               elapsedMinutes={0}
               expectedEarnings={
                 (Number(request.effectiveHoursValue) || 0) *
                 ((100 - (Number(request.platformPercentage) || 0)) / 100)
               }
               currency={request.currencySymbol || request.currencyCode || ''}
-              onEndLiveSession={handleFinishService}
             />
           )}
 
