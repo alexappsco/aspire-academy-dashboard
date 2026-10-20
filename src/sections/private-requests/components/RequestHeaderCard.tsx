@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -21,7 +22,8 @@ interface Props {
   showPreviewSwitcher?: boolean;
   onStatusChange?: (newStatus: PrivateRequestStatus) => void;
   onServiceTypeChange?: (newType: PrivateRequestServiceType) => void;
-  onFinishService?: () => void;
+  onFinishService?: () => Promise<boolean | void> | void;
+  isFinishing?: boolean;
 }
 
 export default function RequestHeaderCard({
@@ -30,15 +32,21 @@ export default function RequestHeaderCard({
   onStatusChange,
   onServiceTypeChange,
   onFinishService,
+  isFinishing = false,
 }: Props) {
   const toast = useToast();
   const t = useTranslations('PrivateRequests');
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
 
-  const handleConfirmFinish = () => {
-    setFinishDialogOpen(false);
-    onFinishService?.();
-    toast.success(t('notifications.finish_success'));
+  const handleConfirmFinish = async () => {
+    if (onFinishService) {
+      const res = await onFinishService();
+      if (res !== false) {
+        setFinishDialogOpen(false);
+      }
+    } else {
+      setFinishDialogOpen(false);
+    }
   };
 
   const isRecorded =
@@ -202,6 +210,37 @@ export default function RequestHeaderCard({
                 },
               }}
             />
+
+            {/* Request Type badge (Individual vs Group) */}
+            {request.participants && request.participants.length > 0 ? (
+              <Chip
+                label={t('group_badge', { count: request.participants.length + 1 })}
+                size="small"
+                sx={{
+                  bgcolor: '#F3E8FF',
+                  color: '#9333EA',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  borderRadius: 1.5,
+                  px: 1,
+                  height: 26,
+                }}
+              />
+            ) : (
+              <Chip
+                label={t('individual_badge')}
+                size="small"
+                sx={{
+                  bgcolor: '#F1F5F9',
+                  color: '#475569',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  borderRadius: 1.5,
+                  px: 1,
+                  height: 26,
+                }}
+              />
+            )}
           </Stack>
 
           {/* Status Label & Dot (Directly under title) */}
@@ -252,8 +291,15 @@ export default function RequestHeaderCard({
           <Button
             variant="outlined"
             color="error"
-            startIcon={<Iconify icon="solar:check-read-bold" width={18} />}
+            startIcon={
+              isFinishing ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="solar:check-read-bold" width={18} />
+              )
+            }
             onClick={() => setFinishDialogOpen(true)}
+            disabled={isFinishing}
             sx={{
               borderRadius: 2,
               fontWeight: 700,
@@ -274,7 +320,7 @@ export default function RequestHeaderCard({
               },
             }}
           >
-            {t('details.finish_service')}
+            {isFinishing ? t('notifications.finishing') : t('details.finish_service')}
           </Button>
         )}
       </Box>
@@ -408,6 +454,7 @@ export default function RequestHeaderCard({
           <Button
             variant="outlined"
             onClick={() => setFinishDialogOpen(false)}
+            disabled={isFinishing}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
             {t('details.header.finish_dialog_cancel')}
@@ -416,9 +463,11 @@ export default function RequestHeaderCard({
             variant="contained"
             color="error"
             onClick={handleConfirmFinish}
+            disabled={isFinishing}
+            startIcon={isFinishing ? <CircularProgress size={16} color="inherit" /> : undefined}
             sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            {t('details.header.finish_dialog_confirm')}
+            {isFinishing ? t('notifications.finishing') : t('details.header.finish_dialog_confirm')}
           </Button>
         </DialogActions>
       </Dialog>

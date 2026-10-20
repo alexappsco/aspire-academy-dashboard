@@ -1,7 +1,6 @@
 
-import { useMeeting, usePubSub } from "@videosdk.live/react-sdk";
+import { useFile, useMeeting, usePubSub } from "@videosdk.live/react-sdk";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
 
 import { formatAMPM, json_verify, nameTructed } from "src/utils/helper";
 import {
@@ -19,8 +18,6 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useMeetingAppContext } from "../../MeetingAppContextDef";
-import { endpoints } from "src/utils/endpoints";
-import { postData } from "src/utils/crud-fetch-api";
 
 interface ChatMessageProps {
   senderId: string;
@@ -44,6 +41,143 @@ function toTimestampMs(ts: string | number): number {
   return Date.now();
 }
 
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("Failed to read file"));
+        return;
+      }
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function mimeFromFileName(fileName: string | undefined, type: "file" | "image") {
+  const ext = fileName?.split(".").pop()?.toLowerCase();
+  if (type === "image") {
+    if (ext === "png") return "image/png";
+    if (ext === "gif") return "image/gif";
+    if (ext === "webp") return "image/webp";
+    return "image/jpeg";
+  }
+  if (ext === "pdf") return "application/pdf";
+  if (ext === "txt") return "text/plain";
+  return "application/octet-stream";
+}
+
+const ChatAttachment: React.FC<{
+  type: "file" | "image";
+  url: string;
+  fileName?: string;
+  token?: string;
+}> = ({ type, url, fileName, token }) => {
+  const { fetchBase64File } = useFile();
+  const [src, setSrc] = useState<string | null>(url.startsWith("data:") ? url : null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (url.startsWith("data:")) {
+      setSrc(url);
+      return;
+    }
+    if (!token) return;
+
+    let cancelled = false;
+    fetchBase64File({ url, token })
+      .then((base64) => {
+        if (cancelled || !base64) return;
+        setSrc(`data:${mimeFromFileName(fileName, type)};base64,${base64}`);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchBase64File, fileName, token, type, url]);
+
+  if (type === "image") {
+    return (
+      <Box sx={{ mt: 1 }}>
+        {src ? (
+          <Box
+            component="img"
+            src={src}
+            alt={fileName || "chat image"}
+            sx={{
+              borderRadius: 1,
+              width: "100%",
+              maxWidth: 260,
+              maxHeight: 260,
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.7)" }}>
+            {failed ? fileName || "Image" : "..."}
+          </Typography>
+        )}
+        {src && (
+          <Box sx={{ mt: 0.5, display: "flex", justifyContent: "flex-end" }}>
+            <IconButton
+              component="a"
+              href={src}
+              download={fileName || "chat-image"}
+              size="small"
+              sx={{ color: "rgba(255,255,255,0.75)" }}
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        mt: 1,
+        mb: 1,
+        p: 1,
+        bgcolor: "rgba(255,255,255,0.05)",
+        borderRadius: 1,
+      }}
+    >
+      <InsertDriveFileIcon sx={{ mr: 1, color: "#4CAF50" }} />
+      <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
+        <Typography variant="body2" noWrap sx={{ color: "white" }}>
+          {fileName || "File"}
+        </Typography>
+      </Box>
+      {src && (
+        <IconButton
+          component="a"
+          href={src}
+          download={fileName || "file"}
+          size="small"
+          sx={{
+            bgcolor: "rgba(255,255,255,0.1)",
+            color: "white",
+            "&:hover": { bgcolor: "rgba(255,255,255,0.2)" },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  );
+};
+
 const ChatMessageComponent: React.FC<ChatMessageProps> = ({
   senderId,
   senderName,
@@ -52,7 +186,8 @@ const ChatMessageComponent: React.FC<ChatMessageProps> = ({
   type = 'text',
   url,
   fileName,
-}) => {
+  token,
+}: ChatMessageProps & { token?: string }) => {
   const mMeeting = useMeeting();
   const localParticipantId = mMeeting?.localParticipant?.id;
   const isLocalSender = localParticipantId === senderId;
@@ -81,74 +216,9 @@ const ChatMessageComponent: React.FC<ChatMessageProps> = ({
           {isLocalSender ? "You" : nameTructed(senderName, 15)}
         </Typography>
 
-        {type === "image" && url ? (
-          <Box sx={{ mt: 1 }}>
-            <Box
-              component="img"
-              src={url}
-              alt={fileName || "chat image"}
-              sx={{
-                borderRadius: 1,
-                width: "100%",
-                maxWidth: 260,
-                maxHeight: 260,
-                objectFit: "cover",
-              }}
-              onError={(e) => {
-                console.error("Image load error:", url);
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <Box sx={{ mt: 0.5, display: "flex", justifyContent: "flex-end" }}>
-              <IconButton
-                component="a"
-                href={url}
-                download={fileName || "chat-image"}
-                size="small"
-                sx={{ color: "rgba(255,255,255,0.75)" }}
-              >
-                <DownloadIcon fontSize="small" />
-              </IconButton>
-            </Box>
-          </Box>
+        {(type === "image" || type === "file") && url ? (
+          <ChatAttachment type={type} url={url} fileName={fileName} token={token} />
         ) : null}
-
-        {type === 'file' && url && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mt: 1,
-              mb: 1,
-              p: 1,
-              bgcolor: 'rgba(255,255,255,0.05)',
-              borderRadius: 1,
-              position: 'relative'
-            }}
-          >
-            <InsertDriveFileIcon sx={{ mr: 1, color: '#4CAF50' }} />
-            <Box sx={{ flex: 1, minWidth: 0, mr: 1 }}>
-              <Typography variant="body2" noWrap sx={{ color: 'white' }}>
-                {fileName || 'File'}
-              </Typography>
-            </Box>
-            <IconButton
-              component="a"
-              href={url}
-              download={fileName || "file"}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' }
-              }}
-            >
-              <DownloadIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        )}
 
         {text && (
           <Typography variant="body2" sx={{ color: "white", wordBreak: "break-word" }}>
@@ -164,63 +234,13 @@ const ChatMessageComponent: React.FC<ChatMessageProps> = ({
   );
 };
 
-const ChatInput: React.FC<{ inputHeight: number }> = ({ inputHeight }) => {
+const ChatInput: React.FC<{ inputHeight: number; token?: string }> = ({ token }) => {
   const [message, setMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const { publish } = usePubSub("CHAT");
+  const { uploadBase64File } = useFile();
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const params = useParams();
-  const videoSessionId = params?.videoSessionId as string;
-
-  const uploadFileToBackend = async (file: File): Promise<string | null> => {
-    try {
-      console.log("[Upload] Starting upload for file:", file.name, "size:", file.size);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // استخدم Endpoint الصحيح حتى لا يتكرر /api/v1
-      const endpointWithQuery = `${endpoints.sdk.chat}?VideoSessionId=${videoSessionId}`;
-      const response = await postData(endpointWithQuery, formData, {
-        tags: ['chat', 'file', 'image']
-      });
-
-      console.log("[Upload] Response received:", response);
-
-      if (!response.success) {
-        throw new Error(response.data as any || "Upload failed");
-      }
-
-      const responseData = response.data as any;
-      console.log("[Upload] Response data:", responseData);
-
-      // Swagger doc shows it might just return the URL directly as string
-      if (typeof responseData === 'string') {
-        return responseData;
-      } else if (responseData?.url) {
-        return responseData.url;
-      } else if (responseData?.data?.url) {
-        return responseData.data.url;
-      } else if (responseData?.file) {
-        return responseData.file;
-      }
-
-      console.error("[Upload] Unexpected response format:", responseData);
-      return null;
-    } catch (error: any) {
-      console.error("[Upload] Upload error caught!");
-      console.error("[Upload] Error message:", error.message);
-      if (error.response) {
-        console.error("[Upload] Error response status:", error.response.status);
-        console.error("[Upload] Error response data:", error.response.data);
-      } else if (error.request) {
-        console.error("[Upload] Error request (no response received):", error.request);
-      } else {
-        console.error("[Upload] Error details:", error);
-      }
-      return null;
-    }
-  };
 
   const sendMessage = (customText?: string, attachment?: { type: string, url: string, fileName: string }) => {
     const messageText = customText !== undefined ? customText : message.trim();
@@ -251,22 +271,31 @@ const ChatInput: React.FC<{ inputHeight: number }> = ({ inputHeight }) => {
     const isImage = file.type.startsWith('image/') ||
       file.name.match(/\.(jpg|jpeg|png|gif|webp|jfif)$/i);
 
+    if (!token) {
+      alert("تعذر إرسال الملف داخل الجلسة.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert("حجم الملف أكبر من 8 ميجا.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setIsUploading(true);
     try {
-      console.log("[File] Processing file:", file.name, "type:", file.type);
-
-      const url = await uploadFileToBackend(file);
-
-      if (url) {
-        const messageType = isImage ? 'image' : 'file';
-        sendMessage("", {
-          type: messageType,
-          url: url,
-          fileName: file.name
-        });
-      } else {
-        alert("فشل رفع الملف. الرجاء المحاولة مرة أخرى.");
-      }
+      const base64 = await readFileAsBase64(file);
+      const url = await uploadBase64File({
+        base64Data: base64,
+        token,
+        fileName: file.name,
+      });
+      sendMessage("", {
+        type: isImage ? "image" : "file",
+        url,
+        fileName: file.name,
+      });
     } catch (err) {
       console.error("File processing error", err);
       alert("حدث خطأ أثناء معالجة الملف");
@@ -282,15 +311,6 @@ const ChatInput: React.FC<{ inputHeight: number }> = ({ inputHeight }) => {
       sendMessage();
     }
   };
-
-  // التحقق من وجود videoSessionId
-  useEffect(() => {
-    if (!videoSessionId) {
-      console.error("[Chat] VideoSessionId is missing!");
-    } else {
-      console.log("[Chat] VideoSessionId:", videoSessionId);
-    }
-  }, [videoSessionId]);
 
   return (
     <Box
@@ -379,7 +399,7 @@ const ChatInput: React.FC<{ inputHeight: number }> = ({ inputHeight }) => {
   );
 };
 
-const ChatMessages: React.FC<{ listHeight: number }> = ({ listHeight }) => {
+const ChatMessages: React.FC<{ listHeight: number; token?: string }> = ({ token }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const { chatMessages } = useMeetingAppContext();
 
@@ -414,19 +434,19 @@ const ChatMessages: React.FC<{ listHeight: number }> = ({ listHeight }) => {
     >
       {
         chatMessages.map((msg, i) => {
-          let type: 'text' | 'file' | 'image' = 'text';
+          let type: 'text' | 'file' | 'image' = msg.type || 'text';
           let messageToShow = msg.message;
-          let url = undefined;
-          let fileName = undefined;
+          let url = msg.url;
+          let fileName = msg.fileName;
 
           const isJson = json_verify(msg.message);
           if (isJson) {
             try {
               const parsed = JSON.parse(msg.message);
-              type = parsed.type || 'text';
+              type = parsed.type || type;
               messageToShow = parsed.text || "";
-              url = parsed.url;
-              fileName = parsed.fileName;
+              url = parsed.url || url;
+              fileName = parsed.fileName || fileName;
             } catch (e) {
               console.error("JSON parse error", e);
             }
@@ -442,6 +462,7 @@ const ChatMessages: React.FC<{ listHeight: number }> = ({ listHeight }) => {
               type={type}
               url={url}
               fileName={fileName}
+              token={token}
             />
           );
         })
@@ -450,7 +471,13 @@ const ChatMessages: React.FC<{ listHeight: number }> = ({ listHeight }) => {
   );
 };
 
-export function ChatPanel({ panelHeight }: { panelHeight: number }) {
+export function ChatPanel({
+  panelHeight,
+  token,
+}: {
+  panelHeight: number;
+  token?: string;
+}) {
   return (
     <Box
       sx={{
@@ -461,11 +488,11 @@ export function ChatPanel({ panelHeight }: { panelHeight: number }) {
       }}
     >
       <Box sx={{ flex: 1, overflow: "hidden" }}>
-        <ChatMessages listHeight={0} />
+        <ChatMessages listHeight={0} token={token} />
       </Box>
 
       <Box sx={{ flexShrink: 0 }}>
-        <ChatInput inputHeight={72} />
+        <ChatInput inputHeight={72} token={token} />
       </Box>
     </Box>
   );

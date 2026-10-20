@@ -121,6 +121,19 @@ export const endpoints = {
     approve: (id: string) => `/admin/orders/${id}/approve`,
     reject: (id: string) => `/admin/orders/${id}/reject`,
   },
+  hoursChargeRequests: {
+    list: '/admin/wallet-charge-requests',
+    statusCounts: '/admin/wallet-charge-requests/status-counts',
+    details: (id: string) => `/admin/wallet-charge-requests/${id}`,
+    approve: (id: string) => `/admin/wallet-charge-requests/${id}/approve`,
+    reject: (id: string) => `/admin/wallet-charge-requests/${id}/reject`,
+  },
+  adminSessionRequests: {
+    list: '/admin/session-requests',
+    details: (id: string) => `/admin/session-requests/${id}`,
+    review: (id: string) => `/admin/session-requests/${id}/review`,
+    groupDiscountSetting: '/admin/session-group-discount-setting',
+  },
   students: {
     list: '/admin/students',
     details: (id: string) => `/admin/students/${id}`,
@@ -180,7 +193,6 @@ export const endpoints = {
     update: '/instructor/session-settings',
   },
   sdk: {
-    chat: '/sdk/chat',
     join: (id: string) => `/instructor/session-requests/${id}/live/join`,
     end: (id: string) => `/instructor/session-requests/${id}/live/end`,
   },
@@ -189,6 +201,7 @@ export const endpoints = {
     details: (id: string) => `/instructor/session-requests/${id}`,
     accept: (id: string) => `/instructor/session-requests/${id}/accept`,
     reject: (id: string) => `/instructor/session-requests/${id}/reject`,
+    complete: (id: string) => `/instructor/session-requests/${id}/complete`,
     chapters: (id: string) => `/instructor/session-requests/${id}/chapters`,
     deleteChapter: (id: string, chapterId: string) =>
       `/instructor/session-requests/${id}/chapters/${chapterId}`,

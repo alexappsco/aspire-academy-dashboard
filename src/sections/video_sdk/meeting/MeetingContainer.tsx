@@ -32,6 +32,7 @@ interface MeetingContainerProps {
   participantName: string;
   participantId?: string;
   videoSessionId?: string;
+  embedded?: boolean;
 }
 
 interface IncomingChatPayload {
@@ -80,6 +81,7 @@ export function MeetingContainer({
   participantName,
   participantId,
   videoSessionId,
+  embedded = false,
 }: MeetingContainerProps) {
   const playAudioSafely = (url: string) => {
     const audio = new Audio(url);
@@ -691,17 +693,32 @@ export function MeetingContainer({
     (mMeeting as { isMeetingJoined?: boolean }).isMeetingJoined !== true;
 
   return (
-    <Box sx={{ height: '100vh' }}>
+    <Box sx={{ height: embedded ? '100%' : '100vh', width: '100%', flex: embedded ? 1 : undefined, minHeight: 0, overflow: 'hidden' }}>
       <Box
         ref={containerRef}
         sx={{
-          height: '100%', display: 'flex', flexDirection: 'column', bgcolor: '#1a1c23', overflow: 'hidden',
+          height: '100%',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: '#1a1c23',
+          overflow: 'hidden',
         }}
       >
         {typeof localParticipantAllowedJoin === 'boolean' ? (
           localParticipantAllowedJoin ? (
             <>
-              <Box sx={{ display: 'flex',height: '80%', flex: 1, flexDirection: 'row', bgcolor: '#1a1c23' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flex: 1,
+                  minHeight: 0,
+                  height: embedded ? 'auto' : '80%',
+                  flexDirection: 'row',
+                  bgcolor: '#1a1c23',
+                  overflow: 'hidden',
+                }}
+              >
                 {isPresenting ? (
                   <>
                     <Box
@@ -813,7 +830,7 @@ export function MeetingContainer({
                     </Box>
                   </>
                 ) : (
-                  <Box sx={{ display: 'flex', flex: 1 }}>
+                  <Box sx={{ display: 'flex', flex: 1, minHeight: 0, width: '100%', overflow: 'hidden' }}>
                     <MemorizedParticipantView isPresenting={isPresenting} />
                   </Box>
                 )}
@@ -826,14 +843,17 @@ export function MeetingContainer({
                   onDenyEntry={handleDenyEntry}
                   onAllowAllEntries={handleAllowAllEntries}
                   onDenyAllEntries={handleDenyAllEntries}
+                  token={token}
                 />
               </Box>
 
-              <BottomBar
-                bottomBarHeight={bottomBarHeight}
-                setIsMeetingLeft={setIsMeetingLeft}
-                videoSessionId={videoSessionId}
-              />
+              <Box sx={{ flexShrink: 0 }}>
+                <BottomBar
+                  bottomBarHeight={bottomBarHeight}
+                  setIsMeetingLeft={setIsMeetingLeft}
+                  videoSessionId={videoSessionId}
+                />
+              </Box>
             </>
           ) : null
         ) : showWaitingScreen ? (

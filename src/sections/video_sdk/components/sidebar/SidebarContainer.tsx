@@ -28,6 +28,7 @@ interface SideBarTabViewProps {
   onDenyEntry: (participantId: string) => void;
   onAllowAllEntries: () => void;
   onDenyAllEntries: () => void;
+  token?: string;
 }
 
 const SideBarTabView: React.FC<SideBarTabViewProps> = ({
@@ -43,6 +44,7 @@ const SideBarTabView: React.FC<SideBarTabViewProps> = ({
   onDenyEntry,
   onAllowAllEntries,
   onDenyAllEntries,
+  token,
 }) => {
   const { participants } = useMeeting();
   const { sideBarMode } = useMeetingAppContext();
@@ -109,7 +111,7 @@ const SideBarTabView: React.FC<SideBarTabViewProps> = ({
             onDenyAllEntries={onDenyAllEntries}
           />
         ) : sideBarMode === 'CHAT' ? (
-          <ChatPanel panelHeight={panelHeight-150} />
+          <ChatPanel panelHeight={panelHeight - 150} token={token} />
         ) : null}
       </Paper>
     </Box>
@@ -124,6 +126,7 @@ export function SidebarContainer({
   onDenyEntry,
   onAllowAllEntries,
   onDenyAllEntries,
+  token,
 }: {
   height: number;
   sideBarContainerWidth: number;
@@ -132,6 +135,7 @@ export function SidebarContainer({
   onDenyEntry: (participantId: string) => void;
   onAllowAllEntries: () => void;
   onDenyAllEntries: () => void;
+  token?: string;
 }) {
   const { sideBarMode, setSideBarMode } = useMeetingAppContext();
   const isMobile = useIsMobile();
@@ -168,6 +172,7 @@ export function SidebarContainer({
             onDenyEntry={onDenyEntry}
             onAllowAllEntries={onAllowAllEntries}
             onDenyAllEntries={onDenyAllEntries}
+            token={token}
           />
         </DialogContent>
       </Dialog>
@@ -188,6 +193,7 @@ export function SidebarContainer({
       onDenyEntry={onDenyEntry}
       onAllowAllEntries={onAllowAllEntries}
       onDenyAllEntries={onDenyAllEntries}
+      token={token}
     />
   );
 }

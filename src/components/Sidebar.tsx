@@ -109,6 +109,16 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/finance.svg",
     path: "/currencies",
   },
+  {
+    key: "hours_charge_requests",
+    icon: "/icons/invoice.svg",
+    path: "/hours-charge-requests",
+  },
+  {
+    key: "admin_private_requests",
+    icon: "/icons/package.svg",
+    path: "/session-requests",
+  },
   // 6. الطلبات الخاصة (للمحاضر)
   {
     key: "private_requests",
@@ -180,6 +190,8 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "categories",
   "banners",
   "legal_info",
+  "admin_private_requests",
+  "hours_charge_requests",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([

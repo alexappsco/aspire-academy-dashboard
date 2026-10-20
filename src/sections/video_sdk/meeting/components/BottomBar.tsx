@@ -41,7 +41,7 @@ import {
   Badge,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { leaveMeetingAction, endMeetingAction } from 'src/actions/api';
+import { leaveMeetingAction } from 'src/actions/api';
 
 // ==================== TYPES ====================
 interface PipBTNProps {
@@ -603,83 +603,21 @@ export function BottomBar({ bottomBarHeight, setIsMeetingLeft, videoSessionId }:
 
   // Leave Button
   const LeaveBTN = () => {
-    const { leave, end } = useMeeting();
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-    const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-      setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-      setAnchorEl(null);
-    };
+    const { leave } = useMeeting();
 
     return (
-      <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
-        <OutlinedButton
-          Icon={EndIcon}
-          bgColor="#d32f2f"
-          onClick={handleOpen}
-          tooltip="Leave Options"
-        />
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          sx={{
-            "& .MuiPaper-root": {
-              bgcolor: "#1A1C23",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px",
-              minWidth: "200px",
-              mt: -1,
-            }
-          }}
-        >
-          <MenuItem
-            onClick={async () => {
-              if (videoSessionId) await leaveMeetingAction(videoSessionId);
-              leave();
-              setIsMeetingLeft(true);
-              handleClose();
-            }}
-            sx={{
-              py: 1.5,
-              "&:hover": { bgcolor: "rgba(255,255,255,0.05)" }
-            }}
-          >
-            <Typography variant="body2">Leave Meeting</Typography>
-          </MenuItem>
-          <MenuItem
-            onClick={async () => {
-              if (window.confirm("Are you sure you want to end the meeting for everyone?")) {
-                if (videoSessionId) await endMeetingAction(videoSessionId);
-                end();
-                setIsMeetingLeft(true);
-              }
-              handleClose();
-            }}
-            sx={{
-              py: 1.5,
-              color: "#ff4444",
-              "&:hover": { bgcolor: "rgba(255,68,68,0.1)" }
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              End Meeting for All
-            </Typography>
-          </MenuItem>
-        </Menu>
-      </Box>
+      <OutlinedButton
+        Icon={EndIcon}
+        bgColor="#d32f2f"
+        onClick={() => {
+          leave();
+          setIsMeetingLeft(true);
+          if (videoSessionId) {
+            void leaveMeetingAction(videoSessionId);
+          }
+        }}
+        tooltip="Leave Meeting"
+      />
     );
   };
 
@@ -930,7 +868,17 @@ export function BottomBar({ bottomBarHeight, setIsMeetingLeft, videoSessionId }:
 
   // Desktop View
   return (
-    <Box sx={{ display: { xs: 'none', md: 'flex' }, px: { lg: 2, xl: 6 }, pb: 2 }}>
+    <Box
+      sx={{
+        display: { xs: 'none', md: 'flex' },
+        width: '100%',
+        maxWidth: '100%',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        px: { md: 1, lg: 2, xl: 6 },
+        pb: 2,
+      }}
+    >
       {/* <MeetingIdCopyBTN /> */}
 
       <Box sx={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>

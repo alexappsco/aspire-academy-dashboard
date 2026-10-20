@@ -28,6 +28,7 @@ export interface SharedTableProps<T> {
   customRender?: Partial<Record<keyof T, (row: T) => ReactNode>>;
   count: number;
   maxHeight?: number;
+  serverPagination?: boolean;
 }
 export interface SharedTableRowProps<T> {
   row: T;

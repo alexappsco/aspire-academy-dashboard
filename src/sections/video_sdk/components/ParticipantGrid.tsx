@@ -77,6 +77,8 @@ function ParticipantGrid({ participantIds, isPresenting }: ParticipantGridProps)
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
+        height: '100%',
+        minHeight: 0,
         m: 1.5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -84,15 +86,16 @@ function ParticipantGrid({ participantIds, isPresenting }: ParticipantGridProps)
         py: padding.py,
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', minHeight: 0, flex: 1 }}>
         {Array.from({ length: rows }, (_, i) => (
           <Box
             key={`participant-row-${i}`}
             sx={{
               display: 'flex',
               flex: 1,
-              alignItems: 'center',
-              justifyContent: isPresenting && participantIds.length !== 1 ? 'center' : 'center',
+              minHeight: 0,
+              alignItems: 'stretch',
+              justifyContent: 'center',
             }}
           >
             {uniqueParticipantIds.slice(i * perRow, (i + 1) * perRow).map((participantId) => (
@@ -101,10 +104,12 @@ function ParticipantGrid({ participantIds, isPresenting }: ParticipantGridProps)
                 sx={{
                   display: 'flex',
                   flex: 1,
-                  alignItems: 'center',
+                  alignSelf: 'stretch',
+                  alignItems: 'stretch',
                   justifyContent: 'center',
+                  minHeight: 0,
                   maxWidth: getMaxWidth(),
-                  overflow: 'clip',
+                  overflow: 'hidden',
                   p: 0.5,
                   ...getParticipantSize(),
                 }}

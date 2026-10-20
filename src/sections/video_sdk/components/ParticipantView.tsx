@@ -494,7 +494,8 @@ export function ParticipantView({ participantId }: { participantId: string }) {
         <VideoPlayer
           participantId={participantId}
           type="video"
-          containerStyle={{ height: '100%', width: '100%' }}
+          containerStyle={{ height: '100%', width: '100%', overflow: 'hidden' }}
+          videoStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
           className="h-full"
           classNameVideo="h-full"
         />

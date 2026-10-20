@@ -49,7 +49,9 @@ const WaitingToJoinScreen: React.FC = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
+        height: "100%",
+        flex: 1,
+        minHeight: 0,
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
