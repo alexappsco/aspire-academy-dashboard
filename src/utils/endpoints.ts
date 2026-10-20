@@ -179,6 +179,11 @@ export const endpoints = {
     get: '/instructor/session-settings',
     update: '/instructor/session-settings',
   },
+  sdk: {
+    chat: '/sdk/chat',
+    join: (id: string) => `/instructor/session-requests/${id}/live/join`,
+    end: (id: string) => `/instructor/session-requests/${id}/live/end`,
+  },
   instructorSessionRequests: {
     list: '/instructor/session-requests',
     details: (id: string) => `/instructor/session-requests/${id}`,
