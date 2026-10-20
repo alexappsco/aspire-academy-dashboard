@@ -43,7 +43,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const info = useCallback((msg: string) => toast(msg, 'info'), [toast]);
   const warning = useCallback((msg: string) => toast(msg, 'warning'), [toast]);
 
-  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleClose = (event: React.SyntheticEvent | Event | null, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
