@@ -36,7 +36,8 @@
     "legal_info": "المعلومات القانونية",
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "instructor_payouts": "مستحقات المحاضرون"
   },
   "Courses": {
     "title": "الدورات التدريبية",
@@ -2651,6 +2652,118 @@
         "empty": "لا توجد صورة إيصال مرفقة",
         "load_error": "تعذر تحميل صورة الإيصال"
       }
+    }
+  },
+  "InstructorPayouts": {
+    "title": "مستحقات المحاضرون",
+    "off_platform_notice": "التحويل يتم بنكياً خارج المنصة: حوّل المبلغ للمعلم من حساب الأكاديمية، ثم سجّل العملية هنا مع رقم المرجع ليتحدث رصيده تلقائياً.",
+    "kpi": {
+      "due_now_title": "المستحق للتحويل الآن",
+      "instructors_waiting": "{count} معلمين بانتظار التحويل",
+      "transferred_month_title": "تم تحويله هذا الشهر",
+      "transfers_recorded": "{count} تحويلاً بنكياً مسجلاً",
+      "missing_bank_data_title": "بيانات بنكية ناقصة",
+      "missing_bank_count": "{count} محاضرين",
+      "missing_bank_helper": "لا يمكن تسجيل تحويل لهم"
+    },
+    "filters": {
+      "search_placeholder": "ابحث باسم المحاضر أو بريده الإلكتروني...",
+      "all_periods": "كل الفترات",
+      "this_month": "هذا الشهر",
+      "last_month": "الشهر الماضي",
+      "this_quarter": "الربع الحالي",
+      "all_universities": "الجامعة: الكل",
+      "all_countries": "الدولة: الكل"
+    },
+    "table": {
+      "col_instructor": "المحاضر",
+      "col_country": "الدولة",
+      "col_university": "الجامعة",
+      "col_total_earnings": "إجمالي الأرباح",
+      "col_transferred": "تم تحويله",
+      "col_due_now": "المستحق الآن",
+      "col_last_transfer": "آخر تحويل",
+      "col_record": "السجل",
+      "view_record": "عرض السجل",
+      "no_data": "لا توجد بيانات مستحقات مطابقة",
+      "rows_per_page": "عدد العناصر لكل صفحة:"
+    },
+    "details": {
+      "breadcrumbs_root": "مستحقات المحاضرون",
+      "page_title": "سجل مستحقات {name}",
+      "bank_card": {
+        "register_transfer_btn": "تسجيل تحويل بنكي",
+        "bank_data_complete": "بيانات بنكية مكتملة",
+        "bank_data_incomplete": "بيانات بنكية ناقصة",
+        "bank_name": "البنك",
+        "account_holder": "اسم صاحب الحساب",
+        "iban": "رقم الآيبان (IBAN)",
+        "last_bank_update": "آخر تحديث للبيانات البنكية",
+        "phone": "رقم الهاتف",
+        "email": "البريد الإلكتروني"
+      },
+      "balance_card": {
+        "title": "ملخص الرصيد",
+        "due_now_label": "المستحق الآن",
+        "progress_caption": "تم تحويل {percent}% من إجمالي الأرباح",
+        "total_earnings": "إجمالي الأرباح",
+        "transferred": "تم تحويله",
+        "under_review": "قيد المراجعة"
+      },
+      "transactions": {
+        "title": "سجل الحركات المالية",
+        "tab_all": "الكل",
+        "tab_completed": "التحويلات المسجلة",
+        "tab_pending": "مستحق",
+        "tab_under_review": "قيد المراجعة",
+        "tab_settled": "تسويات",
+        "col_date": "التاريخ",
+        "col_note": "الملاحظة",
+        "col_reference": "المرجع",
+        "col_amount": "المبلغ",
+        "col_status": "الحالة",
+        "col_receipt": "الإيصال",
+        "view_receipt": "عرض الإيصال",
+        "status_completed": "مكتمل",
+        "status_pending": "مستحق",
+        "status_under_review": "قيد المراجعة",
+        "status_settled": "مُسوّى",
+        "no_transactions": "لا توجد حركات مالية مسجلة في هذا التبويب",
+        "rows_per_page": "عدد الحركات لكل صفحة:"
+      }
+    },
+    "dialog": {
+      "title": "تسجيل تحويل بنكي",
+      "subtitle": "إلى: {name} • {bank} • {iban}",
+      "warning_notice": "هذا الإجراء يسجّل تحويلاً نَفّذته فعلاً من حساب الأكاديمية، ولا يرسل أي أموال من المنصة.",
+      "transfer_amount": "المبلغ المحوّل",
+      "amount_helper": "المستحق الحالي {due} {currency}، ويمكن تسجيل مبلغ جزئي",
+      "transfer_date": "تاريخ التحويل",
+      "bank_reference": "رقم المرجع البنكي",
+      "bank_reference_placeholder": "مثال: TRF-20261020-01",
+      "transfer_receipt": "إيصال التحويل",
+      "drop_receipt_prompt": "اسحب الإيصال هنا أو اضغط للرفع",
+      "file_limits_hint": "MB أو صورة حتى 5 PDF",
+      "optional_note": "ملاحظة (اختياري)",
+      "note_placeholder": "أضف أي تفاصيل تخص هذا التحويل...",
+      "due_after_registration": "الرصيد المستحق بعد التسجيل",
+      "confirm_btn": "تأكيد تسجيل التحويل",
+      "cancel_btn": "إلغاء",
+      "submitting": "جاري التسجيل...",
+      "amount_required_error": "يرجى إدخال مبلغ صحيح أكبر من الصفر",
+      "amount_exceeds_due": "المبلغ المدخل يتجاوز الرصيد المستحق حالياً",
+      "reference_required_error": "يرجى إدخال رقم المرجع البنكي",
+      "transfer_success_message": "تم تسجيل التحويل البنكي وتحديث الرصيد بنجاح",
+      "transfer_error_message": "حدث خطأ أثناء تسجيل التحويل",
+      "default_transfer_note": "تحويل بنكي إلى حساب المعلم"
+    },
+    "receipt_dialog": {
+      "title": "إيصال التحويل البنكي",
+      "reference": "رقم المرجع:",
+      "date": "تاريخ التحويل:",
+      "amount": "المبلغ المحوّل:",
+      "receipt_verified": "تم التحقق من مطابقة الإيصال وتوثيق العملية في سجل الحركات المالية.",
+      "close_btn": "إغلاق"
     }
   }
 }

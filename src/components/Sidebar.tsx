@@ -70,6 +70,11 @@ const sidebarItems: SidebarItem[] = [
       },
     ],
   },
+  {
+    key: "instructor_payouts",
+    icon: "/icons/finance.svg",
+    path: "/instructor-payouts",
+  },
   // 4. الهيكل الأكاديمي
   {
     key: "academic_hierarchy",
@@ -192,6 +197,7 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "legal_info",
   "admin_private_requests",
   "hours_charge_requests",
+  "instructor_payouts",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([
