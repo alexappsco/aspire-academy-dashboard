@@ -2345,7 +2345,12 @@
         "confirm_dialog_student_desc": "هل أنت متأكد من رغبتك في إغلاق البث وإنهاء الجلسة الحالية مع الطالب {student}؟",
         "confirm_dialog_recorded_metrics": "المدة المسجلة: {minutes} دقيقة • المستحق: {amount} {currency}",
         "confirm": "تأكيد الإنهاء",
-        "cancel": "تراجع"
+        "cancel": "تراجع",
+        "join_session": "دخول الجلسة",
+        "joining": "جاري الدخول...",
+        "expand_meeting": "تكبير",
+        "shrink_meeting": "تصغير",
+        "join_failed": "تعذر دخول الجلسة"
       },
       "recorded_curriculum": {
         "title": "منهج ومحتوى الجلسات المسجلة",

@@ -2345,7 +2345,12 @@
         "confirm_dialog_student_desc": "Are you sure you want to end broadcast and finish session with {student}?",
         "confirm_dialog_recorded_metrics": "Logged Duration: {minutes} mins • Entitlement: {amount} {currency}",
         "confirm": "Confirm End",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "join_session": "Join session",
+        "joining": "Joining...",
+        "expand_meeting": "Expand",
+        "shrink_meeting": "Shrink",
+        "join_failed": "Could not join the session"
       },
       "recorded_curriculum": {
         "title": "Recorded Sessions Curriculum & Content",

@@ -1,74 +1,132 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Avatar from '@mui/material/Avatar';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
 import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
+import { getProfile, joinMeeting } from 'src/actions/api';
+import EmbeddedMeeting, { EmbeddedMeetingCredentials } from 'src/sections/video_sdk/EmbeddedMeeting';
 
 interface Props {
+  requestId: string;
+  sessionTitle?: string;
   studentName?: string;
-  duration?: string;
   elapsedMinutes?: number;
   expectedEarnings?: number;
   currency?: string;
-  onEndLiveSession?: () => void;
 }
 
 export default function LiveBroadcastRoomSection({
+  requestId,
+  sessionTitle = '',
   studentName = 'الطالب',
-  duration = '01:30:00',
   elapsedMinutes = 0,
   expectedEarnings = 0,
   currency = '',
-  onEndLiveSession,
 }: Props) {
   const toast = useToast();
   const t = useTranslations('PrivateRequests');
 
   const [activeTab, setActiveTab] = useState<'screen' | 'logs'>('screen');
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-  const [screenSharing, setScreenSharing] = useState(false);
-  const [endDialogOpen, setEndDialogOpen] = useState(false);
+  const [joining, setJoining] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [credentials, setCredentials] = useState<EmbeddedMeetingCredentials | null>(null);
+  const [stageReady, setStageReady] = useState(false);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const stageHostRef = useRef<HTMLDivElement | null>(null);
 
-  const handleToggleMic = () => {
-    setMicOn(!micOn);
-    toast.info(!micOn ? t('notifications.mic_on') : t('notifications.mic_off'));
-  };
+  useEffect(() => {
+    const host = document.createElement('div');
+    host.setAttribute('data-embedded-meeting', 'true');
+    stageHostRef.current = host;
+    setStageReady(true);
+    return () => {
+      host.remove();
+      stageHostRef.current = null;
+    };
+  }, []);
 
-  const handleToggleCam = () => {
-    setCamOn(!camOn);
-    toast.info(!camOn ? t('notifications.cam_on') : t('notifications.cam_off'));
-  };
+  useEffect(() => {
+    const host = stageHostRef.current;
+    if (!host) return;
+    if (!credentials) {
+      host.remove();
+      return;
+    }
 
-  const handleToggleShare = () => {
-    setScreenSharing(!screenSharing);
-    toast.info(!screenSharing ? t('notifications.share_start') : t('notifications.share_stop'));
-  };
+    host.style.display = 'flex';
+    host.style.flexDirection = 'column';
+    host.style.overflow = 'hidden';
+    host.style.background = '#0F172A';
 
-  const handleConfirmEndSession = () => {
-    setEndDialogOpen(false);
-    onEndLiveSession?.();
-    toast.success(
-      t('notifications.session_ended', {
-        amount: expectedEarnings.toFixed(2),
-        currency,
-      })
-    );
+    if (expanded) {
+      host.style.position = 'fixed';
+      host.style.top = '0';
+      host.style.right = '0';
+      host.style.bottom = '0';
+      host.style.left = '0';
+      host.style.width = '100vw';
+      host.style.height = '100dvh';
+      host.style.zIndex = '1600';
+      document.body.appendChild(host);
+      return;
+    }
+
+    host.style.position = 'absolute';
+    host.style.top = '0';
+    host.style.right = '0';
+    host.style.bottom = '0';
+    host.style.left = '0';
+    host.style.width = '100%';
+    host.style.height = '100%';
+    host.style.zIndex = '1';
+    frameRef.current?.appendChild(host);
+  }, [credentials, expanded, stageReady]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setExpanded(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [expanded]);
+
+  const handleJoin = async () => {
+    if (!requestId || joining) return;
+    setJoining(true);
+    try {
+      const profile = await getProfile();
+      const result = await joinMeeting({ videoSessionId: requestId });
+      if (!result.roomId || !result.token) {
+        toast.error(result.message || t('details.live_room.join_failed'));
+        return;
+      }
+      setCredentials({
+        token: result.token,
+        meetingId: result.roomId,
+        participantId: result.participantId || profile.id || '',
+        participantName: profile.name || 'Instructor',
+      });
+    } catch {
+      toast.error(t('details.live_room.join_failed'));
+    } finally {
+      setJoining(false);
+    }
   };
 
   return (
@@ -143,24 +201,29 @@ export default function LiveBroadcastRoomSection({
         </Tabs>
       </Stack>
 
-      {/* Main Live Room Frame */}
-      {activeTab === 'screen' ? (
-        <Box
-          sx={{
-            borderRadius: 3,
-            overflow: 'hidden',
-            bgcolor: '#0F172A',
-            position: 'relative',
-            minHeight: { xs: 360, md: 460 },
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            p: 2.5,
-            backgroundImage:
-              'radial-gradient(ellipse at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%)',
-          }}
-        >
-          {/* Top Floating Bar inside Live Screen: Student on RIGHT (First in RTL), Timer on LEFT (Second in RTL) */}
+      {/* Main Live Room Frame. Stays mounted while the meeting is open so expand does not join again. */}
+      <Box
+        ref={frameRef}
+        sx={{
+          borderRadius: 3,
+          overflow: 'hidden',
+          bgcolor: '#0F172A',
+          position: 'relative',
+          width: '100%',
+          height: credentials ? { xs: 460, md: 560 } : 'auto',
+          minHeight: credentials ? { xs: 460, md: 560 } : { xs: 360, md: 520 },
+          display: activeTab === 'screen' ? 'flex' : 'none',
+          flexDirection: 'column',
+          justifyContent: credentials ? 'stretch' : 'space-between',
+          p: credentials ? 0 : 2.5,
+          backgroundImage: credentials
+            ? 'none'
+            : 'radial-gradient(ellipse at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%)',
+        }}
+      >
+          {!credentials && (
+          <>
+          {/* Top Floating Bar inside Live Screen: Connected student */}
           <Stack
             direction="row"
             spacing={1.5}
@@ -188,86 +251,7 @@ export default function LiveBroadcastRoomSection({
                 },
               }}
             />
-
-            {/* Left in RTL: Live Timer */}
-            <Chip
-              icon={<Iconify icon="solar:clock-circle-bold" width={16} sx={{ color: '#FFFFFF !important' }} />}
-              label={t('details.live_room.session_duration', { duration })}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(8px)',
-                color: '#FFFFFF',
-                fontWeight: 700,
-                fontSize: { xs: 11.5, sm: 12.5 },
-                borderRadius: 2,
-                px: 1,
-                height: 26,
-                '& .MuiChip-icon': {
-                  margin: '0 !important',
-                  marginInlineEnd: '6px !important',
-                },
-                '& .MuiChip-label': {
-                  px: 0.5,
-                },
-              }}
-            />
           </Stack>
-
-          {/* Instructor PIP Overlay (Camera) */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: { xs: 55, md: 70 },
-              left: { xs: 15, md: 20 },
-              width: { xs: 95, sm: 120, md: 150 },
-              height: { xs: 68, sm: 85, md: 105 },
-              borderRadius: 2.5,
-              overflow: 'hidden',
-              bgcolor: '#1E293B',
-              border: '2px solid rgba(255,255,255,0.2)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-              zIndex: 3,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {camOn ? (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundImage:
-                    'url(https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&auto=format&fit=crop&q=80)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  position: 'relative',
-                }}
-              >
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 4,
-                    right: 4,
-                    bgcolor: 'rgba(0,0,0,0.7)',
-                    px: 0.75,
-                    py: 0.25,
-                    borderRadius: 1,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  {t('details.live_room.instructor_pip')}
-                </Box>
-              </Box>
-            ) : (
-              <Avatar sx={{ bgcolor: '#334155' }}>
-                <Iconify icon="solar:user-bold" width={24} />
-              </Avatar>
-            )}
-          </Box>
 
           {/* Central Presentation / Board Mockup */}
           <Box
@@ -307,7 +291,7 @@ export default function LiveBroadcastRoomSection({
                 mb: 1,
               }}
             >
-              Adrenergic Pharmacology & Receptors
+              {sessionTitle || t('details.live_room.interactive_live')}
             </Typography>
 
             <Typography
@@ -317,109 +301,107 @@ export default function LiveBroadcastRoomSection({
                 lineHeight: 1.6,
                 maxWidth: 480,
                 mx: 'auto',
+                mb: 2.5,
               }}
             >
               {t('details.live_room.interactive_live')}
             </Typography>
-          </Box>
 
-          {/* Bottom Floating Control Bar */}
-          <Box
-            sx={{
-              p: 1.5,
-              px: 2.5,
-              borderRadius: 2.5,
-              bgcolor: 'rgba(15, 23, 42, 0.85)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 1.5,
-              zIndex: 2,
-            }}
-          >
-            {/* Right in RTL (First child): End session button */}
             <Button
               variant="contained"
-              color="error"
-              startIcon={<Iconify icon="solar:phone-calling-rounded-bold" width={18} sx={{ transform: 'rotate(135deg)' }} />}
-              onClick={() => setEndDialogOpen(true)}
+              disabled={joining}
+              onClick={handleJoin}
+              startIcon={<Iconify icon="solar:play-circle-bold" width={20} />}
               sx={{
                 borderRadius: 2,
-                bgcolor: '#DC2626',
+                bgcolor: '#0D9488',
                 fontWeight: 800,
-                fontSize: 13,
-                px: 2,
+                px: 3,
+                '&:hover': { bgcolor: '#0F766E' },
                 '& .MuiButton-startIcon': {
                   margin: '0 !important',
                   marginInlineEnd: '8px !important',
                 },
-                '&:hover': { bgcolor: '#B91C1C' },
               }}
             >
-              {t('details.live_room.end_current_session')}
+              {joining ? t('details.live_room.joining') : t('details.live_room.join_session')}
             </Button>
-
-            {/* Center: Controls (Mic, Cam, Share, Settings) */}
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-              <IconButton
-                onClick={handleToggleMic}
-                sx={{
-                  bgcolor: micOn ? 'rgba(255,255,255,0.1)' : '#DC2626',
-                  color: '#FFFFFF',
-                  '&:hover': { bgcolor: micOn ? 'rgba(255,255,255,0.2)' : '#B91C1C' },
-                }}
-              >
-                <Iconify icon={micOn ? 'solar:microphone-2-bold' : 'solar:microphone-2-broken'} width={18} />
-              </IconButton>
-
-              <IconButton
-                onClick={handleToggleCam}
-                sx={{
-                  bgcolor: camOn ? 'rgba(255,255,255,0.1)' : '#DC2626',
-                  color: '#FFFFFF',
-                  '&:hover': { bgcolor: camOn ? 'rgba(255,255,255,0.2)' : '#B91C1C' },
-                }}
-              >
-                <Iconify icon={camOn ? 'solar:videocamera-bold' : 'solar:videocamera-record-broken'} width={18} />
-              </IconButton>
-
-              <IconButton
-                onClick={handleToggleShare}
-                sx={{
-                  bgcolor: screenSharing ? '#0284C7' : 'rgba(255,255,255,0.1)',
-                  color: '#FFFFFF',
-                  '&:hover': { bgcolor: screenSharing ? '#0369A1' : 'rgba(255,255,255,0.2)' },
-                }}
-              >
-                <Iconify icon="solar:screencast-bold" width={18} />
-              </IconButton>
-
-              <IconButton
-                sx={{
-                  bgcolor: 'rgba(255,255,255,0.1)',
-                  color: '#FFFFFF',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
-                }}
-              >
-                <Iconify icon="solar:settings-minimalistic-bold" width={18} />
-              </IconButton>
-            </Stack>
-
-            {/* Left in RTL (Third child): Audio Waveform status */}
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 0.75 }}>
-              <Typography sx={{ color: '#E2E8F0', fontSize: 12, fontWeight: 700 }}>
-                {t('details.live_room.audio_connected')}
-              </Typography>
-              <Box sx={{ color: '#10B981', display: 'flex' }}>
-                <Iconify icon="solar:soundwave-bold" width={22} />
-              </Box>
-            </Stack>
           </Box>
+          </>
+          )}
+
+          {credentials && !expanded && (
+            <Button
+              onClick={() => setExpanded(true)}
+              startIcon={<Iconify icon="solar:maximize-square-bold" width={18} />}
+              sx={{
+                position: 'absolute',
+                top: 12,
+                insetInlineEnd: 12,
+                zIndex: 30,
+                borderRadius: 2,
+                px: 1.5,
+                bgcolor: 'rgba(15, 23, 42, 0.92)',
+                color: '#FFFFFF',
+                fontWeight: 800,
+                border: '1px solid rgba(255,255,255,0.2)',
+                '&:hover': { bgcolor: '#0F172A' },
+                '& .MuiButton-startIcon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '8px !important',
+                },
+              }}
+            >
+              {t('details.live_room.expand_meeting')}
+            </Button>
+          )}
+          {credentials &&
+            stageReady &&
+            stageHostRef.current &&
+            createPortal(
+              <EmbeddedMeeting
+                videoSessionId={requestId}
+                token={credentials.token}
+                meetingId={credentials.meetingId}
+                participantId={credentials.participantId}
+                participantName={credentials.participantName}
+                onLeft={() => {
+                  setExpanded(false);
+                  setCredentials(null);
+                }}
+              />,
+              stageHostRef.current
+            )}
+          {expanded &&
+            createPortal(
+              <Button
+                onClick={() => setExpanded(false)}
+                startIcon={<Iconify icon="solar:minimize-square-bold" width={18} />}
+                sx={{
+                  position: 'fixed',
+                  top: 16,
+                  insetInlineEnd: 16,
+                  zIndex: 2000,
+                  borderRadius: 2,
+                  px: 1.75,
+                  bgcolor: '#0F172A',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+                  '&:hover': { bgcolor: '#1E293B' },
+                  '& .MuiButton-startIcon': {
+                    margin: '0 !important',
+                    marginInlineEnd: '8px !important',
+                  },
+                }}
+              >
+                {t('details.live_room.shrink_meeting')}
+              </Button>,
+              document.body
+            )}
         </Box>
-      ) : (
+
+      {activeTab === 'logs' && !expanded && (
         /* Logs Tab */
         <Box sx={{ p: 4, textAlign: 'center', color: '#64748B' }}>
           <Iconify icon="solar:history-bold" width={40} sx={{ color: '#CBD5E1', mb: 1 }} />
@@ -465,44 +447,6 @@ export default function LiveBroadcastRoomSection({
           {t('details.live_room.ping_status')}
         </Typography>
       </Box>
-
-      {/* End Live Session Confirmation Dialog */}
-      <Dialog
-        open={endDialogOpen}
-        onClose={() => setEndDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A', textAlign: 'center' }}>
-          {t('details.live_room.confirm_end_title')}
-        </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center', py: 1 }}>
-          <Typography sx={{ color: '#64748B', fontSize: 13.5, mb: 1.5 }}>
-            {t('details.live_room.confirm_dialog_student_desc', { student: studentName })}
-          </Typography>
-          <Typography sx={{ color: '#047857', fontSize: 13, fontWeight: 700, bgcolor: '#ECFDF5', p: 1.5, borderRadius: 2 }}>
-            {t('details.live_room.confirm_dialog_recorded_metrics', {
-              minutes: elapsedMinutes,
-              amount: expectedEarnings.toFixed(2),
-              currency,
-            })}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 2, gap: 1.5 }}>
-          <Button variant="outlined" onClick={() => setEndDialogOpen(false)} sx={{ borderRadius: 2, px: 3 }}>
-            {t('details.live_room.cancel')}
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleConfirmEndSession}
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
-            {t('details.live_room.confirm')}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Card>
   );
 }
