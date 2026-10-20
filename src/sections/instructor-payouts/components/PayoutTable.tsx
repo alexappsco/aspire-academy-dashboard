@@ -10,16 +10,18 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Link from 'next/link';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
-import { InstructorPayoutItem } from 'src/types/instructor-payout';
+import { InstructorDueItem } from 'src/types/instructor-payout';
 import { paths } from 'src/routes/paths';
 
 interface Props {
-  items: InstructorPayoutItem[];
+  items: InstructorDueItem[];
   totalCount: number;
   page: number;
   rowsPerPage: number;
+  loading?: boolean;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRows: number) => void;
 }
@@ -29,6 +31,7 @@ export default function PayoutTable({
   totalCount,
   page,
   rowsPerPage,
+  loading = false,
   onPageChange,
   onRowsPerPageChange,
 }: Props) {
@@ -91,7 +94,13 @@ export default function PayoutTable({
 
           {/* Table Body */}
           <Box component="tbody">
-            {items.length === 0 ? (
+            {loading ? (
+              <Box component="tr">
+                <Box component="td" colSpan={8} sx={{ py: 8, textAlign: 'center' }}>
+                  <CircularProgress size={32} sx={{ color: '#0F172A' }} />
+                </Box>
+              </Box>
+            ) : items.length === 0 ? (
               <Box component="tr">
                 <Box component="td" colSpan={8} sx={{ py: 8, textAlign: 'center' }}>
                   <Typography sx={{ fontWeight: 700, fontSize: 15, color: '#64748B' }}>
@@ -100,85 +109,92 @@ export default function PayoutTable({
                 </Box>
               </Box>
             ) : (
-              items.map((row) => (
-                <Box
-                  component="tr"
-                  key={row.id}
-                  sx={{
-                    borderBottom: '1px solid #F1F5F9',
-                    '&:hover': { bgcolor: '#F8FAFC' },
-                    '& td': { p: 2, fontSize: 13.5, textAlign: 'start' },
-                  }}
-                >
-                  {/* 1. Instructor Name */}
-                  <Box component="td" sx={{ fontWeight: 700, color: '#0F172A' }}>
-                    {row.name}
-                  </Box>
+              items.map((row) => {
+                const currency = row.currencySymbol || row.currencyCode || '';
+                const formattedDate = row.lastTransferDate
+                  ? new Date(row.lastTransferDate).toLocaleDateString('en-GB')
+                  : '—';
 
-                  {/* 2. Country */}
-                  <Box component="td" sx={{ color: '#475569' }}>
-                    {row.country}
-                  </Box>
-
-                  {/* 3. University */}
-                  <Box component="td" sx={{ color: '#475569' }}>
-                    {row.university}
-                  </Box>
-
-                  {/* 4. Total Earnings */}
-                  <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                      {row.totalEarnings.toLocaleString()} {row.currency}
-                    </Box>
-                  </Box>
-
-                  {/* 5. Transferred */}
-                  <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                      {row.totalTransferred.toLocaleString()} {row.currency}
-                    </Box>
-                  </Box>
-
-                  {/* 6. Due Now */}
+                return (
                   <Box
-                    component="td"
+                    component="tr"
+                    key={row.instructorId}
                     sx={{
-                      fontWeight: 800,
-                      color: row.dueNow > 0 ? '#0F172A' : '#64748B',
+                      borderBottom: '1px solid #F1F5F9',
+                      '&:hover': { bgcolor: '#F8FAFC' },
+                      '& td': { p: 2, fontSize: 13.5, textAlign: 'start' },
                     }}
                   >
-                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-                      {row.dueNow.toLocaleString()} {row.currency}
+                    {/* 1. Instructor Name */}
+                    <Box component="td" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                      {row.instructorName}
                     </Box>
-                  </Box>
 
-                  {/* 7. Last Transfer Date */}
-                  <Box component="td" sx={{ color: '#64748B' }}>
-                    {row.lastTransferDate || '—'}
-                  </Box>
+                    {/* 2. Country */}
+                    <Box component="td" sx={{ color: '#475569' }}>
+                      {row.countryName || '—'}
+                    </Box>
 
-                  {/* 8. Record Link */}
-                  <Box component="td" sx={{ minWidth: 120, whiteSpace: 'nowrap', textAlign: 'center !important' }}>
-                    <Button
-                      component={Link}
-                      href={paths.instructorPayouts.details(row.id)}
-                      size="small"
+                    {/* 3. University */}
+                    <Box component="td" sx={{ color: '#475569' }}>
+                      {row.universityName || '—'}
+                    </Box>
+
+                    {/* 4. Total Earnings */}
+                    <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
+                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                        {row.totalProfits.toLocaleString()} {currency}
+                      </Box>
+                    </Box>
+
+                    {/* 5. Transferred */}
+                    <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
+                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                        {row.transferredThisPeriod.toLocaleString()} {currency}
+                      </Box>
+                    </Box>
+
+                    {/* 6. Due Now */}
+                    <Box
+                      component="td"
                       sx={{
-                        color: '#2563EB',
-                        fontWeight: 700,
-                        fontSize: 13,
-                        px: 1.5,
-                        py: 0.5,
-                        whiteSpace: 'nowrap',
-                        minWidth: 'auto',
-                        '&:hover': { bgcolor: '#EFF6FF', textDecoration: 'underline' },
+                        fontWeight: 800,
+                        color: row.dueNow > 0 ? '#0F172A' : '#64748B',
                       }}
                     >
-                      {t('view_record')}
-                    </Button>
+                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                        {row.dueNow.toLocaleString()} {currency}
+                      </Box>
+                    </Box>
+
+                    {/* 7. Last Transfer Date */}
+                    <Box component="td" sx={{ color: '#64748B' }}>
+                      {formattedDate}
+                    </Box>
+
+                    {/* 8. Record Link */}
+                    <Box component="td" sx={{ minWidth: 120, whiteSpace: 'nowrap', textAlign: 'center !important' }}>
+                      <Button
+                        component={Link}
+                        href={paths.instructorPayouts.details(row.instructorId)}
+                        size="small"
+                        sx={{
+                          color: '#2563EB',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          px: 1.5,
+                          py: 0.5,
+                          whiteSpace: 'nowrap',
+                          minWidth: 'auto',
+                          '&:hover': { bgcolor: '#EFF6FF', textDecoration: 'underline' },
+                        }}
+                      >
+                        {t('view_record')}
+                      </Button>
+                    </Box>
                   </Box>
-                </Box>
-              ))
+                );
+              })
             )}
           </Box>
         </Box>

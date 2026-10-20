@@ -20,8 +20,8 @@ interface Props {
   onUniversityChange: (value: string) => void;
   countryFilter: string;
   onCountryChange: (value: string) => void;
-  availableUniversities: string[];
-  availableCountries: string[];
+  availableUniversities: { id: string; name: string }[];
+  availableCountries: { id: string; name: string }[];
 }
 
 export default function PayoutFilterBar({
@@ -101,8 +101,8 @@ export default function PayoutFilterBar({
             >
               <MenuItem value="all">{t('all_universities')}</MenuItem>
               {availableUniversities.map((uni) => (
-                <MenuItem key={uni} value={uni}>
-                  {uni}
+                <MenuItem key={uni.id} value={uni.id}>
+                  {uni.name}
                 </MenuItem>
               ))}
             </Select>
@@ -120,8 +120,8 @@ export default function PayoutFilterBar({
             >
               <MenuItem value="all">{t('all_countries')}</MenuItem>
               {availableCountries.map((c) => (
-                <MenuItem key={c} value={c}>
-                  {c}
+                <MenuItem key={c.id} value={c.id}>
+                  {c.name}
                 </MenuItem>
               ))}
             </Select>

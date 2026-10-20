@@ -47,3 +47,50 @@ export interface InstructorPayoutsSummary {
   missingBankDataCount: number;
   currency: string;
 }
+
+// ==========================================
+// Backend API DTOs (InstructorDuesAdmin)
+// ==========================================
+
+export interface InstructorDuesSummaryResponse {
+  totalDueNow: number;
+  instructorsAwaitingTransferCount: number;
+  totalTransferredThisPeriod: number;
+  transfersThisPeriodCount: number;
+  instructorsWithIncompleteBankDetailsCount: number;
+}
+
+export interface InstructorDueItem {
+  instructorId: string;
+  instructorName: string;
+  instructorImageUrl: string | null;
+  countryId: string;
+  countryName: string;
+  universityId: string;
+  universityName: string;
+  dueNow: number;
+  transferredThisPeriod: number;
+  transfersThisPeriodCount: number;
+  totalProfits: number;
+  currencyId: string;
+  currencyCode: string;
+  currencySymbol: string;
+  lastTransferDate: string | null;
+  hasCompleteBankDetails: boolean;
+}
+
+export interface InstructorDuesListResponse {
+  items: InstructorDueItem[];
+  totalCount: number;
+}
+
+export interface GetInstructorDuesParams {
+  CountryId?: string;
+  UniversityId?: string;
+  FromDate?: string;
+  ToDate?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}

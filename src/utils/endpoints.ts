@@ -205,4 +205,10 @@ export const endpoints = {
       `/instructor/session-requests/${id}/chapters/${chapterId}/lessons/${lessonId}`,
     transactions: (id: string) => `/instructor/session-requests/${id}/transactions`,
   },
+  instructorDues: {
+    list: '/admin/instructor-dues',
+    summary: '/admin/instructor-dues/summary',
+    details: (instructorId: string) => `/admin/instructor-dues/${instructorId}`,
+    transfers: (instructorId: string) => `/admin/instructor-dues/${instructorId}/transfers`,
+  },
 };
