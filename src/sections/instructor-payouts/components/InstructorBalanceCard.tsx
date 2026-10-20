@@ -42,17 +42,22 @@ export default function InstructorBalanceCard({ instructor }: Props) {
         </Typography>
 
         {/* Due Now Label & Big Amount */}
-        <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 0.5 }}>
+        <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 0.5, textAlign: 'start' }}>
           {t('due_now_label')}
         </Typography>
-        <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 2 }}>
-          <Typography component="span" sx={{ fontSize: { xs: 32, md: 40 }, fontWeight: 900, color: '#0F172A' }}>
-            {dueNow.toLocaleString()}
-          </Typography>
-          <Typography component="span" sx={{ fontSize: { xs: 18, md: 22 }, fontWeight: 800, color: '#0F172A' }}>
-            {currency}
-          </Typography>
-        </Box>
+        <Typography
+          sx={{
+            fontSize: { xs: 32, md: 40 },
+            fontWeight: 900,
+            color: '#0F172A',
+            mb: 2,
+            textAlign: 'start',
+          }}
+        >
+          <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+            {dueNow.toLocaleString()} {currency}
+          </Box>
+        </Typography>
 
         {/* Progress Bar & Percent Label */}
         <LinearProgress

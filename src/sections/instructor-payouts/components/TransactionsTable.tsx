@@ -7,8 +7,6 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
@@ -28,22 +26,15 @@ export default function TransactionsTable({
   const t = useTranslations('InstructorPayouts.details.transactions');
   const locale = useLocale();
 
-  const [activeTab, setActiveTab] = useState<'all' | PayoutTransactionStatus>('all');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(6);
 
-  // Filter by status tab
-  const filteredTransactions = useMemo(() => {
-    if (activeTab === 'all') return transactions;
-    return transactions.filter((tx) => tx.status === activeTab);
-  }, [transactions, activeTab]);
-
-  const totalCount = filteredTransactions.length;
+  const totalCount = transactions.length;
   const totalPages = Math.ceil(totalCount / rowsPerPage);
   const paginatedTransactions = useMemo(() => {
     const start = page * rowsPerPage;
-    return filteredTransactions.slice(start, start + rowsPerPage);
-  }, [filteredTransactions, page, rowsPerPage]);
+    return transactions.slice(start, start + rowsPerPage);
+  }, [transactions, page, rowsPerPage]);
 
   const startItem = totalCount === 0 ? 0 : page * rowsPerPage + 1;
   const endItem = Math.min((page + 1) * rowsPerPage, totalCount);
@@ -129,57 +120,11 @@ export default function TransactionsTable({
         overflow: 'hidden',
       }}
     >
-      {/* Title & Tabs Bar */}
-      <Box sx={{ p: 2.5, pb: 0, borderBottom: '1px solid #F1F5F9' }}>
-        <Typography sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', mb: 2, textAlign: 'start' }}>
+      {/* Title Bar (Without filters/tabs) */}
+      <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
+        <Typography sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'start' }}>
           {t('title')}
         </Typography>
-
-        <Tabs
-          value={activeTab}
-          onChange={(_, val) => {
-            setActiveTab(val);
-            setPage(0);
-          }}
-          sx={{
-            minHeight: 44,
-            '& .MuiTab-root': {
-              minHeight: 44,
-              fontSize: 13.5,
-              fontWeight: 700,
-              color: '#64748B',
-              px: 2,
-              '&.Mui-selected': { color: '#0F172A' },
-            },
-            '& .MuiTabs-indicator': {
-              bgcolor: '#0F172A',
-              height: 2.5,
-            },
-          }}
-        >
-          <Tab
-            value="all"
-            label={
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-                <span>{t('tab_all')}</span>
-                <Chip
-                  label={transactions.length}
-                  size="small"
-                  sx={{
-                    bgcolor: activeTab === 'all' ? '#0F172A' : '#F1F5F9',
-                    color: activeTab === 'all' ? '#FFFFFF' : '#64748B',
-                    fontWeight: 700,
-                    height: 20,
-                  }}
-                />
-              </Stack>
-            }
-          />
-          <Tab value="completed" label={t('tab_completed')} />
-          <Tab value="pending" label={t('tab_pending')} />
-          <Tab value="under_review" label={t('tab_under_review')} />
-          <Tab value="settled" label={t('tab_settled')} />
-        </Tabs>
       </Box>
 
       {/* Table Content */}

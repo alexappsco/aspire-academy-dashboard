@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
@@ -49,49 +49,33 @@ export default function PayoutFilterBar({
         mb: 2.5,
       }}
     >
-      <Stack
-        direction={{ xs: 'column', lg: 'row' }}
-        spacing={1.5}
-        sx={{
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 1.5,
-        }}
-      >
-        {/* Search input (Right side in RTL) */}
-        <TextField
-          size="small"
-          placeholder={t('search_placeholder')}
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{
-            width: { xs: '100%', lg: 360 },
-            '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13.5 },
-          }}
-        />
+      <Grid container spacing={1.5} sx={{ alignItems: 'center', width: '100%' }}>
+        {/* 1. Search input (Right side in RTL, takes 4.5 of 12) */}
+        <Grid size={{ xs: 12, sm: 6, md: 4.5 }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={t('search_placeholder')}
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13.5 },
+            }}
+          />
+        </Grid>
 
-        {/* Filters Group (Left side in RTL) */}
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: 1.5,
-            width: { xs: '100%', lg: 'auto' },
-          }}
-        >
-          {/* Period Filter */}
-          <FormControl size="small" sx={{ minWidth: 140, flex: { xs: 1, sm: 'none' } }}>
+        {/* 2. Period Filter (takes 2.5 of 12) */}
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+          <FormControl fullWidth size="small">
             <Select
               value={periodFilter}
               onChange={(e) => onPeriodChange(e.target.value)}
@@ -104,9 +88,11 @@ export default function PayoutFilterBar({
               <MenuItem value="quarter">{t('this_quarter')}</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
 
-          {/* University Filter */}
-          <FormControl size="small" sx={{ minWidth: 150, flex: { xs: 1, sm: 'none' } }}>
+        {/* 3. University Filter (takes 2.5 of 12) */}
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+          <FormControl fullWidth size="small">
             <Select
               value={universityFilter}
               onChange={(e) => onUniversityChange(e.target.value)}
@@ -121,9 +107,11 @@ export default function PayoutFilterBar({
               ))}
             </Select>
           </FormControl>
+        </Grid>
 
-          {/* Country Filter */}
-          <FormControl size="small" sx={{ minWidth: 130, flex: { xs: 1, sm: 'none' } }}>
+        {/* 4. Country Filter (takes 2.5 of 12) */}
+        <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
+          <FormControl fullWidth size="small">
             <Select
               value={countryFilter}
               onChange={(e) => onCountryChange(e.target.value)}
@@ -138,8 +126,8 @@ export default function PayoutFilterBar({
               ))}
             </Select>
           </FormControl>
-        </Stack>
-      </Stack>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

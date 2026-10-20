@@ -83,7 +83,7 @@ export default function PayoutTable({
               <Box component="th">{t('col_transferred')}</Box>
               <Box component="th">{t('col_due_now')}</Box>
               <Box component="th">{t('col_last_transfer')}</Box>
-              <Box component="th" sx={{ width: 100, textAlign: 'center !important' }}>
+              <Box component="th" sx={{ minWidth: 120, whiteSpace: 'nowrap', textAlign: 'center !important' }}>
                 {t('col_record')}
               </Box>
             </Box>
@@ -158,7 +158,7 @@ export default function PayoutTable({
                   </Box>
 
                   {/* 8. Record Link */}
-                  <Box component="td" sx={{ textAlign: 'center !important' }}>
+                  <Box component="td" sx={{ minWidth: 120, whiteSpace: 'nowrap', textAlign: 'center !important' }}>
                     <Button
                       component={Link}
                       href={paths.instructorPayouts.details(row.id)}
@@ -167,7 +167,9 @@ export default function PayoutTable({
                         color: '#2563EB',
                         fontWeight: 700,
                         fontSize: 13,
-                        p: 0.5,
+                        px: 1.5,
+                        py: 0.5,
+                        whiteSpace: 'nowrap',
                         minWidth: 'auto',
                         '&:hover': { bgcolor: '#EFF6FF', textDecoration: 'underline' },
                       }}

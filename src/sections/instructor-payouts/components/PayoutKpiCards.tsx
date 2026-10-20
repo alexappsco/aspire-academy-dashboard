@@ -27,24 +27,26 @@ export default function PayoutKpiCards({ summary }: Props) {
             color: '#FFFFFF',
             boxShadow: '0 4px 14px rgba(15, 23, 42, 0.12)',
             height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
             textAlign: 'start',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, mb: 1 }}>
+          <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, mb: 1, textAlign: 'start' }}>
             {t('due_now_title')}
           </Typography>
-          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 0.5 }}>
-            <Typography component="span" sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#FFFFFF' }}>
-              {summary.dueNowTotal.toLocaleString()}
-            </Typography>
-            <Typography component="span" sx={{ fontSize: { xs: 16, md: 20 }, fontWeight: 700, color: '#FFFFFF' }}>
-              {summary.currency}
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: 12.5, color: '#94A3B8' }}>
+          <Typography
+            sx={{
+              fontSize: { xs: 26, md: 32 },
+              fontWeight: 800,
+              color: '#FFFFFF',
+              mb: 0.5,
+              textAlign: 'start',
+            }}
+          >
+            <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+              {summary.dueNowTotal.toLocaleString()} {summary.currency}
+            </Box>
+          </Typography>
+          <Typography sx={{ fontSize: 12.5, color: '#94A3B8', textAlign: 'start' }}>
             {t('instructors_waiting', { count: summary.instructorsWaitingCount })}
           </Typography>
         </Card>
@@ -60,24 +62,26 @@ export default function PayoutKpiCards({ summary }: Props) {
             border: '1px solid #F1F5F9',
             boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
             height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
             textAlign: 'start',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1 }}>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1, textAlign: 'start' }}>
             {t('transferred_month_title')}
           </Typography>
-          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 0.5 }}>
-            <Typography component="span" sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#0F172A' }}>
-              {summary.transferredThisMonthTotal.toLocaleString()}
-            </Typography>
-            <Typography component="span" sx={{ fontSize: { xs: 16, md: 20 }, fontWeight: 700, color: '#0F172A' }}>
-              {summary.currency}
-            </Typography>
-          </Box>
-          <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
+          <Typography
+            sx={{
+              fontSize: { xs: 26, md: 32 },
+              fontWeight: 800,
+              color: '#0F172A',
+              mb: 0.5,
+              textAlign: 'start',
+            }}
+          >
+            <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+              {summary.transferredThisMonthTotal.toLocaleString()} {summary.currency}
+            </Box>
+          </Typography>
+          <Typography sx={{ fontSize: 12.5, color: '#64748B', textAlign: 'start' }}>
             {t('transfers_recorded', { count: summary.transfersCountThisMonth })}
           </Typography>
         </Card>
@@ -93,19 +97,24 @@ export default function PayoutKpiCards({ summary }: Props) {
             border: '1px solid #F1F5F9',
             boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
             height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
             textAlign: 'start',
           }}
         >
-          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1 }}>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1, textAlign: 'start' }}>
             {t('missing_bank_data_title')}
           </Typography>
-          <Typography sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#0F172A', mb: 0.5 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: 26, md: 32 },
+              fontWeight: 800,
+              color: '#0F172A',
+              mb: 0.5,
+              textAlign: 'start',
+            }}
+          >
             {t('missing_bank_count', { count: summary.missingBankDataCount })}
           </Typography>
-          <Typography sx={{ fontSize: 12.5, color: '#DC2626', fontWeight: 600 }}>
+          <Typography sx={{ fontSize: 12.5, color: '#DC2626', fontWeight: 600, textAlign: 'start' }}>
             {t('missing_bank_helper')}
           </Typography>
         </Card>
