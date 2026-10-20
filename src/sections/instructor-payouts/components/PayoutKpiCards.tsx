@@ -30,15 +30,20 @@ export default function PayoutKpiCards({ summary }: Props) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            textAlign: 'end',
+            textAlign: 'start',
           }}
         >
           <Typography sx={{ fontSize: 13, color: '#94A3B8', fontWeight: 600, mb: 1 }}>
             {t('due_now_title')}
           </Typography>
-          <Typography sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#FFFFFF', mb: 0.5 }}>
-            {summary.dueNowTotal.toLocaleString()} {summary.currency}
-          </Typography>
+          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 0.5 }}>
+            <Typography component="span" sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#FFFFFF' }}>
+              {summary.dueNowTotal.toLocaleString()}
+            </Typography>
+            <Typography component="span" sx={{ fontSize: { xs: 16, md: 20 }, fontWeight: 700, color: '#FFFFFF' }}>
+              {summary.currency}
+            </Typography>
+          </Box>
           <Typography sx={{ fontSize: 12.5, color: '#94A3B8' }}>
             {t('instructors_waiting', { count: summary.instructorsWaitingCount })}
           </Typography>
@@ -58,15 +63,20 @@ export default function PayoutKpiCards({ summary }: Props) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            textAlign: 'end',
+            textAlign: 'start',
           }}
         >
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1 }}>
             {t('transferred_month_title')}
           </Typography>
-          <Typography sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#0F172A', mb: 0.5 }}>
-            {summary.transferredThisMonthTotal.toLocaleString()} {summary.currency}
-          </Typography>
+          <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 0.5 }}>
+            <Typography component="span" sx={{ fontSize: { xs: 26, md: 32 }, fontWeight: 800, color: '#0F172A' }}>
+              {summary.transferredThisMonthTotal.toLocaleString()}
+            </Typography>
+            <Typography component="span" sx={{ fontSize: { xs: 16, md: 20 }, fontWeight: 700, color: '#0F172A' }}>
+              {summary.currency}
+            </Typography>
+          </Box>
           <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
             {t('transfers_recorded', { count: summary.transfersCountThisMonth })}
           </Typography>
@@ -86,7 +96,7 @@ export default function PayoutKpiCards({ summary }: Props) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            textAlign: 'end',
+            textAlign: 'start',
           }}
         >
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 1 }}>

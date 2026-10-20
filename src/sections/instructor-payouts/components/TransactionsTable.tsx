@@ -282,7 +282,9 @@ export default function TransactionsTable({
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {formattedAmount}
+                      <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                        {formattedAmount}
+                      </Box>
                     </Box>
 
                     {/* 5. Status Badge */}

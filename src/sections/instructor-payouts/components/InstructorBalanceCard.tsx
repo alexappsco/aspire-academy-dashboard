@@ -45,9 +45,14 @@ export default function InstructorBalanceCard({ instructor }: Props) {
         <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 0.5 }}>
           {t('due_now_label')}
         </Typography>
-        <Typography sx={{ fontSize: { xs: 32, md: 40 }, fontWeight: 900, color: '#0F172A', mb: 2 }}>
-          {dueNow.toLocaleString()} {currency}
-        </Typography>
+        <Box sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 0.75, direction: 'ltr', mb: 2 }}>
+          <Typography component="span" sx={{ fontSize: { xs: 32, md: 40 }, fontWeight: 900, color: '#0F172A' }}>
+            {dueNow.toLocaleString()}
+          </Typography>
+          <Typography component="span" sx={{ fontSize: { xs: 18, md: 22 }, fontWeight: 800, color: '#0F172A' }}>
+            {currency}
+          </Typography>
+        </Box>
 
         {/* Progress Bar & Percent Label */}
         <LinearProgress
@@ -75,7 +80,7 @@ export default function InstructorBalanceCard({ instructor }: Props) {
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             {t('total_earnings')}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800 }}>
+          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
             {totalEarnings.toLocaleString()} {currency}
           </Typography>
         </Stack>
@@ -84,7 +89,7 @@ export default function InstructorBalanceCard({ instructor }: Props) {
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             {t('transferred')}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800 }}>
+          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
             {totalTransferred.toLocaleString()} {currency}
           </Typography>
         </Stack>
@@ -94,7 +99,7 @@ export default function InstructorBalanceCard({ instructor }: Props) {
             <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
               {t('under_review')}
             </Typography>
-            <Typography sx={{ fontSize: 14, color: '#D97706', fontWeight: 800 }}>
+            <Typography sx={{ fontSize: 14, color: '#D97706', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
               {underReviewAmount.toLocaleString()} {currency}
             </Typography>
           </Stack>

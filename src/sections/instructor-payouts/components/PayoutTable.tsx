@@ -127,12 +127,16 @@ export default function PayoutTable({
 
                   {/* 4. Total Earnings */}
                   <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                    {row.totalEarnings.toLocaleString()} {row.currency}
+                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                      {row.totalEarnings.toLocaleString()} {row.currency}
+                    </Box>
                   </Box>
 
                   {/* 5. Transferred */}
                   <Box component="td" sx={{ color: '#334155', fontWeight: 600 }}>
-                    {row.totalTransferred.toLocaleString()} {row.currency}
+                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                      {row.totalTransferred.toLocaleString()} {row.currency}
+                    </Box>
                   </Box>
 
                   {/* 6. Due Now */}
@@ -143,7 +147,9 @@ export default function PayoutTable({
                       color: row.dueNow > 0 ? '#0F172A' : '#64748B',
                     }}
                   >
-                    {row.dueNow.toLocaleString()} {row.currency}
+                    <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+                      {row.dueNow.toLocaleString()} {row.currency}
+                    </Box>
                   </Box>
 
                   {/* 7. Last Transfer Date */}
