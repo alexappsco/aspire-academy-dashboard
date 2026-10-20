@@ -27,6 +27,7 @@ interface ChatMessageProps {
   type?: 'text' | 'file' | 'image';
   url?: string;
   fileName?: string;
+  token?: string;
 }
 
 /** Pub/Sub may deliver `timestamp` as string (e.g. ISO or ms) or number */
@@ -187,7 +188,7 @@ const ChatMessageComponent: React.FC<ChatMessageProps> = ({
   url,
   fileName,
   token,
-}: ChatMessageProps & { token?: string }) => {
+}) => {
   const mMeeting = useMeeting();
   const localParticipantId = mMeeting?.localParticipant?.id;
   const isLocalSender = localParticipantId === senderId;
@@ -293,7 +294,7 @@ const ChatInput: React.FC<{ inputHeight: number; token?: string }> = ({ token })
       });
       sendMessage("", {
         type: isImage ? "image" : "file",
-        url,
+        url: url || "",
         fileName: file.name,
       });
     } catch (err) {
