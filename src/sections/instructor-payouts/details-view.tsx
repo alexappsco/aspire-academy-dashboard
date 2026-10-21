@@ -14,10 +14,13 @@ import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 
 import { paths } from 'src/routes/paths';
-import { InstructorDueDetailsResponse, PayoutTransaction } from 'src/types/instructor-payout';
-import { getInstructorDueDetails } from 'src/actions/instructor-dues';
+import {
+  InstructorDueDetailsResponse,
+  InstructorTransferItem,
+  PayoutTransaction,
+} from 'src/types/instructor-payout';
+import { getInstructorDueDetails, getInstructorTransfers } from 'src/actions/instructor-dues';
 import { resolveReceiptUrl } from 'src/types/order';
-import { INITIAL_TRANSACTIONS_AHMED } from './mock-data';
 import InstructorBankInfoCard from './components/InstructorBankInfoCard';
 import InstructorBalanceCard from './components/InstructorBalanceCard';
 import TransactionsTable from './components/TransactionsTable';
@@ -32,16 +35,22 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
   const locale = useLocale();
   const toast = useToast();
 
+  // Instructor details state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [instructor, setInstructor] = useState<InstructorDueDetailsResponse | null>(null);
 
-  // Transactions list (placeholder / fallback until transactions endpoint schema is provided)
-  const [transactions, setTransactions] = useState<PayoutTransaction[]>(INITIAL_TRANSACTIONS_AHMED);
+  // Transfers log state
+  const [transfers, setTransfers] = useState<InstructorTransferItem[]>([]);
+  const [totalTransfersCount, setTotalTransfersCount] = useState<number>(0);
+  const [transfersPage, setTransfersPage] = useState<number>(0);
+  const [transfersRowsPerPage, setTransfersRowsPerPage] = useState<number>(10);
+  const [transfersLoading, setTransfersLoading] = useState<boolean>(true);
 
   // Dialog State
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
 
+  // 1. Fetch Instructor Due Details
   const fetchDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -63,42 +72,51 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
     }
   }, [instructorId, t, toast]);
 
+  // 2. Fetch Transfers Log
+  const fetchTransfers = useCallback(async () => {
+    setTransfersLoading(true);
+    try {
+      const res = await getInstructorTransfers(instructorId, {
+        SkipCount: transfersPage * transfersRowsPerPage,
+        MaxResultCount: transfersRowsPerPage,
+      });
+
+      if (res.success && res.data) {
+        setTransfers(res.data.items || []);
+        setTotalTransfersCount(res.data.totalCount || 0);
+      }
+    } catch {
+      // Keep existing list on error
+    } finally {
+      setTransfersLoading(false);
+    }
+  }, [instructorId, transfersPage, transfersRowsPerPage]);
+
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
 
+  useEffect(() => {
+    fetchTransfers();
+  }, [fetchTransfers]);
+
   // Handler when transfer is registered in dialog
   const handleTransferSuccess = (
-    newTx: PayoutTransaction,
-    transferredAmount: number
+    _newTx: PayoutTransaction,
+    _transferredAmount: number
   ) => {
-    setInstructor((prev) => {
-      if (!prev) return prev;
-      const updatedDue = Math.max(0, prev.dueNow - transferredAmount);
-      const updatedTransferred = prev.totalTransferred + transferredAmount;
-      const updatedPercent =
-        prev.totalProfits > 0
-          ? Math.round((updatedTransferred / prev.totalProfits) * 100)
-          : 0;
-
-      return {
-        ...prev,
-        dueNow: updatedDue,
-        totalTransferred: updatedTransferred,
-        transferredPercent: updatedPercent,
-      };
-    });
-
-    setTransactions((prev) => [newTx, ...prev]);
+    // Re-fetch both summary details and transfers list to stay completely synced with backend
+    fetchDetails();
+    fetchTransfers();
   };
 
   // View Receipt: opens the image directly in a new tab without a dialog
-  const handleOpenReceipt = (tx: PayoutTransaction) => {
-    if (!tx.receiptUrl) {
+  const handleOpenReceipt = (receiptUrl?: string | null) => {
+    if (!receiptUrl) {
       toast.info('لا توجد صورة إيصال مرفقة');
       return;
     }
-    const url = resolveReceiptUrl(tx.receiptUrl);
+    const url = resolveReceiptUrl(receiptUrl);
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
@@ -200,9 +218,15 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
         </Grid>
       </Grid>
 
-      {/* 4. Financial Transactions Log Table */}
+      {/* 4. Financial Transfers Log Table */}
       <TransactionsTable
-        transactions={transactions}
+        transactions={transfers}
+        totalCount={totalTransfersCount}
+        page={transfersPage}
+        rowsPerPage={transfersRowsPerPage}
+        loading={transfersLoading}
+        onPageChange={setTransfersPage}
+        onRowsPerPageChange={setTransfersRowsPerPage}
         onViewReceipt={handleOpenReceipt}
       />
 

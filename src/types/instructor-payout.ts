@@ -114,3 +114,22 @@ export interface InstructorDueDetailsResponse {
   instructorEmail: string;
   lastUpdated?: string | null;
 }
+
+export interface InstructorTransferItem {
+  id: string;
+  transferNumber: string;
+  amount: number;
+  currencyId: string;
+  currencyCode: string;
+  currencySymbol: string;
+  transferDate: string;
+  bankReferenceNumber: string;
+  receiptUrl?: string | null;
+  note?: string | null;
+  creationTime: string;
+}
+
+export interface InstructorTransfersListResponse {
+  items: InstructorTransferItem[];
+  totalCount: number;
+}

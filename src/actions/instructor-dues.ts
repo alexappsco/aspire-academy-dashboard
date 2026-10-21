@@ -6,6 +6,7 @@ import type {
   InstructorDuesListResponse,
   GetInstructorDuesParams,
   InstructorDueDetailsResponse,
+  InstructorTransfersListResponse,
 } from 'src/types/instructor-payout';
 import { getData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
@@ -126,3 +127,45 @@ export async function getInstructorDueDetails(
     };
   }
 }
+
+/**
+ * Fetch paginated transfers for an instructor
+ * GET /api/v1/admin/instructor-dues/{instructorId}/transfers
+ */
+export async function getInstructorTransfers(
+  instructorId: string,
+  params?: {
+    SkipCount?: number;
+    MaxResultCount?: number;
+  }
+): Promise<ApiSingleResponse<InstructorTransfersListResponse>> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.SkipCount !== undefined) {
+      searchParams.append('SkipCount', String(params.SkipCount));
+    }
+    if (params?.MaxResultCount !== undefined) {
+      searchParams.append('MaxResultCount', String(params.MaxResultCount));
+    }
+    const query = searchParams.toString();
+    const baseUrl = endpoints.instructorDues.transfers(instructorId);
+    const endpoint = query ? `${baseUrl}?${query}` : baseUrl;
+
+    const response = await getData<InstructorTransfersListResponse>(endpoint);
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to load instructor transfers',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load instructor transfers',
+    };
+  }
+}
+
