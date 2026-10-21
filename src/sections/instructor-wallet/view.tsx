@@ -26,6 +26,27 @@ import InstructorMyBalanceCard from './components/InstructorMyBalanceCard';
 import InstructorMyTransfersTable from './components/InstructorMyTransfersTable';
 import EditBankDetailsDialog from './components/EditBankDetailsDialog';
 
+const DEFAULT_EMPTY_INSTRUCTOR: InstructorWalletDetailsResponse = {
+  instructorId: '',
+  instructorName: '',
+  instructorTitle: '',
+  instructorImageUrl: null,
+  dueNow: 0,
+  totalProfits: 0,
+  totalTransferred: 0,
+  transferredPercent: 0,
+  currencyId: '',
+  currencyCode: '',
+  currencySymbol: '',
+  iban: '',
+  bankName: '',
+  bankAccountHolderName: '',
+  bankDetailsUpdatedAt: null,
+  hasCompleteBankDetails: false,
+  instructorPhoneNumber: '',
+  instructorEmail: '',
+};
+
 export default function InstructorWalletView() {
   const t = useTranslations('InstructorWallet');
   const toast = useToast();
@@ -56,16 +77,14 @@ export default function InstructorWalletView() {
       } else {
         const errorMsg = res.error || t('failed_to_load');
         setError(errorMsg);
-        toast.error(errorMsg);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : t('failed_to_load');
       setError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
-  }, [t, toast]);
+  }, [t]);
 
   // 2. Fetch Completed Transfers Log
   const fetchTransfers = useCallback(async () => {
@@ -99,6 +118,8 @@ export default function InstructorWalletView() {
   const handleBankDetailsUpdated = () => {
     fetchWallet();
   };
+
+  const displayInstructor = instructor || DEFAULT_EMPTY_INSTRUCTOR;
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1400, mx: 'auto' }}>
@@ -136,7 +157,7 @@ export default function InstructorWalletView() {
         </Alert>
       </Box>
 
-      {/* Error Alert */}
+      {/* Error Alert (if any error occurred during fetch) */}
       {error && !loading && (
         <Alert
           severity="error"
@@ -160,7 +181,7 @@ export default function InstructorWalletView() {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {/* Right (in RTL): Bank Details Card */}
         <Grid size={{ xs: 12, md: 8 }}>
-          {loading || !instructor ? (
+          {loading ? (
             <Skeleton
               variant="rectangular"
               height={240}
@@ -168,7 +189,7 @@ export default function InstructorWalletView() {
             />
           ) : (
             <InstructorMyBankCard
-              instructor={instructor}
+              instructor={displayInstructor}
               onOpenEditDialog={() => setEditDialogOpen(true)}
             />
           )}
@@ -176,14 +197,14 @@ export default function InstructorWalletView() {
 
         {/* Left (in RTL): Current Balance Card */}
         <Grid size={{ xs: 12, md: 4 }}>
-          {loading || !instructor ? (
+          {loading ? (
             <Skeleton
               variant="rectangular"
               height={240}
               sx={{ borderRadius: 3 }}
             />
           ) : (
-            <InstructorMyBalanceCard instructor={instructor} />
+            <InstructorMyBalanceCard instructor={displayInstructor} />
           )}
         </Grid>
       </Grid>
@@ -202,14 +223,12 @@ export default function InstructorWalletView() {
       </Box>
 
       {/* 4. Edit Bank Details Dialog */}
-      {instructor && (
-        <EditBankDetailsDialog
-          open={editDialogOpen}
-          onClose={() => setEditDialogOpen(false)}
-          instructor={instructor}
-          onSuccess={handleBankDetailsUpdated}
-        />
-      )}
+      <EditBankDetailsDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        instructor={displayInstructor}
+        onSuccess={handleBankDetailsUpdated}
+      />
     </Box>
   );
 }
