@@ -2683,6 +2683,8 @@
     "details": {
       "breadcrumbs_root": "Instructor Payouts",
       "page_title": "Payouts Record – {name}",
+      "failed_to_load": "Failed to load dues details",
+      "retry": "Retry",
       "bank_card": {
         "register_transfer_btn": "Register Bank Transfer",
         "bank_data_complete": "Bank details complete",

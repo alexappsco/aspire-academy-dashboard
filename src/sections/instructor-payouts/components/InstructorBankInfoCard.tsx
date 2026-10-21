@@ -12,10 +12,10 @@ import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
-import { InstructorPayoutItem } from 'src/types/instructor-payout';
+import { InstructorDueDetailsResponse } from 'src/types/instructor-payout';
 
 interface Props {
-  instructor: InstructorPayoutItem;
+  instructor: InstructorDueDetailsResponse;
   onOpenTransferDialog: () => void;
 }
 
@@ -25,8 +25,18 @@ export default function InstructorBankInfoCard({
 }: Props) {
   const t = useTranslations('InstructorPayouts.details.bank_card');
 
-  const { bankDetails } = instructor;
-  const isComplete = bankDetails.isComplete;
+  const isComplete = Boolean(
+    instructor.iban && instructor.bankName && instructor.bankAccountHolderName
+  );
+  const name = instructor.instructorName || '';
+  const title = instructor.instructorTitle || '';
+  const avatar = instructor.instructorImageUrl || '';
+  const bankName = instructor.bankName || '—';
+  const accountHolder = instructor.bankAccountHolderName || '—';
+  const iban = instructor.iban || '—';
+  const phone = instructor.instructorPhoneNumber || '—';
+  const email = instructor.instructorEmail || '—';
+  const lastUpdated = instructor.lastUpdated || '—';
 
   return (
     <Card
@@ -62,8 +72,8 @@ export default function InstructorBankInfoCard({
           }}
         >
           <Avatar
-            src={instructor.avatar}
-            alt={instructor.name}
+            src={avatar}
+            alt={name}
             sx={{
               width: 56,
               height: 56,
@@ -73,16 +83,18 @@ export default function InstructorBankInfoCard({
               fontSize: 20,
             }}
           >
-            {(instructor.name[0] || 'I').toUpperCase()}
+            {(name[0] || 'I').toUpperCase()}
           </Avatar>
 
           <Box sx={{ textAlign: 'start' }}>
             <Typography sx={{ fontWeight: 800, fontSize: 18, color: '#0F172A' }}>
-              {instructor.name}
+              {name}
             </Typography>
-            <Typography sx={{ fontSize: 13, color: '#64748B', mb: 0.75 }}>
-              {instructor.specialization}
-            </Typography>
+            {title && (
+              <Typography sx={{ fontSize: 13, color: '#64748B', mb: 0.75 }}>
+                {title}
+              </Typography>
+            )}
             <Chip
               label={isComplete ? t('bank_data_complete') : t('bank_data_incomplete')}
               size="small"
@@ -94,6 +106,7 @@ export default function InstructorBankInfoCard({
                 height: 24,
                 borderRadius: 1.5,
                 px: 0.5,
+                mt: title ? 0 : 0.5,
               }}
             />
           </Box>
@@ -139,7 +152,7 @@ export default function InstructorBankInfoCard({
             {t('bank_name')}
           </Typography>
           <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-            {bankDetails.bankName || '—'}
+            {bankName}
           </Typography>
         </Grid>
 
@@ -149,7 +162,7 @@ export default function InstructorBankInfoCard({
             {t('account_holder')}
           </Typography>
           <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
-            {bankDetails.accountHolderName || '—'}
+            {accountHolder}
           </Typography>
         </Grid>
 
@@ -169,7 +182,7 @@ export default function InstructorBankInfoCard({
               display: 'inline-block',
             }}
           >
-            {bankDetails.iban || '—'}
+            {iban}
           </Typography>
         </Grid>
 
@@ -187,7 +200,7 @@ export default function InstructorBankInfoCard({
               display: 'inline-block',
             }}
           >
-            {bankDetails.phone || '—'}
+            {phone}
           </Typography>
         </Grid>
 
@@ -197,7 +210,7 @@ export default function InstructorBankInfoCard({
             {t('email')}
           </Typography>
           <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#0F172A' }}>
-            {bankDetails.email || '—'}
+            {email}
           </Typography>
         </Grid>
 
@@ -215,7 +228,7 @@ export default function InstructorBankInfoCard({
               display: 'inline-block',
             }}
           >
-            {bankDetails.lastUpdated || '—'}
+            {lastUpdated}
           </Typography>
         </Grid>
       </Grid>

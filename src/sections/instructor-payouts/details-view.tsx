@@ -1,23 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Skeleton from '@mui/material/Skeleton';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
 
 import { paths } from 'src/routes/paths';
-import { InstructorPayoutItem, PayoutTransaction } from 'src/types/instructor-payout';
-import { INITIAL_INSTRUCTORS } from './mock-data';
+import { InstructorDueDetailsResponse, PayoutTransaction } from 'src/types/instructor-payout';
+import { getInstructorDueDetails } from 'src/actions/instructor-dues';
+import { resolveReceiptUrl } from 'src/types/order';
+import { INITIAL_TRANSACTIONS_AHMED } from './mock-data';
 import InstructorBankInfoCard from './components/InstructorBankInfoCard';
 import InstructorBalanceCard from './components/InstructorBalanceCard';
 import TransactionsTable from './components/TransactionsTable';
 import RegisterTransferDialog from './components/RegisterTransferDialog';
-import ReceiptPreviewDialog from './components/ReceiptPreviewDialog';
 
 interface Props {
   instructorId: string;
@@ -26,17 +30,42 @@ interface Props {
 export default function InstructorPayoutDetailsView({ instructorId }: Props) {
   const t = useTranslations('InstructorPayouts.details');
   const locale = useLocale();
+  const toast = useToast();
 
-  // Find instructor from mock data or fallback to the first one (Ahmed Mahmoud)
-  const initialInstructor =
-    INITIAL_INSTRUCTORS.find((i) => i.id === instructorId) || INITIAL_INSTRUCTORS[0];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [instructor, setInstructor] = useState<InstructorDueDetailsResponse | null>(null);
 
-  const [instructor, setInstructor] = useState<InstructorPayoutItem>(initialInstructor);
+  // Transactions list (placeholder / fallback until transactions endpoint schema is provided)
+  const [transactions, setTransactions] = useState<PayoutTransaction[]>(INITIAL_TRANSACTIONS_AHMED);
 
-  // Dialog States
+  // Dialog State
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
-  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
-  const [selectedReceiptTx, setSelectedReceiptTx] = useState<PayoutTransaction | null>(null);
+
+  const fetchDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await getInstructorDueDetails(instructorId);
+      if (res.success && res.data) {
+        setInstructor(res.data);
+      } else {
+        const errorMsg = res.error || t('failed_to_load');
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : t('failed_to_load');
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  }, [instructorId, t, toast]);
+
+  useEffect(() => {
+    fetchDetails();
+  }, [fetchDetails]);
 
   // Handler when transfer is registered in dialog
   const handleTransferSuccess = (
@@ -44,24 +73,74 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
     transferredAmount: number
   ) => {
     setInstructor((prev) => {
+      if (!prev) return prev;
       const updatedDue = Math.max(0, prev.dueNow - transferredAmount);
       const updatedTransferred = prev.totalTransferred + transferredAmount;
-      const updatedTransactions = [newTx, ...(prev.transactions || [])];
+      const updatedPercent =
+        prev.totalProfits > 0
+          ? Math.round((updatedTransferred / prev.totalProfits) * 100)
+          : 0;
 
       return {
         ...prev,
         dueNow: updatedDue,
         totalTransferred: updatedTransferred,
-        lastTransferDate: newTx.date,
-        transactions: updatedTransactions,
+        transferredPercent: updatedPercent,
       };
     });
+
+    setTransactions((prev) => [newTx, ...prev]);
   };
 
+  // View Receipt: opens the image directly in a new tab without a dialog
   const handleOpenReceipt = (tx: PayoutTransaction) => {
-    setSelectedReceiptTx(tx);
-    setReceiptDialogOpen(true);
+    if (!tx.receiptUrl) {
+      toast.info('لا توجد صورة إيصال مرفقة');
+      return;
+    }
+    const url = resolveReceiptUrl(tx.receiptUrl);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      toast.info('لا توجد صورة إيصال مرفقة');
+    }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ py: 3, px: { xs: 2, sm: 3, md: 4 } }}>
+        <Skeleton variant="rounded" width={220} height={24} sx={{ mb: 2 }} />
+        <Skeleton variant="rounded" width={320} height={36} sx={{ mb: 3 }} />
+        <Grid container spacing={2.5} sx={{ mb: 3.5 }}>
+          <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+            <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
+          </Grid>
+          <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+            <Skeleton variant="rounded" height={220} sx={{ borderRadius: 3 }} />
+          </Grid>
+        </Grid>
+        <Skeleton variant="rounded" height={360} sx={{ borderRadius: 3 }} />
+      </Box>
+    );
+  }
+
+  if (error || !instructor) {
+    return (
+      <Box sx={{ py: 4, px: { xs: 2, sm: 3, md: 4 } }}>
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={fetchDetails}>
+              {t('retry')}
+            </Button>
+          }
+          sx={{ borderRadius: 2 }}
+        >
+          {error || t('failed_to_load')}
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ py: 3, px: { xs: 2, sm: 3, md: 4 } }}>
@@ -87,7 +166,7 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
       >
         <Link href={paths.instructorPayouts.root}>{t('breadcrumbs_root')}</Link>
         <Typography sx={{ color: '#0F172A', fontWeight: 700, fontSize: 13 }}>
-          {instructor.name}
+          {instructor.instructorName}
         </Typography>
       </Breadcrumbs>
 
@@ -102,7 +181,7 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
           textAlign: 'start',
         }}
       >
-        {t('page_title', { name: instructor.name })}
+        {t('page_title', { name: instructor.instructorName })}
       </Typography>
 
       {/* 3. Top Section: 2 Cards (Bank Identity & Balance Summary) */}
@@ -123,7 +202,7 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
 
       {/* 4. Financial Transactions Log Table */}
       <TransactionsTable
-        transactions={instructor.transactions || []}
+        transactions={transactions}
         onViewReceipt={handleOpenReceipt}
       />
 
@@ -133,15 +212,6 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
         onClose={() => setTransferDialogOpen(false)}
         instructor={instructor}
         onSuccess={handleTransferSuccess}
-      />
-
-      <ReceiptPreviewDialog
-        open={receiptDialogOpen}
-        onClose={() => {
-          setReceiptDialogOpen(false);
-          setSelectedReceiptTx(null);
-        }}
-        transaction={selectedReceiptTx}
       />
     </Box>
   );

@@ -15,12 +15,12 @@ import IconButton from '@mui/material/IconButton';
 import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { InstructorPayoutItem, PayoutTransaction } from 'src/types/instructor-payout';
+import { InstructorDueDetailsResponse, InstructorPayoutItem, PayoutTransaction } from 'src/types/instructor-payout';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  instructor: InstructorPayoutItem;
+  instructor: InstructorDueDetailsResponse | InstructorPayoutItem;
   onSuccess: (newTransaction: PayoutTransaction, transferredAmount: number) => void;
 }
 
@@ -33,8 +33,17 @@ export default function RegisterTransferDialog({
   const t = useTranslations('InstructorPayouts.dialog');
   const toast = useToast();
 
+  const instructorName =
+    'instructorName' in instructor ? instructor.instructorName : instructor.name;
   const currentDue = instructor.dueNow;
-  const currency = instructor.currency;
+  const currency =
+    'currency' in instructor
+      ? instructor.currency
+      : instructor.currencySymbol || instructor.currencyCode || '';
+  const rawIban =
+    'bankDetails' in instructor ? instructor.bankDetails.iban : instructor.iban || '';
+  const bankName =
+    'bankDetails' in instructor ? instructor.bankDetails.bankName : instructor.bankName || '';
 
   const [amount, setAmount] = useState<string>(String(currentDue > 0 ? currentDue : 0));
   const [transferDate, setTransferDate] = useState<string>(
@@ -54,7 +63,6 @@ export default function RegisterTransferDialog({
   const remainingBalance = Math.max(0, currentDue - numAmount);
 
   // Format IBAN masked preview for subtitle
-  const rawIban = instructor.bankDetails.iban;
   const maskedIban =
     rawIban && rawIban.length > 8
       ? `${rawIban.slice(0, 4)} .... ${rawIban.slice(-4)}`
@@ -144,8 +152,8 @@ export default function RegisterTransferDialog({
             </Typography>
             <Typography sx={{ fontSize: 13, color: '#64748B', mt: 0.5 }}>
               {t('subtitle', {
-                name: instructor.name,
-                bank: instructor.bankDetails.bankName,
+                name: instructorName,
+                bank: bankName,
                 iban: maskedIban,
               })}
             </Typography>

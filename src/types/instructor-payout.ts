@@ -94,3 +94,23 @@ export interface GetInstructorDuesParams {
   SkipCount?: number;
   MaxResultCount?: number;
 }
+
+export interface InstructorDueDetailsResponse {
+  instructorId: string;
+  instructorName: string;
+  instructorTitle?: string;
+  instructorImageUrl?: string | null;
+  dueNow: number;
+  totalProfits: number;
+  totalTransferred: number;
+  transferredPercent: number;
+  currencyId: string;
+  currencyCode: string;
+  currencySymbol: string;
+  iban: string;
+  bankName: string;
+  bankAccountHolderName: string;
+  instructorPhoneNumber: string;
+  instructorEmail: string;
+  lastUpdated?: string | null;
+}

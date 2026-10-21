@@ -2691,6 +2691,8 @@
     "details": {
       "breadcrumbs_root": "مستحقات المحاضرون",
       "page_title": "سجل مستحقات {name}",
+      "failed_to_load": "فشل تحميل تفاصيل المستحقات",
+      "retry": "إعادة المحاولة",
       "bank_card": {
         "register_transfer_btn": "تسجيل تحويل بنكي",
         "bank_data_complete": "بيانات بنكية مكتملة",

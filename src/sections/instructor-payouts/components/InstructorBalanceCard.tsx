@@ -7,18 +7,31 @@ import Typography from '@mui/material/Typography';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import { useTranslations } from 'next-intl';
-import { InstructorPayoutItem } from 'src/types/instructor-payout';
+import { InstructorDueDetailsResponse } from 'src/types/instructor-payout';
 
 interface Props {
-  instructor: InstructorPayoutItem;
+  instructor: InstructorDueDetailsResponse;
 }
 
 export default function InstructorBalanceCard({ instructor }: Props) {
   const t = useTranslations('InstructorPayouts.details.balance_card');
 
-  const { totalEarnings, totalTransferred, dueNow, currency, underReviewAmount = 0 } = instructor;
+  const {
+    totalProfits = 0,
+    totalTransferred = 0,
+    dueNow = 0,
+    transferredPercent,
+    currencySymbol,
+    currencyCode,
+  } = instructor;
+
+  const currency = currencySymbol || currencyCode || '';
   const progressPercent =
-    totalEarnings > 0 ? Math.min(Math.round((totalTransferred / totalEarnings) * 100), 100) : 0;
+    typeof transferredPercent === 'number'
+      ? Math.min(Math.round(transferredPercent), 100)
+      : totalProfits > 0
+        ? Math.min(Math.round((totalTransferred / totalProfits) * 100), 100)
+        : 0;
 
   return (
     <Card
@@ -54,9 +67,23 @@ export default function InstructorBalanceCard({ instructor }: Props) {
             textAlign: 'start',
           }}
         >
-          <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
-            {dueNow.toLocaleString()} {currency}
-          </Box>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: 0.5,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <Box component="span">{dueNow.toLocaleString()}</Box>
+            {currency && (
+              <Box component="span" sx={{ fontSize: '0.6em', color: '#64748B', fontWeight: 700 }}>
+                {currency}
+              </Box>
+            )}
+          </Stack>
         </Typography>
 
         {/* Progress Bar & Percent Label */}
@@ -85,30 +112,53 @@ export default function InstructorBalanceCard({ instructor }: Props) {
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             {t('total_earnings')}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
-            {totalEarnings.toLocaleString()} {currency}
-          </Typography>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: 0.5,
+              whiteSpace: 'nowrap',
+              fontWeight: 800,
+              fontSize: 14,
+              color: '#0F172A',
+            }}
+          >
+            <Box component="span">{totalProfits.toLocaleString()}</Box>
+            {currency && (
+              <Box component="span" sx={{ fontSize: '0.85em', color: '#64748B', fontWeight: 500 }}>
+                {currency}
+              </Box>
+            )}
+          </Stack>
         </Stack>
 
         <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
             {t('transferred')}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#0F172A', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
-            {totalTransferred.toLocaleString()} {currency}
-          </Typography>
-        </Stack>
-
-        {underReviewAmount > 0 && (
-          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>
-              {t('under_review')}
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: '#D97706', fontWeight: 800, direction: 'ltr', display: 'inline-block' }}>
-              {underReviewAmount.toLocaleString()} {currency}
-            </Typography>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: 0.5,
+              whiteSpace: 'nowrap',
+              fontWeight: 800,
+              fontSize: 14,
+              color: '#0F172A',
+            }}
+          >
+            <Box component="span">{totalTransferred.toLocaleString()}</Box>
+            {currency && (
+              <Box component="span" sx={{ fontSize: '0.85em', color: '#64748B', fontWeight: 500 }}>
+                {currency}
+              </Box>
+            )}
           </Stack>
-        )}
+        </Stack>
       </Stack>
     </Card>
   );

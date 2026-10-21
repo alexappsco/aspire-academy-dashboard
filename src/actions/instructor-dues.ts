@@ -5,6 +5,7 @@ import type {
   InstructorDuesSummaryResponse,
   InstructorDuesListResponse,
   GetInstructorDuesParams,
+  InstructorDueDetailsResponse,
 } from 'src/types/instructor-payout';
 import { getData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
@@ -94,6 +95,34 @@ export async function getInstructorDues(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to load instructor dues list',
+    };
+  }
+}
+
+/**
+ * Fetch instructor dues details by instructorId
+ * GET /api/v1/admin/instructor-dues/{instructorId}
+ */
+export async function getInstructorDueDetails(
+  instructorId: string
+): Promise<ApiSingleResponse<InstructorDueDetailsResponse>> {
+  try {
+    const response = await getData<InstructorDueDetailsResponse>(
+      endpoints.instructorDues.details(instructorId)
+    );
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to load instructor dues details',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load instructor dues details',
     };
   }
 }
