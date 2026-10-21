@@ -92,7 +92,14 @@ export default function InstructorMyTransfersTable({
               minWidth: 700,
             }}
           >
-            {/* Table Header */}
+            {/* Table Header:
+                1. التاريخ (Date)
+                2. الملاحظة (Note)
+                3. المرجع (Reference)
+                4. المبلغ (Amount)
+                5. الحالة (Status)
+                6. الإيصال (Receipt)
+            */}
             <Box component="thead">
               <Box
                 component="tr"
@@ -108,25 +115,30 @@ export default function InstructorMyTransfersTable({
                   },
                 }}
               >
-                <Box component="th" sx={{ width: 140 }}>
-                  {t('col_transfer_number')}
-                </Box>
-                <Box component="th" sx={{ width: 130 }}>
-                  {t('col_amount')}
-                </Box>
+                {/* 1. Date */}
                 <Box component="th" sx={{ width: 130 }}>
                   {t('col_date')}
                 </Box>
+                {/* 2. Note */}
+                <Box component="th">
+                  {t('col_note')}
+                </Box>
+                {/* 3. Reference */}
                 <Box component="th" sx={{ width: 170 }}>
                   {t('col_bank_reference')}
                 </Box>
+                {/* 4. Amount */}
+                <Box component="th" sx={{ width: 140 }}>
+                  {t('col_amount')}
+                </Box>
+                {/* 5. Status */}
                 <Box component="th" sx={{ width: 120, textAlign: 'center !important' }}>
                   {t('col_status')}
                 </Box>
+                {/* 6. Receipt */}
                 <Box component="th" sx={{ width: 120, textAlign: 'center !important' }}>
                   {t('col_receipt')}
                 </Box>
-                <Box component="th">{t('col_note')}</Box>
               </Box>
             </Box>
 
@@ -146,13 +158,13 @@ export default function InstructorMyTransfersTable({
                       <Skeleton width={90} height={20} />
                     </Box>
                     <Box component="td">
-                      <Skeleton width={80} height={20} />
-                    </Box>
-                    <Box component="td">
-                      <Skeleton width={90} height={20} />
+                      <Skeleton width={180} height={20} />
                     </Box>
                     <Box component="td">
                       <Skeleton width={120} height={20} />
+                    </Box>
+                    <Box component="td">
+                      <Skeleton width={80} height={20} />
                     </Box>
                     <Box component="td" sx={{ textAlign: 'center' }}>
                       <Skeleton width={60} height={24} sx={{ mx: 'auto' }} />
@@ -160,14 +172,11 @@ export default function InstructorMyTransfersTable({
                     <Box component="td" sx={{ textAlign: 'center' }}>
                       <Skeleton width={70} height={20} sx={{ mx: 'auto' }} />
                     </Box>
-                    <Box component="td">
-                      <Skeleton width={150} height={20} />
-                    </Box>
                   </Box>
                 ))
               ) : transactions.length === 0 ? (
                 <Box component="tr">
-                  <Box component="td" colSpan={7} sx={{ py: 6, textAlign: 'center' }}>
+                  <Box component="td" colSpan={6} sx={{ py: 6, textAlign: 'center' }}>
                     <Typography sx={{ color: '#64748B', fontSize: 14, fontWeight: 600 }}>
                       {t('no_transactions')}
                     </Typography>
@@ -176,9 +185,8 @@ export default function InstructorMyTransfersTable({
               ) : (
                 transactions.map((tx) => {
                   const currency = tx.currencySymbol || tx.currencyCode || '';
-                  const displayTransferNumber = tx.transferNumber || '—';
-                  const displayRef = tx.bankReferenceNumber || '—';
-                  const displayNote = tx.note || '—';
+                  const displayNote = tx.note || tx.transferNumber || t('status_completed');
+                  const displayRef = tx.bankReferenceNumber || tx.transferNumber || '—';
 
                   return (
                     <Box
@@ -190,19 +198,28 @@ export default function InstructorMyTransfersTable({
                         '& td': { p: 2, fontSize: 13.5, textAlign: 'start' },
                       }}
                     >
-                      {/* 1. Transfer Number */}
+                      {/* 1. Date */}
+                      <Box component="td" sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>
+                        {formatDate(tx.transferDate || tx.creationTime)}
+                      </Box>
+
+                      {/* 2. Note */}
+                      <Box component="td" sx={{ fontWeight: 600, color: '#0F172A' }}>
+                        {displayNote}
+                      </Box>
+
+                      {/* 3. Bank Reference */}
                       <Box
                         component="td"
                         sx={{
-                          fontWeight: 700,
-                          color: '#0F172A',
-                          fontFamily: 'monospace',
+                          color: '#64748B',
+                          fontFamily: displayRef !== '—' ? 'monospace' : 'inherit',
                         }}
                       >
-                        {displayTransferNumber}
+                        {displayRef}
                       </Box>
 
-                      {/* 2. Amount */}
+                      {/* 4. Amount */}
                       <Box
                         component="td"
                         sx={{
@@ -217,22 +234,6 @@ export default function InstructorMyTransfersTable({
                         >
                           -{Math.abs(tx.amount).toLocaleString()} {currency}
                         </Box>
-                      </Box>
-
-                      {/* 3. Transfer Date */}
-                      <Box component="td" sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>
-                        {formatDate(tx.transferDate || tx.creationTime)}
-                      </Box>
-
-                      {/* 4. Bank Reference */}
-                      <Box
-                        component="td"
-                        sx={{
-                          color: '#64748B',
-                          fontFamily: displayRef !== '—' ? 'monospace' : 'inherit',
-                        }}
-                      >
-                        {displayRef}
                       </Box>
 
                       {/* 5. Status Badge */}
@@ -272,11 +273,6 @@ export default function InstructorMyTransfersTable({
                         ) : (
                           <Typography sx={{ color: '#94A3B8' }}>—</Typography>
                         )}
-                      </Box>
-
-                      {/* 7. Note */}
-                      <Box component="td" sx={{ color: '#64748B', maxWidth: 220 }}>
-                        {displayNote}
                       </Box>
                     </Box>
                   );
@@ -335,16 +331,25 @@ export default function InstructorMyTransfersTable({
           <Typography sx={{ fontWeight: 800, fontSize: 16 }}>
             {t('col_receipt')}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
             {previewReceiptUrl && (
               <Button
                 size="small"
                 variant="outlined"
                 onClick={() => window.open(previewReceiptUrl, '_blank')}
-                startIcon={<Iconify icon="solar:square-top-down-linear" width={16} />}
-                sx={{ borderRadius: 1.5, fontWeight: 700 }}
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.6,
+                }}
               >
-                {locale === 'ar' ? 'فتح في نافذة جديدة' : 'Open in new tab'}
+                <Iconify icon="solar:square-top-down-linear" width={18} />
+                <span>{locale === 'ar' ? 'فتح في نافذة جديدة' : 'Open in new tab'}</span>
               </Button>
             )}
             <IconButton onClick={() => setPreviewReceiptUrl(null)} size="small">
