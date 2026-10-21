@@ -40,7 +40,8 @@
     "terms_and_conditions": "الشروط والأحكام",
     "about_us": "من نحن",
     "logout": "تسجيل الخروج",
-    "instructor_payouts": "مستحقات المحاضرون"
+    "instructor_payouts": "مستحقات المحاضرون",
+    "instructor_wallet": "الأرباح والمحفظة"
   },
   "Courses": {
     "title": "الدورات التدريبية",
@@ -2903,6 +2904,61 @@
       "amount": "المبلغ المحوّل:",
       "receipt_verified": "تم التحقق من مطابقة الإيصال وتوثيق العملية في سجل الحركات المالية.",
       "close_btn": "إغلاق"
+    }
+  },
+  "InstructorWallet": {
+    "title": "الأرباح والمحفظة",
+    "info_notice": "يحول المبلغ بنكياً بواسطة الإدارة إلى حسابك المسجل. ستصلك إشعارات عند كل تحويل، ويظهر في سجل الحركات المالية.",
+    "failed_to_load": "فشل تحميل بيانات المحفظة",
+    "retry": "إعادة المحاولة",
+    "bank_card": {
+      "edit_bank_details_btn": "تعديل البيانات البنكية",
+      "bank_data_complete": "بيانات بنكية مكتملة",
+      "bank_data_incomplete": "بيانات بنكية غير مكتملة",
+      "bank_name": "اسم البنك",
+      "account_holder": "اسم صاحب الحساب",
+      "iban": "الآيبان",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "last_bank_update": "آخر تحديث بنكي"
+    },
+    "balance_card": {
+      "title": "رصيدي",
+      "current_balance_label": "الرصيد الحالي",
+      "balance_subtitle": "يُضاف كل ربح إلى رصيدك فور تحققه",
+      "total_earnings": "إجمالي الأرباح",
+      "transferred": "تم تحويله"
+    },
+    "transactions": {
+      "title": "سجل الحركات المالية (التحويلات المكتملة)",
+      "col_transfer_number": "رقم التحويل",
+      "col_amount": "المبلغ",
+      "col_date": "تاريخ التحويل",
+      "col_bank_reference": "الرقم المرجعي للبنك",
+      "col_receipt": "الإيصال",
+      "col_note": "الملاحظة",
+      "col_status": "الحالة",
+      "view_receipt": "عرض الإيصال",
+      "status_completed": "مكتمل",
+      "no_transactions": "لا توجد تحويلات مالية مكتملة حتى الآن",
+      "rows_per_page": "عدد الحركات لكل صفحة:"
+    },
+    "edit_dialog": {
+      "title": "تعديل البيانات البنكية",
+      "subtitle": "تأكد من إدخال بياناتك البنكية بدقة لضمان استلام المستحقات دون تأخير.",
+      "bank_name": "اسم البنك",
+      "bank_name_placeholder": "أدخل اسم البنك...",
+      "account_holder": "اسم صاحب الحساب",
+      "account_holder_placeholder": "أدخل الاسم كما هو مسجل في البنك...",
+      "iban": "رقم الآيبان (IBAN)",
+      "iban_placeholder": "مثال: KW00AAAA0000000000000000000000",
+      "iban_helper": "يرجى كتابة الآيبان كاملاً شاملاً كود الدولة وبدون مسافات",
+      "save_btn": "حفظ التغييرات",
+      "cancel_btn": "إلغاء",
+      "saving": "جاري الحفظ...",
+      "success_message": "تم تحديث البيانات البنكية بنجاح",
+      "error_message": "فشل تحديث البيانات البنكية",
+      "required_fields_error": "يرجى تعبئة كافة الحقول المطلوبة"
     }
   }
 }

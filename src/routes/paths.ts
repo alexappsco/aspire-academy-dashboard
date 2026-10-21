@@ -12,6 +12,7 @@ export const paths = {
     root: '/instructor-payouts',
     details: (id: string) => `/instructor-payouts/${id}`,
   },
+    wallet: '/wallet',
   groupDiscountSettings: {
     root: '/group-discount-settings',
     edit: '/group-discount-settings/edit',

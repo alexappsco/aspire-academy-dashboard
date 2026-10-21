@@ -217,6 +217,11 @@ export const endpoints = {
       `/instructor/session-requests/${id}/chapters/${chapterId}/lessons/${lessonId}`,
     transactions: (id: string) => `/instructor/session-requests/${id}/transactions`,
   },
+  instructorWallet: {
+    dues: '/instructor/dues',
+    transfers: '/instructor/dues/transfers',
+    bankDetails: '/instructor/bank-details',
+  },
   instructorDues: {
     list: '/admin/instructor-dues',
     summary: '/admin/instructor-dues/summary',
