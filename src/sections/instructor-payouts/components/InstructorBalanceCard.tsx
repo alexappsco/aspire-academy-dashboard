@@ -58,7 +58,7 @@ export default function InstructorBalanceCard({ instructor }: Props) {
         <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 600, mb: 0.5, textAlign: 'start' }}>
           {t('due_now_label')}
         </Typography>
-        <Typography
+        <Box
           sx={{
             fontSize: { xs: 32, md: 40 },
             fontWeight: 900,
@@ -84,7 +84,7 @@ export default function InstructorBalanceCard({ instructor }: Props) {
               </Box>
             )}
           </Stack>
-        </Typography>
+        </Box>
 
         {/* Progress Bar & Percent Label */}
         <LinearProgress

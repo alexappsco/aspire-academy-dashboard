@@ -6,13 +6,10 @@ import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
+import TablePagination from '@mui/material/TablePagination';
 import Link from 'next/link';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useLocale, useTranslations } from 'next-intl';
-import Iconify from 'src/components/iconify';
 import { InstructorDueItem } from 'src/types/instructor-payout';
 import { paths } from 'src/routes/paths';
 
@@ -37,10 +34,6 @@ export default function PayoutTable({
 }: Props) {
   const t = useTranslations('InstructorPayouts.table');
   const locale = useLocale();
-
-  const totalPages = Math.ceil(totalCount / rowsPerPage);
-  const startItem = totalCount === 0 ? 0 : page * rowsPerPage + 1;
-  const endItem = Math.min((page + 1) * rowsPerPage, totalCount);
 
   return (
     <Card
@@ -243,69 +236,31 @@ export default function PayoutTable({
       </Box>
 
       {/* Pagination Footer */}
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{
-          p: 2,
-          px: 2.5,
-          borderTop: '1px solid #F1F5F9',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          gap: 2,
+      <TablePagination
+        component="div"
+        count={totalCount}
+        page={page}
+        onPageChange={(_, newPage) => onPageChange(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => {
+          onRowsPerPageChange(parseInt(e.target.value, 10));
+          onPageChange(0);
         }}
-      >
-        <Typography sx={{ fontSize: 13, color: '#64748B' }}>
-          {startItem}-{endItem} of {totalCount}
-        </Typography>
-
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', gap: 1 }}>
-          <Select
-            size="small"
-            value={rowsPerPage}
-            onChange={(e) => {
-              onRowsPerPageChange(Number(e.target.value));
-              onPageChange(0);
-            }}
-            sx={{
-              height: 32,
-              fontSize: 13,
-              borderRadius: 1.5,
-              '& .MuiSelect-select': { py: 0.5, px: 1.25 },
-            }}
-          >
-            <MenuItem value={8}>8</MenuItem>
-            <MenuItem value={15}>15</MenuItem>
-            <MenuItem value={25}>25</MenuItem>
-          </Select>
-          <Typography sx={{ fontSize: 13, color: '#64748B' }}>{t('rows_per_page')}</Typography>
-        </Stack>
-
-        <Stack direction="row" spacing={0.5} sx={{ ms: 'auto', gap: 0.5 }}>
-          <IconButton
-            size="small"
-            disabled={page === 0}
-            onClick={() => onPageChange(page - 1)}
-            sx={{ borderRadius: 1.5 }}
-          >
-            <Iconify
-              icon={locale === 'ar' ? 'solar:alt-arrow-right-linear' : 'solar:alt-arrow-left-linear'}
-              width={18}
-            />
-          </IconButton>
-          <IconButton
-            size="small"
-            disabled={page >= totalPages - 1}
-            onClick={() => onPageChange(page + 1)}
-            sx={{ borderRadius: 1.5 }}
-          >
-            <Iconify
-              icon={locale === 'ar' ? 'solar:alt-arrow-left-linear' : 'solar:alt-arrow-right-linear'}
-              width={18}
-            />
-          </IconButton>
-        </Stack>
-      </Stack>
+        rowsPerPageOptions={[8, 15, 25]}
+        labelRowsPerPage={t('rows_per_page')}
+        labelDisplayedRows={({ from, to, count: total }) =>
+          locale === 'ar'
+            ? `${total === 0 ? '0-0' : `${from}-${to}`} من ${total}`
+            : `${total === 0 ? '0-0' : `${from}-${to}`} of ${total}`
+        }
+        sx={{
+          borderTop: '1px solid #F1F5F9',
+          '& .MuiTablePagination-toolbar': {
+            minHeight: 52,
+            px: 2.5,
+          },
+        }}
+      />
     </Card>
   );
 }
