@@ -10,7 +10,7 @@ import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { InstructorDueDetailsResponse } from 'src/types/instructor-payout';
 
@@ -24,11 +24,16 @@ export default function InstructorBankInfoCard({
   onOpenTransferDialog,
 }: Props) {
   const t = useTranslations('InstructorPayouts.details.bank_card');
+  const locale = useLocale();
 
   const isComplete =
     typeof instructor.hasCompleteBankDetails === 'boolean'
       ? instructor.hasCompleteBankDetails
-      : Boolean(instructor.iban && instructor.bankName && instructor.bankAccountHolderName);
+      : Boolean(
+          instructor.iban?.trim() &&
+            instructor.bankName?.trim() &&
+            instructor.bankAccountHolderName?.trim()
+        );
   const name = instructor.instructorName || '';
   const title = instructor.instructorTitle || '';
   const avatar = instructor.instructorImageUrl || '';
@@ -37,7 +42,23 @@ export default function InstructorBankInfoCard({
   const iban = instructor.iban || '—';
   const phone = instructor.instructorPhoneNumber || '—';
   const email = instructor.instructorEmail || '—';
-  const lastUpdated = instructor.lastUpdated || '—';
+
+  const rawUpdatedDate = instructor.bankDetailsUpdatedAt || instructor.lastUpdated;
+  const lastUpdated = rawUpdatedDate
+    ? (() => {
+        try {
+          const d = new Date(rawUpdatedDate);
+          if (Number.isNaN(d.getTime())) return rawUpdatedDate;
+          return d.toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          });
+        } catch {
+          return rawUpdatedDate;
+        }
+      })()
+    : '—';
 
   return (
     <Card

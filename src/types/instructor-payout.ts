@@ -113,6 +113,7 @@ export interface InstructorDueDetailsResponse {
   instructorPhoneNumber: string;
   instructorEmail: string;
   hasCompleteBankDetails?: boolean;
+  bankDetailsUpdatedAt?: string | null;
   lastUpdated?: string | null;
 }
 
