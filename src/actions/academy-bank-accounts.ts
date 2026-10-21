@@ -12,7 +12,9 @@ export async function getAcademyBankAccounts(): Promise<
   ApiSingleResponse<AcademyBankAccount[]>
 > {
   try {
-    const response = await getData<AcademyBankAccount[]>(endpoints.academyBankAccounts.list);
+    const response = await getData<AcademyBankAccount[]>(endpoints.academyBankAccounts.list, {
+      cache: 'no-store',
+    });
     if ('success' in response && response.success) {
       return { success: true, data: response.data };
     }

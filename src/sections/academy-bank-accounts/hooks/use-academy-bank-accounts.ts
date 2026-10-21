@@ -98,16 +98,25 @@ export default function useAcademyBankAccounts() {
   const setPrimary = async (account: AcademyBankAccount) => {
     setActionId(account.id);
     const response = await setPrimaryAcademyBankAccount(account.id);
-    if (response.success && response.data) {
-      setAccounts((current) =>
-        current.map((item) => ({
-          ...item,
-          ...(item.id === account.id ? response.data! : { isPrimary: false }),
-        }))
-      );
-      toast.success(t('primary_success'));
-    } else {
+    if (!response.success) {
       toast.error(response.error || t('primary_error'));
+      setActionId('');
+      return;
+    }
+
+    const refreshed = await getAcademyBankAccounts();
+    if (refreshed.success && refreshed.data) {
+      setAccounts(refreshed.data);
+      const primaryWasApplied = refreshed.data.some(
+        (item) => item.id === account.id && item.isPrimary
+      );
+      if (primaryWasApplied) {
+        toast.success(t('primary_success'));
+      } else {
+        toast.error(t('primary_error'));
+      }
+    } else {
+      toast.error(refreshed.error || t('primary_error'));
     }
     setActionId('');
   };
