@@ -8,6 +8,10 @@ export const paths = {
     root: '/session-requests',
     details: (id: string) => `/session-requests/${id}`,
   },
+  instructorPayouts: {
+    root: '/instructor-payouts',
+    details: (id: string) => `/instructor-payouts/${id}`,
+  },
   groupDiscountSettings: {
     root: '/group-discount-settings',
     edit: '/group-discount-settings/edit',

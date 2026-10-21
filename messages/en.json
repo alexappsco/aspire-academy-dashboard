@@ -38,7 +38,8 @@
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
-    "logout": "Logout"
+    "logout": "Logout",
+    "instructor_payouts": "Instructor Payouts"
   },
   "Courses": {
     "title": "Training Courses",
@@ -2723,6 +2724,120 @@
         "empty": "No receipt image is attached",
         "load_error": "The receipt image could not be loaded"
       }
+    }
+  },
+  "InstructorPayouts": {
+    "title": "Instructor Payouts",
+    "off_platform_notice": "Transfers are handled outside the platform via bank wire. Transfer from the academy account, then log the transaction here with the reference number to update the instructor's balance automatically.",
+    "kpi": {
+      "due_now_title": "Due for Transfer Now",
+      "instructors_waiting": "{count} instructors awaiting transfer",
+      "transferred_month_title": "Transferred This Month",
+      "transfers_recorded": "{count} registered bank transfers",
+      "missing_bank_data_title": "Incomplete Bank Details",
+      "missing_bank_count": "{count} instructors",
+      "missing_bank_helper": "Transfers cannot be processed"
+    },
+    "filters": {
+      "search_placeholder": "Search by instructor name or email...",
+      "all_periods": "All Periods",
+      "this_month": "This Month",
+      "last_month": "Last Month",
+      "this_quarter": "This Quarter",
+      "all_universities": "University: All",
+      "all_countries": "Country: All"
+    },
+    "table": {
+      "col_instructor": "Instructor",
+      "col_country": "Country",
+      "col_university": "University",
+      "col_total_earnings": "Total Earnings",
+      "col_transferred": "Transferred",
+      "col_due_now": "Due Now",
+      "col_last_transfer": "Last Transfer",
+      "col_record": "Record",
+      "view_record": "View Record",
+      "no_data": "No matching payout records",
+      "rows_per_page": "Rows per page:"
+    },
+    "details": {
+      "breadcrumbs_root": "Instructor Payouts",
+      "page_title": "Payouts Record – {name}",
+      "failed_to_load": "Failed to load dues details",
+      "retry": "Retry",
+      "bank_card": {
+        "register_transfer_btn": "Register Bank Transfer",
+        "bank_data_complete": "Bank details complete",
+        "bank_data_incomplete": "Bank details incomplete",
+        "bank_name": "Bank",
+        "account_holder": "Account Holder Name",
+        "iban": "IBAN Number",
+        "last_bank_update": "Last Bank Data Update",
+        "phone": "Phone Number",
+        "email": "Email"
+      },
+      "balance_card": {
+        "title": "Balance Summary",
+        "due_now_label": "Due Now",
+        "progress_caption": "{percent}% of total earnings transferred",
+        "total_earnings": "Total Earnings",
+        "transferred": "Transferred",
+        "under_review": "Under Review"
+      },
+      "transactions": {
+        "title": "Financial Transactions Log",
+        "tab_all": "All",
+        "tab_completed": "Registered Transfers",
+        "tab_pending": "Due",
+        "tab_under_review": "Under Review",
+        "tab_settled": "Settlements",
+        "col_date": "Date",
+        "col_note": "Note",
+        "col_reference": "Reference",
+        "col_amount": "Amount",
+        "col_status": "Status",
+        "col_receipt": "Receipt",
+        "view_receipt": "View Receipt",
+        "status_completed": "Completed",
+        "status_pending": "Due",
+        "status_under_review": "Under Review",
+        "status_settled": "Settled",
+        "no_transactions": "No financial transactions recorded in this tab",
+        "rows_per_page": "Transactions per page:"
+      }
+    },
+    "dialog": {
+      "title": "Register Bank Transfer",
+      "subtitle": "To: {name} • {bank} • {iban}",
+      "warning_notice": "This action records a wire transfer already executed from the academy's bank account. No real funds are transferred from this platform.",
+      "transfer_amount": "Transfer Amount",
+      "amount_helper": "Current due: {due} {currency}. Partial amounts can be registered.",
+      "transfer_date": "Transfer Date",
+      "bank_reference": "Bank Reference Number",
+      "bank_reference_placeholder": "e.g. TRF-20261020-01",
+      "transfer_receipt": "Transfer Receipt",
+      "drop_receipt_prompt": "Drag receipt here or click to upload",
+      "file_limits_hint": "PDF or image up to 5 MB",
+      "optional_note": "Optional Note",
+      "note_placeholder": "Add any details regarding this transfer...",
+      "due_after_registration": "Due Balance After Registration",
+      "confirm_btn": "Confirm Transfer Registration",
+      "cancel_btn": "Cancel",
+      "submitting": "Recording...",
+      "amount_required_error": "Please enter a valid amount greater than zero",
+      "amount_exceeds_due": "The entered amount exceeds the current due balance",
+      "reference_required_error": "Please enter the bank reference number",
+      "transfer_success_message": "Bank transfer recorded and balance updated successfully",
+      "transfer_error_message": "An error occurred while registering the transfer",
+      "default_transfer_note": "Bank transfer to instructor account"
+    },
+    "receipt_dialog": {
+      "title": "Bank Transfer Receipt",
+      "reference": "Reference Number:",
+      "date": "Transfer Date:",
+      "amount": "Transferred Amount:",
+      "receipt_verified": "Receipt matched and transaction verified in financial logs.",
+      "close_btn": "Close"
     }
   }
 }
