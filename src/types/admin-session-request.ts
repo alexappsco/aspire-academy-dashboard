@@ -64,9 +64,3 @@ export type GetAdminSessionRequestsParams = {
 export type AdminSessionRequestStatusCounts = Record<AdminSessionRequestStatus, number> & {
   total: number;
 };
-
-export type SessionGroupDiscountSetting = {
-  isEnabled: boolean;
-  minParticipants: number;
-  discountPercentage: number;
-};

@@ -28,3 +28,4 @@ export * from './instructor-session-settings';
 export * from './instructor-session-requests';
 export * from './hours-charge-requests';
 export * from './admin-session-requests';
+export * from './session-group-discount-settings';

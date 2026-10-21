@@ -6,12 +6,10 @@ import { useTranslations } from 'next-intl';
 import {
   getSessionGroupDiscountSetting,
   reviewAdminSessionRequest,
-} from 'src/actions/admin-session-requests';
+} from 'src/actions';
 import { useToast } from 'src/components/toast';
-import type {
-  AdminSessionRequest,
-  SessionGroupDiscountSetting,
-} from 'src/types/admin-session-request';
+import type { AdminSessionRequest } from 'src/types/admin-session-request';
+import type { SessionGroupDiscountSetting } from 'src/types/session-group-discount-setting';
 
 import { isGroupSessionRequest, normalizeSessionRequestStatus } from '../utils';
 
