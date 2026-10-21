@@ -35,7 +35,8 @@ const requiredField = (value: string) => value.trim().length > 0;
 export default function BankAccountFormDialog({ open, account, saving, onClose, onSave }: Props) {
   const t = useTranslations('AcademyBankAccounts.form');
   const locale = useLocale();
-  const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const isRtl = locale === 'ar';
+  const direction = isRtl ? 'rtl' : 'ltr';
   const isEdit = Boolean(account);
   const [accountHolderName, setAccountHolderName] = useState('');
   const [bankName, setBankName] = useState('');
@@ -127,7 +128,31 @@ export default function BankAccountFormDialog({ open, account, saving, onClose, 
       </Box>
 
       <DialogContent sx={{ p: 2.5 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1.5 }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+            gap: 1.5,
+            ...(isRtl && {
+              '& .MuiInputLabel-root': {
+                right: 24,
+                left: 'auto',
+                transformOrigin: 'right',
+              },
+              '& .MuiInputLabel-shrink': {
+                right: 24,
+                left: 'auto',
+                transform: 'translate(0, -6px) scale(0.75)',
+              },
+              '& .MuiOutlinedInput-notchedOutline legend': {
+                textAlign: 'right',
+              },
+              '& .MuiInputBase-input': {
+                textAlign: 'right',
+              },
+            }),
+          }}
+        >
           <TextField label={t('bank_name')} value={bankName} onChange={(event) => setBankName(event.target.value)} disabled={saving} {...fieldProps(bankName)} />
           <TextField label={t('account_holder')} value={accountHolderName} onChange={(event) => setAccountHolderName(event.target.value)} disabled={saving} {...fieldProps(accountHolderName)} />
           <TextField label={t('account_number')} value={accountNumber} onChange={(event) => setAccountNumber(event.target.value)} disabled={saving} {...fieldProps(accountNumber)} />

@@ -116,7 +116,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     key: "academy_bank_accounts",
-    icon: "/icons/finance.svg",
+    icon: "/icons/bank.svg",
     path: "/academy-bank-accounts",
   },
   {
