@@ -59,16 +59,18 @@ export default function BankAccountCard({
           </Box>
         </Stack>
 
-        {!account.isPrimary && (
-          <Button
-            variant="outlined"
-            disabled={loading}
-            onClick={onSetPrimary}
-            sx={{ justifySelf: 'center', whiteSpace: 'nowrap' }}
-          >
-            {t('set_primary')}
-          </Button>
-        )}
+        <Box sx={{ justifySelf: 'center' }}>
+          {!account.isPrimary && (
+            <Button
+              variant="outlined"
+              disabled={loading}
+              onClick={onSetPrimary}
+              sx={{ whiteSpace: 'nowrap' }}
+            >
+              {t('set_primary')}
+            </Button>
+          )}
+        </Box>
 
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifySelf: 'end' }}>
           {loading && <CircularProgress size={18} />}
