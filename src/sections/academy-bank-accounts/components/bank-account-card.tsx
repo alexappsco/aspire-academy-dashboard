@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -12,6 +11,7 @@ import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
+import SvgColor from 'src/components/svg-color';
 import type { AcademyBankAccount } from 'src/types/academy-bank-account';
 
 import AccountDetailItem from './account-detail-item';
@@ -22,7 +22,6 @@ type Props = {
   onEdit: () => void;
   onDelete: () => void;
   onVisibilityChange: (isVisible: boolean) => void;
-  onSetPrimary: () => void;
 };
 
 export default function BankAccountCard({
@@ -31,7 +30,6 @@ export default function BankAccountCard({
   onEdit,
   onDelete,
   onVisibilityChange,
-  onSetPrimary,
 }: Props) {
   const t = useTranslations('AcademyBankAccounts');
 
@@ -41,36 +39,22 @@ export default function BankAccountCard({
         sx={{
           p: 2,
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto minmax(0, 1fr)' },
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
           alignItems: 'center',
           gap: 2,
         }}
       >
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', justifySelf: 'start' }}>
           <Box sx={{ width: 42, height: 42, borderRadius: '50%', bgcolor: '#DDF8EF', color: '#168567', display: 'grid', placeItems: 'center' }}>
-            <Iconify icon="solar:bank-linear" width={23} />
+            <SvgColor src="/icons/bank.svg" sx={{ width: 23, height: 23 }} />
           </Box>
           <Box>
             <Typography sx={{ fontSize: 16, fontWeight: 800 }}>{account.bankName}</Typography>
             <Stack direction="row" spacing={0.75} sx={{ mt: 0.5, flexWrap: 'wrap' }}>
-              {account.isPrimary && <Chip size="small" label={t('primary')} sx={{ bgcolor: '#DDF5E8', color: '#14804A', fontWeight: 700 }} />}
               <Chip size="small" label={`${account.countryName} · ${account.currencyCode}`} />
             </Stack>
           </Box>
         </Stack>
-
-        <Box sx={{ justifySelf: 'center' }}>
-          {!account.isPrimary && (
-            <Button
-              variant="outlined"
-              disabled={loading}
-              onClick={onSetPrimary}
-              sx={{ whiteSpace: 'nowrap' }}
-            >
-              {t('set_primary')}
-            </Button>
-          )}
-        </Box>
 
         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifySelf: 'end' }}>
           {loading && <CircularProgress size={18} />}

@@ -7,7 +7,6 @@ import {
   createAcademyBankAccount,
   deleteAcademyBankAccount,
   getAcademyBankAccounts,
-  setPrimaryAcademyBankAccount,
   updateAcademyBankAccount,
   updateAcademyBankAccountVisibility,
 } from 'src/actions/academy-bank-accounts';
@@ -95,32 +94,6 @@ export default function useAcademyBankAccounts() {
     setActionId('');
   };
 
-  const setPrimary = async (account: AcademyBankAccount) => {
-    setActionId(account.id);
-    const response = await setPrimaryAcademyBankAccount(account.id);
-    if (!response.success) {
-      toast.error(response.error || t('primary_error'));
-      setActionId('');
-      return;
-    }
-
-    const refreshed = await getAcademyBankAccounts();
-    if (refreshed.success && refreshed.data) {
-      setAccounts(refreshed.data);
-      const primaryWasApplied = refreshed.data.some(
-        (item) => item.id === account.id && item.isPrimary
-      );
-      if (primaryWasApplied) {
-        toast.success(t('primary_success'));
-      } else {
-        toast.error(t('primary_error'));
-      }
-    } else {
-      toast.error(refreshed.error || t('primary_error'));
-    }
-    setActionId('');
-  };
-
   return {
     accounts,
     loading,
@@ -131,6 +104,5 @@ export default function useAcademyBankAccounts() {
     saveAccount,
     removeAccount,
     changeVisibility,
-    setPrimary,
   };
 }

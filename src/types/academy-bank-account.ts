@@ -12,7 +12,6 @@ export type AcademyBankAccount = {
   countryName: string;
   studentInstructions: string | null;
   isVisibleToStudents: boolean;
-  isPrimary: boolean;
   creationTime: string;
 };
 

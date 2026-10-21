@@ -2509,8 +2509,6 @@
     "add_account": "Add bank account",
     "notice": "These accounts appear to students on the hours charging page so they can transfer the amount and upload the transfer receipt. Show or hide any account without deleting it.",
     "section_title": "Accounts displayed to students",
-    "primary": "Primary account",
-    "set_primary": "Set as primary",
     "visible_to_students": "Visible to students",
     "edit": "Edit account",
     "delete": "Delete account",
@@ -2559,9 +2557,7 @@
       "delete_success": "Bank account deleted successfully",
       "delete_error": "Failed to delete bank account",
       "visibility_success": "Account visibility updated successfully",
-      "visibility_error": "Failed to update account visibility",
-      "primary_success": "Primary bank account updated successfully",
-      "primary_error": "Failed to set the primary bank account"
+      "visibility_error": "Failed to update account visibility"
     }
   },
   "GroupDiscountSettings": {

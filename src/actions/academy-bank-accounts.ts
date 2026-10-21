@@ -122,26 +122,3 @@ export async function updateAcademyBankAccountVisibility(
     };
   }
 }
-
-export async function setPrimaryAcademyBankAccount(
-  id: string
-): Promise<ApiSingleResponse<AcademyBankAccount>> {
-  try {
-    const response = await postData<AcademyBankAccount, undefined>(
-      endpoints.academyBankAccounts.primary(id),
-      undefined
-    );
-    if ('success' in response && response.success) {
-      return { success: true, data: response.data };
-    }
-    return {
-      success: false,
-      error: 'error' in response ? response.error : 'Failed to set primary bank account',
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to set primary bank account',
-    };
-  }
-}

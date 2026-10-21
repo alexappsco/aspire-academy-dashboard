@@ -141,7 +141,6 @@ export const endpoints = {
     delete: (id: string) => `/admin/academy-bank-accounts/${id}`,
     visibility: (id: string, isVisible: boolean) =>
       `/admin/academy-bank-accounts/${id}/visibility?isVisible=${isVisible}`,
-    primary: (id: string) => `/admin/academy-bank-accounts/${id}/primary`,
   },
   students: {
     list: '/admin/students',

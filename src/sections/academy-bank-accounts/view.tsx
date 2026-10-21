@@ -54,7 +54,6 @@ export default function AcademyBankAccountsView() {
             onEdit={() => openEdit(account)}
             onDelete={() => setDeletingAccount(account)}
             onVisibilityChange={(visible) => void bankAccounts.changeVisibility(account, visible)}
-            onSetPrimary={() => void bankAccounts.setPrimary(account)}
           />
         ))}
       </Box>
