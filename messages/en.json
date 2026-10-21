@@ -32,6 +32,8 @@
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
     "admin_private_requests": "Private Requests",
+    "admin_private_requests_list": "Requests List",
+    "group_discount_settings": "Group Discount Settings",
     "reports": "Reports",
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
@@ -2346,7 +2348,12 @@
         "confirm_dialog_student_desc": "Are you sure you want to end broadcast and finish session with {student}?",
         "confirm_dialog_recorded_metrics": "Logged Duration: {minutes} mins • Entitlement: {amount} {currency}",
         "confirm": "Confirm End",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "join_session": "Join session",
+        "joining": "Joining...",
+        "expand_meeting": "Expand",
+        "shrink_meeting": "Shrink",
+        "join_failed": "Could not join the session"
       },
       "recorded_curriculum": {
         "title": "Recorded Sessions Curriculum & Content",
@@ -2494,6 +2501,79 @@
       "title": "Decision",
       "approve": "Approve request",
       "approve_note": "Approval is only available while the request is awaiting admin review and after setting the instructor percentage."
+    }
+  },
+  "GroupDiscountSettings": {
+    "title": "Private Request Group Discount Settings",
+    "subtitle": "Set the minimum group size and discount percentage applied to each student's charged hours.",
+    "edit_settings": "Edit settings",
+    "retry": "Retry",
+    "load_error": "Failed to load group discount settings",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "current_rule": {
+      "title": "Current discount rule",
+      "description": "The student count includes the request owner and all participants."
+    },
+    "minimum": {
+      "title": "Students required to activate the discount",
+      "value": "{count, plural, one {# student} other {# students}}",
+      "description": "The minimum group size, including the request owner and {friends} additional participants.",
+      "example": "The discount applies when the group reaches {count} students."
+    },
+    "percentage": {
+      "title": "Discount percentage on charged hours",
+      "description": "The final percentage set by the administrator.",
+      "example": "If 10 hours are consumed, only {hours} hours are charged."
+    },
+    "how_it_works": {
+      "title": "How does the discount work?",
+      "steps": {
+        "count": {
+          "title": "{number}. Count",
+          "description": "The total number of students in the shared request is calculated."
+        },
+        "wallet": {
+          "title": "{number}. Charge each student",
+          "description": "Each student needs a registered account and their own hours wallet."
+        },
+        "apply": {
+          "title": "{number}. Apply the discount",
+          "description": "The discount is applied to the consumed hours when recharging."
+        }
+      }
+    },
+    "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage.",
+    "edit": {
+      "title": "Edit Private Request Group Discount Settings",
+      "subtitle": "Set the total number of students required for the discount, then enter the discount percentage.",
+      "future_notice": "The new rules will apply to requests created after saving without changing previous consumption records.",
+      "minimum": {
+        "title": "Minimum number of students",
+        "description": "The request owner is included in the total count.",
+        "label": "Students required to start the discount",
+        "helper": "For example: 4 means the request owner plus 3 additional participants.",
+        "error": "Enter a valid whole number of students."
+      },
+      "percentage": {
+        "title": "Discount percentage",
+        "description": "A percentage deducted from the charged hours for each eligible student.",
+        "label": "Discount percentage (%)",
+        "helper": "Enter the percentage approved by the administrator.",
+        "error": "Enter a valid percentage from 0 to 100."
+      },
+      "activation": {
+        "title": "Enable group discount",
+        "description": "Turn this setting off to stop applying the discount to new eligible requests."
+      },
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "retry": "Retry",
+      "load_error": "Failed to load group discount settings",
+      "save_error": "Failed to save group discount settings",
+      "success": "Group discount settings updated successfully"
     }
   },
   "AdminSessionRequests": {

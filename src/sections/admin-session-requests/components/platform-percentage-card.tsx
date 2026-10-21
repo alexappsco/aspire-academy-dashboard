@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-import type { SessionGroupDiscountSetting } from 'src/types/admin-session-request';
+import type { SessionGroupDiscountSetting } from 'src/types/session-group-discount-setting';
 
 type Props = {
   percentage: string;
