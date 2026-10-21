@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -50,6 +51,10 @@ const DEFAULT_EMPTY_INSTRUCTOR: InstructorWalletDetailsResponse = {
 export default function InstructorWalletView() {
   const t = useTranslations('InstructorWallet');
   const toast = useToast();
+  const searchParams = useSearchParams();
+
+  const page = Number(searchParams.get('page') || 1);
+  const limit = Number(searchParams.get('limit') || 10);
 
   // Wallet details state
   const [loading, setLoading] = useState(true);
@@ -59,8 +64,6 @@ export default function InstructorWalletView() {
   // Transfers log state
   const [transfers, setTransfers] = useState<InstructorTransferItem[]>([]);
   const [totalTransfersCount, setTotalTransfersCount] = useState<number>(0);
-  const [transfersPage, setTransfersPage] = useState<number>(0);
-  const [transfersRowsPerPage, setTransfersRowsPerPage] = useState<number>(10);
   const [transfersLoading, setTransfersLoading] = useState<boolean>(true);
 
   // Dialog State
@@ -91,8 +94,8 @@ export default function InstructorWalletView() {
     setTransfersLoading(true);
     try {
       const res = await getInstructorMyTransfers({
-        SkipCount: transfersPage * transfersRowsPerPage,
-        MaxResultCount: transfersRowsPerPage,
+        SkipCount: (page - 1) * limit,
+        MaxResultCount: limit,
       });
 
       if (res.success && res.data) {
@@ -104,7 +107,7 @@ export default function InstructorWalletView() {
     } finally {
       setTransfersLoading(false);
     }
-  }, [transfersPage, transfersRowsPerPage]);
+  }, [page, limit]);
 
   useEffect(() => {
     fetchWallet();
@@ -214,11 +217,7 @@ export default function InstructorWalletView() {
         <InstructorMyTransfersTable
           transactions={transfers}
           totalCount={totalTransfersCount}
-          page={transfersPage}
-          rowsPerPage={transfersRowsPerPage}
           loading={transfersLoading}
-          onPageChange={setTransfersPage}
-          onRowsPerPageChange={setTransfersRowsPerPage}
         />
       </Box>
 

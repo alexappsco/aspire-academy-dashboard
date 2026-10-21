@@ -6,38 +6,38 @@ import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
-import Skeleton from '@mui/material/Skeleton';
-import TablePagination from '@mui/material/TablePagination';
+import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import { useLocale, useTranslations } from 'next-intl';
+
+import SharedTable from 'src/components/SharedTable/SharedTable';
+import { cellAlignment, headCellType } from 'src/components/SharedTable/types';
 import Iconify from 'src/components/iconify';
 import { InstructorTransferItem } from 'src/types/instructor-wallet';
 import { resolveReceiptUrl } from 'src/types/order';
 
+export type FormattedTransferRow = InstructorTransferItem & {
+  status?: string;
+  receipt?: string;
+};
+
 interface Props {
   transactions: InstructorTransferItem[];
   totalCount: number;
-  page: number;
-  rowsPerPage: number;
   loading?: boolean;
-  onPageChange: (newPage: number) => void;
-  onRowsPerPageChange: (newRowsPerPage: number) => void;
 }
 
 export default function InstructorMyTransfersTable({
   transactions,
   totalCount,
-  page,
-  rowsPerPage,
   loading = false,
-  onPageChange,
-  onRowsPerPageChange,
 }: Props) {
   const t = useTranslations('InstructorWallet.transactions');
   const locale = useLocale();
+  const isRtl = locale === 'ar';
 
   // Receipt preview modal state
   const [previewReceiptUrl, setPreviewReceiptUrl] = useState<string | null>(null);
@@ -62,6 +62,108 @@ export default function InstructorMyTransfersTable({
     setPreviewReceiptUrl(fullUrl);
   };
 
+  const tableHead: headCellType[] = [
+    {
+      id: 'transferDate',
+      label: t('col_date'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'note',
+      label: t('col_note'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'bankReferenceNumber',
+      label: t('col_bank_reference'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'amount',
+      label: t('col_amount'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'status',
+      label: t('col_status'),
+      align: cellAlignment.center,
+    },
+    {
+      id: 'receipt',
+      label: t('col_receipt'),
+      align: cellAlignment.center,
+    },
+  ];
+
+  const customRender = {
+    transferDate: (row: FormattedTransferRow) => (
+      <Typography sx={{ fontSize: 13, color: '#64748B', whiteSpace: 'nowrap' }}>
+        {formatDate(row.transferDate || row.creationTime)}
+      </Typography>
+    ),
+    note: (row: FormattedTransferRow) => (
+      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
+        {row.note || row.transferNumber || t('status_completed')}
+      </Typography>
+    ),
+    bankReferenceNumber: (row: FormattedTransferRow) => (
+      <Typography sx={{ fontSize: 13, color: '#64748B', fontFamily: 'monospace' }}>
+        {row.bankReferenceNumber || row.transferNumber || '—'}
+      </Typography>
+    ),
+    amount: (row: FormattedTransferRow) => {
+      const currency = row.currencySymbol || row.currencyCode || '';
+      return (
+        <Typography
+          sx={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap' }}
+        >
+          <Box component="span" sx={{ direction: 'ltr', display: 'inline-block' }}>
+            -{Math.abs(row.amount).toLocaleString()} {currency}
+          </Box>
+        </Typography>
+      );
+    },
+    status: () => (
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Chip
+          label={t('status_completed')}
+          size="small"
+          sx={{
+            bgcolor: '#DCFCE7',
+            color: '#15803D',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+            px: 0.5,
+          }}
+        />
+      </Box>
+    ),
+    receipt: (row: FormattedTransferRow) => (
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        {row.receiptUrl ? (
+          <Button
+            size="small"
+            onClick={() => handleOpenReceipt(row.receiptUrl!)}
+            sx={{
+              color: '#2563EB',
+              fontWeight: 700,
+              fontSize: 13,
+              p: 0.5,
+              minWidth: 'auto',
+              '&:hover': { bgcolor: '#EFF6FF', textDecoration: 'underline' },
+            }}
+          >
+            {t('view_receipt')}
+          </Button>
+        ) : (
+          <Typography sx={{ color: '#94A3B8' }}>—</Typography>
+        )}
+      </Box>
+    ),
+  };
+
   return (
     <>
       <Card
@@ -82,241 +184,31 @@ export default function InstructorMyTransfersTable({
           </Typography>
         </Box>
 
-        {/* Table Content */}
-        <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <Box
-            component="table"
-            sx={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              minWidth: 750,
-              tableLayout: 'fixed',
-            }}
-          >
-            {/* Table Header:
-                1. التاريخ (Date) - 16%
-                2. الملاحظة (Note) - 25%
-                3. المرجع (Reference) - 23%
-                4. المبلغ (Amount) - 14%
-                5. الحالة (Status) - 11%
-                6. الإيصال (Receipt) - 11%
-            */}
-            <Box component="thead">
-              <Box
-                component="tr"
-                sx={{
-                  bgcolor: '#F8FAFC',
-                  '& th': {
-                    p: 2,
-                    color: '#64748B',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    textAlign: 'start',
-                    borderBottom: '1px solid #F1F5F9',
-                  },
-                }}
-              >
-                {/* 1. Date */}
-                <Box component="th" sx={{ width: '16%' }}>
-                  {t('col_date')}
-                </Box>
-                {/* 2. Note */}
-                <Box component="th" sx={{ width: '25%' }}>
-                  {t('col_note')}
-                </Box>
-                {/* 3. Reference */}
-                <Box component="th" sx={{ width: '23%' }}>
-                  {t('col_bank_reference')}
-                </Box>
-                {/* 4. Amount */}
-                <Box component="th" sx={{ width: '14%' }}>
-                  {t('col_amount')}
-                </Box>
-                {/* 5. Status */}
-                <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
-                  {t('col_status')}
-                </Box>
-                {/* 6. Receipt */}
-                <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
-                  {t('col_receipt')}
-                </Box>
-              </Box>
+        {/* SharedTable Component */}
+        <Box sx={{ px: 1, position: 'relative' }}>
+          {loading && (
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 2,
+                display: 'grid',
+                placeItems: 'center',
+                bgcolor: 'rgba(255,255,255,0.72)',
+              }}
+            >
+              <CircularProgress size={32} />
             </Box>
+          )}
 
-            {/* Table Body */}
-            <Box component="tbody">
-              {loading ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <Box
-                    component="tr"
-                    key={`skeleton-${idx}`}
-                    sx={{
-                      borderBottom: '1px solid #F1F5F9',
-                      '& td': { p: 2 },
-                    }}
-                  >
-                    <Box component="td">
-                      <Skeleton width="80%" height={20} />
-                    </Box>
-                    <Box component="td">
-                      <Skeleton width="90%" height={20} />
-                    </Box>
-                    <Box component="td">
-                      <Skeleton width="85%" height={20} />
-                    </Box>
-                    <Box component="td">
-                      <Skeleton width="70%" height={20} />
-                    </Box>
-                    <Box component="td" sx={{ textAlign: 'center' }}>
-                      <Skeleton width={60} height={24} sx={{ mx: 'auto' }} />
-                    </Box>
-                    <Box component="td" sx={{ textAlign: 'center' }}>
-                      <Skeleton width={70} height={20} sx={{ mx: 'auto' }} />
-                    </Box>
-                  </Box>
-                ))
-              ) : transactions.length === 0 ? (
-                <Box component="tr">
-                  <Box component="td" colSpan={6} sx={{ py: 6, textAlign: 'center' }}>
-                    <Typography sx={{ color: '#64748B', fontSize: 14, fontWeight: 600 }}>
-                      {t('no_transactions')}
-                    </Typography>
-                  </Box>
-                </Box>
-              ) : (
-                transactions.map((tx) => {
-                  const currency = tx.currencySymbol || tx.currencyCode || '';
-                  const displayNote = tx.note || tx.transferNumber || t('status_completed');
-                  const displayRef = tx.bankReferenceNumber || tx.transferNumber || '—';
-
-                  return (
-                    <Box
-                      component="tr"
-                      key={tx.id}
-                      sx={{
-                        borderBottom: '1px solid #F1F5F9',
-                        '&:hover': { bgcolor: '#F8FAFC' },
-                        '& td': { p: 2, fontSize: 13.5, textAlign: 'start' },
-                      }}
-                    >
-                      {/* 1. Date */}
-                      <Box component="td" sx={{ color: '#64748B', whiteSpace: 'nowrap' }}>
-                        {formatDate(tx.transferDate || tx.creationTime)}
-                      </Box>
-
-                      {/* 2. Note */}
-                      <Box
-                        component="td"
-                        sx={{
-                          fontWeight: 600,
-                          color: '#0F172A',
-                          wordBreak: 'break-word',
-                        }}
-                      >
-                        {displayNote}
-                      </Box>
-
-                      {/* 3. Bank Reference */}
-                      <Box
-                        component="td"
-                        sx={{
-                          color: '#64748B',
-                          fontFamily: displayRef !== '—' ? 'monospace' : 'inherit',
-                          wordBreak: 'break-all',
-                        }}
-                      >
-                        {displayRef}
-                      </Box>
-
-                      {/* 4. Amount */}
-                      <Box
-                        component="td"
-                        sx={{
-                          fontWeight: 800,
-                          color: '#0F172A',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <Box
-                          component="span"
-                          sx={{ direction: 'ltr', display: 'inline-block' }}
-                        >
-                          -{Math.abs(tx.amount).toLocaleString()} {currency}
-                        </Box>
-                      </Box>
-
-                      {/* 5. Status Badge */}
-                      <Box component="td" sx={{ textAlign: 'center !important' }}>
-                        <Chip
-                          label={t('status_completed')}
-                          size="small"
-                          sx={{
-                            bgcolor: '#DCFCE7',
-                            color: '#15803D',
-                            fontWeight: 700,
-                            fontSize: 12,
-                            height: 24,
-                            borderRadius: 1.5,
-                            px: 0.5,
-                          }}
-                        />
-                      </Box>
-
-                      {/* 6. Receipt Link */}
-                      <Box component="td" sx={{ textAlign: 'center !important' }}>
-                        {tx.receiptUrl ? (
-                          <Button
-                            size="small"
-                            onClick={() => handleOpenReceipt(tx.receiptUrl!)}
-                            sx={{
-                              color: '#2563EB',
-                              fontWeight: 700,
-                              fontSize: 13,
-                              p: 0.5,
-                              minWidth: 'auto',
-                              '&:hover': { bgcolor: '#EFF6FF', textDecoration: 'underline' },
-                            }}
-                          >
-                            {t('view_receipt')}
-                          </Button>
-                        ) : (
-                          <Typography sx={{ color: '#94A3B8' }}>—</Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  );
-                })
-              )}
-            </Box>
-          </Box>
+          <SharedTable<FormattedTransferRow>
+            data={transactions}
+            tableHead={tableHead}
+            customRender={customRender}
+            count={totalCount}
+            serverPagination
+          />
         </Box>
-
-        {/* Pagination Footer */}
-        <TablePagination
-          component="div"
-          count={totalCount}
-          page={page}
-          onPageChange={(_, newPage) => onPageChange(newPage)}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(e) => {
-            onRowsPerPageChange(parseInt(e.target.value, 10));
-            onPageChange(0);
-          }}
-          rowsPerPageOptions={[5, 10, 20]}
-          labelRowsPerPage={t('rows_per_page')}
-          labelDisplayedRows={({ from, to, count: total }) =>
-            locale === 'ar'
-              ? `${total === 0 ? '0-0' : `${from}-${to}`} من ${total}`
-              : `${total === 0 ? '0-0' : `${from}-${to}`} of ${total}`
-          }
-          sx={{
-            borderTop: '1px solid #F1F5F9',
-            '& .MuiTablePagination-toolbar': {
-              minHeight: 52,
-              px: 2.5,
-            },
-          }}
-        />
       </Card>
 
       {/* Receipt Modal Preview */}
