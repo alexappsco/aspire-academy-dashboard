@@ -134,6 +134,14 @@ export const endpoints = {
     review: (id: string) => `/admin/session-requests/${id}/review`,
     groupDiscountSetting: '/admin/session-group-discount-setting',
   },
+  academyBankAccounts: {
+    list: '/admin/academy-bank-accounts',
+    create: '/admin/academy-bank-accounts',
+    update: (id: string) => `/admin/academy-bank-accounts/${id}`,
+    delete: (id: string) => `/admin/academy-bank-accounts/${id}`,
+    visibility: (id: string, isVisible: boolean) =>
+      `/admin/academy-bank-accounts/${id}/visibility?isVisible=${isVisible}`,
+  },
   students: {
     list: '/admin/students',
     details: (id: string) => `/admin/students/${id}`,

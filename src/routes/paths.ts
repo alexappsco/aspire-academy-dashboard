@@ -16,4 +16,5 @@ export const paths = {
     root: '/group-discount-settings',
     edit: '/group-discount-settings/edit',
   },
+  academyBankAccounts: '/academy-bank-accounts',
 };

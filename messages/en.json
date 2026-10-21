@@ -28,6 +28,7 @@
     "academic_hierarchy": "Academic Structure",
     "countries": "Countries",
     "currencies": "Currencies",
+    "academy_bank_accounts": "Academy Bank Accounts",
     "subjects": "Subjects Management",
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
@@ -2501,6 +2502,62 @@
       "title": "Decision",
       "approve": "Approve request",
       "approve_note": "Approval is only available while the request is awaiting admin review and after setting the instructor percentage."
+    }
+  },
+  "AcademyBankAccounts": {
+    "title": "Academy Bank Accounts",
+    "add_account": "Add bank account",
+    "notice": "These accounts appear to students on the hours charging page so they can transfer the amount and upload the transfer receipt. Show or hide any account without deleting it.",
+    "section_title": "Accounts displayed to students",
+    "visible_to_students": "Visible to students",
+    "edit": "Edit account",
+    "delete": "Delete account",
+    "retry": "Retry",
+    "fields": {
+      "account_holder": "Account holder name",
+      "account_number": "Account number",
+      "iban": "IBAN",
+      "swift": "SWIFT / BIC",
+      "currency": "Currency",
+      "instructions": "Student instructions"
+    },
+    "empty": {
+      "title": "No bank accounts yet",
+      "description": "Add the first bank account that students can use for transfers."
+    },
+    "form": {
+      "add_title": "Add bank account",
+      "edit_title": "Edit bank account",
+      "subtitle": "This account will appear to students on the hours charging page after saving.",
+      "bank_name": "Bank name",
+      "account_holder": "Account holder name",
+      "account_number": "Account number",
+      "currency": "Currency",
+      "iban": "IBAN",
+      "swift": "SWIFT / BIC (optional)",
+      "country": "Country",
+      "instructions": "Student instructions (optional)",
+      "visible": "Show this account to students on the hours charging page",
+      "required": "This field is required",
+      "save": "Save account",
+      "cancel": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete bank account",
+      "message": "Are you sure you want to delete the {bank} account?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "load_error": "Failed to load bank accounts",
+      "create_success": "Bank account added successfully",
+      "create_error": "Failed to add bank account",
+      "update_success": "Bank account updated successfully",
+      "update_error": "Failed to update bank account",
+      "delete_success": "Bank account deleted successfully",
+      "delete_error": "Failed to delete bank account",
+      "visibility_success": "Account visibility updated successfully",
+      "visibility_error": "Failed to update account visibility"
     }
   },
   "GroupDiscountSettings": {
