@@ -117,7 +117,16 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "admin_private_requests",
     icon: "/icons/package.svg",
-    path: "/session-requests",
+    children: [
+      {
+        key: "admin_private_requests_list",
+        path: "/session-requests",
+      },
+      {
+        key: "group_discount_settings",
+        path: "/group-discount-settings",
+      },
+    ],
   },
   // 6. الطلبات الخاصة (للمحاضر)
   {

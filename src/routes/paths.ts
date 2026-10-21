@@ -8,4 +8,8 @@ export const paths = {
     root: '/session-requests',
     details: (id: string) => `/session-requests/${id}`,
   },
+  groupDiscountSettings: {
+    root: '/group-discount-settings',
+    edit: '/group-discount-settings/edit',
+  },
 };
