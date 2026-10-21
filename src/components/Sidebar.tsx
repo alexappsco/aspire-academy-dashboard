@@ -115,6 +115,11 @@ const sidebarItems: SidebarItem[] = [
     path: "/currencies",
   },
   {
+    key: "academy_bank_accounts",
+    icon: "/icons/finance.svg",
+    path: "/academy-bank-accounts",
+  },
+  {
     key: "hours_charge_requests",
     icon: "/icons/invoice.svg",
     path: "/hours-charge-requests",
@@ -207,6 +212,7 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "admin_private_requests",
   "hours_charge_requests",
   "instructor_payouts",
+  "academy_bank_accounts",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([
