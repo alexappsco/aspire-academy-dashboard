@@ -30,3 +30,4 @@ export * from './hours-charge-requests';
 export * from './admin-session-requests';
 export * from './instructor-dues';
 export * from './session-group-discount-settings';
+export * from './academy-bank-accounts';
