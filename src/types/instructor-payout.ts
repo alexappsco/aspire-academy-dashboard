@@ -110,10 +110,10 @@ export interface InstructorDueDetailsResponse {
   iban: string;
   bankName: string;
   bankAccountHolderName: string;
+  bankDetailsUpdatedAt?: string | null;
   instructorPhoneNumber: string;
   instructorEmail: string;
-  hasCompleteBankDetails?: boolean;
-  bankDetailsUpdatedAt?: string | null;
+  hasCompleteBankDetails: boolean;
   lastUpdated?: string | null;
 }
 

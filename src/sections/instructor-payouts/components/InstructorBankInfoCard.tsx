@@ -26,14 +26,7 @@ export default function InstructorBankInfoCard({
   const t = useTranslations('InstructorPayouts.details.bank_card');
   const locale = useLocale();
 
-  const isComplete =
-    typeof instructor.hasCompleteBankDetails === 'boolean'
-      ? instructor.hasCompleteBankDetails
-      : Boolean(
-          instructor.iban?.trim() &&
-            instructor.bankName?.trim() &&
-            instructor.bankAccountHolderName?.trim()
-        );
+  const isComplete = Boolean(instructor.hasCompleteBankDetails);
   const name = instructor.instructorName || '';
   const title = instructor.instructorTitle || '';
   const avatar = instructor.instructorImageUrl || '';
