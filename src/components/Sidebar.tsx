@@ -119,6 +119,11 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/package.svg",
     path: "/session-requests",
   },
+  {
+    key: "group_discount_settings",
+    icon: "/icons/bxs--discount.svg",
+    path: "/group-discount-settings",
+  },
   // 6. الطلبات الخاصة (للمحاضر)
   {
     key: "private_requests",
@@ -192,6 +197,7 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "legal_info",
   "admin_private_requests",
   "hours_charge_requests",
+  "group_discount_settings",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([

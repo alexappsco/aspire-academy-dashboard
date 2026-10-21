@@ -32,6 +32,7 @@
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
     "admin_private_requests": "Private Requests",
+    "group_discount_settings": "Group Discount Settings",
     "reports": "Reports",
     "legal_info": "Legal Information",
     "terms_and_conditions": "Terms & Conditions",
@@ -2499,6 +2500,50 @@
       "approve": "Approve request",
       "approve_note": "Approval is only available while the request is awaiting admin review and after setting the instructor percentage."
     }
+  },
+  "GroupDiscountSettings": {
+    "title": "Private Request Group Discount Settings",
+    "subtitle": "Set the minimum group size and discount percentage applied to each student's charged hours.",
+    "edit_settings": "Edit settings",
+    "retry": "Retry",
+    "load_error": "Failed to load group discount settings",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "current_rule": {
+      "title": "Current discount rule",
+      "description": "The student count includes the request owner and all participants."
+    },
+    "minimum": {
+      "title": "Students required to activate the discount",
+      "value": "{count, plural, one {# student} other {# students}}",
+      "description": "The minimum group size, including the request owner and {friends} additional participants.",
+      "example": "The discount applies when the group reaches {count} students."
+    },
+    "percentage": {
+      "title": "Discount percentage on charged hours",
+      "description": "The final percentage set by the administrator.",
+      "example": "If 10 hours are consumed, only {hours} hours are charged."
+    },
+    "how_it_works": {
+      "title": "How does the discount work?",
+      "steps": {
+        "count": {
+          "title": "{number}. Count",
+          "description": "The total number of students in the shared request is calculated."
+        },
+        "wallet": {
+          "title": "{number}. Charge each student",
+          "description": "Each student needs a registered account and their own hours wallet."
+        },
+        "apply": {
+          "title": "{number}. Apply the discount",
+          "description": "The discount is applied to the consumed hours when recharging."
+        }
+      }
+    },
+    "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage."
   },
   "AdminSessionRequests": {
     "title": "Private Requests",
