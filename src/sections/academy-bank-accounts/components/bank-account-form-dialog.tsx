@@ -35,6 +35,7 @@ const requiredField = (value: string) => value.trim().length > 0;
 export default function BankAccountFormDialog({ open, account, saving, onClose, onSave }: Props) {
   const t = useTranslations('AcademyBankAccounts.form');
   const locale = useLocale();
+  const direction = locale === 'ar' ? 'rtl' : 'ltr';
   const isEdit = Boolean(account);
   const [accountHolderName, setAccountHolderName] = useState('');
   const [bankName, setBankName] = useState('');
@@ -110,7 +111,13 @@ export default function BankAccountFormDialog({ open, account, saving, onClose, 
   });
 
   return (
-    <Dialog open={open} onClose={saving ? undefined : onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 2.5 } } }}>
+    <Dialog
+      open={open}
+      onClose={saving ? undefined : onClose}
+      fullWidth
+      maxWidth="sm"
+      slotProps={{ paper: { dir: direction, sx: { borderRadius: 2.5 } } }}
+    >
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2.5, pt: 2 }}>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t(isEdit ? 'edit_title' : 'add_title')}</Typography>
