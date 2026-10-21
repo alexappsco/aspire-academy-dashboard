@@ -3,3 +3,5 @@ export type SessionGroupDiscountSetting = {
   minParticipants: number;
   discountPercentage: number;
 };
+
+export type UpdateSessionGroupDiscountSettingPayload = SessionGroupDiscountSetting;

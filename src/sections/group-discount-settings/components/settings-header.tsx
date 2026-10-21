@@ -5,8 +5,12 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 
+import { useRouter } from 'src/i18n/routing';
+import { paths } from 'src/routes/paths';
+
 export default function GroupDiscountSettingsHeader() {
   const t = useTranslations('GroupDiscountSettings');
+  const router = useRouter();
 
   return (
     <Box
@@ -29,7 +33,7 @@ export default function GroupDiscountSettingsHeader() {
 
       <Button
         variant="contained"
-        disabled
+        onClick={() => router.push(paths.groupDiscountSettings.edit)}
         sx={{ minWidth: 170, minHeight: 44, bgcolor: '#17243E', borderRadius: 1.5 }}
       >
         {t('edit_settings')}

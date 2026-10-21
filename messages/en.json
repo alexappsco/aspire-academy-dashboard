@@ -2543,7 +2543,36 @@
         }
       }
     },
-    "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage."
+    "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage.",
+    "edit": {
+      "title": "Edit Private Request Group Discount Settings",
+      "subtitle": "Set the total number of students required for the discount, then enter the discount percentage.",
+      "future_notice": "The new rules will apply to requests created after saving without changing previous consumption records.",
+      "minimum": {
+        "title": "Minimum number of students",
+        "description": "The request owner is included in the total count.",
+        "label": "Students required to start the discount",
+        "helper": "For example: 4 means the request owner plus 3 additional participants.",
+        "error": "Enter a valid whole number of students."
+      },
+      "percentage": {
+        "title": "Discount percentage",
+        "description": "A percentage deducted from the charged hours for each eligible student.",
+        "label": "Discount percentage (%)",
+        "helper": "Enter the percentage approved by the administrator.",
+        "error": "Enter a valid percentage from 0 to 100."
+      },
+      "activation": {
+        "title": "Enable group discount",
+        "description": "Turn this setting off to stop applying the discount to new eligible requests."
+      },
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "retry": "Retry",
+      "load_error": "Failed to load group discount settings",
+      "save_error": "Failed to save group discount settings",
+      "success": "Group discount settings updated successfully"
+    }
   },
   "AdminSessionRequests": {
     "title": "Private Requests",
