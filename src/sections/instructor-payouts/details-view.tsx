@@ -17,7 +17,6 @@ import { paths } from 'src/routes/paths';
 import {
   InstructorDueDetailsResponse,
   InstructorTransferItem,
-  PayoutTransaction,
 } from 'src/types/instructor-payout';
 import { getInstructorDueDetails, getInstructorTransfers } from 'src/actions/instructor-dues';
 import { resolveReceiptUrl } from 'src/types/order';
@@ -101,10 +100,7 @@ export default function InstructorPayoutDetailsView({ instructorId }: Props) {
   }, [fetchTransfers]);
 
   // Handler when transfer is registered in dialog
-  const handleTransferSuccess = (
-    _newTx: PayoutTransaction,
-    _transferredAmount: number
-  ) => {
+  const handleTransferSuccess = () => {
     // Re-fetch both summary details and transfers list to stay completely synced with backend
     fetchDetails();
     fetchTransfers();

@@ -7,8 +7,9 @@ import type {
   GetInstructorDuesParams,
   InstructorDueDetailsResponse,
   InstructorTransfersListResponse,
+  InstructorTransferItem,
 } from 'src/types/instructor-payout';
-import { getData } from 'src/utils/crud-fetch-api';
+import { getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 
 function buildQuery(params?: GetInstructorDuesParams): string {
@@ -168,4 +169,33 @@ export async function getInstructorTransfers(
     };
   }
 }
+
+/**
+ * Register a new bank transfer for an instructor
+ * POST /api/v1/admin/instructor-dues/{instructorId}/transfers
+ */
+export async function createInstructorTransfer(
+  instructorId: string,
+  formData: FormData
+): Promise<ApiSingleResponse<InstructorTransferItem>> {
+  try {
+    const endpoint = endpoints.instructorDues.transfers(instructorId);
+    const response = await postData<InstructorTransferItem, FormData>(endpoint, formData);
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to register transfer',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to register transfer',
+    };
+  }
+}
+
 

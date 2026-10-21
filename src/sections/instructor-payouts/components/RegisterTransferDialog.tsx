@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -15,13 +15,18 @@ import IconButton from '@mui/material/IconButton';
 import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { InstructorDueDetailsResponse, InstructorPayoutItem, PayoutTransaction } from 'src/types/instructor-payout';
+import {
+  InstructorDueDetailsResponse,
+  InstructorPayoutItem,
+  InstructorTransferItem,
+} from 'src/types/instructor-payout';
+import { createInstructorTransfer } from 'src/actions/instructor-dues';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   instructor: InstructorDueDetailsResponse | InstructorPayoutItem;
-  onSuccess: (newTransaction: PayoutTransaction, transferredAmount: number) => void;
+  onSuccess: (newTransfer?: InstructorTransferItem) => void;
 }
 
 export default function RegisterTransferDialog({
@@ -33,6 +38,8 @@ export default function RegisterTransferDialog({
   const t = useTranslations('InstructorPayouts.dialog');
   const toast = useToast();
 
+  const instructorId =
+    'instructorId' in instructor ? instructor.instructorId : instructor.id;
   const instructorName =
     'instructorName' in instructor ? instructor.instructorName : instructor.name;
   const currentDue = instructor.dueNow;
@@ -57,6 +64,19 @@ export default function RegisterTransferDialog({
   // Errors
   const [amountError, setAmountError] = useState('');
   const [refError, setRefError] = useState('');
+
+  // Reset fields when opening modal
+  useEffect(() => {
+    if (open) {
+      setAmount(String(currentDue > 0 ? currentDue : 0));
+      setTransferDate(new Date().toISOString().slice(0, 10));
+      setReference('');
+      setNote('');
+      setSelectedFile(null);
+      setAmountError('');
+      setRefError('');
+    }
+  }, [open, currentDue]);
 
   // Calculate remaining balance dynamically
   const numAmount = parseFloat(amount) || 0;
@@ -103,26 +123,32 @@ export default function RegisterTransferDialog({
     setIsSubmitting(true);
 
     try {
-      // Simulate registration delay
-      await new Promise((r) => setTimeout(r, 600));
+      const formData = new FormData();
+      formData.append('Amount', String(numAmount));
+      const dateObj = new Date(transferDate);
+      formData.append(
+        'TransferDate',
+        Number.isNaN(dateObj.getTime()) ? new Date().toISOString() : dateObj.toISOString()
+      );
+      formData.append('BankReferenceNumber', reference.trim());
+      if (selectedFile) {
+        formData.append('Receipt', selectedFile);
+      }
+      if (note.trim()) {
+        formData.append('Note', note.trim());
+      }
 
-      const newTx: PayoutTransaction = {
-        id: `tx-${Date.now()}`,
-        date: transferDate,
-        note: note.trim() || t('default_transfer_note'),
-        reference: reference.trim(),
-        amount: -numAmount,
-        currency,
-        status: 'completed',
-        receiptUrl: selectedFile ? URL.createObjectURL(selectedFile) : null,
-        receiptFileName: selectedFile ? selectedFile.name : null,
-      };
+      const res = await createInstructorTransfer(instructorId, formData);
 
-      toast.success(t('transfer_success_message'));
-      onSuccess(newTx, numAmount);
-      onClose();
-    } catch {
-      toast.error(t('transfer_error_message'));
+      if (res.success) {
+        toast.success(t('transfer_success_message'));
+        onSuccess(res.data);
+        onClose();
+      } else {
+        toast.error(res.error || t('transfer_error_message'));
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('transfer_error_message'));
     } finally {
       setIsSubmitting(false);
     }
