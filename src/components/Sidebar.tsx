@@ -72,7 +72,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     key: "instructor_payouts",
-    icon: "/icons/finance.svg",
+    icon: "/icons/walit.svg",
     path: "/instructor-payouts",
   },
   // 4. الهيكل الأكاديمي
