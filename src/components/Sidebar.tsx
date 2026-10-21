@@ -117,12 +117,16 @@ const sidebarItems: SidebarItem[] = [
   {
     key: "admin_private_requests",
     icon: "/icons/package.svg",
-    path: "/session-requests",
-  },
-  {
-    key: "group_discount_settings",
-    icon: "/icons/bxs--discount.svg",
-    path: "/group-discount-settings",
+    children: [
+      {
+        key: "admin_private_requests_list",
+        path: "/session-requests",
+      },
+      {
+        key: "group_discount_settings",
+        path: "/group-discount-settings",
+      },
+    ],
   },
   // 6. الطلبات الخاصة (للمحاضر)
   {
@@ -197,7 +201,6 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "legal_info",
   "admin_private_requests",
   "hours_charge_requests",
-  "group_discount_settings",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([
