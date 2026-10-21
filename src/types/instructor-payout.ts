@@ -112,6 +112,7 @@ export interface InstructorDueDetailsResponse {
   bankAccountHolderName: string;
   instructorPhoneNumber: string;
   instructorEmail: string;
+  hasCompleteBankDetails?: boolean;
   lastUpdated?: string | null;
 }
 
