@@ -89,16 +89,17 @@ export default function InstructorMyTransfersTable({
             sx={{
               width: '100%',
               borderCollapse: 'collapse',
-              minWidth: 700,
+              minWidth: 750,
+              tableLayout: 'fixed',
             }}
           >
             {/* Table Header:
-                1. التاريخ (Date)
-                2. الملاحظة (Note)
-                3. المرجع (Reference)
-                4. المبلغ (Amount)
-                5. الحالة (Status)
-                6. الإيصال (Receipt)
+                1. التاريخ (Date) - 16%
+                2. الملاحظة (Note) - 25%
+                3. المرجع (Reference) - 23%
+                4. المبلغ (Amount) - 14%
+                5. الحالة (Status) - 11%
+                6. الإيصال (Receipt) - 11%
             */}
             <Box component="thead">
               <Box
@@ -116,27 +117,27 @@ export default function InstructorMyTransfersTable({
                 }}
               >
                 {/* 1. Date */}
-                <Box component="th" sx={{ width: 130 }}>
+                <Box component="th" sx={{ width: '16%' }}>
                   {t('col_date')}
                 </Box>
                 {/* 2. Note */}
-                <Box component="th">
+                <Box component="th" sx={{ width: '25%' }}>
                   {t('col_note')}
                 </Box>
                 {/* 3. Reference */}
-                <Box component="th" sx={{ width: 170 }}>
+                <Box component="th" sx={{ width: '23%' }}>
                   {t('col_bank_reference')}
                 </Box>
                 {/* 4. Amount */}
-                <Box component="th" sx={{ width: 140 }}>
+                <Box component="th" sx={{ width: '14%' }}>
                   {t('col_amount')}
                 </Box>
                 {/* 5. Status */}
-                <Box component="th" sx={{ width: 120, textAlign: 'center !important' }}>
+                <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
                   {t('col_status')}
                 </Box>
                 {/* 6. Receipt */}
-                <Box component="th" sx={{ width: 120, textAlign: 'center !important' }}>
+                <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
                   {t('col_receipt')}
                 </Box>
               </Box>
@@ -155,16 +156,16 @@ export default function InstructorMyTransfersTable({
                     }}
                   >
                     <Box component="td">
-                      <Skeleton width={90} height={20} />
+                      <Skeleton width="80%" height={20} />
                     </Box>
                     <Box component="td">
-                      <Skeleton width={180} height={20} />
+                      <Skeleton width="90%" height={20} />
                     </Box>
                     <Box component="td">
-                      <Skeleton width={120} height={20} />
+                      <Skeleton width="85%" height={20} />
                     </Box>
                     <Box component="td">
-                      <Skeleton width={80} height={20} />
+                      <Skeleton width="70%" height={20} />
                     </Box>
                     <Box component="td" sx={{ textAlign: 'center' }}>
                       <Skeleton width={60} height={24} sx={{ mx: 'auto' }} />
@@ -204,7 +205,14 @@ export default function InstructorMyTransfersTable({
                       </Box>
 
                       {/* 2. Note */}
-                      <Box component="td" sx={{ fontWeight: 600, color: '#0F172A' }}>
+                      <Box
+                        component="td"
+                        sx={{
+                          fontWeight: 600,
+                          color: '#0F172A',
+                          wordBreak: 'break-word',
+                        }}
+                      >
                         {displayNote}
                       </Box>
 
@@ -214,6 +222,7 @@ export default function InstructorMyTransfersTable({
                         sx={{
                           color: '#64748B',
                           fontFamily: displayRef !== '—' ? 'monospace' : 'inherit',
+                          wordBreak: 'break-all',
                         }}
                       >
                         {displayRef}

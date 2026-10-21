@@ -74,7 +74,8 @@ export default function TransactionsTable({
           sx={{
             width: '100%',
             borderCollapse: 'collapse',
-            minWidth: 700,
+            minWidth: 750,
+            tableLayout: 'fixed',
           }}
         >
           {/* Table Header */}
@@ -93,20 +94,22 @@ export default function TransactionsTable({
                 },
               }}
             >
-              <Box component="th" sx={{ width: 130 }}>
+              <Box component="th" sx={{ width: '16%' }}>
                 {t('col_date')}
               </Box>
-              <Box component="th">{t('col_note')}</Box>
-              <Box component="th" sx={{ width: 170 }}>
+              <Box component="th" sx={{ width: '25%' }}>
+                {t('col_note')}
+              </Box>
+              <Box component="th" sx={{ width: '23%' }}>
                 {t('col_reference')}
               </Box>
-              <Box component="th" sx={{ width: 140 }}>
+              <Box component="th" sx={{ width: '14%' }}>
                 {t('col_amount')}
               </Box>
-              <Box component="th" sx={{ width: 130, textAlign: 'center !important' }}>
+              <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
                 {t('col_status')}
               </Box>
-              <Box component="th" sx={{ width: 120, textAlign: 'center !important' }}>
+              <Box component="th" sx={{ width: '11%', textAlign: 'center !important' }}>
                 {t('col_receipt')}
               </Box>
             </Box>
