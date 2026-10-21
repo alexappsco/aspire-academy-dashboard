@@ -2507,7 +2507,7 @@
   "AcademyBankAccounts": {
     "title": "Academy Bank Accounts",
     "add_account": "Add bank account",
-    "notice": "These accounts appear to students on the hours charging page. Add or close an account without removing its transfer history.",
+    "notice": "These accounts appear to students on the hours charging page so they can transfer the amount and upload the transfer receipt. Show or hide any account without deleting it.",
     "section_title": "Accounts displayed to students",
     "primary": "Primary account",
     "set_primary": "Set as primary",
