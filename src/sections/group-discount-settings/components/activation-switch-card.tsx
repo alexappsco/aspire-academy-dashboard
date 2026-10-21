@@ -36,7 +36,7 @@ export default function ActivationSwitchCard({ checked, onChange }: Props) {
       <Switch
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        inputProps={{ 'aria-label': t('activation.title') }}
+        slotProps={{ input: { 'aria-label': t('activation.title') } }}
       />
     </Card>
   );
