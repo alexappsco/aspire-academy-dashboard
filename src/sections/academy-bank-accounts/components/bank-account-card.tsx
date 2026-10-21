@@ -37,8 +37,16 @@ export default function BankAccountCard({
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2.5, boxShadow: 'none', overflow: 'hidden' }}>
-      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+      <Box
+        sx={{
+          p: 2,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto minmax(0, 1fr)' },
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', justifySelf: 'start' }}>
           <Box sx={{ width: 42, height: 42, borderRadius: '50%', bgcolor: '#DDF8EF', color: '#168567', display: 'grid', placeItems: 'center' }}>
             <Iconify icon="solar:bank-linear" width={23} />
           </Box>
@@ -51,7 +59,18 @@ export default function BankAccountCard({
           </Box>
         </Stack>
 
-        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+        {!account.isPrimary && (
+          <Button
+            variant="outlined"
+            disabled={loading}
+            onClick={onSetPrimary}
+            sx={{ justifySelf: 'center', whiteSpace: 'nowrap' }}
+          >
+            {t('set_primary')}
+          </Button>
+        )}
+
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', justifySelf: 'end' }}>
           {loading && <CircularProgress size={18} />}
           <Typography sx={{ color: 'text.secondary', fontSize: 12 }}>{t('visible_to_students')}</Typography>
           <Switch
@@ -75,11 +94,6 @@ export default function BankAccountCard({
         <AccountDetailItem label={t('fields.currency')} value={`${account.currencyName} (${account.currencyCode})`} />
         <AccountDetailItem label={t('fields.iban')} value={account.iban} ltr />
         <AccountDetailItem label={t('fields.swift')} value={account.swiftCode} ltr />
-        {!account.isPrimary && (
-          <Button variant="text" disabled={loading} onClick={onSetPrimary} sx={{ justifySelf: 'start' }}>
-            {t('set_primary')}
-          </Button>
-        )}
       </Box>
 
       {account.studentInstructions && (
