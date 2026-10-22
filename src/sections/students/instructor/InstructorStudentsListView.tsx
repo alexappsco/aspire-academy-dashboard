@@ -8,20 +8,16 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
-import SelectField from 'src/components/SelectField/SelectField';
 import { useRouter } from 'src/i18n/routing';
 import { useToast } from 'src/components/toast';
 import { getInstructorStudentsAction } from 'src/actions/instructor-students';
-import { getCourses } from 'src/actions/courses';
 import type { InstructorStudentItemDto } from 'src/types/instructor-student';
-import type { CourseDto } from 'src/types/course';
 
 export default function InstructorStudentsListView() {
   const t = useTranslations('InstructorStudents');
@@ -33,16 +29,13 @@ export default function InstructorStudentsListView() {
   // Filters state
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCourseId, setSelectedCourseId] = useState<string>('');
-  const [courses, setCourses] = useState<CourseDto[]>([]);
-
 
   // Data state
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<InstructorStudentItemDto[]>([]);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Debounce search
+  // Debounce search input (400ms)
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => {
     debounceTimer.current = setTimeout(() => {
@@ -51,28 +44,13 @@ export default function InstructorStudentsListView() {
     return () => clearTimeout(debounceTimer.current);
   }, [searchTerm]);
 
-  // Load instructor's courses for the filter dropdown
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await getCourses({ SkipCount: 0, MaxResultCount: 200 });
-        if (res.success && res.data) {
-          setCourses(res.data.items || []);
-        }
-      } catch (err) {
-        console.error('Failed to load courses for filter:', err);
-      }
-    };
-    fetchCourses();
-  }, []);
-
-  // Fetch students
+  // Fetch students from backend with Filter
   const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
+      const trimmedFilter = debouncedSearch.trim();
       const res = await getInstructorStudentsAction({
-        Filter: debouncedSearch.trim() || undefined,
-        CourseId: selectedCourseId || undefined,
+        Filter: trimmedFilter || undefined,
         SkipCount: 0,
         MaxResultCount: 1000,
       });
@@ -89,7 +67,7 @@ export default function InstructorStudentsListView() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedCourseId, toast]);
+  }, [debouncedSearch, toast]);
 
   useEffect(() => {
     fetchStudents();
@@ -231,19 +209,13 @@ export default function InstructorStudentsListView() {
           boxShadow: '0 0 2px 0 rgba(145, 158, 171, 0.2), 0 12px 24px -4px rgba(145, 158, 171, 0.12)',
         }}
       >
-        {/* Filters bar */}
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
-          sx={{ p: 2.5, alignItems: 'center' }}
-        >
-          {/* Search Box */}
+        {/* Full-width Search Bar */}
+        <Box sx={{ p: 2.5 }}>
           <TextField
             fullWidth
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('search_placeholder')}
-            sx={{ flex: 1 }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -253,26 +225,14 @@ export default function InstructorStudentsListView() {
                 ),
               },
             }}
+            sx={{
+              width: '100%',
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1.5,
+              },
+            }}
           />
-
-          {/* Course Filter Dropdown */}
-          <Box sx={{ width: { xs: '100%', sm: 260 } }}>
-            <SelectField
-              fullWidth
-              value={selectedCourseId}
-              onChange={(e) => {
-                setSelectedCourseId(e.target.value as string);
-              }}
-            >
-              <MenuItem value="">{t('course_filter_all')}</MenuItem>
-              {courses.map((c) => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.title}
-                </MenuItem>
-              ))}
-            </SelectField>
-          </Box>
-        </Stack>
+        </Box>
 
         {/* Loading / Table / Empty */}
         {loading ? (
@@ -290,7 +250,7 @@ export default function InstructorStudentsListView() {
           <Box sx={{ px: 0.5 }}>
             <SharedTable<InstructorStudentItemDto>
               data={students}
-              count={students.length}
+              count={totalCount || students.length}
               tableHead={tableHead}
               actions={actions}
               customRender={customRender}

@@ -18,12 +18,12 @@ export async function getInstructorStudentsAction(
     if (params) {
       const searchParams = new URLSearchParams();
 
-      if (params.CourseId) {
-        searchParams.append('CourseId', params.CourseId);
+      if (params.Filter && params.Filter.trim() !== '') {
+        searchParams.append('Filter', params.Filter.trim());
       }
 
-      if (params.Filter) {
-        searchParams.append('Filter', params.Filter);
+      if (params.CourseId) {
+        searchParams.append('CourseId', params.CourseId);
       }
 
       if (params.Sorting) {
