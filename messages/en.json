@@ -40,7 +40,8 @@
     "terms_and_conditions": "Terms & Conditions",
     "about_us": "About Us",
     "logout": "Logout",
-    "instructor_payouts": "Instructor Payouts"
+    "instructor_payouts": "Instructor Payouts",
+    "instructor_wallet": "Earnings & Wallet"
   },
   "Courses": {
     "title": "Training Courses",
@@ -2895,6 +2896,61 @@
       "amount": "Transferred Amount:",
       "receipt_verified": "Receipt matched and transaction verified in financial logs.",
       "close_btn": "Close"
+    }
+  },
+  "InstructorWallet": {
+    "title": "Earnings & Wallet",
+    "info_notice": "Payouts are transferred via bank transfer by management to your registered account. You will receive notifications upon each transfer, and it will appear in your financial log.",
+    "failed_to_load": "Failed to load wallet data",
+    "retry": "Retry",
+    "bank_card": {
+      "edit_bank_details_btn": "Edit Bank Details",
+      "bank_data_complete": "Complete Bank Details",
+      "bank_data_incomplete": "Incomplete Bank Details",
+      "bank_name": "Bank Name",
+      "account_holder": "Account Holder Name",
+      "iban": "IBAN",
+      "phone": "Phone",
+      "email": "Email",
+      "last_bank_update": "Last Bank Update"
+    },
+    "balance_card": {
+      "title": "My Balance",
+      "current_balance_label": "Current Balance",
+      "balance_subtitle": "Each earning is added to your balance upon realization",
+      "total_earnings": "Total Earnings",
+      "transferred": "Transferred"
+    },
+    "transactions": {
+      "title": "Financial Transaction Log (Completed Transfers)",
+      "col_transfer_number": "Transfer Number",
+      "col_amount": "Amount",
+      "col_date": "Transfer Date",
+      "col_bank_reference": "Bank Reference Number",
+      "col_receipt": "Receipt",
+      "col_note": "Note",
+      "col_status": "Status",
+      "view_receipt": "View Receipt",
+      "status_completed": "Completed",
+      "no_transactions": "No completed transfers found yet",
+      "rows_per_page": "Transactions per page:"
+    },
+    "edit_dialog": {
+      "title": "Edit Bank Details",
+      "subtitle": "Ensure accurate bank details to receive payouts without delay.",
+      "bank_name": "Bank Name",
+      "bank_name_placeholder": "Enter bank name...",
+      "account_holder": "Account Holder Name",
+      "account_holder_placeholder": "Enter full name as registered in the bank...",
+      "iban": "IBAN Number",
+      "iban_placeholder": "e.g. KW00AAAA0000000000000000000000",
+      "iban_helper": "Please enter complete IBAN including country code without spaces",
+      "save_btn": "Save Changes",
+      "cancel_btn": "Cancel",
+      "saving": "Saving...",
+      "success_message": "Bank details updated successfully",
+      "error_message": "Failed to update bank details",
+      "required_fields_error": "Please fill in all required fields"
     }
   }
 }
