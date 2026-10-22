@@ -2101,14 +2101,15 @@
       "cancelled": "ملغي"
     },
     "filters": {
-      "search_placeholder": "بحث في الطلبات...",
-      "all_types": "كل أنواع الخدمات",
+      "search_placeholder": "بحث..",
+      "date": "التاريخ",
+      "all_types": "نوع الخدمة",
       "recorded": "محتوى مسجل",
       "live": "جلسة مباشرة",
       "request_type_all": "نوع الطلب: الكل",
       "request_type_individual": "طلب فردي",
       "request_type_group": "طلب جماعي",
-      "all_statuses": "جميع الحالات"
+      "all_statuses": "الحالة"
     },
     "columns": {
       "request_id": "رقم الطلب",

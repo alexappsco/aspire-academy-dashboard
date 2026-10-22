@@ -35,6 +35,7 @@ import {
   SessionType,
 } from 'src/types/private-request';
 import ServiceToggleCards from './components/ServiceToggleCards';
+import DateInput from 'src/components/DateInput';
 
 // Format backend ISO date to locale readable format
 function formatRequestDate(dateStr?: string, locale = 'ar'): string {
@@ -216,6 +217,7 @@ export default function PrivateRequestsListView() {
   );
   const [requestTypeFilter, setRequestTypeFilter] = useState<'all' | 'individual' | 'group'>('all');
   const [statusFilter, setStatusFilter] = useState<string>(urlStatus);
+  const [dateFilter, setDateFilter] = useState<string>('');
 
   // Backend session settings state (Top Cards)
   const [sessionSettings, setSessionSettings] = useState<InstructorSessionSettingsDto | null>(null);
@@ -339,17 +341,25 @@ export default function PrivateRequestsListView() {
     fetchRequests();
   }, [fetchRequests]);
 
-  // Client-side filtering by Request Type (Individual vs Group)
+  // Client-side filtering by Request Type (Individual vs Group) & Date
   const filteredRequests = useMemo(() => {
-    if (requestTypeFilter === 'all') return requests;
+    let result = requests;
     if (requestTypeFilter === 'individual') {
-      return requests.filter((r) => !r.participants || r.participants.length === 0);
+      result = result.filter((r) => !r.participants || r.participants.length === 0);
+    } else if (requestTypeFilter === 'group') {
+      result = result.filter((r) => r.participants && r.participants.length > 0);
     }
-    if (requestTypeFilter === 'group') {
-      return requests.filter((r) => r.participants && r.participants.length > 0);
+
+    if (dateFilter) {
+      result = result.filter((r) => {
+        const itemDate = r.creationTime;
+        if (!itemDate) return true;
+        return String(itemDate).startsWith(dateFilter);
+      });
     }
-    return requests;
-  }, [requests, requestTypeFilter]);
+
+    return result;
+  }, [requests, requestTypeFilter, dateFilter]);
 
   // Toggle Recorded Sessions (Optimistic UI)
   const handleToggleRecorded = async () => {
@@ -606,19 +616,19 @@ export default function PrivateRequestsListView() {
           </Tabs>
         </Box>
 
-        {/* Filter Controls Bar: Search on FAR RIGHT (First in RTL), Selects on LEFT */}
+        {/* Filter Controls Bar: Search, Date, Request Type, Service Type, Status (Matching Figma) */}
         <Box
           sx={{
             p: { xs: 2, sm: 2.5 },
             borderBottom: '1px solid #F1F5F9',
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'stretch', md: 'center' },
-            justifyContent: 'space-between',
-            gap: 2,
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1.5,
           }}
         >
-          {/* Search Input: Far Right in RTL */}
+          {/* 1. Search Input: Far Right in RTL */}
           <TextField
             size="small"
             placeholder={t('filters.search_placeholder')}
@@ -629,91 +639,221 @@ export default function PrivateRequestsListView() {
             }}
             slotProps={{
               input: {
-                startAdornment: (
-                  <InputAdornment position="start">
+                endAdornment: (
+                  <InputAdornment position="end">
                     <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              width: { xs: '100%', md: 280 },
-              '& .MuiOutlinedInput-root': { borderRadius: 2, fontSize: 13.5 },
+              width: { xs: '100%', sm: 190, md: 210 },
+              '& .MuiOutlinedInput-root': {
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                '& fieldset': {
+                  borderColor: '#E2E8F0',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#CBD5E1',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#94A3B8',
+                },
+              },
+              '& .MuiInputBase-input': {
+                py: 0,
+                height: 42,
+                fontSize: 13.5,
+                color: '#1E293B',
+                fontWeight: 500,
+                '&::placeholder': {
+                  color: '#64748B',
+                  opacity: 1,
+                },
+              },
             }}
           />
 
-          {/* Filters: Service Type, Status (Left side in RTL) */}
-          <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: 1.5,
-              width: { xs: '100%', md: 'auto' },
-            }}
-          >
-            {/* Request Type Select (Individual vs Group) */}
-            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 160 } }}>
-              <Select
-                value={requestTypeFilter}
-                onChange={(e) => {
-                  setRequestTypeFilter(e.target.value as any);
-                  setPage(0);
-                }}
-                displayEmpty
-                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
-              >
-                <MenuItem value="all">{t('filters.request_type_all')}</MenuItem>
-                <MenuItem value="individual">{t('filters.request_type_individual')}</MenuItem>
-                <MenuItem value="group">{t('filters.request_type_group')}</MenuItem>
-              </Select>
-            </FormControl>
+          {/* 2. Date Input */}
+          <Box sx={{ width: { xs: 'calc(50% - 6px)', sm: 140, md: 150 } }}>
+            <DateInput
+              fullWidth
+              size="small"
+              placeholder={t('filters.date')}
+              value={dateFilter}
+              onChange={(val) => {
+                setDateFilter(val);
+                setPage(0);
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: 42,
+                  borderRadius: '8px',
+                  bgcolor: '#FFFFFF',
+                  fontSize: 13.5,
+                  '& fieldset': {
+                    borderColor: '#E2E8F0',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#CBD5E1',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#94A3B8',
+                  },
+                },
+                '& .MuiInputBase-input': {
+                  py: 0,
+                  height: 42,
+                  fontSize: 13.5,
+                  color: dateFilter ? '#1E293B' : '#64748B',
+                  fontWeight: 500,
+                  '&::placeholder': {
+                    color: '#64748B',
+                    opacity: 1,
+                  },
+                },
+              }}
+            />
+          </Box>
 
-            {/* Service Type Select */}
-            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 150 } }}>
-              <Select
-                value={serviceTypeFilter}
-                onChange={(e) => {
-                  setServiceTypeFilter(e.target.value as any);
-                  setPage(0);
-                }}
-                displayEmpty
-                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
-              >
-                <MenuItem value="all">{t('filters.all_types')}</MenuItem>
-                <MenuItem value="Recorded">{t('filters.recorded')}</MenuItem>
-                <MenuItem value="Live">{t('filters.live')}</MenuItem>
-              </Select>
-            </FormControl>
+          {/* 3. Request Type Select (Individual vs Group) */}
+          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 160, md: 170 } }}>
+            <Select
+              value={requestTypeFilter}
+              onChange={(e) => {
+                setRequestTypeFilter(e.target.value as any);
+                setPage(0);
+              }}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: requestTypeFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#CBD5E1',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': {
+                  color: '#64748B',
+                },
+              }}
+            >
+              <MenuItem value="all">{t('filters.request_type_all')}</MenuItem>
+              <MenuItem value="individual">{t('filters.request_type_individual')}</MenuItem>
+              <MenuItem value="group">{t('filters.request_type_group')}</MenuItem>
+            </Select>
+          </FormControl>
 
-            {/* Status Select */}
-            <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 150 } }}>
-              <Select
-                value={statusFilter}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setStatusFilter(val);
-                  if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(val)) {
-                    setCurrentTab(val as SessionRequestStatus);
-                  } else {
-                    setCurrentTab('all');
-                  }
-                  setPage(0);
-                }}
-                displayEmpty
-                sx={{ borderRadius: 2, bgcolor: '#FFFFFF', fontSize: 13 }}
-              >
-                <MenuItem value="all">{t('filters.all_statuses')}</MenuItem>
-                <MenuItem value="Pending">{t('tabs.pending')}</MenuItem>
-                <MenuItem value="AwaitingAdminReview">{t('tabs.awaiting_admin')}</MenuItem>
-                <MenuItem value="Active">{t('tabs.active')}</MenuItem>
-                <MenuItem value="Completed">{t('tabs.completed')}</MenuItem>
-                <MenuItem value="Rejected">{t('tabs.rejected')}</MenuItem>
-                <MenuItem value="Cancelled">{t('tabs.cancelled')}</MenuItem>
-              </Select>
-            </FormControl>
-          </Stack>
+          {/* 4. Service Type Select */}
+          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 140, md: 150 } }}>
+            <Select
+              value={serviceTypeFilter}
+              onChange={(e) => {
+                setServiceTypeFilter(e.target.value as any);
+                setPage(0);
+              }}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: serviceTypeFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#CBD5E1',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': {
+                  color: '#64748B',
+                },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_types')}</MenuItem>
+              <MenuItem value="Recorded">{t('filters.recorded')}</MenuItem>
+              <MenuItem value="Live">{t('filters.live')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* 5. Status Select */}
+          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 130, md: 140 } }}>
+            <Select
+              value={statusFilter}
+              onChange={(e) => {
+                const val = e.target.value;
+                setStatusFilter(val);
+                if (['Pending', 'AwaitingAdminReview', 'Active', 'Completed'].includes(val)) {
+                  setCurrentTab(val as SessionRequestStatus);
+                } else {
+                  setCurrentTab('all');
+                }
+                setPage(0);
+              }}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: statusFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#CBD5E1',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': {
+                  color: '#64748B',
+                },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_statuses')}</MenuItem>
+              <MenuItem value="Pending">{t('tabs.pending')}</MenuItem>
+              <MenuItem value="AwaitingAdminReview">{t('tabs.awaiting_admin')}</MenuItem>
+              <MenuItem value="Active">{t('tabs.active')}</MenuItem>
+              <MenuItem value="Completed">{t('tabs.completed')}</MenuItem>
+              <MenuItem value="Rejected">{t('tabs.rejected')}</MenuItem>
+              <MenuItem value="Cancelled">{t('tabs.cancelled')}</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
         {/* Table Content: Column 1 on Right is Request ID, Column 7 on Left is Actions */}

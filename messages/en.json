@@ -2101,14 +2101,15 @@
       "cancelled": "Cancelled"
     },
     "filters": {
-      "search_placeholder": "Search requests...",
-      "all_types": "All Service Types",
+      "search_placeholder": "Search..",
+      "date": "Date",
+      "all_types": "Service Type",
       "recorded": "Recorded Content",
       "live": "Live Session",
       "request_type_all": "Request Type: All",
       "request_type_individual": "Individual Request",
       "request_type_group": "Group Request",
-      "all_statuses": "All Statuses"
+      "all_statuses": "Status"
     },
     "columns": {
       "request_id": "Request ID",
