@@ -616,20 +616,22 @@ export default function PrivateRequestsListView() {
           </Tabs>
         </Box>
 
-        {/* Filter Controls Bar: Search, Date, Request Type, Service Type, Status (Matching Figma) */}
+        {/* Filter Controls Bar: Full Width Distributed (Search, Date, Request Type, Service Type, Status) */}
         <Box
           sx={{
             p: { xs: 2, sm: 2.5 },
             borderBottom: '1px solid #F1F5F9',
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
-            flexWrap: 'wrap',
+            flexWrap: { xs: 'wrap', md: 'nowrap' },
             gap: 1.5,
+            width: '100%',
           }}
         >
           {/* 1. Search Input: Far Right in RTL */}
           <TextField
+            fullWidth
             size="small"
             placeholder={t('filters.search_placeholder')}
             value={searchQuery}
@@ -647,7 +649,9 @@ export default function PrivateRequestsListView() {
               },
             }}
             sx={{
-              width: { xs: '100%', sm: 190, md: 210 },
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
               '& .MuiOutlinedInput-root': {
                 height: 42,
                 borderRadius: '8px',
@@ -678,7 +682,13 @@ export default function PrivateRequestsListView() {
           />
 
           {/* 2. Date Input */}
-          <Box sx={{ width: { xs: 'calc(50% - 6px)', sm: 140, md: 150 } }}>
+          <Box
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
             <DateInput
               fullWidth
               size="small"
@@ -689,6 +699,7 @@ export default function PrivateRequestsListView() {
                 setPage(0);
               }}
               sx={{
+                width: '100%',
                 '& .MuiOutlinedInput-root': {
                   height: 42,
                   borderRadius: '8px',
@@ -720,8 +731,19 @@ export default function PrivateRequestsListView() {
           </Box>
 
           {/* 3. Request Type Select (Individual vs Group) */}
-          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 160, md: 170 } }}>
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
             <Select
+              fullWidth
+              variant="outlined"
               value={requestTypeFilter}
               onChange={(e) => {
                 setRequestTypeFilter(e.target.value as any);
@@ -735,13 +757,13 @@ export default function PrivateRequestsListView() {
                 fontSize: 13.5,
                 color: requestTypeFilter === 'all' ? '#64748B' : '#1E293B',
                 fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#E2E8F0',
                 },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#CBD5E1',
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#94A3B8',
                 },
                 '& .MuiSelect-select': {
@@ -762,8 +784,19 @@ export default function PrivateRequestsListView() {
           </FormControl>
 
           {/* 4. Service Type Select */}
-          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 140, md: 150 } }}>
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
             <Select
+              fullWidth
+              variant="outlined"
               value={serviceTypeFilter}
               onChange={(e) => {
                 setServiceTypeFilter(e.target.value as any);
@@ -777,13 +810,13 @@ export default function PrivateRequestsListView() {
                 fontSize: 13.5,
                 color: serviceTypeFilter === 'all' ? '#64748B' : '#1E293B',
                 fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#E2E8F0',
                 },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#CBD5E1',
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#94A3B8',
                 },
                 '& .MuiSelect-select': {
@@ -804,8 +837,19 @@ export default function PrivateRequestsListView() {
           </FormControl>
 
           {/* 5. Status Select */}
-          <FormControl size="small" sx={{ width: { xs: 'calc(50% - 6px)', sm: 130, md: 140 } }}>
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
             <Select
+              fullWidth
+              variant="outlined"
               value={statusFilter}
               onChange={(e) => {
                 const val = e.target.value;
@@ -825,13 +869,13 @@ export default function PrivateRequestsListView() {
                 fontSize: 13.5,
                 color: statusFilter === 'all' ? '#64748B' : '#1E293B',
                 fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#E2E8F0',
                 },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#CBD5E1',
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: '#94A3B8',
                 },
                 '& .MuiSelect-select': {
