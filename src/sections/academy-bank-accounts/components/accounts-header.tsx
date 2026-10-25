@@ -19,7 +19,14 @@ export default function AcademyBankAccountsHeader({ onAdd }: Props) {
         variant="contained"
         startIcon={<Iconify icon="mingcute:add-line" width={20} />}
         onClick={onAdd}
-        sx={{ minWidth: 165, minHeight: 42, borderRadius: 1.5, bgcolor: '#17243E' }}
+        sx={{
+          minWidth: 165,
+          minHeight: 42,
+          borderRadius: 1.5,
+          bgcolor: '#17243E',
+          gap: 1,
+          '& .MuiButton-startIcon': { m: 0 },
+        }}
       >
         {t('add_account')}
       </Button>

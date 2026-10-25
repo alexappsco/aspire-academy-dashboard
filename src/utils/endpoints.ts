@@ -133,6 +133,7 @@ export const endpoints = {
     details: (id: string) => `/admin/session-requests/${id}`,
     review: (id: string) => `/admin/session-requests/${id}/review`,
     groupDiscountSetting: '/admin/session-group-discount-setting',
+    createGroupDiscountTier: '/admin/session-group-discount-setting/tiers',
   },
   academyBankAccounts: {
     list: '/admin/academy-bank-accounts',
@@ -141,6 +142,18 @@ export const endpoints = {
     delete: (id: string) => `/admin/academy-bank-accounts/${id}`,
     visibility: (id: string, isVisible: boolean) =>
       `/admin/academy-bank-accounts/${id}/visibility?isVisible=${isVisible}`,
+  },
+  academyCustomFields: {
+    list: '/admin/academy-custom-fields',
+    create: '/admin/academy-custom-fields',
+    update: (id: string) => `/admin/academy-custom-fields/${id}`,
+    delete: (id: string) => `/admin/academy-custom-fields/${id}`,
+  },
+  instructorCustomFields: {
+    list: '/instructor/custom-fields',
+    create: '/instructor/custom-fields',
+    update: (id: string) => `/instructor/custom-fields/${id}`,
+    delete: (id: string) => `/instructor/custom-fields/${id}`,
   },
   students: {
     list: '/admin/students',

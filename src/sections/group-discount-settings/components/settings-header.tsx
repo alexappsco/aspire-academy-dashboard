@@ -8,7 +8,9 @@ import Typography from '@mui/material/Typography';
 import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 
-export default function GroupDiscountSettingsHeader() {
+type Props = { onAdd: () => void };
+
+export default function GroupDiscountSettingsHeader({ onAdd }: Props) {
   const t = useTranslations('GroupDiscountSettings');
   const router = useRouter();
 
@@ -31,13 +33,22 @@ export default function GroupDiscountSettingsHeader() {
         </Typography>
       </Box>
 
-      <Button
-        variant="contained"
-        onClick={() => router.push(paths.groupDiscountSettings.edit)}
-        sx={{ minWidth: 170, minHeight: 44, bgcolor: '#17243E', borderRadius: 1.5 }}
-      >
-        {t('edit_settings')}
-      </Button>
+      <Box sx={{ display: 'flex', gap: 1.25, flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          onClick={onAdd}
+          sx={{ minWidth: 150, minHeight: 44, bgcolor: '#17243E', borderRadius: 1.5 }}
+        >
+          {t('add_tier')}
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => router.push(paths.groupDiscountSettings.edit)}
+          sx={{ minWidth: 170, minHeight: 44, borderRadius: 1.5 }}
+        >
+          {t('edit_settings')}
+        </Button>
+      </Box>
     </Box>
   );
 }
