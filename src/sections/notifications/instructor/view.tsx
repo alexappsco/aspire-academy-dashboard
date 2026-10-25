@@ -1,13 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
-import Badge from '@mui/material/Badge';
 import Chip from '@mui/material/Chip';
 import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
@@ -17,15 +14,16 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import FormControl from '@mui/material/FormControl';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 
+import { useRouter, usePathname } from 'src/i18n/routing';
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
 import {
   getInstructorNotificationsAction,
-  getInstructorSentNotificationsAction,
   getInstructorUnreadCountAction,
   markInstructorNotificationAsReadAction,
   markAllInstructorNotificationsAsReadAction,
@@ -80,28 +78,37 @@ export default function InstructorNotificationsView() {
   const isRtl = locale === 'ar';
   const toast = useToast();
 
-  const [currentTab, setCurrentTab] = useState<0 | 1>(0); // 0 = Received, 1 = Sent
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read initial filter values from URL
+  const urlFilter = searchParams.get('Filter') || '';
+  const urlUserId = searchParams.get('UserId') || 'all';
+  const urlType = searchParams.get('Type') || 'all';
+  const urlPeriod = searchParams.get('period') || 'all';
+
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
-  // Received Notifications
-  const [receivedItems, setReceivedItems] = useState<InstructorNotificationItemDto[]>([]);
-  const [receivedTotalCount, setReceivedTotalCount] = useState(0);
-
-  // Sent Notifications
-  const [sentItems, setSentItems] = useState<InstructorNotificationItemDto[]>([]);
-  const [sentTotalCount, setSentTotalCount] = useState(0);
+  // Notifications state
+  const [items, setItems] = useState<InstructorNotificationItemDto[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Instructor Students for "المستخدم" select
   const [students, setStudents] = useState<InstructorStudentItemDto[]>([]);
 
-  // Filter States (Matching Swagger & Figma Image 2)
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [userIdFilter, setUserIdFilter] = useState('all');
-  const [datePeriodFilter, setDatePeriodFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [readStatusFilter, setReadStatusFilter] = useState<'all' | 'unread' | 'read'>('all');
+  // Filter States
+  const [searchQuery, setSearchQuery] = useState(urlFilter);
+  const [debouncedSearch, setDebouncedSearch] = useState(urlFilter);
+  const [userIdFilter, setUserIdFilter] = useState(urlUserId);
+  const [datePeriodFilter, setDatePeriodFilter] = useState(urlPeriod);
+  const [typeFilter, setTypeFilter] = useState(urlType);
+
+  // Dialogs state
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Debounce search input
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -111,6 +118,38 @@ export default function InstructorNotificationsView() {
     }, 400);
     return () => clearTimeout(debounceTimer.current);
   }, [searchQuery]);
+
+  // Synchronize active filters with URL query parameters
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (debouncedSearch.trim()) {
+      params.set('Filter', debouncedSearch.trim());
+    }
+    if (userIdFilter && userIdFilter !== 'all') {
+      params.set('UserId', userIdFilter);
+    }
+    if (typeFilter && typeFilter !== 'all') {
+      params.set('Type', typeFilter);
+    }
+    if (datePeriodFilter && datePeriodFilter !== 'all') {
+      params.set('period', datePeriodFilter);
+    }
+
+    const currentQuery = searchParams.toString();
+    const newQuery = params.toString();
+
+    if (currentQuery !== newQuery) {
+      const target = newQuery ? `${pathname}?${newQuery}` : pathname;
+      router.replace(target, { scroll: false });
+    }
+  }, [debouncedSearch, userIdFilter, typeFilter, datePeriodFilter, pathname, router, searchParams]);
 
   // Load instructor students once on mount
   useEffect(() => {
@@ -127,11 +166,6 @@ export default function InstructorNotificationsView() {
     loadStudents();
   }, []);
 
-  // Dialogs state
-  const [sendDialogOpen, setSendDialogOpen] = useState(false);
-  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
   // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {
     try {
@@ -144,8 +178,8 @@ export default function InstructorNotificationsView() {
     }
   }, []);
 
-  // Fetch Received Notifications from Backend
-  const fetchReceived = useCallback(
+  // Fetch Notifications from Backend
+  const fetchNotifications = useCallback(
     async (showLoading = true) => {
       try {
         if (showLoading) setLoading(true);
@@ -162,13 +196,13 @@ export default function InstructorNotificationsView() {
         });
 
         if (res.success && res.data) {
-          setReceivedItems(res.data.items || []);
-          setReceivedTotalCount(res.data.totalCount ?? (res.data.items?.length || 0));
+          setItems(res.data.items || []);
+          setTotalCount(res.data.totalCount ?? (res.data.items?.length || 0));
         } else if (res.error) {
           toast.error(res.error);
         }
       } catch (err) {
-        console.error('Failed to load received notifications:', err);
+        console.error('Failed to load notifications:', err);
       } finally {
         if (showLoading) setLoading(false);
       }
@@ -176,47 +210,11 @@ export default function InstructorNotificationsView() {
     [debouncedSearch, userIdFilter, typeFilter, datePeriodFilter, toast]
   );
 
-  // Fetch Sent Notifications from Backend
-  const fetchSent = useCallback(
-    async (showLoading = true) => {
-      try {
-        if (showLoading) setLoading(true);
-        const { FromDate, ToDate } = getDateRangeForPeriod(datePeriodFilter);
-
-        const res = await getInstructorSentNotificationsAction({
-          Filter: debouncedSearch.trim() || undefined,
-          UserId: userIdFilter !== 'all' ? userIdFilter : undefined,
-          Type: typeFilter !== 'all' ? typeFilter : undefined,
-          FromDate,
-          ToDate,
-          SkipCount: 0,
-          MaxResultCount: 1000,
-        });
-
-        if (res.success && res.data) {
-          setSentItems(res.data.items || []);
-          setSentTotalCount(res.data.totalCount ?? (res.data.items?.length || 0));
-        } else if (res.error) {
-          toast.error(res.error);
-        }
-      } catch (err) {
-        console.error('Failed to load sent notifications:', err);
-      } finally {
-        if (showLoading) setLoading(false);
-      }
-    },
-    [debouncedSearch, userIdFilter, typeFilter, datePeriodFilter, toast]
-  );
-
-  // Trigger fetch when tab or active backend filters change
+  // Trigger fetch when active backend filters change
   useEffect(() => {
     fetchUnreadCount();
-    if (currentTab === 0) {
-      fetchReceived();
-    } else {
-      fetchSent();
-    }
-  }, [currentTab, fetchReceived, fetchSent, fetchUnreadCount]);
+    fetchNotifications();
+  }, [fetchNotifications, fetchUnreadCount]);
 
   // Mark all as read
   const handleMarkAllAsRead = async () => {
@@ -225,7 +223,7 @@ export default function InstructorNotificationsView() {
       if (res.success) {
         toast.success(t('mark_all_read_success'));
         setUnreadCount(0);
-        setReceivedItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
+        setItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
       } else {
         toast.error(res.error || 'Failed');
       }
@@ -239,11 +237,11 @@ export default function InstructorNotificationsView() {
     setSelectedNotificationId(notification.id);
     setDetailsOpen(true);
 
-    if (!notification.isRead && currentTab === 0) {
+    if (!notification.isRead) {
       try {
         await markInstructorNotificationAsReadAction(notification.id);
         setUnreadCount((prev) => Math.max(0, prev - 1));
-        setReceivedItems((prev) =>
+        setItems((prev) =>
           prev.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item))
         );
       } catch (err) {
@@ -323,32 +321,13 @@ export default function InstructorNotificationsView() {
     }
   };
 
-  // Filtered received items (client-side read status filter applied on top of server data)
-  const filteredReceived = useMemo(() => {
-    if (readStatusFilter === 'all') return receivedItems;
-    return receivedItems.filter((item) =>
-      readStatusFilter === 'unread' ? !item.isRead : item.isRead
-    );
-  }, [receivedItems, readStatusFilter]);
-
-  // Sent items
-  const filteredSent = sentItems;
-
   // Table Heads
-  const receivedTableHead = [
+  const tableHead = [
     { id: 'image', label: '', align: 'center' as cellAlignment, width: 50 },
     { id: 'title', label: t('columns.title'), align: (isRtl ? 'right' : 'left') as cellAlignment },
     { id: 'message', label: t('columns.message'), align: (isRtl ? 'right' : 'left') as cellAlignment },
     { id: 'type', label: t('columns.type'), align: 'center' as cellAlignment, width: 140 },
     { id: 'status', label: t('columns.status'), align: 'center' as cellAlignment, width: 100 },
-    { id: 'createdAt', label: t('columns.date'), align: 'center' as cellAlignment, width: 160 },
-  ];
-
-  const sentTableHead = [
-    { id: 'image', label: '', align: 'center' as cellAlignment, width: 50 },
-    { id: 'title', label: t('columns.title'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'message', label: t('columns.message'), align: (isRtl ? 'right' : 'left') as cellAlignment },
-    { id: 'type', label: t('columns.type'), align: 'center' as cellAlignment, width: 140 },
     { id: 'createdAt', label: t('columns.date'), align: 'center' as cellAlignment, width: 160 },
   ];
 
@@ -376,8 +355,8 @@ export default function InstructorNotificationsView() {
           sx={{
             width: 36,
             height: 36,
-            bgcolor: !row.isRead && currentTab === 0 ? '#EFF6FF' : '#F4F6F8',
-            color: !row.isRead && currentTab === 0 ? '#2563EB' : '#919EAB',
+            bgcolor: !row.isRead ? '#EFF6FF' : '#F4F6F8',
+            color: !row.isRead ? '#2563EB' : '#919EAB',
             mx: 'auto',
           }}
         >
@@ -392,7 +371,7 @@ export default function InstructorNotificationsView() {
         <Typography
           variant="body2"
           sx={{
-            fontWeight: !row.isRead && currentTab === 0 ? 800 : 600,
+            fontWeight: !row.isRead ? 800 : 600,
             color: '#1C252E',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -413,8 +392,8 @@ export default function InstructorNotificationsView() {
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
-          color: !row.isRead && currentTab === 0 ? '#1C252E' : '#64748B',
-          fontWeight: !row.isRead && currentTab === 0 ? 600 : 400,
+          color: !row.isRead ? '#1C252E' : '#64748B',
+          fontWeight: !row.isRead ? 600 : 400,
           cursor: 'pointer',
           '&:hover': { textDecoration: 'underline' },
         }}
@@ -460,8 +439,8 @@ export default function InstructorNotificationsView() {
         </Typography>
 
         <Stack direction="row" spacing={1.5}>
-          {/* Mark all as read button (only on received tab) */}
-          {currentTab === 0 && unreadCount > 0 && (
+          {/* Mark all as read button */}
+          {unreadCount > 0 && (
             <Button
               variant="outlined"
               onClick={handleMarkAllAsRead}
@@ -478,11 +457,11 @@ export default function InstructorNotificationsView() {
             </Button>
           )}
 
-          {/* Send notification button */}
+          {/* Send notification button with proper gap between icon and text */}
           <Button
             variant="contained"
             onClick={() => setSendDialogOpen(true)}
-            startIcon={<Iconify icon="mingcute:add-line" />}
+            startIcon={<Iconify icon="mingcute:add-line" width={20} />}
             sx={{
               bgcolor: '#1C252E',
               color: '#FFFFFF',
@@ -491,6 +470,11 @@ export default function InstructorNotificationsView() {
               py: 1,
               fontWeight: 700,
               boxShadow: 'none',
+              gap: 1.25,
+              '& .MuiButton-startIcon': {
+                mx: 0,
+                ...(isRtl ? { ml: 1 } : { mr: 1 }),
+              },
               '&:hover': { bgcolor: '#2C353E' },
             }}
           >
@@ -499,7 +483,7 @@ export default function InstructorNotificationsView() {
         </Stack>
       </Stack>
 
-      {/* Main Card with Tabs & Full-Width Filters Bar */}
+      {/* Main Card with Full-Width Filters Bar & Table */}
       <Card
         sx={{
           borderRadius: 3,
@@ -507,56 +491,7 @@ export default function InstructorNotificationsView() {
           border: '1px solid #F1F3F5',
         }}
       >
-        {/* 1. Tabs Bar at Top */}
-        <Box sx={{ borderBottom: '1px solid #F1F5F9', px: 2.5 }}>
-          <Tabs
-            value={currentTab}
-            onChange={(_, val) => setCurrentTab(val)}
-            sx={{
-              minHeight: 52,
-              '& .MuiTab-root': {
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                minWidth: 'auto',
-                px: 2,
-                py: 1.5,
-              },
-              '& .Mui-selected': {
-                color: '#0F172A !important',
-              },
-              '& .MuiTabs-indicator': {
-                bgcolor: '#0F172A',
-                height: 3,
-                borderRadius: '3px 3px 0 0',
-              },
-            }}
-          >
-            <Tab
-              label={
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <span>{t('tab_received')}</span>
-                  {unreadCount > 0 && (
-                    <Badge
-                      badgeContent={unreadCount}
-                      color="error"
-                      sx={{
-                        '& .MuiBadge-badge': {
-                          fontSize: '0.7rem',
-                          height: 18,
-                          minWidth: 18,
-                          px: 0.5,
-                        },
-                      }}
-                    />
-                  )}
-                </Stack>
-              }
-            />
-            <Tab label={t('tab_sent')} />
-          </Tabs>
-        </Box>
-
-        {/* 2. Dedicated Filter Controls Bar (Matching Image 2 + Swagger params, Full-Width Distributed) */}
+        {/* Dedicated Filter Controls Bar (Matching Image 2 + Swagger params, Full-Width Distributed) */}
         <Box
           sx={{
             p: { xs: 2, sm: 2.5 },
@@ -569,7 +504,7 @@ export default function InstructorNotificationsView() {
             width: '100%',
           }}
         >
-          {/* 1. Search Input: Far Right in RTL (Image 2) */}
+          {/* 1. Search Input: Icon placed at startAdornment (on the other side) */}
           <TextField
             fullWidth
             size="small"
@@ -578,15 +513,15 @@ export default function InstructorNotificationsView() {
             onChange={(e) => setSearchQuery(e.target.value)}
             slotProps={{
               input: {
-                endAdornment: (
-                  <InputAdornment position="end">
+                startAdornment: (
+                  <InputAdornment position="start">
                     <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              flex: { xs: '1 1 100%', md: 1.2 },
+              flex: { xs: '1 1 100%', md: 1.25 },
               width: { xs: '100%', md: 'auto' },
               minWidth: 0,
               '& .MuiOutlinedInput-root': {
@@ -609,7 +544,7 @@ export default function InstructorNotificationsView() {
             }}
           />
 
-          {/* 2. User select (المستخدم) - Image 2 */}
+          {/* 2. User select (المستخدم) */}
           <FormControl
             fullWidth
             size="small"
@@ -656,7 +591,7 @@ export default function InstructorNotificationsView() {
             </Select>
           </FormControl>
 
-          {/* 3. Date select (التاريخ) - Image 2 */}
+          {/* 3. Date select (التاريخ) */}
           <FormControl
             fullWidth
             size="small"
@@ -704,7 +639,7 @@ export default function InstructorNotificationsView() {
             </Select>
           </FormControl>
 
-          {/* 4. Type select (نوع الإشعار) - Added from Swagger Image 1 */}
+          {/* 4. Type select (نوع الإشعار) */}
           <FormControl
             fullWidth
             size="small"
@@ -748,99 +683,30 @@ export default function InstructorNotificationsView() {
               <MenuItem value="PurchaseComplete">{t('filters.type_purchase_complete')}</MenuItem>
             </Select>
           </FormControl>
-
-          {/* 5. Read Status select (حالة القراءة) - only for Received tab */}
-          {currentTab === 0 && (
-            <FormControl
-              fullWidth
-              size="small"
-              variant="outlined"
-              sx={{
-                flex: { xs: '1 1 100%', md: 1 },
-                width: { xs: '100%', md: 'auto' },
-                minWidth: 0,
-              }}
-            >
-              <Select
-                fullWidth
-                variant="outlined"
-                value={readStatusFilter}
-                onChange={(e) => setReadStatusFilter(e.target.value as any)}
-                displayEmpty
-                sx={{
-                  height: 42,
-                  borderRadius: '8px',
-                  bgcolor: '#FFFFFF',
-                  fontSize: 13.5,
-                  color: readStatusFilter === 'all' ? '#64748B' : '#1E293B',
-                  fontWeight: 500,
-                  '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
-                  '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
-                  '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#94A3B8',
-                  },
-                  '& .MuiSelect-select': {
-                    py: 0,
-                    height: 42,
-                    display: 'flex',
-                    alignItems: 'center',
-                  },
-                  '& .MuiSelect-icon': { color: '#64748B' },
-                }}
-              >
-                <MenuItem value="all">{t('filters.all_statuses')}</MenuItem>
-                <MenuItem value="unread">{t('filters.unread')}</MenuItem>
-                <MenuItem value="read">{t('filters.read')}</MenuItem>
-              </Select>
-            </FormControl>
-          )}
         </Box>
 
-        {/* 3. Content Area */}
+        {/* Content Area */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress size={36} />
           </Box>
-        ) : currentTab === 0 ? (
-          /* Received Notifications Tab */
-          filteredReceived.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8, color: '#919EAB' }}>
-              <Iconify icon="solar:bell-off-bold" width={48} sx={{ mb: 1, opacity: 0.5 }} />
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {t('empty_received')}
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ px: 0.5 }}>
-              <SharedTable<InstructorNotificationItemDto>
-                data={filteredReceived}
-                count={receivedTotalCount}
-                tableHead={receivedTableHead}
-                actions={actions}
-                customRender={customRender}
-              />
-            </Box>
-          )
+        ) : items.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 8, color: '#919EAB' }}>
+            <Iconify icon="solar:bell-off-bold" width={48} sx={{ mb: 1, opacity: 0.5 }} />
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              {t('empty_received')}
+            </Typography>
+          </Box>
         ) : (
-          /* Sent Notifications Tab */
-          filteredSent.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8, color: '#919EAB' }}>
-              <Iconify icon="solar:letter-opened-bold" width={48} sx={{ mb: 1, opacity: 0.5 }} />
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {t('empty_sent')}
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ px: 0.5 }}>
-              <SharedTable<InstructorNotificationItemDto>
-                data={filteredSent}
-                count={sentTotalCount}
-                tableHead={sentTableHead}
-                actions={actions}
-                customRender={customRender}
-              />
-            </Box>
-          )
+          <Box sx={{ px: 0.5 }}>
+            <SharedTable<InstructorNotificationItemDto>
+              data={items}
+              count={totalCount}
+              tableHead={tableHead}
+              actions={actions}
+              customRender={customRender}
+            />
+          </Box>
         )}
       </Card>
 
@@ -852,7 +718,7 @@ export default function InstructorNotificationsView() {
           setSelectedNotificationId(null);
         }}
         notificationId={selectedNotificationId}
-        isSent={currentTab === 1}
+        isSent={false}
       />
 
       {/* Send Notification to Course Students Dialog */}
@@ -860,11 +726,7 @@ export default function InstructorNotificationsView() {
         open={sendDialogOpen}
         onClose={() => setSendDialogOpen(false)}
         onSuccess={() => {
-          if (currentTab === 1) {
-            fetchSent(true);
-          } else {
-            setCurrentTab(1); // switch to sent to see the newly sent notification
-          }
+          fetchNotifications(true);
         }}
       />
     </Box>
