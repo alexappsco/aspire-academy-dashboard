@@ -990,6 +990,28 @@
       "type_label": "نوع الإشعار",
       "created_at_label": "تاريخ الإرسال",
       "close": "إغلاق"
+    },
+    "filters": {
+      "search_placeholder": "...بحث",
+      "user_label": "المستخدم",
+      "all_users": "المستخدم",
+      "broadcast_label": "طريقة الإرسال",
+      "all_broadcast": "طريقة الإرسال",
+      "broadcast_only": "إشعار عام (للجميع)",
+      "targeted_only": "إشعار مخصص",
+      "type_label": "نوع الإشعار",
+      "all_types": "نوع الإشعار",
+      "type_general": "عام",
+      "type_course_promo": "ترويج دورة",
+      "type_purchase_complete": "اكتمال شراء",
+      "date_label": "التاريخ",
+      "all_dates": "التاريخ",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "this_week": "هذا الأسبوع",
+      "this_month": "هذا الشهر",
+      "last_month": "الشهر الماضي",
+      "last_3_months": "آخر 3 شهور"
     }
   },
   "TermsAndConditions": {

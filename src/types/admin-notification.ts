@@ -31,6 +31,8 @@ export interface GetAdminNotificationsParams {
   Type?: string;
   UserId?: string;
   IsBroadcast?: boolean;
+  FromDate?: string;
+  ToDate?: string;
   Filter?: string;
   Sorting?: string;
   SkipCount?: number;

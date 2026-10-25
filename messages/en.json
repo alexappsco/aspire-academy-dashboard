@@ -990,6 +990,28 @@
       "type_label": "Notification Type",
       "created_at_label": "Sent At",
       "close": "Close"
+    },
+    "filters": {
+      "search_placeholder": "Search...",
+      "user_label": "User",
+      "all_users": "User",
+      "broadcast_label": "Delivery",
+      "all_broadcast": "Delivery",
+      "broadcast_only": "Broadcast (All)",
+      "targeted_only": "Targeted",
+      "type_label": "Notification Type",
+      "all_types": "Notification Type",
+      "type_general": "General",
+      "type_course_promo": "Course Promo",
+      "type_purchase_complete": "Purchase Complete",
+      "date_label": "Date",
+      "all_dates": "Date",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "this_week": "This Week",
+      "this_month": "This Month",
+      "last_month": "Last Month",
+      "last_3_months": "Last 3 Months"
     }
   },
   "TermsAndConditions": {

@@ -32,6 +32,14 @@ export async function getAdminNotificationsAction(
         searchParams.append('IsBroadcast', String(params.IsBroadcast));
       }
 
+      if (params.FromDate && params.FromDate.trim() !== '') {
+        searchParams.append('FromDate', params.FromDate.trim());
+      }
+
+      if (params.ToDate && params.ToDate.trim() !== '') {
+        searchParams.append('ToDate', params.ToDate.trim());
+      }
+
       if (params.Sorting && params.Sorting.trim() !== '') {
         searchParams.append('Sorting', params.Sorting.trim());
       }

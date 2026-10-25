@@ -6,6 +6,8 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -16,7 +18,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useLocale, useTranslations } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
-import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import DeleteDialog from 'src/components/dialog/delete';
@@ -31,10 +32,15 @@ interface Props {
   totalCount: number;
   searchQuery: string;
   onSearchChange: (val: string) => void;
-  typeFilter: string;
-  onTypeFilterChange: (val: string) => void;
+  userIdFilter: string;
+  onUserIdFilterChange: (val: string) => void;
+  users: Array<{ id: string; name: string; email?: string }>;
   broadcastFilter: string;
   onBroadcastFilterChange: (val: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (val: string) => void;
+  datePeriodFilter: string;
+  onDatePeriodFilterChange: (val: string) => void;
   onDelete: (id: string) => Promise<boolean | void>;
   onNavigateToSend: () => void;
 }
@@ -45,10 +51,15 @@ export default function NotificationsListView({
   totalCount,
   searchQuery,
   onSearchChange,
-  typeFilter,
-  onTypeFilterChange,
+  userIdFilter,
+  onUserIdFilterChange,
+  users,
   broadcastFilter,
   onBroadcastFilterChange,
+  typeFilter,
+  onTypeFilterChange,
+  datePeriodFilter,
+  onDatePeriodFilterChange,
   onDelete,
   onNavigateToSend,
 }: Props) {
@@ -344,21 +355,25 @@ export default function NotificationsListView({
         <Button
           variant="contained"
           onClick={onNavigateToSend}
+          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: 1.5,
             px: 2.5,
             py: 1,
-            gap: 1,
             fontWeight: 700,
             boxShadow: 'none',
+            gap: 1.25,
+            '& .MuiButton-startIcon': {
+              mx: 0,
+              ...(isRtl ? { ml: 1 } : { mr: 1 }),
+            },
             '&:hover': {
               bgcolor: '#2C353E',
             },
           }}
         >
-          <Iconify icon="mingcute:add-line" width={20} />
           {t('send_notification')}
         </Button>
       </Stack>
@@ -369,95 +384,245 @@ export default function NotificationsListView({
           borderRadius: 3,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.02)',
           border: '1px solid #F1F3F5',
-          p: 2.5,
         }}
       >
-        {/* Top Filters Row */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          sx={{ mb: 3, alignItems: 'center' }}
+        {/* Dedicated Filter Controls Bar (Full-Width Distributed across the card) */}
+        <Box
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            borderBottom: '1px solid #F1F5F9',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            flexWrap: { xs: 'wrap', md: 'nowrap' },
+            gap: 1.5,
+            width: '100%',
+          }}
         >
-          {/* Search Field */}
+          {/* 1. Search Field */}
           <TextField
             fullWidth
             size="small"
-            placeholder={t('search_placeholder')}
+            placeholder={t('filters.search_placeholder')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
+                    <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
                   </InputAdornment>
                 ),
               },
             }}
             sx={{
-              flex: 1,
+              flex: { xs: '1 1 100%', md: 1.25 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
+                height: 42,
+                borderRadius: '8px',
                 bgcolor: '#FFFFFF',
-                '& fieldset': {
-                  borderColor: '#E5E7EB',
-                },
+                fontSize: 13.5,
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset': { borderColor: '#94A3B8' },
+              },
+              '& .MuiInputBase-input': {
+                py: 0,
+                height: 42,
+                fontSize: 13.5,
+                color: '#1E293B',
+                fontWeight: 500,
+                '&::placeholder': { color: '#64748B', opacity: 1 },
               },
             }}
           />
 
-          {/* Filter Selects */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            sx={{ width: { xs: '100%', md: 'auto' } }}
+          {/* 2. User Select (المستخدم) */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
           >
-            {/* Filter by Type */}
-            <SelectField
+            <Select
               fullWidth
-              size="small"
-              value={typeFilter}
-              onChange={(e) => onTypeFilterChange(e.target.value)}
+              variant="outlined"
+              value={userIdFilter}
+              onChange={(e) => onUserIdFilterChange(e.target.value)}
+              displayEmpty
               sx={{
-                minWidth: 160,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': {
-                    borderColor: '#E5E7EB',
-                  },
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: userIdFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
                 },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
               }}
             >
-              <MenuItem value="all">{tTypes('all')}</MenuItem>
-              <MenuItem value="General">{tTypes('General')}</MenuItem>
-              <MenuItem value="CoursePromo">{tTypes('CoursePromo')}</MenuItem>
-              <MenuItem value="PurchaseComplete">{tTypes('PurchaseComplete')}</MenuItem>
-            </SelectField>
+              <MenuItem value="all">{t('filters.all_users')}</MenuItem>
+              {users.map((u) => (
+                <MenuItem key={u.id} value={u.id}>
+                  {u.name || u.email || u.id}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-            {/* Filter by Delivery (Broadcast / Targeted) */}
-            <SelectField
+          {/* 3. Delivery / Broadcast Select (طريقة الإرسال) */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
+            <Select
               fullWidth
-              size="small"
+              variant="outlined"
               value={broadcastFilter}
               onChange={(e) => onBroadcastFilterChange(e.target.value)}
+              displayEmpty
               sx={{
-                minWidth: 160,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': {
-                    borderColor: '#E5E7EB',
-                  },
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: broadcastFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
                 },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
               }}
             >
-              <MenuItem value="all">{t('all_broadcast')}</MenuItem>
-              <MenuItem value="broadcast">{t('broadcast_only')}</MenuItem>
-              <MenuItem value="specific">{t('targeted_only')}</MenuItem>
-            </SelectField>
-          </Stack>
-        </Stack>
+              <MenuItem value="all">{t('filters.all_broadcast')}</MenuItem>
+              <MenuItem value="broadcast">{t('filters.broadcast_only')}</MenuItem>
+              <MenuItem value="specific">{t('filters.targeted_only')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* 4. Type Select (نوع الإشعار) */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
+            <Select
+              fullWidth
+              variant="outlined"
+              value={typeFilter}
+              onChange={(e) => onTypeFilterChange(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: typeFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_types')}</MenuItem>
+              <MenuItem value="General">{t('filters.type_general')}</MenuItem>
+              <MenuItem value="CoursePromo">{t('filters.type_course_promo')}</MenuItem>
+              <MenuItem value="PurchaseComplete">{t('filters.type_purchase_complete')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* 5. Date Select (التاريخ) */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
+            <Select
+              fullWidth
+              variant="outlined"
+              value={datePeriodFilter}
+              onChange={(e) => onDatePeriodFilterChange(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: datePeriodFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_dates')}</MenuItem>
+              <MenuItem value="today">{t('filters.today')}</MenuItem>
+              <MenuItem value="yesterday">{t('filters.yesterday')}</MenuItem>
+              <MenuItem value="this_week">{t('filters.this_week')}</MenuItem>
+              <MenuItem value="this_month">{t('filters.this_month')}</MenuItem>
+              <MenuItem value="last_month">{t('filters.last_month')}</MenuItem>
+              <MenuItem value="last_3_months">{t('filters.last_3_months')}</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
 
         {/* Loading Spinner or Table */}
         {loading ? (
@@ -465,7 +630,7 @@ export default function NotificationsListView({
             <CircularProgress size={36} />
           </Box>
         ) : (
-          <Box sx={{ px: 0.5 }}>
+          <Box sx={{ p: 2 }}>
             <SharedTable<AdminNotificationItemDto>
               data={data}
               count={totalCount}
