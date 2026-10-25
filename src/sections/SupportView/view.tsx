@@ -71,6 +71,16 @@ export default function SupportView() {
     return 'New';
   };
 
+  // Helper to normalize senderType to PascalCase enum ('Student' | 'Instructor' | 'Admin')
+  const normalizeSenderType = (type?: unknown): 'Student' | 'Instructor' | 'Admin' | string => {
+    if (type === null || type === undefined || type === '') return '';
+    const s = String(type).trim().toLowerCase();
+    if (s === '0' || s === 'student' || s === 'طالب') return 'Student';
+    if (s === '1' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم') return 'Instructor';
+    if (s === 'admin' || s === 'مسؤول') return 'Admin';
+    return s;
+  };
+
   // Read initial filter values from URL
   const rawUrlFilter = searchParams.get('Filter') || searchParams.get('search') || '';
   const rawUrlStatus = searchParams.get('Status') || searchParams.get('status') || 'all';
@@ -258,14 +268,13 @@ export default function SupportView() {
 
   // Helper to format sender type
   const formatSenderType = (type?: unknown) => {
-    if (type === null || type === undefined) {
+    if (type === null || type === undefined || type === '') {
       return isInstructor ? (isRtl ? 'محاضر' : 'Instructor') : isRtl ? 'طالب' : 'Student';
     }
-    const s = String(type).toLowerCase().trim();
-    if (s === '0' || s === 'student' || s === 'طالب') return isRtl ? 'طالب' : 'Student';
-    if (s === '1' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم')
-      return isRtl ? 'محاضر' : 'Instructor';
-    if (s === 'admin' || s === 'مسؤول') return isRtl ? 'مسؤول' : 'Admin';
+    const norm = normalizeSenderType(type);
+    if (norm === 'Student') return isRtl ? 'طالب' : 'Student';
+    if (norm === 'Instructor') return isRtl ? 'محاضر' : 'Instructor';
+    if (norm === 'Admin') return isRtl ? 'مسؤول' : 'Admin';
     return String(type);
   };
 
@@ -362,8 +371,14 @@ export default function SupportView() {
       }
 
       if (!isInstructor && senderTypeFilter && senderTypeFilter !== 'all') {
-        const itemType = (item.raw.senderType || '').toLowerCase();
-        if (itemType !== senderTypeFilter.toLowerCase()) return false;
+        const itemType = normalizeSenderType(item.raw.senderType);
+        const filterType = normalizeSenderType(senderTypeFilter);
+        if (itemType && filterType) {
+          if (itemType !== filterType) return false;
+        } else if (filterType) {
+          const displayType = normalizeSenderType(item.senderType);
+          if (displayType !== filterType) return false;
+        }
       }
 
       if (dateFilter) {
