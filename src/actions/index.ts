@@ -31,4 +31,5 @@ export * from './admin-session-requests';
 export * from './instructor-dues';
 export * from './session-group-discount-settings';
 export * from './academy-bank-accounts';
+export * from './academy-custom-fields';
 export * from './instructor-wallet';
