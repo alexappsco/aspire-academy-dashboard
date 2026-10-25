@@ -512,18 +512,23 @@ export default function SupportView() {
         {isInstructor && (
           <Button
             variant="contained"
-            startIcon={<Iconify icon="solar:plain-bold" />}
+            startIcon={<Iconify icon="solar:plain-bold" width={20} />}
             onClick={() => setCreateOpen(true)}
             sx={{
-              bgcolor: '#886ce8',
-              color: '#fff',
-              borderRadius: '12px',
+              bgcolor: '#1C252E',
+              color: '#FFFFFF',
+              borderRadius: 1.5,
               fontWeight: 700,
-              px: 3,
+              px: 2.5,
+              py: 1,
               height: 44,
-              gap: 1,
-              boxShadow: '0 8px 16px 0 rgba(136, 108, 232, 0.24)',
-              '&:hover': { bgcolor: '#7758e6' },
+              boxShadow: 'none',
+              gap: 1.25,
+              '& .MuiButton-startIcon': {
+                mx: 0,
+                ...(isRtl ? { ml: 1 } : { mr: 1 }),
+              },
+              '&:hover': { bgcolor: '#2C353E' },
               textTransform: 'none',
               whiteSpace: 'nowrap',
             }}

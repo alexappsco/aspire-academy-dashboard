@@ -60,7 +60,7 @@ export default function SupportStatusTabs({
             whiteSpace: 'nowrap',
             '&:hover': {
               backgroundColor: 'transparent',
-              color: '#886ce8',
+              color: '#111827',
             },
           }}
         >

@@ -31,19 +31,20 @@ export default function SupportHeader({ onCreateClick, canAdd = true }: SupportH
       {canAdd && (
         <Button
           variant="contained"
-          startIcon={<Iconify icon="solar:plain-bold" />}
+          startIcon={<Iconify icon="solar:plain-bold" width={20} />}
           onClick={onCreateClick}
           sx={{
-            bgcolor: '#886ce8',
-            color: '#fff',
-            borderRadius: '12px',
+            bgcolor: '#1C252E',
+            color: '#FFFFFF',
+            borderRadius: 1.5,
             fontWeight: 700,
-            px: 3,
-            height: 48,
-            gap: 1.5,
-            boxShadow: '0 8px 16px 0 rgba(136, 108, 232, 0.24)',
+            px: 2.5,
+            py: 1,
+            height: 44,
+            boxShadow: 'none',
+            gap: 1.25,
             '&:hover': {
-              bgcolor: '#7758e6',
+              bgcolor: '#2C353E',
             },
             textTransform: 'none',
             whiteSpace: 'nowrap',

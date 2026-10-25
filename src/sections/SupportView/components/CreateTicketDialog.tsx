@@ -139,15 +139,15 @@ export default function CreateTicketDialog({
                 onClick={onSubmit}
                 disabled={!isValid || submitting}
                 sx={{
-                  bgcolor: '#886ce8',
-                  color: '#fff',
-                  borderRadius: '12px',
+                  bgcolor: '#1C252E',
+                  color: '#FFFFFF',
+                  borderRadius: 1.5,
                   fontWeight: 700,
-                  height: 48,
-                  px: 5,
+                  height: 44,
+                  px: 4,
                   boxShadow: 'none',
                   '&:hover': {
-                    bgcolor: '#7758e6',
+                    bgcolor: '#2C353E',
                     boxShadow: 'none',
                   },
                 }}
