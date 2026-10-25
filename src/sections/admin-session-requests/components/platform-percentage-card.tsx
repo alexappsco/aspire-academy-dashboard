@@ -106,16 +106,21 @@ export default function PlatformPercentageCard({
             <Typography sx={{ color: '#667085', fontSize: 12 }}>
               {t(discountSetting.isEnabled ? 'group_discount.enabled' : 'group_discount.disabled')}
             </Typography>
-            {discountSetting.isEnabled && (
-              <>
-                <Typography sx={{ color: '#667085', fontSize: 12 }}>
-                  {t('group_discount.minimum', { count: discountSetting.minParticipants })}
-                </Typography>
-                <Typography sx={{ color: '#667085', fontSize: 12 }}>
-                  {t('group_discount.percentage', { value: discountSetting.discountPercentage })}
-                </Typography>
-              </>
+            {discountSetting.isEnabled && discountSetting.tiers.length === 0 && (
+              <Typography sx={{ color: '#667085', fontSize: 12 }}>
+                {t('group_discount.no_tiers')}
+              </Typography>
             )}
+            {discountSetting.isEnabled && discountSetting.tiers.map((tier) => (
+              <Box key={tier.id} sx={{ mt: 0.5 }}>
+                <Typography sx={{ color: '#667085', fontSize: 12 }}>
+                  {t('group_discount.minimum', { count: tier.minParticipants })}
+                </Typography>
+                <Typography sx={{ color: '#667085', fontSize: 12 }}>
+                  {t('group_discount.percentage', { value: tier.discountPercentage })}
+                </Typography>
+              </Box>
+            ))}
           </Box>
         ) : (
           <Typography sx={{ color: '#667085', fontSize: 12 }}>

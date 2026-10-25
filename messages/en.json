@@ -2478,6 +2478,7 @@
         "disabled": "Group discount is disabled",
         "minimum": "Minimum participants: {count}",
         "percentage": "Discount percentage: {value}%",
+        "no_tiers": "No discount tiers are available",
         "unavailable": "The group discount setting is unavailable"
       },
       "example": {
@@ -2563,7 +2564,8 @@
   },
   "GroupDiscountSettings": {
     "title": "Private Request Group Discount Settings",
-    "subtitle": "Set the minimum group size and discount percentage applied to each student's charged hours.",
+    "subtitle": "View the private request group discount settings and edit the available tiers.",
+    "add_tier": "Add discount tier",
     "edit_settings": "Edit settings",
     "retry": "Retry",
     "load_error": "Failed to load group discount settings",
@@ -2572,8 +2574,15 @@
       "disabled": "Disabled"
     },
     "current_rule": {
-      "title": "Current discount rule",
-      "description": "The student count includes the request owner and all participants."
+      "title": "Current discount setting",
+      "description": "The status of the private request group discount setting."
+    },
+    "tiers": {
+      "title": "Discount tiers",
+      "item": "Tier {number}",
+      "minimum": "Minimum participants — tier {number}",
+      "percentage": "Discount percentage",
+      "empty": "No discount tiers are available."
     },
     "minimum": {
       "title": "Students required to activate the discount",
@@ -2604,9 +2613,21 @@
       }
     },
     "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage.",
+    "create": {
+      "title": "Add discount tier",
+      "subtitle": "Enter the minimum participants and discount percentage for the new tier.",
+      "minimum_label": "Minimum participants",
+      "percentage_label": "Discount percentage (%)",
+      "minimum_error": "Enter a valid whole number of participants.",
+      "percentage_error": "Enter a valid percentage from 0 to 100.",
+      "save": "Add tier",
+      "cancel": "Cancel",
+      "success": "Discount tier added successfully",
+      "error": "Failed to add the discount tier"
+    },
     "edit": {
       "title": "Edit Private Request Group Discount Settings",
-      "subtitle": "Set the total number of students required for the discount, then enter the discount percentage.",
+      "subtitle": "Edit the setting status and the values of the available discount tiers.",
       "future_notice": "The new rules will apply to requests created after saving without changing previous consumption records.",
       "minimum": {
         "title": "Minimum number of students",
@@ -2621,6 +2642,11 @@
         "label": "Discount percentage (%)",
         "helper": "Enter the percentage approved by the administrator.",
         "error": "Enter a valid percentage from 0 to 100."
+      },
+      "tiers": {
+        "title": "Discount tiers",
+        "item": "Tier {number}",
+        "empty": "No discount tiers are available to edit."
       },
       "activation": {
         "title": "Enable group discount",

@@ -133,6 +133,7 @@ export const endpoints = {
     details: (id: string) => `/admin/session-requests/${id}`,
     review: (id: string) => `/admin/session-requests/${id}/review`,
     groupDiscountSetting: '/admin/session-group-discount-setting',
+    createGroupDiscountTier: '/admin/session-group-discount-setting/tiers',
   },
   academyBankAccounts: {
     list: '/admin/academy-bank-accounts',
