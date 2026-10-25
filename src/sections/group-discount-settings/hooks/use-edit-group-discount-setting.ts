@@ -11,12 +11,17 @@ import { useToast } from 'src/components/toast';
 import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 
+export type EditableDiscountTier = {
+  id: string;
+  minParticipants: string;
+  discountPercentage: string;
+};
+
 export default function useEditGroupDiscountSetting() {
   const t = useTranslations('GroupDiscountSettings.edit');
   const toast = useToast();
   const router = useRouter();
-  const [minParticipants, setMinParticipants] = useState('');
-  const [discountPercentage, setDiscountPercentage] = useState('');
+  const [tiers, setTiers] = useState<EditableDiscountTier[]>([]);
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -29,8 +34,13 @@ export default function useEditGroupDiscountSetting() {
     const response = await getSessionGroupDiscountSetting();
 
     if (response.success && response.data) {
-      setMinParticipants(String(response.data.minParticipants));
-      setDiscountPercentage(String(response.data.discountPercentage));
+      setTiers(
+        response.data.tiers.map((tier) => ({
+          id: tier.id,
+          minParticipants: String(tier.minParticipants),
+          discountPercentage: String(tier.discountPercentage),
+        }))
+      );
       setIsEnabled(response.data.isEnabled);
     } else {
       setError(response.error || t('load_error'));
@@ -43,18 +53,32 @@ export default function useEditGroupDiscountSetting() {
   }, [loadSetting]);
 
   const valuesAreValid = useMemo(() => {
-    const participants = Number(minParticipants);
-    const percentage = Number(discountPercentage);
-    return (
-      minParticipants.trim() !== '' &&
-      discountPercentage.trim() !== '' &&
-      Number.isInteger(participants) &&
-      participants >= 0 &&
-      Number.isFinite(percentage) &&
-      percentage >= 0 &&
-      percentage <= 100
+    return tiers.every((tier) => {
+      const participants = Number(tier.minParticipants);
+      const percentage = Number(tier.discountPercentage);
+      return (
+        tier.minParticipants.trim() !== '' &&
+        tier.discountPercentage.trim() !== '' &&
+        Number.isInteger(participants) &&
+        participants >= 0 &&
+        Number.isFinite(percentage) &&
+        percentage >= 0 &&
+        percentage <= 100
+      );
+    });
+  }, [tiers]);
+
+  const updateTier = (
+    index: number,
+    field: 'minParticipants' | 'discountPercentage',
+    value: string
+  ) => {
+    setTiers((current) =>
+      current.map((tier, tierIndex) =>
+        tierIndex === index ? { ...tier, [field]: value } : tier
+      )
     );
-  }, [discountPercentage, minParticipants]);
+  };
 
   const save = async () => {
     setTouched(true);
@@ -63,8 +87,11 @@ export default function useEditGroupDiscountSetting() {
     setSaving(true);
     const response = await updateSessionGroupDiscountSetting({
       isEnabled,
-      minParticipants: Number(minParticipants),
-      discountPercentage: Number(discountPercentage),
+      tiers: tiers.map((tier) => ({
+        id: tier.id,
+        minParticipants: Number(tier.minParticipants),
+        discountPercentage: Number(tier.discountPercentage),
+      })),
     });
 
     if (response.success) {
@@ -77,16 +104,14 @@ export default function useEditGroupDiscountSetting() {
   };
 
   return {
-    minParticipants,
-    discountPercentage,
+    tiers,
     isEnabled,
     loading,
     saving,
     error,
     touched,
     valuesAreValid,
-    setMinParticipants,
-    setDiscountPercentage,
+    updateTier,
     setIsEnabled,
     retry: loadSetting,
     save,

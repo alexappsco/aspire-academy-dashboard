@@ -37,13 +37,10 @@ export default function EditGroupDiscountSettingsView() {
   return (
     <Box sx={{ py: 2, pb: 6, display: 'grid', gap: 1.5 }}>
       <EditGroupDiscountSettingsHeader />
-      <Alert severity="info" icon={false}>{t('future_notice')}</Alert>
       <EditSettingsFields
-        minParticipants={form.minParticipants}
-        discountPercentage={form.discountPercentage}
+        tiers={form.tiers}
         touched={form.touched}
-        onMinParticipantsChange={form.setMinParticipants}
-        onDiscountPercentageChange={form.setDiscountPercentage}
+        onTierChange={form.updateTier}
       />
       <ActivationSwitchCard checked={form.isEnabled} onChange={form.setIsEnabled} />
       <EditSettingsActions saving={form.saving} onSave={() => void form.save()} onCancel={form.cancel} />
