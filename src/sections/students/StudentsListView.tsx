@@ -25,6 +25,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 
+import SelectField from 'src/components/SelectField/SelectField';
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
@@ -529,27 +530,39 @@ export default function StudentsListView() {
           />
 
           {/* Status Dropdown Filter */}
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              displayEmpty
-              sx={{
+          <SelectField
+            size="small"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            slotProps={{
+              select: {
+                displayEmpty: true,
+              },
+            }}
+            sx={{
+              minWidth: { xs: '100%', sm: 150 },
+              '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 bgcolor: '#FFFFFF',
                 fontSize: 13.5,
                 fontWeight: 600,
                 color: '#1E293B',
-                '& .MuiOutlinedInput-notchedOutline': {
+                '& fieldset': {
                   borderColor: '#E2E8F0',
                 },
-              }}
-            >
-              <MenuItem value="all">{t('status_all')}</MenuItem>
-              <MenuItem value="active">{t('active')}</MenuItem>
-              <MenuItem value="inactive">{t('inactive')}</MenuItem>
-            </Select>
-          </FormControl>
+                '&:hover fieldset': {
+                  borderColor: '#CBD5E1',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: '#94A3B8',
+                },
+              },
+            }}
+          >
+            <MenuItem value="all">{t('status_all')}</MenuItem>
+            <MenuItem value="active">{t('active')}</MenuItem>
+            <MenuItem value="inactive">{t('inactive')}</MenuItem>
+          </SelectField>
         </Stack>
 
         {/* SharedTable with Loading Indicator */}
