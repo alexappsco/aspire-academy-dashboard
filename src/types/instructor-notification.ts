@@ -13,7 +13,15 @@ export interface InstructorNotificationListResponse {
   totalCount: number;
 }
 
+export type InstructorNotificationType = 'General' | 'CoursePromo' | 'PurchaseComplete';
+
 export interface GetInstructorNotificationsParams {
+  Type?: string;
+  UserId?: string;
+  FromDate?: string;
+  ToDate?: string;
+  Filter?: string;
+  Sorting?: string;
   SkipCount?: number;
   MaxResultCount?: number;
 }

@@ -1981,6 +1981,28 @@
     }
   },
   "InstructorNotifications": {
+    "filters": {
+      "search_placeholder": "...بحث",
+      "user_label": "المستخدم",
+      "all_users": "المستخدم",
+      "date_label": "التاريخ",
+      "all_dates": "التاريخ",
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "this_week": "هذا الأسبوع",
+      "this_month": "هذا الشهر",
+      "last_month": "الشهر الماضي",
+      "last_3_months": "آخر 3 أشهر",
+      "type_label": "نوع الإشعار",
+      "all_types": "نوع الإشعار",
+      "type_general": "عام",
+      "type_course_promo": "ترويج دورة",
+      "type_purchase_complete": "اكتمال شراء",
+      "read_status_label": "حالة القراءة",
+      "all_statuses": "حالة القراءة",
+      "unread": "غير مقروء",
+      "read": "مقروء"
+    },
     "title": "إشعارات المحاضر",
     "tab_received": "الإشعارات الواردة",
     "tab_sent": "الإشعارات المرسلة",

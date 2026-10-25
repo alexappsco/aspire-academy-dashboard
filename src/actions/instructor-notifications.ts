@@ -9,28 +9,52 @@ import type {
   SendInstructorNotificationPayload,
 } from 'src/types/instructor-notification';
 
+function appendNotificationParams(endpoint: string, params?: GetInstructorNotificationsParams): string {
+  if (!params) return endpoint;
+
+  const searchParams = new URLSearchParams();
+
+  if (params.Type && params.Type !== 'all') {
+    searchParams.append('Type', params.Type);
+  }
+
+  if (params.UserId && params.UserId !== 'all') {
+    searchParams.append('UserId', params.UserId);
+  }
+
+  if (params.FromDate) {
+    searchParams.append('FromDate', params.FromDate);
+  }
+
+  if (params.ToDate) {
+    searchParams.append('ToDate', params.ToDate);
+  }
+
+  if (params.Filter && params.Filter.trim() !== '') {
+    searchParams.append('Filter', params.Filter.trim());
+  }
+
+  if (params.Sorting) {
+    searchParams.append('Sorting', params.Sorting);
+  }
+
+  if (typeof params.SkipCount === 'number') {
+    searchParams.append('SkipCount', String(params.SkipCount));
+  }
+
+  if (typeof params.MaxResultCount === 'number') {
+    searchParams.append('MaxResultCount', String(params.MaxResultCount));
+  }
+
+  const query = searchParams.toString();
+  return query ? `${endpoint}?${query}` : endpoint;
+}
+
 export async function getInstructorNotificationsAction(
   params?: GetInstructorNotificationsParams
 ): Promise<{ success: boolean; data?: InstructorNotificationListResponse; error?: string }> {
   try {
-    let endpoint = endpoints.instructorNotifications.received;
-    if (params) {
-      const searchParams = new URLSearchParams();
-
-      if (typeof params.SkipCount === 'number') {
-        searchParams.append('SkipCount', String(params.SkipCount));
-      }
-
-      if (typeof params.MaxResultCount === 'number') {
-        searchParams.append('MaxResultCount', String(params.MaxResultCount));
-      }
-
-      const query = searchParams.toString();
-      if (query) {
-        endpoint += `?${query}`;
-      }
-    }
-
+    const endpoint = appendNotificationParams(endpoints.instructorNotifications.received, params);
     const res = await getData<InstructorNotificationListResponse>(endpoint);
 
     if ('success' in res && res.success) {
@@ -52,24 +76,7 @@ export async function getInstructorSentNotificationsAction(
   params?: GetInstructorNotificationsParams
 ): Promise<{ success: boolean; data?: InstructorNotificationListResponse; error?: string }> {
   try {
-    let endpoint = endpoints.instructorNotifications.sent;
-    if (params) {
-      const searchParams = new URLSearchParams();
-
-      if (typeof params.SkipCount === 'number') {
-        searchParams.append('SkipCount', String(params.SkipCount));
-      }
-
-      if (typeof params.MaxResultCount === 'number') {
-        searchParams.append('MaxResultCount', String(params.MaxResultCount));
-      }
-
-      const query = searchParams.toString();
-      if (query) {
-        endpoint += `?${query}`;
-      }
-    }
-
+    const endpoint = appendNotificationParams(endpoints.instructorNotifications.sent, params);
     const res = await getData<InstructorNotificationListResponse>(endpoint);
 
     if ('success' in res && res.success) {
@@ -222,4 +229,3 @@ export async function getInstructorSentNotificationDetailsAction(
     };
   }
 }
-

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -14,11 +14,12 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import FormControl from '@mui/material/FormControl';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useLocale, useTranslations } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
-import SelectField from 'src/components/SelectField/SelectField';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
@@ -29,11 +30,48 @@ import {
   markInstructorNotificationAsReadAction,
   markAllInstructorNotificationsAsReadAction,
 } from 'src/actions/instructor-notifications';
+import { getInstructorStudentsAction } from 'src/actions/instructor-students';
+import type { InstructorStudentItemDto } from 'src/types/instructor-student';
 import type { InstructorNotificationItemDto } from 'src/types/instructor-notification';
 import { normalizeNotificationType } from 'src/types/admin-notification';
 
 import SendCourseNotificationDialog from './SendCourseNotificationDialog';
 import InstructorNotificationDetailsDialog from './InstructorNotificationDetailsDialog';
+
+// Helper to compute ISO date range for period filter
+function getDateRangeForPeriod(period: string): { FromDate?: string; ToDate?: string } {
+  if (!period || period === 'all') return {};
+
+  const now = new Date();
+  if (period === 'today') {
+    const from = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    return { FromDate: from.toISOString(), ToDate: to.toISOString() };
+  }
+  if (period === 'yesterday') {
+    const from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0, 0);
+    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+    return { FromDate: from.toISOString(), ToDate: to.toISOString() };
+  }
+  if (period === 'this_week') {
+    const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return { FromDate: from.toISOString(), ToDate: now.toISOString() };
+  }
+  if (period === 'this_month') {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    return { FromDate: from.toISOString(), ToDate: now.toISOString() };
+  }
+  if (period === 'last_month') {
+    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+    const to = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    return { FromDate: from.toISOString(), ToDate: to.toISOString() };
+  }
+  if (period === 'last_3_months') {
+    const from = new Date(now.getFullYear(), now.getMonth() - 3, 1, 0, 0, 0, 0);
+    return { FromDate: from.toISOString(), ToDate: now.toISOString() };
+  }
+  return {};
+}
 
 export default function InstructorNotificationsView() {
   const t = useTranslations('InstructorNotifications');
@@ -54,18 +92,40 @@ export default function InstructorNotificationsView() {
   const [sentItems, setSentItems] = useState<InstructorNotificationItemDto[]>([]);
   const [sentTotalCount, setSentTotalCount] = useState(0);
 
-  // Filters for Received
+  // Instructor Students for "المستخدم" select
+  const [students, setStudents] = useState<InstructorStudentItemDto[]>([]);
+
+  // Filter States (Matching Swagger & Figma Image 2)
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [userIdFilter, setUserIdFilter] = useState('all');
+  const [datePeriodFilter, setDatePeriodFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [readStatusFilter, setReadStatusFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // Debounce search input
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => {
     debounceTimer.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
     }, 400);
     return () => clearTimeout(debounceTimer.current);
   }, [searchQuery]);
+
+  // Load instructor students once on mount
+  useEffect(() => {
+    async function loadStudents() {
+      try {
+        const res = await getInstructorStudentsAction({ SkipCount: 0, MaxResultCount: 1000 });
+        if (res.success && res.data?.items) {
+          setStudents(res.data.items);
+        }
+      } catch (err) {
+        console.error('Failed to load instructor students:', err);
+      }
+    }
+    loadStudents();
+  }, []);
 
   // Dialogs state
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
@@ -84,14 +144,21 @@ export default function InstructorNotificationsView() {
     }
   }, []);
 
-  // Fetch Received Notifications
+  // Fetch Received Notifications from Backend
   const fetchReceived = useCallback(
     async (showLoading = true) => {
       try {
         if (showLoading) setLoading(true);
+        const { FromDate, ToDate } = getDateRangeForPeriod(datePeriodFilter);
+
         const res = await getInstructorNotificationsAction({
+          Filter: debouncedSearch.trim() || undefined,
+          UserId: userIdFilter !== 'all' ? userIdFilter : undefined,
+          Type: typeFilter !== 'all' ? typeFilter : undefined,
+          FromDate,
+          ToDate,
           SkipCount: 0,
-          MaxResultCount: 200,
+          MaxResultCount: 1000,
         });
 
         if (res.success && res.data) {
@@ -106,17 +173,24 @@ export default function InstructorNotificationsView() {
         if (showLoading) setLoading(false);
       }
     },
-    [toast]
+    [debouncedSearch, userIdFilter, typeFilter, datePeriodFilter, toast]
   );
 
-  // Fetch Sent Notifications
+  // Fetch Sent Notifications from Backend
   const fetchSent = useCallback(
     async (showLoading = true) => {
       try {
         if (showLoading) setLoading(true);
+        const { FromDate, ToDate } = getDateRangeForPeriod(datePeriodFilter);
+
         const res = await getInstructorSentNotificationsAction({
+          Filter: debouncedSearch.trim() || undefined,
+          UserId: userIdFilter !== 'all' ? userIdFilter : undefined,
+          Type: typeFilter !== 'all' ? typeFilter : undefined,
+          FromDate,
+          ToDate,
           SkipCount: 0,
-          MaxResultCount: 200,
+          MaxResultCount: 1000,
         });
 
         if (res.success && res.data) {
@@ -131,9 +205,10 @@ export default function InstructorNotificationsView() {
         if (showLoading) setLoading(false);
       }
     },
-    [toast]
+    [debouncedSearch, userIdFilter, typeFilter, datePeriodFilter, toast]
   );
 
+  // Trigger fetch when tab or active backend filters change
   useEffect(() => {
     fetchUnreadCount();
     if (currentTab === 0) {
@@ -248,29 +323,16 @@ export default function InstructorNotificationsView() {
     }
   };
 
-  // Filtered received items (client-side search & read status)
-  const filteredReceived = receivedItems.filter((item) => {
-    const matchesSearch =
-      !debouncedSearch.trim() ||
-      item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      item.message.toLowerCase().includes(debouncedSearch.toLowerCase());
-
-    const matchesStatus =
-      readStatusFilter === 'all' ||
-      (readStatusFilter === 'unread' && !item.isRead) ||
-      (readStatusFilter === 'read' && item.isRead);
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Filtered sent items (client-side search)
-  const filteredSent = sentItems.filter((item) => {
-    return (
-      !debouncedSearch.trim() ||
-      item.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      item.message.toLowerCase().includes(debouncedSearch.toLowerCase())
+  // Filtered received items (client-side read status filter applied on top of server data)
+  const filteredReceived = useMemo(() => {
+    if (readStatusFilter === 'all') return receivedItems;
+    return receivedItems.filter((item) =>
+      readStatusFilter === 'unread' ? !item.isRead : item.isRead
     );
-  });
+  }, [receivedItems, readStatusFilter]);
+
+  // Sent items
+  const filteredSent = sentItems;
 
   // Table Heads
   const receivedTableHead = [
@@ -437,36 +499,35 @@ export default function InstructorNotificationsView() {
         </Stack>
       </Stack>
 
-      {/* Main Card with Tabs */}
+      {/* Main Card with Tabs & Full-Width Filters Bar */}
       <Card
         sx={{
           borderRadius: 3,
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.02)',
           border: '1px solid #F1F3F5',
-          p: 2.5,
         }}
       >
-        {/* Tabs Bar */}
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          sx={{
-            borderBottom: '1px solid #F1F5F9',
-            mb: 2.5,
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', md: 'center' },
-          }}
-        >
+        {/* 1. Tabs Bar at Top */}
+        <Box sx={{ borderBottom: '1px solid #F1F5F9', px: 2.5 }}>
           <Tabs
             value={currentTab}
             onChange={(_, val) => setCurrentTab(val)}
             sx={{
+              minHeight: 52,
               '& .MuiTab-root': {
                 fontWeight: 700,
                 fontSize: '0.95rem',
                 minWidth: 'auto',
                 px: 2,
                 py: 1.5,
+              },
+              '& .Mui-selected': {
+                color: '#0F172A !important',
+              },
+              '& .MuiTabs-indicator': {
+                bgcolor: '#0F172A',
+                height: 3,
+                borderRadius: '3px 3px 0 0',
               },
             }}
           >
@@ -493,63 +554,249 @@ export default function InstructorNotificationsView() {
             />
             <Tab label={t('tab_sent')} />
           </Tabs>
+        </Box>
 
-          {/* Search & Filter Controls */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            sx={{ width: { xs: '100%', md: 'auto' }, pb: { xs: 1.5, md: 0 } }}
+        {/* 2. Dedicated Filter Controls Bar (Matching Image 2 + Swagger params, Full-Width Distributed) */}
+        <Box
+          sx={{
+            p: { xs: 2, sm: 2.5 },
+            borderBottom: '1px solid #F1F5F9',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            flexWrap: { xs: 'wrap', md: 'nowrap' },
+            gap: 1.5,
+            width: '100%',
+          }}
+        >
+          {/* 1. Search Input: Far Right in RTL (Image 2) */}
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={t('filters.search_placeholder')}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{
+              flex: { xs: '1 1 100%', md: 1.2 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+              '& .MuiOutlinedInput-root': {
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset': { borderColor: '#94A3B8' },
+              },
+              '& .MuiInputBase-input': {
+                py: 0,
+                height: 42,
+                fontSize: 13.5,
+                color: '#1E293B',
+                fontWeight: 500,
+                '&::placeholder': { color: '#64748B', opacity: 1 },
+              },
+            }}
+          />
+
+          {/* 2. User select (المستخدم) - Image 2 */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
           >
-            <TextField
-              size="small"
-              placeholder={t('search_placeholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Iconify icon="eva:search-fill" sx={{ color: '#919EAB' }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
+            <Select
+              fullWidth
+              variant="outlined"
+              value={userIdFilter}
+              onChange={(e) => setUserIdFilter(e.target.value)}
+              displayEmpty
               sx={{
-                width: { xs: '100%', sm: 240 },
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  bgcolor: '#FFFFFF',
-                  '& fieldset': { borderColor: '#E5E7EB' },
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: userIdFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
                 },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
               }}
-            />
+            >
+              <MenuItem value="all">{t('filters.all_users')}</MenuItem>
+              {students.map((st) => (
+                <MenuItem key={st.id || st.studentId} value={st.studentId || st.id}>
+                  {st.name || st.email}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-            {/* Read status filter (only on Received tab) */}
-            {currentTab === 0 && (
-              <SelectField
-                size="small"
+          {/* 3. Date select (التاريخ) - Image 2 */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
+            <Select
+              fullWidth
+              variant="outlined"
+              value={datePeriodFilter}
+              onChange={(e) => setDatePeriodFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: datePeriodFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_dates')}</MenuItem>
+              <MenuItem value="today">{t('filters.today')}</MenuItem>
+              <MenuItem value="yesterday">{t('filters.yesterday')}</MenuItem>
+              <MenuItem value="this_week">{t('filters.this_week')}</MenuItem>
+              <MenuItem value="this_month">{t('filters.this_month')}</MenuItem>
+              <MenuItem value="last_month">{t('filters.last_month')}</MenuItem>
+              <MenuItem value="last_3_months">{t('filters.last_3_months')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* 4. Type select (نوع الإشعار) - Added from Swagger Image 1 */}
+          <FormControl
+            fullWidth
+            size="small"
+            variant="outlined"
+            sx={{
+              flex: { xs: '1 1 100%', md: 1 },
+              width: { xs: '100%', md: 'auto' },
+              minWidth: 0,
+            }}
+          >
+            <Select
+              fullWidth
+              variant="outlined"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              displayEmpty
+              sx={{
+                height: 42,
+                borderRadius: '8px',
+                bgcolor: '#FFFFFF',
+                fontSize: 13.5,
+                color: typeFilter === 'all' ? '#64748B' : '#1E293B',
+                fontWeight: 500,
+                '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#94A3B8',
+                },
+                '& .MuiSelect-select': {
+                  py: 0,
+                  height: 42,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+                '& .MuiSelect-icon': { color: '#64748B' },
+              }}
+            >
+              <MenuItem value="all">{t('filters.all_types')}</MenuItem>
+              <MenuItem value="General">{t('filters.type_general')}</MenuItem>
+              <MenuItem value="CoursePromo">{t('filters.type_course_promo')}</MenuItem>
+              <MenuItem value="PurchaseComplete">{t('filters.type_purchase_complete')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* 5. Read Status select (حالة القراءة) - only for Received tab */}
+          {currentTab === 0 && (
+            <FormControl
+              fullWidth
+              size="small"
+              variant="outlined"
+              sx={{
+                flex: { xs: '1 1 100%', md: 1 },
+                width: { xs: '100%', md: 'auto' },
+                minWidth: 0,
+              }}
+            >
+              <Select
+                fullWidth
+                variant="outlined"
                 value={readStatusFilter}
-                onChange={(e) =>
-                  setReadStatusFilter(e.target.value as 'all' | 'unread' | 'read')
-                }
+                onChange={(e) => setReadStatusFilter(e.target.value as any)}
+                displayEmpty
                 sx={{
-                  width: { xs: '100%', sm: 160 },
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    bgcolor: '#FFFFFF',
-                    '& fieldset': { borderColor: '#E5E7EB' },
+                  height: 42,
+                  borderRadius: '8px',
+                  bgcolor: '#FFFFFF',
+                  fontSize: 13.5,
+                  color: readStatusFilter === 'all' ? '#64748B' : '#1E293B',
+                  fontWeight: 500,
+                  '& fieldset, & .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+                  '&:hover fieldset, &:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+                  '&.Mui-focused fieldset, &.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#94A3B8',
                   },
+                  '& .MuiSelect-select': {
+                    py: 0,
+                    height: 42,
+                    display: 'flex',
+                    alignItems: 'center',
+                  },
+                  '& .MuiSelect-icon': { color: '#64748B' },
                 }}
               >
-                <MenuItem value="all">{t('filter_status_all')}</MenuItem>
-                <MenuItem value="unread">{t('filter_status_unread')}</MenuItem>
-                <MenuItem value="read">{t('filter_status_read')}</MenuItem>
-              </SelectField>
-            )}
-          </Stack>
-        </Stack>
+                <MenuItem value="all">{t('filters.all_statuses')}</MenuItem>
+                <MenuItem value="unread">{t('filters.unread')}</MenuItem>
+                <MenuItem value="read">{t('filters.read')}</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        </Box>
 
-        {/* Content Area */}
+        {/* 3. Content Area */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress size={36} />

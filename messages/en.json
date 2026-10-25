@@ -1981,6 +1981,28 @@
     }
   },
   "InstructorNotifications": {
+    "filters": {
+      "search_placeholder": "Search...",
+      "user_label": "User",
+      "all_users": "User",
+      "date_label": "Date",
+      "all_dates": "Date",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "this_week": "This Week",
+      "this_month": "This Month",
+      "last_month": "Last Month",
+      "last_3_months": "Last 3 Months",
+      "type_label": "Notification Type",
+      "all_types": "Notification Type",
+      "type_general": "General",
+      "type_course_promo": "Course Promo",
+      "type_purchase_complete": "Purchase Complete",
+      "read_status_label": "Read Status",
+      "all_statuses": "Read Status",
+      "unread": "Unread",
+      "read": "Read"
+    },
     "title": "Instructor Notifications",
     "tab_received": "Received",
     "tab_sent": "Sent",
