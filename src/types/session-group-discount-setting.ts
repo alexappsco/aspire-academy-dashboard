@@ -9,4 +9,9 @@ export type SessionGroupDiscountSetting = {
   tiers: SessionGroupDiscountTier[];
 };
 
+export type CreateSessionGroupDiscountTierPayload = {
+  minParticipants: number;
+  discountPercentage: number;
+};
+
 export type UpdateSessionGroupDiscountSettingPayload = SessionGroupDiscountSetting;

@@ -2565,6 +2565,7 @@
   "GroupDiscountSettings": {
     "title": "Private Request Group Discount Settings",
     "subtitle": "View the private request group discount settings and edit the available tiers.",
+    "add_tier": "Add discount tier",
     "edit_settings": "Edit settings",
     "retry": "Retry",
     "load_error": "Failed to load group discount settings",
@@ -2612,6 +2613,18 @@
       }
     },
     "read_only_notice": "The current values are for display only. Editing the settings will determine the new minimum and discount percentage.",
+    "create": {
+      "title": "Add discount tier",
+      "subtitle": "Enter the minimum participants and discount percentage for the new tier.",
+      "minimum_label": "Minimum participants",
+      "percentage_label": "Discount percentage (%)",
+      "minimum_error": "Enter a valid whole number of participants.",
+      "percentage_error": "Enter a valid percentage from 0 to 100.",
+      "save": "Add tier",
+      "cancel": "Cancel",
+      "success": "Discount tier added successfully",
+      "error": "Failed to add the discount tier"
+    },
     "edit": {
       "title": "Edit Private Request Group Discount Settings",
       "subtitle": "Edit the setting status and the values of the available discount tiers.",
