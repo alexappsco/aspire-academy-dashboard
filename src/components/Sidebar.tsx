@@ -120,9 +120,23 @@ const sidebarItems: SidebarItem[] = [
     path: "/currencies",
   },
   {
-    key: "academy_bank_accounts",
+    key: "academy_financial_settings",
     icon: "/icons/bank.svg",
-    path: "/academy-bank-accounts",
+    children: [
+      {
+        key: "academy_bank_accounts",
+        path: "/academy-bank-accounts",
+      },
+      {
+        key: "academy_custom_fields",
+        path: "/academy-custom-fields",
+      },
+    ],
+  },
+  {
+    key: "instructor_custom_fields",
+    icon: "/icons/settings.svg",
+    path: "/instructor-custom-fields",
   },
   {
     key: "hours_charge_requests",
@@ -218,11 +232,14 @@ const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "hours_charge_requests",
   "instructor_payouts",
   "academy_bank_accounts",
+  "academy_custom_fields",
+  "academy_financial_settings",
 ]);
 
 const ADMIN_HIDDEN_KEYS = new Set([
   "private_requests",
   "instructor_wallet",
+  "instructor_custom_fields",
 ]);
 
 function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): SidebarItem[] {

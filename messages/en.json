@@ -29,6 +29,9 @@
     "countries": "Countries",
     "currencies": "Currencies",
     "academy_bank_accounts": "Academy Bank Accounts",
+    "academy_custom_fields": "Academy Additional Fields",
+    "academy_financial_settings": "Bank Transfer Settings",
+    "instructor_custom_fields": "Additional Fields",
     "subjects": "Subjects Management",
     "discount_codes": "Discount Codes",
     "private_requests": "Private Requests",
@@ -2503,6 +2506,49 @@
       "title": "Decision",
       "approve": "Approve request",
       "approve_note": "Approval is only available while the request is awaiting admin review and after setting the instructor percentage."
+    }
+  },
+  "AcademyCustomFields": {
+    "title": "Academy Additional Fields",
+    "subtitle": "Add general information that can be displayed with the academy transfer details.",
+    "notice": "These fields belong to the academy and are not linked to a specific bank account.",
+    "instructor_title": "Instructor Additional Fields",
+    "instructor_subtitle": "Add general information associated with your instructor account.",
+    "instructor_notice": "These fields belong to the instructor account and are not linked to a specific item.",
+    "add": "Add field",
+    "edit": "Edit field",
+    "delete": "Delete field",
+    "retry": "Retry",
+    "columns": {
+      "sort_order": "Display order",
+      "key": "Field name",
+      "value": "Value"
+    },
+    "form": {
+      "add_title": "Add additional field",
+      "edit_title": "Edit additional field",
+      "key": "Field name",
+      "value": "Field value",
+      "sort_order": "Display order",
+      "required": "This field is required",
+      "sort_error": "Enter a valid whole order starting from zero.",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete additional field",
+      "message": "Are you sure you want to delete “{key}”?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "load_error": "Failed to load additional fields",
+      "create_success": "Field added successfully",
+      "create_error": "Failed to add the field",
+      "update_success": "Field updated successfully",
+      "update_error": "Failed to update the field",
+      "delete_success": "Field deleted successfully",
+      "delete_error": "Failed to delete the field"
     }
   },
   "AcademyBankAccounts": {

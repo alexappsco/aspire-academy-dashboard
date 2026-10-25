@@ -18,4 +18,6 @@ export const paths = {
     edit: '/group-discount-settings/edit',
   },
   academyBankAccounts: '/academy-bank-accounts',
+  academyCustomFields: '/academy-custom-fields',
+  instructorCustomFields: '/instructor-custom-fields',
 };
