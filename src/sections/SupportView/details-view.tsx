@@ -171,8 +171,9 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
       return t('user_types.student');
     }
     const raw = String(message.senderType).toLowerCase().trim();
+    // Backend enum: 1 = Student, 2 = Instructor, 3 = Admin
     if (
-      raw === '1' ||
+      raw === '2' ||
       raw === 'lecturer' ||
       raw === 'instructor' ||
       raw === 'محاضر' ||
@@ -180,13 +181,13 @@ export default function SupportDetailsView({ ticketId }: SupportDetailsViewProps
     ) {
       return t('user_types.lecturer');
     }
-    if (raw === 'admin' || raw === 'مسؤول') {
+    if (raw === '3' || raw === 'admin' || raw === 'مسؤول') {
       return t('user_types.admin');
     }
-    if (raw === '0' || raw === 'student' || raw === 'طالب') {
+    if (raw === '1' || raw === '0' || raw === 'student' || raw === 'طالب') {
       return t('user_types.student');
     }
-    return String(message.senderType);
+    return t('user_types.student');
   })();
 
   // Strict adherence to backend schema: id, email, title, notes, name, userId, userName, senderType, status, creationTime

@@ -72,12 +72,13 @@ export default function SupportView() {
   };
 
   // Helper to normalize senderType to PascalCase enum ('Student' | 'Instructor' | 'Admin')
+  // Backend enum: 1 = Student, 2 = Instructor, 3 = Admin
   const normalizeSenderType = (type?: unknown): 'Student' | 'Instructor' | 'Admin' | string => {
     if (type === null || type === undefined || type === '') return '';
     const s = String(type).trim().toLowerCase();
-    if (s === '0' || s === 'student' || s === 'طالب') return 'Student';
-    if (s === '1' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم') return 'Instructor';
-    if (s === 'admin' || s === 'مسؤول') return 'Admin';
+    if (s === '2' || s === 'lecturer' || s === 'instructor' || s === 'محاضر' || s === 'معلم') return 'Instructor';
+    if (s === '1' || s === '0' || s === 'student' || s === 'طالب') return 'Student';
+    if (s === '3' || s === 'admin' || s === 'مسؤول') return 'Admin';
     return s;
   };
 
@@ -272,10 +273,10 @@ export default function SupportView() {
       return isInstructor ? (isRtl ? 'محاضر' : 'Instructor') : isRtl ? 'طالب' : 'Student';
     }
     const norm = normalizeSenderType(type);
-    if (norm === 'Student') return isRtl ? 'طالب' : 'Student';
     if (norm === 'Instructor') return isRtl ? 'محاضر' : 'Instructor';
+    if (norm === 'Student') return isRtl ? 'طالب' : 'Student';
     if (norm === 'Admin') return isRtl ? 'مسؤول' : 'Admin';
-    return String(type);
+    return isRtl ? 'طالب' : 'Student';
   };
 
   // Helper to render status badge matching design
@@ -352,44 +353,8 @@ export default function SupportView() {
     });
   }, [messages, isRtl, isInstructor]);
 
-  // Client-side filtering secondary safeguard
-  const filteredMessages = useMemo(() => {
-    return formattedMessages.filter((item) => {
-      const search = debouncedSearch.trim().toLowerCase();
-      if (search) {
-        const matches =
-          item.senderName.toLowerCase().includes(search) ||
-          item.complaintContent.toLowerCase().includes(search) ||
-          item.senderType.toLowerCase().includes(search);
-        if (!matches) return false;
-      }
-
-      if (statusFilter && statusFilter !== 'all') {
-        const filterSt = normalizeStatus(statusFilter).toLowerCase();
-        const itemSt = normalizeStatus(item.status).toLowerCase();
-        if (filterSt !== itemSt) return false;
-      }
-
-      if (!isInstructor && senderTypeFilter && senderTypeFilter !== 'all') {
-        const itemType = normalizeSenderType(item.raw.senderType);
-        const filterType = normalizeSenderType(senderTypeFilter);
-        if (itemType && filterType) {
-          if (itemType !== filterType) return false;
-        } else if (filterType) {
-          const displayType = normalizeSenderType(item.senderType);
-          if (displayType !== filterType) return false;
-        }
-      }
-
-      if (dateFilter) {
-        const rawCreation = item.raw.creationTime || item.raw.createdAt || '';
-        const rawDateOnly = rawCreation ? rawCreation.split('T')[0] : '';
-        if (rawDateOnly && rawDateOnly !== dateFilter) return false;
-      }
-
-      return true;
-    });
-  }, [formattedMessages, debouncedSearch, statusFilter, senderTypeFilter, dateFilter, isInstructor]);
+  // Backend API handles all filtering directly (Filter, Status, SenderType, Date)
+  const filteredMessages = formattedMessages;
 
   const isAllSelected =
     filteredMessages.length > 0 && selectedIds.length === filteredMessages.length;
