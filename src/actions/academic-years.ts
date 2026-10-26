@@ -19,9 +19,30 @@ export interface AcademicYearsListResponse {
   items: AcademicYearDto[];
 }
 
-export async function getAcademicYears(): Promise<ApiSingleResponse<AcademicYearsListResponse>> {
+export interface GetAcademicYearsParams {
+  IsActive?: boolean;
+  FacultyId?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+export async function getAcademicYears(
+  params: GetAcademicYearsParams = {}
+): Promise<ApiSingleResponse<AcademicYearsListResponse>> {
   try {
-    const res = await getData<AcademicYearsListResponse>(endpoints.academicYear.list);
+    let endpoint = endpoints.academicYear.list;
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.append(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    if (qs) endpoint += `?${qs}`;
+
+    const res = await getData<AcademicYearsListResponse>(endpoint);
     if ('success' in res && res.success) {
       return { success: true, data: res.data };
     }
@@ -34,3 +55,4 @@ export async function getAcademicYears(): Promise<ApiSingleResponse<AcademicYear
     };
   }
 }
+
