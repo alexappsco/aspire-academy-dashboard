@@ -73,11 +73,11 @@ export default function CollegeView() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedCollegeForYears, setSelectedCollegeForYears] = useState<FormattedCollegeRow | null>(null);
 
-  // Debounce search input
+  // Debounce search input (1.2 seconds delay)
   useEffect(() => {
     debounceTimer.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-    }, 400);
+    }, 1200);
     return () => clearTimeout(debounceTimer.current);
   }, [searchQuery]);
 
@@ -469,6 +469,12 @@ export default function CollegeView() {
                     <Iconify icon="solar:magnifer-linear" sx={{ color: '#919EAB' }} width={20} />
                   </InputAdornment>
                 ),
+                endAdornment:
+                  searchQuery !== debouncedSearch ? (
+                    <InputAdornment position="end">
+                      <CircularProgress size={16} sx={{ color: '#919EAB' }} />
+                    </InputAdornment>
+                  ) : null,
               },
             }}
             sx={{
