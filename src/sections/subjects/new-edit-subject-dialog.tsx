@@ -37,6 +37,63 @@ const FALLBACK_FACULTIES: FacultyLookupDto[] = [
   { id: '6', nameAr: 'كلية الحقوق', nameEn: 'Faculty of Law' },
 ];
 
+const getTextFieldStyles = (isRtl: boolean) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 1.5,
+    ...(isRtl && {
+      '& fieldset': {
+        textAlign: 'right',
+      },
+    }),
+  },
+  ...(isRtl && {
+    direction: 'rtl',
+    '& .MuiInputLabel-root': {
+      fontSize: '0.875rem',
+      right: 28,
+      left: 'auto',
+      transformOrigin: 'top right',
+      textAlign: 'right',
+    },
+    '& .MuiInputLabel-shrink': {
+      transform: 'translate(0, -6px) scale(0.75)',
+      right: 28,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiOutlinedInput-notchedOutline legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-input': {
+      textAlign: 'right',
+      direction: 'rtl',
+    },
+    '& input::placeholder': {
+      textAlign: 'right',
+      direction: 'rtl',
+      opacity: 0.7,
+    },
+    '& .MuiInputBase-input::placeholder': {
+      textAlign: 'right',
+      direction: 'rtl',
+      opacity: 0.7,
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+      direction: 'rtl',
+      pr: '14px !important',
+      pl: '36px !important',
+    },
+    '& .MuiSelect-icon': {
+      right: 'auto !important',
+      left: '10px !important',
+    },
+    '& .MuiFormHelperText-root': {
+      textAlign: 'right',
+    },
+  }),
+});
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -282,8 +339,8 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ pt: 2.5, px: 3, pb: 3 }}>
-        <Stack spacing={2.5}>
+      <DialogContent dividers sx={{ pt: 2.5, px: 3, pb: 3, direction: isRtl ? 'rtl' : 'ltr' }}>
+        <Stack spacing={2.5} sx={{ direction: isRtl ? 'rtl' : 'ltr' }}>
           {/* الاسم بالعربية */}
           <TextField
             fullWidth
@@ -298,12 +355,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             helperText={errors.nameAr}
             disabled={submitting}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-              ...(isRtl && {
-                '& .MuiOutlinedInput-input': { textAlign: 'right' },
-              }),
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* الاسم بالإنجليزية */}
@@ -320,9 +372,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             helperText={errors.nameEn}
             disabled={submitting}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* الكلية / Faculty */}
@@ -336,9 +386,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             helperText={errors.facultyId}
             disabled={submitting || loadingFaculties}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           >
             {loadingFaculties ? (
               <MenuItem disabled>
@@ -370,9 +418,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             }
             disabled={submitting || !facultyId || loadingAcademicYears}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           >
             {loadingAcademicYears ? (
               <MenuItem disabled>
@@ -413,9 +459,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             }
             disabled={submitting || !academicYearId || loadingSemesters}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           >
             {loadingSemesters ? (
               <MenuItem disabled>
@@ -436,7 +480,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
           </TextField>
 
           {/* مفعل / غير مفعل */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5, direction: isRtl ? 'rtl' : 'ltr' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {t('dialog.status')}
             </Typography>
@@ -456,7 +500,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2 }}>
+      <DialogActions sx={{ px: 3, py: 2, direction: isRtl ? 'rtl' : 'ltr' }}>
         <Button
           onClick={onClose}
           variant="outlined"
@@ -477,7 +521,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             px: 3,
           }}
         >
-          {t('dialog.save')}
+          {isEdit ? t('dialog.save') : t('dialog.save')}
         </Button>
       </DialogActions>
     </>
@@ -499,9 +543,14 @@ export default function SubjectFormDialog({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
+      dir={isRtl ? 'rtl' : 'ltr'}
       slotProps={{
         paper: {
-          sx: { borderRadius: 2 },
+          dir: isRtl ? 'rtl' : 'ltr',
+          sx: {
+            borderRadius: 2,
+            direction: isRtl ? 'rtl' : 'ltr',
+          },
         },
       }}
     >
