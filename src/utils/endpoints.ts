@@ -67,6 +67,10 @@ export const endpoints = {
   },
   faculties: {
     list: '/admin/faculties',
+    details: (id: string) => `/admin/faculties/${id}`,
+    create: '/admin/faculties',
+    update: (id: string) => `/admin/faculties/${id}`,
+    delete: (id: string) => `/admin/faculties/${id}`,
   },
   semesters: {
     list: '/admin/semesters',

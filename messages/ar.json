@@ -702,10 +702,17 @@
     "subtitle": "إدارة جميع الكليات",
     "add_college": "إضافة كلية",
     "search_placeholder": "البحث في الكليات..",
+    "filter_university": "الجامعة",
+    "all_universities": "جميع الجامعات",
+    "no_academic_years": "لا يوجد",
+    "view_all_years": "عرض جميع السنوات الدراسية",
+    "years_dialog_title": "السنوات الدراسية",
+    "close": "إغلاق",
     "columns": {
       "image": "الصورة",
       "name": "الاسم",
       "university": "الجامعة",
+      "academic_years": "السنوات الدراسية",
       "order": "الترتيب",
       "created_date": "تاريخ الإضافة",
       "status": "الحالة"
@@ -723,15 +730,26 @@
       "edit": "تعديل",
       "delete": "حذف"
     },
+    "messages": {
+      "add_success": "تمت إضافة الكلية بنجاح",
+      "edit_success": "تم تعديل الكلية بنجاح",
+      "delete_success": "تم حذف الكلية بنجاح",
+      "status_updated": "تم تحديث الحالة بنجاح",
+      "load_error": "فشل تحميل الكليات",
+      "validation_error": "يرجى تعبئة الحقول المطلوبة"
+    },
     "dialog": {
       "add_title": "إضافة كلية",
       "edit_title": "تعديل كلية",
-      "subtitle": " بيانات الكلية",
+      "subtitle": "بيانات الكلية",
       "select_image": "اختر الصورة",
+      "change_image": "تغيير الصورة",
       "drag_drop": "اسحب وأفلت الملفات هنا أو",
       "browse": "تصفح البيانات",
       "university": "الجامعة",
       "university_placeholder": "اختر الجامعة",
+      "academic_years": "السنوات الدراسية",
+      "academic_years_placeholder": "اختر السنوات الدراسية",
       "name_ar": "الاسم بالعربية",
       "name_ar_placeholder": "الاسم بالعربية..",
       "name_en": "الاسم بالإنجليزية",
@@ -739,9 +757,11 @@
       "order": "الترتيب",
       "status": "الحالة",
       "save": "حفظ",
+      "saving": "جاري الحفظ...",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد حذف هذه الكلية؟",
-      "delete": "حذف"
+      "delete": "حذف",
+      "deleting": "جاري الحذف..."
     }
   },
   "Subjects": {
