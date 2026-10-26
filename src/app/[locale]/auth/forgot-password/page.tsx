@@ -1,26 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "src/i18n/routing";
+import { useTranslations } from "next-intl";
+import { forgetPasswordAction } from "src/actions/auth";
+import { saveForgotPasswordEmail } from "src/utils/password-reset-session";
 import { Box, Typography, TextField, Button, CircularProgress } from "@mui/material";
-
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const t = useTranslations("ForgotPassword");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email) {
-      setError("يرجى إدخال البريد الإلكتروني");
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError(t("email_required"));
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError(t("invalid_email"));
+      return;
+    }
+
     setError("");
     setLoading(true);
-    setSuccess(true);
-    setLoading(false);
+    try {
+      const result = await forgetPasswordAction({ email: trimmed });
+      if (!result.success) {
+        setError(result.error || t("generic_error"));
+        return;
+      }
+
+      saveForgotPasswordEmail(trimmed);
+      router.push("/auth/otp");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("generic_error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,101 +74,82 @@ export default function ForgotPasswordPage() {
             variant="h3"
             sx={{ fontWeight: 700, textAlign: "center", mb: 6 }}
           >
-            نسيت كلمة المرور
+            {t("title")}
           </Typography>
 
-          {success ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", textAlign: "center" }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                تم إرسال رابط استعادة كلمة المرور!
-              </Typography>
-              <Typography sx={{ fontSize: "0.9rem" }}>
-                يرجى التحقق من بريدك الإلكتروني ({email}) للوصول إلى رابط إعادة التعيين.
-              </Typography>
-              <Button
-                onClick={() => router.push("/auth/login")}
-                sx={{
-                  bgcolor: "#ebedef",
-                  color: "#374151",
-                  fontWeight: 500,
-                  py: 1.5,
-                  px: 4,
-                  borderRadius: "12px",
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                  "&:hover": { bgcolor: "#d1d5db" },
-                  mt: 2,
-                }}
-              >
-                العودة لتسجيل الدخول
-              </Button>
-            </Box>
-          ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <TextField
-                type="email"
-                placeholder="example@gmail.com"
-                dir="ltr"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                slotProps={{
-                  input: {
-                    sx: {
-                      bgcolor: "#fff",
-                      borderRadius: "12px",
-                      "& fieldset": { border: "none" },
-                    },
+          <Box
+            component="form"
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSubmit();
+            }}
+            sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+          >
+            <TextField
+              type="email"
+              placeholder="example@gmail.com"
+              dir="ltr"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              slotProps={{
+                input: {
+                  sx: {
+                    bgcolor: "#fff",
+                    borderRadius: "12px",
+                    "& fieldset": { border: "none" },
                   },
-                }}
-                sx={{
-                  "& .MuiInputBase-input": {
-                    py: 2,
-                    px: 2,
-                  },
-                }}
-              />
-
-              {error && (
-                <Typography sx={{ color: "#ff8a8a", fontSize: "0.85rem", textAlign: "right", fontWeight: 600 }}>
-                  {error}
-                </Typography>
-              )}
-
-              <Typography
-                sx={{ color: "#fff", fontSize: "0.75rem", textAlign: "right" }}
-              >
-                سيتم إرسال رابط إلى عنوان البريد لإعادة تعيين كلمة المرور
-              </Typography>
-
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                sx={{
-                  bgcolor: "#ebedef",
-                  color: "#374151",
-                  fontWeight: 500,
+                },
+              }}
+              sx={{
+                "& .MuiInputBase-input": {
                   py: 2,
-                  borderRadius: "12px",
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                  "&:hover": { bgcolor: "#d1d5db" },
-                  "&.Mui-disabled": { bgcolor: "#b0b4ba", color: "#6b7280" },
-                  mt: 2,
-                }}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "إرسال الرابط"}
-              </Button>
+                  px: 2,
+                },
+              }}
+            />
 
-              <Button
-                onClick={() => router.push("/auth/login")}
-                sx={{ color: "#fff", textDecoration: "underline", fontSize: "0.9rem" }}
-              >
-                العودة لتسجيل الدخول
-              </Button>
-            </Box>
-          )}
+            {error && (
+              <Typography sx={{ color: "#ff8a8a", fontSize: "0.85rem", textAlign: "right", fontWeight: 600 }}>
+                {error}
+              </Typography>
+            )}
+
+            <Typography
+              sx={{ color: "#fff", fontSize: "0.75rem", textAlign: "right" }}
+            >
+              {t("hint")}
+            </Typography>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              sx={{
+                bgcolor: "#ebedef",
+                color: "#374151",
+                fontWeight: 500,
+                py: 2,
+                borderRadius: "12px",
+                fontSize: "1rem",
+                textTransform: "none",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                "&:hover": { bgcolor: "#d1d5db" },
+                "&.Mui-disabled": { bgcolor: "#b0b4ba", color: "#6b7280" },
+                mt: 2,
+              }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : t("submit")}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => router.push("/auth/login")}
+              sx={{ color: "#fff", textDecoration: "underline", fontSize: "0.9rem" }}
+            >
+              {t("back_to_login")}
+            </Button>
+          </Box>
         </Box>
       </Box>
 
