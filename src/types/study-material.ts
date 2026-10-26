@@ -5,6 +5,13 @@ export interface FacultyLookupDto {
   nameEn?: string;
 }
 
+export interface AcademicYearLookupDto {
+  id: string;
+  name?: string;
+  nameAr?: string;
+  nameEn?: string;
+}
+
 export interface SemesterLookupDto {
   id: string;
   name?: string;
@@ -18,6 +25,8 @@ export interface StudyMaterialDto {
   nameEn: string;
   facultyId: string;
   faculty?: FacultyLookupDto;
+  academicYearId?: string;
+  academicYear?: AcademicYearLookupDto;
   semesterId: string;
   semester?: SemesterLookupDto;
   isActive: boolean;
@@ -36,6 +45,7 @@ export interface GetStudyMaterialsParams {
   SkipCount?: number;
   MaxResultCount?: number;
   FacultyId?: string;
+  AcademicYearId?: string;
   SemesterId?: string;
 }
 
@@ -43,6 +53,7 @@ export interface CreateStudyMaterialDto {
   nameAr: string;
   nameEn: string;
   facultyId: string;
+  academicYearId?: string;
   semesterId: string;
   isActive: boolean;
 }
@@ -51,6 +62,8 @@ export interface UpdateStudyMaterialDto {
   nameAr: string;
   nameEn: string;
   facultyId: string;
+  academicYearId?: string;
   semesterId: string;
   isActive: boolean;
 }
+

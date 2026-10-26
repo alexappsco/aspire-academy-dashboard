@@ -32,9 +32,14 @@ export async function getStudyMaterialsAction(
         searchParams.append('FacultyId', params.FacultyId.trim());
       }
 
+      if (params.AcademicYearId && params.AcademicYearId.trim() !== '') {
+        searchParams.append('AcademicYearId', params.AcademicYearId.trim());
+      }
+
       if (params.SemesterId && params.SemesterId.trim() !== '') {
         searchParams.append('SemesterId', params.SemesterId.trim());
       }
+
 
       if (params.Sorting) {
         searchParams.append('Sorting', params.Sorting);
