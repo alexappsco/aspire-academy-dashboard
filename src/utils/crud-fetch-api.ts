@@ -54,6 +54,9 @@ const commonErrorMessages = new Map([
 const commonErrorStatus = new Set([500, 503, 404]);
 
 const KNOWN_BACKEND_ERRORS: Record<string, string> = {
+  UserNotExist: 'هذا البريد الإلكتروني غير مسجل',
+  invalid_otp: 'الرمز التأكيدي غير صحيح',
+  FailedToResetPassword: 'تعذر إعادة تعيين كلمة المرور. أعد طلب الرمز وحاول مرة أخرى',
   InsufficientWalletBalance: 'رصيد محفظة الطالب غير كافٍ لتغطية تكلفة ساعات هذا المنهج',
   SessionRequestNotFound: 'لم يتم العثور على الطلب الخاص المطلوب',
   UnauthorizedAccess: 'ليس لديك صلاحية لتعديل هذا الطلب',

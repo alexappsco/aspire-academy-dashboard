@@ -1,25 +1,133 @@
 "use client";
 
-import { useRef, type KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
-import { Box, Typography, Button } from "@mui/material";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useRouter } from "src/i18n/routing";
+import { useTranslations } from "next-intl";
+import { forgetPasswordAction, verifyForgetPasswordOtpAction } from "src/actions/auth";
+import {
+  readForgotPasswordEmail,
+  saveResetPasswordToken,
+} from "src/utils/password-reset-session";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 
+const OTP_LENGTH = 4;
+const RESEND_SECONDS = 60;
+
+function formatCountdown(total: number) {
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
 export default function OtpPage() {
   const router = useRouter();
+  const t = useTranslations("Otp");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const [email, setEmail] = useState("");
+  const [ready, setReady] = useState(false);
+  const [digits, setDigits] = useState<string[]>(() => Array(OTP_LENGTH).fill(""));
+  const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleInput = (index: number, value: string) => {
-    if (value && index < 3) {
-      inputsRef.current[index + 1]?.focus();
+  useEffect(() => {
+    const stored = readForgotPasswordEmail();
+    if (!stored) {
+      router.replace("/auth/forgot-password");
+      return;
+    }
+    setEmail(stored);
+    setReady(true);
+  }, [router]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setSecondsLeft((current) => (current <= 0 ? 0 : current - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const focusIndex = (index: number) => {
+    inputsRef.current[index]?.focus();
+  };
+
+  const handleChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    setDigits((current) => {
+      const next = [...current];
+      next[index] = digit;
+      return next;
+    });
+    if (digit && index < OTP_LENGTH - 1) {
+      focusIndex(index + 1);
     }
   };
 
-  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !e.currentTarget.value && index > 0) {
-      inputsRef.current[index - 1]?.focus();
+  const handleKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && !digits[index] && index > 0) {
+      focusIndex(index - 1);
     }
   };
+
+  const handlePaste = (text: string) => {
+    const pasted = text.replace(/\D/g, "").slice(0, OTP_LENGTH);
+    if (!pasted) return;
+    const next = Array(OTP_LENGTH).fill("");
+    pasted.split("").forEach((char, index) => {
+      next[index] = char;
+    });
+    setDigits(next);
+    focusIndex(Math.min(pasted.length, OTP_LENGTH) - 1);
+  };
+
+  const handleVerify = async () => {
+    const otp = digits.join("");
+    if (otp.length !== OTP_LENGTH) {
+      setError(t("incomplete"));
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+    try {
+      const result = await verifyForgetPasswordOtpAction({ email, otp });
+      if (!result.success || !result.data?.token) {
+        setError(result.error || t("generic_error"));
+        return;
+      }
+
+      saveResetPasswordToken(result.data.token);
+      router.push("/auth/reset-password");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("generic_error"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (secondsLeft > 0 || resending || !email) return;
+
+    setError("");
+    setResending(true);
+    try {
+      const result = await forgetPasswordAction({ email });
+      if (!result.success) {
+        setError(result.error || t("generic_error"));
+        return;
+      }
+      setDigits(Array(OTP_LENGTH).fill(""));
+      setSecondsLeft(RESEND_SECONDS);
+      focusIndex(0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("generic_error"));
+    } finally {
+      setResending(false);
+    }
+  };
+
+  if (!ready) return null;
 
   return (
     <Box
@@ -52,10 +160,18 @@ export default function OtpPage() {
             variant="h3"
             sx={{ fontWeight: 700, textAlign: "center", mb: 4 }}
           >
-            الرمز التأكيدي
+            {t("title")}
           </Typography>
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleVerify();
+            }}
+            sx={{ display: "flex", flexDirection: "column", gap: 4 }}
+          >
             <Typography
               sx={{
                 textAlign: "center",
@@ -63,14 +179,7 @@ export default function OtpPage() {
                 lineHeight: 1.8,
               }}
             >
-              ادخل الرمز التأكيدي الذي تم إرساله إلى الرقم
-              <Typography
-                component="span"
-                sx={{ fontWeight: 500, display: "inline" }}
-              >
-                {" "}
-                +966396******
-              </Typography>
+              {t("instruction", { email })}
             </Typography>
 
             <Box
@@ -80,22 +189,28 @@ export default function OtpPage() {
                 gap: { xs: 2, md: 3 },
               }}
             >
-              {[0, 1, 2, 3].map((i) => (
+              {digits.map((digit, index) => (
                 <Box
-                  key={i}
+                  key={index}
                   component="input"
                   inputMode="numeric"
                   maxLength={1}
                   placeholder="-"
+                  value={digit}
+                  autoComplete={index === 0 ? "one-time-code" : "off"}
                   ref={(el: HTMLInputElement | null) => {
-                    inputsRef.current[i] = el;
+                    inputsRef.current[index] = el;
                   }}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleInput(i, e.target.value)
+                    handleChange(index, e.target.value)
                   }
                   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                    handleKeyDown(i, e)
+                    handleKeyDown(index, e)
                   }
+                  onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => {
+                    e.preventDefault();
+                    handlePaste(e.clipboardData.getData("text"));
+                  }}
                   sx={{
                     width: { xs: 72, md: 96 },
                     height: { xs: 88, md: 112 },
@@ -115,20 +230,33 @@ export default function OtpPage() {
               ))}
             </Box>
 
+            {error && (
+              <Typography sx={{ color: "#ff8a8a", fontSize: "0.85rem", textAlign: "center", fontWeight: 600 }}>
+                {error}
+              </Typography>
+            )}
+
             <Typography
+              onClick={() => {
+                void handleResend();
+              }}
               sx={{
                 textAlign: "center",
                 fontSize: "0.75rem",
                 textDecoration: "underline",
                 fontWeight: 700,
-                cursor: "pointer",
+                cursor: secondsLeft > 0 || resending ? "default" : "pointer",
+                opacity: secondsLeft > 0 || resending ? 0.7 : 1,
               }}
             >
-              إعادة الارسال 00:59
+              {secondsLeft > 0
+                ? t("resend_in", { time: formatCountdown(secondsLeft) })
+                : t("resend")}
             </Typography>
 
             <Button
-              onClick={() => router.push("/auth/reset-password")}
+              type="submit"
+              disabled={loading}
               sx={{
                 bgcolor: "#ebedef",
                 color: "#374151",
@@ -139,10 +267,11 @@ export default function OtpPage() {
                 textTransform: "none",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                 "&:hover": { bgcolor: "#d1d5db" },
+                "&.Mui-disabled": { bgcolor: "#b0b4ba", color: "#6b7280" },
                 mt: 2,
               }}
             >
-              التالي
+              {loading ? <CircularProgress size={24} color="inherit" /> : t("next")}
             </Button>
           </Box>
         </Box>
