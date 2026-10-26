@@ -18,7 +18,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
-import { getFacultiesLookupAction, getSemestersLookupAction } from 'src/actions/study-materials';
+import { getFacultiesLookupAction } from 'src/actions/study-materials';
+import { getAcademicYears, type AcademicYearDto } from 'src/actions/academic-years';
+import { getSemesters } from 'src/actions/semesters';
 import type {
   StudyMaterialDto,
   CreateStudyMaterialDto,
@@ -35,11 +37,62 @@ const FALLBACK_FACULTIES: FacultyLookupDto[] = [
   { id: '6', nameAr: 'كلية الحقوق', nameEn: 'Faculty of Law' },
 ];
 
-const FALLBACK_SEMESTERS: SemesterLookupDto[] = [
-  { id: '1', nameAr: 'الفصل الدراسي الأول', nameEn: 'First Semester' },
-  { id: '2', nameAr: 'الفصل الدراسي الثاني', nameEn: 'Second Semester' },
-  { id: '3', nameAr: 'الفصل الدراسي الصيفي', nameEn: 'Summer Semester' },
-];
+const getTextFieldStyles = (isRtl: boolean) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 1.5,
+    ...(isRtl && {
+      '& fieldset': {
+        textAlign: 'right',
+      },
+    }),
+  },
+  ...(isRtl && {
+    direction: 'rtl',
+    '& .MuiInputLabel-root': {
+      fontSize: '0.875rem',
+      right: 28,
+      left: 'auto',
+      transformOrigin: 'top right',
+      textAlign: 'right',
+    },
+    '& .MuiInputLabel-shrink': {
+      transform: 'translate(0, -6px) scale(0.75)',
+      right: 28,
+      left: 'auto',
+      transformOrigin: 'top right',
+    },
+    '& .MuiOutlinedInput-notchedOutline legend': {
+      textAlign: 'right',
+    },
+    '& .MuiOutlinedInput-input': {
+      textAlign: 'right',
+      direction: 'rtl',
+    },
+    '& input::placeholder': {
+      textAlign: 'right',
+      direction: 'rtl',
+      opacity: 0.7,
+    },
+    '& .MuiInputBase-input::placeholder': {
+      textAlign: 'right',
+      direction: 'rtl',
+      opacity: 0.7,
+    },
+    '& .MuiSelect-select': {
+      textAlign: 'right',
+      direction: 'rtl',
+      pr: '14px !important',
+      pl: '36px !important',
+    },
+    '& .MuiSelect-icon': {
+      right: 'auto !important',
+      left: '10px !important',
+    },
+    '& .MuiFormHelperText-root': {
+      textAlign: 'right',
+    },
+  }),
+});
 
 interface Props {
   open: boolean;
@@ -62,56 +115,182 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
   const [nameAr, setNameAr] = useState(initialData?.nameAr ?? '');
   const [nameEn, setNameEn] = useState(initialData?.nameEn ?? '');
   const [facultyId, setFacultyId] = useState(initialData?.facultyId ?? '');
+  const [academicYearId, setAcademicYearId] = useState(initialData?.academicYearId ?? '');
   const [semesterId, setSemesterId] = useState(initialData?.semesterId ?? '');
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
 
   const [faculties, setFaculties] = useState<FacultyLookupDto[]>(FALLBACK_FACULTIES);
-  const [semesters, setSemesters] = useState<SemesterLookupDto[]>(FALLBACK_SEMESTERS);
+  const [academicYears, setAcademicYears] = useState<AcademicYearDto[]>([]);
+  const [semesters, setSemesters] = useState<SemesterLookupDto[]>([]);
+
+  const [loadingFaculties, setLoadingFaculties] = useState(false);
+  const [loadingAcademicYears, setLoadingAcademicYears] = useState(false);
+  const [loadingSemesters, setLoadingSemesters] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let isMounted = true;
-    const fetchLookups = async () => {
-      try {
-        const [facultiesRes, semestersRes] = await Promise.all([
-          getFacultiesLookupAction(),
-          getSemestersLookupAction(),
-        ]);
 
+    const init = async () => {
+      setLoadingFaculties(true);
+      try {
+        const facRes = await getFacultiesLookupAction();
         if (isMounted) {
-          if (facultiesRes.success && facultiesRes.data && facultiesRes.data.length > 0) {
-            setFaculties(facultiesRes.data);
-          }
-          if (semestersRes.success && semestersRes.data && semestersRes.data.length > 0) {
-            setSemesters(semestersRes.data);
+          if (facRes.success && facRes.data && facRes.data.length > 0) {
+            setFaculties(facRes.data);
           }
         }
       } catch {
         // use fallback list
+      } finally {
+        if (isMounted) setLoadingFaculties(false);
+      }
+
+      if (initialData?.facultyId) {
+        setLoadingAcademicYears(true);
+        try {
+          const ayRes = await getAcademicYears({
+            FacultyId: initialData.facultyId,
+            IsActive: true,
+            MaxResultCount: 1000,
+          });
+
+          if (!isMounted) return;
+
+          const loadedYears = ayRes.success && ayRes.data?.items ? ayRes.data.items : [];
+          setAcademicYears(loadedYears);
+
+          // Find academic year ID
+          let foundYearId = initialData.academicYearId || '';
+          if (!foundYearId && initialData.semesterId && loadedYears.length > 0) {
+            const matchedYear = loadedYears.find((y) =>
+              y.semesters?.some((s) => s.id === initialData.semesterId)
+            );
+            if (matchedYear) {
+              foundYearId = matchedYear.id;
+            }
+          }
+
+          if (!foundYearId && initialData.semesterId) {
+            const semResAll = await getSemesters({
+              FacultyId: initialData.facultyId,
+              IsActive: true,
+              MaxResultCount: 1000,
+            });
+            if (semResAll.success && semResAll.data?.items) {
+              const matchedSemester = semResAll.data.items.find(
+                (s) => s.id === initialData.semesterId
+              );
+              if (matchedSemester?.academicYears?.length) {
+                foundYearId = matchedSemester.academicYears[0].id;
+              }
+            }
+          }
+
+          if (foundYearId) {
+            setAcademicYearId(foundYearId);
+            setLoadingSemesters(true);
+            const semRes = await getSemesters({
+              FacultyId: initialData.facultyId,
+              AcademicYearId: foundYearId,
+              IsActive: true,
+              MaxResultCount: 1000,
+            });
+            if (isMounted && semRes.success && semRes.data?.items) {
+              setSemesters(semRes.data.items);
+            }
+          }
+        } catch {
+          // ignore
+        } finally {
+          if (isMounted) {
+            setLoadingAcademicYears(false);
+            setLoadingSemesters(false);
+          }
+        }
       }
     };
 
-    fetchLookups();
+    init();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialData]);
+
+  const handleFacultyChange = async (newFacultyId: string) => {
+    setFacultyId(newFacultyId);
+    setAcademicYearId('');
+    setSemesterId('');
+    setAcademicYears([]);
+    setSemesters([]);
+    if (errors.facultyId) setErrors((prev) => ({ ...prev, facultyId: '' }));
+    if (errors.academicYearId) setErrors((prev) => ({ ...prev, academicYearId: '' }));
+    if (errors.semesterId) setErrors((prev) => ({ ...prev, semesterId: '' }));
+
+    if (!newFacultyId) return;
+
+    setLoadingAcademicYears(true);
+    try {
+      const res = await getAcademicYears({
+        FacultyId: newFacultyId,
+        IsActive: true,
+        MaxResultCount: 1000,
+      });
+      if (res.success && res.data?.items) {
+        setAcademicYears(res.data.items);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingAcademicYears(false);
+    }
+  };
+
+  const handleAcademicYearChange = async (newAcademicYearId: string) => {
+    setAcademicYearId(newAcademicYearId);
+    setSemesterId('');
+    setSemesters([]);
+    if (errors.academicYearId) setErrors((prev) => ({ ...prev, academicYearId: '' }));
+    if (errors.semesterId) setErrors((prev) => ({ ...prev, semesterId: '' }));
+
+    if (!newAcademicYearId || !facultyId) return;
+
+    setLoadingSemesters(true);
+    try {
+      const res = await getSemesters({
+        FacultyId: facultyId,
+        AcademicYearId: newAcademicYearId,
+        IsActive: true,
+        MaxResultCount: 1000,
+      });
+      if (res.success && res.data?.items) {
+        setSemesters(res.data.items);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoadingSemesters(false);
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!nameAr.trim()) {
-      newErrors.nameAr = 'يرجى إدخال الاسم بالعربية';
+      newErrors.nameAr = isRtl ? 'يرجى إدخال الاسم بالعربية' : 'Please enter Arabic name';
     }
     if (!nameEn.trim()) {
-      newErrors.nameEn = 'يرجى إدخال الاسم بالإنجليزية';
+      newErrors.nameEn = isRtl ? 'يرجى إدخال الاسم بالإنجليزية' : 'Please enter English name';
     }
     if (!facultyId) {
-      newErrors.facultyId = 'يرجى اختيار الكلية';
+      newErrors.facultyId = isRtl ? 'يرجى اختيار الكلية' : 'Please select college';
+    }
+    if (!academicYearId) {
+      newErrors.academicYearId = isRtl ? 'يرجى اختيار السنة الدراسية' : 'Please select academic year';
     }
     if (!semesterId) {
-      newErrors.semesterId = 'يرجى اختيار الفصل الدراسي';
+      newErrors.semesterId = isRtl ? 'يرجى اختيار الفصل الدراسي' : 'Please select semester';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -126,6 +305,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         nameAr: nameAr.trim(),
         nameEn: nameEn.trim(),
         facultyId,
+        academicYearId,
         semesterId,
         isActive,
       };
@@ -159,8 +339,8 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ pt: 2.5, px: 3, pb: 3 }}>
-        <Stack spacing={2.5}>
+      <DialogContent dividers sx={{ pt: 2.5, px: 3, pb: 3, direction: isRtl ? 'rtl' : 'ltr' }}>
+        <Stack spacing={2.5} sx={{ direction: isRtl ? 'rtl' : 'ltr' }}>
           {/* الاسم بالعربية */}
           <TextField
             fullWidth
@@ -175,12 +355,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             helperText={errors.nameAr}
             disabled={submitting}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-              ...(isRtl && {
-                '& .MuiOutlinedInput-input': { textAlign: 'right' },
-              }),
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* الاسم بالإنجليزية */}
@@ -197,9 +372,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             helperText={errors.nameEn}
             disabled={submitting}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           />
 
           {/* الكلية / Faculty */}
@@ -208,52 +381,106 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
             fullWidth
             label={t('dialog.college')}
             value={facultyId}
-            onChange={(e) => {
-              setFacultyId(e.target.value);
-              if (errors.facultyId) setErrors((prev) => ({ ...prev, facultyId: '' }));
-            }}
+            onChange={(e) => handleFacultyChange(e.target.value)}
             error={!!errors.facultyId}
             helperText={errors.facultyId}
-            disabled={submitting}
+            disabled={submitting || loadingFaculties}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           >
-            {faculties.map((f) => (
-              <MenuItem key={f.id} value={f.id}>
-                {isRtl ? f.nameAr || f.name : f.nameEn || f.name}
+            {loadingFaculties ? (
+              <MenuItem disabled>
+                <CircularProgress size={18} sx={{ mr: 1 }} />
+                {isRtl ? 'جارٍ التحميل...' : 'Loading...'}
               </MenuItem>
-            ))}
+            ) : faculties.length === 0 ? (
+              <MenuItem disabled>{isRtl ? 'لا توجد كليات' : 'No faculties'}</MenuItem>
+            ) : (
+              faculties.map((f) => (
+                <MenuItem key={f.id} value={f.id}>
+                  {isRtl ? f.nameAr || f.name : f.nameEn || f.name}
+                </MenuItem>
+              ))
+            )}
+          </TextField>
+
+          {/* السنة الدراسية / Academic Year */}
+          <TextField
+            select
+            fullWidth
+            label={t('dialog.academic_year')}
+            value={academicYearId}
+            onChange={(e) => handleAcademicYearChange(e.target.value)}
+            error={!!errors.academicYearId}
+            helperText={
+              errors.academicYearId ||
+              (!facultyId ? (isRtl ? 'يرجى اختيار الكلية أولاً' : 'Please select a college first') : '')
+            }
+            disabled={submitting || !facultyId || loadingAcademicYears}
+            required
+            sx={getTextFieldStyles(isRtl)}
+          >
+            {loadingAcademicYears ? (
+              <MenuItem disabled>
+                <CircularProgress size={18} sx={{ mr: 1 }} />
+                {isRtl ? 'جارٍ التحميل...' : 'Loading...'}
+              </MenuItem>
+            ) : academicYears.length === 0 ? (
+              <MenuItem disabled>
+                {isRtl ? 'لا توجد سنوات دراسية متاحة' : 'No academic years available'}
+              </MenuItem>
+            ) : (
+              academicYears.map((ay) => (
+                <MenuItem key={ay.id} value={ay.id}>
+                  {isRtl ? ay.nameAr || ay.nameEn : ay.nameEn || ay.nameAr}
+                </MenuItem>
+              ))
+            )}
           </TextField>
 
           {/* الفصل الدراسي / Semester */}
           <TextField
             select
             fullWidth
-            label={isRtl ? 'الفصل الدراسي' : 'Semester'}
+            label={t('dialog.semester')}
             value={semesterId}
             onChange={(e) => {
               setSemesterId(e.target.value);
               if (errors.semesterId) setErrors((prev) => ({ ...prev, semesterId: '' }));
             }}
             error={!!errors.semesterId}
-            helperText={errors.semesterId}
-            disabled={submitting}
+            helperText={
+              errors.semesterId ||
+              (!academicYearId
+                ? isRtl
+                  ? 'يرجى اختيار السنة الدراسية أولاً'
+                  : 'Please select an academic year first'
+                : '')
+            }
+            disabled={submitting || !academicYearId || loadingSemesters}
             required
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 1.5 },
-            }}
+            sx={getTextFieldStyles(isRtl)}
           >
-            {semesters.map((s) => (
-              <MenuItem key={s.id} value={s.id}>
-                {isRtl ? s.nameAr || s.name : s.nameEn || s.name}
+            {loadingSemesters ? (
+              <MenuItem disabled>
+                <CircularProgress size={18} sx={{ mr: 1 }} />
+                {isRtl ? 'جارٍ التحميل...' : 'Loading...'}
               </MenuItem>
-            ))}
+            ) : semesters.length === 0 ? (
+              <MenuItem disabled>
+                {isRtl ? 'لا توجد فصول دراسية متاحة' : 'No semesters available'}
+              </MenuItem>
+            ) : (
+              semesters.map((s) => (
+                <MenuItem key={s.id} value={s.id}>
+                  {isRtl ? s.nameAr || s.nameEn || s.name : s.nameEn || s.nameAr || s.name}
+                </MenuItem>
+              ))
+            )}
           </TextField>
 
           {/* مفعل / غير مفعل */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 0.5, direction: isRtl ? 'rtl' : 'ltr' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {t('dialog.status')}
             </Typography>
@@ -273,7 +500,7 @@ function FormContent({ initialData, onClose, onSave, isRtl }: FormContentProps) 
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2 }}>
+      <DialogActions sx={{ px: 3, py: 2, direction: isRtl ? 'rtl' : 'ltr' }}>
         <Button
           onClick={onClose}
           variant="outlined"
@@ -316,9 +543,14 @@ export default function SubjectFormDialog({
       onClose={onClose}
       fullWidth
       maxWidth="sm"
+      dir={isRtl ? 'rtl' : 'ltr'}
       slotProps={{
         paper: {
-          sx: { borderRadius: 2 },
+          dir: isRtl ? 'rtl' : 'ltr',
+          sx: {
+            borderRadius: 2,
+            direction: isRtl ? 'rtl' : 'ltr',
+          },
         },
       }}
     >
