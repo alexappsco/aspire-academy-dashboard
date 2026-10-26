@@ -1,6 +1,10 @@
 {
   "Metadata": {
-    "login": "Login"
+    "login": "Login",
+    "auth_forgot_password": "Forgot password",
+    "auth_otp": "Verification code",
+    "auth_reset_password": "Reset password",
+    "auth_forgot_password_token": "Reset password"
   },
   "Sidebar": {
     "home": "Home",
@@ -827,6 +831,38 @@
     "fill_fields": "Please fill in all fields",
     "create_account": "Create New Account",
     "transition_success": "Signed in successfully"
+  },
+  "ForgotPassword": {
+    "title": "Forgot password",
+    "hint": "A verification code will be sent to your email to reset your password",
+    "submit": "Send code",
+    "back_to_login": "Back to sign in",
+    "email_required": "Please enter your email",
+    "invalid_email": "Please enter a valid email address",
+    "generic_error": "Something went wrong"
+  },
+  "Otp": {
+    "title": "Verification code",
+    "instruction": "Enter the verification code sent to {email}",
+    "resend": "Resend",
+    "resend_in": "Resend {time}",
+    "next": "Next",
+    "incomplete": "Please enter the full code",
+    "generic_error": "Something went wrong"
+  },
+  "ResetPassword": {
+    "title": "Reset password",
+    "new_password": "New password",
+    "confirm_password": "Confirm password",
+    "submit": "Save changes",
+    "back_to_login": "Back to sign in",
+    "required": "Please enter and confirm your password",
+    "mismatch": "Passwords do not match",
+    "invalid_session": "This reset session is invalid or expired. Please start again.",
+    "success_title": "Password changed successfully",
+    "success_hint": "You will be redirected to the sign-in page...",
+    "login_now": "Sign in now",
+    "generic_error": "Something went wrong"
   },
   "Support": {
     "title": "Technical Support",

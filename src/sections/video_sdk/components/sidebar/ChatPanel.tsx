@@ -10,7 +10,6 @@ import {
   TextField,
   IconButton,
   InputAdornment,
-
   CircularProgress
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";

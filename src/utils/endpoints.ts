@@ -1,6 +1,9 @@
 export const endpoints = {
   auth: {
     login: '/admin/auth/login',
+    forgetPassword: '/admin/auth/forget-password',
+    verifyOtp: '/admin/auth/verify-forget-password-otp',
+    resetPassword: '/admin/auth/reset-password',
   },
   countries: {
     list: '/admin/countries',
