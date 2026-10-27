@@ -48,7 +48,8 @@
     "about_us": "من نحن",
     "logout": "تسجيل الخروج",
     "instructor_payouts": "مستحقات المحاضرون",
-    "instructor_wallet": "الأرباح والمحفظة"
+    "instructor_wallet": "الأرباح والمحفظة",
+    "instructor_subjects": "إدارة المواد"
   },
   "Courses": {
     "title": "الدورات التدريبية",
@@ -3136,6 +3137,45 @@
       "success_message": "تم تحديث البيانات البنكية بنجاح",
       "error_message": "فشل تحديث البيانات البنكية",
       "required_fields_error": "يرجى تعبئة كافة الحقول المطلوبة"
+    }
+  },
+  "InstructorSubjects": {
+    "title": "إدارة المواد",
+    "add_subject": "إضافة مادة",
+    "search_placeholder": "بحث",
+    "status_all": "الحالة",
+    "status_active": "مفعل",
+    "status_inactive": "غير مفعل",
+    "columns": {
+      "name": "اسم المادة",
+      "college": "الكلية",
+      "semester": "الفصل الدراسي",
+      "status": "الحالة"
+    },
+    "dialog": {
+      "add_title": "إضافة مادة",
+      "edit_title": "تعديل مادة",
+      "college_label": "الكلية",
+      "semester_label": "الفصل الدراسي",
+      "subject_label": "المادة",
+      "status_label": "الحالة",
+      "active": "مفعل",
+      "inactive": "غير مفعل",
+      "add": "إضافة",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "delete_dialog": {
+      "title": "حذف المادة",
+      "message": "هل أنت متأكد من رغبتك في حذف هذه المادة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "confirm": "حذف",
+      "cancel": "إلغاء"
+    },
+    "messages": {
+      "status_updated": "تم تغيير حالة المادة بنجاح",
+      "add_success": "تم إضافة المادة بنجاح",
+      "edit_success": "تم تعديل المادة بنجاح",
+      "delete_success": "تم حذف المادة بنجاح"
     }
   }
 }

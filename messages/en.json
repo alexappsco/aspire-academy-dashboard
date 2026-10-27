@@ -48,7 +48,8 @@
     "about_us": "About Us",
     "logout": "Logout",
     "instructor_payouts": "Instructor Payouts",
-    "instructor_wallet": "Earnings & Wallet"
+    "instructor_wallet": "Earnings & Wallet",
+    "instructor_subjects": "Subjects Management"
   },
   "Courses": {
     "title": "Training Courses",
@@ -3128,6 +3129,45 @@
       "success_message": "Bank details updated successfully",
       "error_message": "Failed to update bank details",
       "required_fields_error": "Please fill in all required fields"
+    }
+  },
+  "InstructorSubjects": {
+    "title": "Subjects Management",
+    "add_subject": "Add Subject",
+    "search_placeholder": "Search...",
+    "status_all": "Status",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "columns": {
+      "name": "Subject Name",
+      "college": "College",
+      "semester": "Academic Semester",
+      "status": "Status"
+    },
+    "dialog": {
+      "add_title": "Add Subject",
+      "edit_title": "Edit Subject",
+      "college_label": "College",
+      "semester_label": "Academic Semester",
+      "subject_label": "Subject",
+      "status_label": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "delete_dialog": {
+      "title": "Delete Subject",
+      "message": "Are you sure you want to delete this subject? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "status_updated": "Subject status updated successfully",
+      "add_success": "Subject added successfully",
+      "edit_success": "Subject updated successfully",
+      "delete_success": "Subject deleted successfully"
     }
   }
 }

@@ -80,6 +80,11 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/walit.svg",
     path: "/wallet",
   },
+  {
+    key: "instructor_subjects",
+    icon: "/icons/curriculum.svg",
+    path: "/subjects",
+  },
   // 4. الهيكل الأكاديمي
   {
     key: "academic_hierarchy",
@@ -240,6 +245,7 @@ const ADMIN_HIDDEN_KEYS = new Set([
   "private_requests",
   "instructor_wallet",
   "instructor_custom_fields",
+  "instructor_subjects",
 ]);
 
 function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): SidebarItem[] {
