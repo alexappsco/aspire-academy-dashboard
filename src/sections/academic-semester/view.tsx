@@ -308,6 +308,11 @@ export default function AcademicSemestersView({
             py: 1,
             fontWeight: 700,
             boxShadow: 'none',
+            gap: 1.25,
+            '& .MuiButton-startIcon': {
+              mx: 0,
+              ...(isRtl ? { ml: 1 } : { mr: 1 }),
+            },
             '&:hover': { bgcolor: '#2C353E' },
           }}
         >
