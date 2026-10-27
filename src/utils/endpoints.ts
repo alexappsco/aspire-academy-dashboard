@@ -5,6 +5,14 @@ export const endpoints = {
     verifyOtp: '/admin/auth/verify-forget-password-otp',
     resetPassword: '/admin/auth/reset-password',
   },
+  clientNotifications: {
+    registerDevice: '/client/profile/me/device-token',
+    unregisterDevice: '/client/profile/me/device-token',
+    list: '/client/notifications',
+    unreadCount: '/client/notifications/unread-count',
+    markAsRead: (id: string) => `/client/notifications/${id}/read`,
+    markAllAsRead: '/client/notifications/read-all',
+  },
   countries: {
     list: '/admin/countries',
     details: (id: string) => `/admin/countries/${id}`,
@@ -67,6 +75,10 @@ export const endpoints = {
   },
   faculties: {
     list: '/admin/faculties',
+    details: (id: string) => `/admin/faculties/${id}`,
+    create: '/admin/faculties',
+    update: (id: string) => `/admin/faculties/${id}`,
+    delete: (id: string) => `/admin/faculties/${id}`,
   },
   semesters: {
     list: '/admin/semesters',

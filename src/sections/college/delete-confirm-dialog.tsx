@@ -8,6 +8,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import Iconify from 'src/components/iconify';
 
@@ -15,19 +16,21 @@ interface DeleteConfirmDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean;
 }
 
 export default function DeleteConfirmDialog({
   open,
   onClose,
   onConfirm,
+  loading = false,
 }: DeleteConfirmDialogProps) {
   const t = useTranslations('Colleges');
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={loading ? undefined : onClose}
       fullWidth
       maxWidth="xs"
       slotProps={{
@@ -35,7 +38,7 @@ export default function DeleteConfirmDialog({
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 0.5 }}>
-        <IconButton onClick={onClose} size="small">
+        <IconButton onClick={onClose} size="small" disabled={loading}>
           <Iconify icon="ic:round-close" sx={{ color: '#64748B', width: 20, height: 20 }} />
         </IconButton>
       </Box>
@@ -48,10 +51,9 @@ export default function DeleteConfirmDialog({
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
             variant="contained"
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
+            onClick={onConfirm}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
             sx={{
               bgcolor: '#D32F2F',
               color: '#FFFFFF',
@@ -64,11 +66,12 @@ export default function DeleteConfirmDialog({
               '&:hover': { bgcolor: '#C62828' },
             }}
           >
-            {t('dialog.delete')}
+            {loading ? t('dialog.deleting') : t('dialog.delete')}
           </Button>
           <Button
             variant="outlined"
             onClick={onClose}
+            disabled={loading}
             sx={{
               borderColor: '#E2E8F0',
               color: '#1E293B',

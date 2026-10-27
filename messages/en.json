@@ -702,10 +702,17 @@
     "subtitle": "Manage all colleges",
     "add_college": "Add College",
     "search_placeholder": "Search in colleges..",
+    "filter_university": "University",
+    "all_universities": "All Universities",
+    "no_academic_years": "None",
+    "view_all_years": "View all academic years",
+    "years_dialog_title": "Academic Years",
+    "close": "Close",
     "columns": {
       "image": "Image",
       "name": "Name",
       "university": "University",
+      "academic_years": "Academic Years",
       "order": "Order",
       "created_date": "Created Date",
       "status": "Status"
@@ -723,15 +730,26 @@
       "edit": "Edit",
       "delete": "Delete"
     },
+    "messages": {
+      "add_success": "College added successfully",
+      "edit_success": "College updated successfully",
+      "delete_success": "College deleted successfully",
+      "status_updated": "Status updated successfully",
+      "load_error": "Failed to load colleges",
+      "validation_error": "Please fill in all required fields"
+    },
     "dialog": {
       "add_title": "Add College",
       "edit_title": "Edit College",
       "subtitle": "Fill in college details",
       "select_image": "Select Image",
+      "change_image": "Change Image",
       "drag_drop": "Drag and drop files here or",
       "browse": "browse",
       "university": "University",
       "university_placeholder": "Select University",
+      "academic_years": "Academic Years",
+      "academic_years_placeholder": "Select Academic Years",
       "name_ar": "Name (Arabic)",
       "name_ar_placeholder": "Name in Arabic..",
       "name_en": "Name (English)",
@@ -739,9 +757,11 @@
       "order": "Order",
       "status": "Status",
       "save": "Save",
+      "saving": "Saving...",
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete this college?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "deleting": "Deleting..."
     }
   },
   "Subjects": {
@@ -938,6 +958,14 @@
     "details_status": "Ticket Status",
     "details_reply": "Reply",
     "close": "Close"
+  },
+  "NotificationInbox": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "all": "All",
+    "unread": "Unread",
+    "empty": "There are no notifications yet.",
+    "empty_unread": "There are no unread notifications."
   },
   "Notifications": {
     "title": "Notifications",
