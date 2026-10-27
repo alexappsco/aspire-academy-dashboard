@@ -52,7 +52,7 @@ export default function AdminSessionRequestsView() {
         <Typography variant="h4" sx={{ fontWeight: 800 }}>
           {t('title')}
         </Typography>
-        <Chip size="small" color={realtime.color} label={realtime.label} sx={{ fontWeight: 700 }} />
+        {/* <Chip size="small" color={realtime.color} label={realtime.label} sx={{ fontWeight: 700 }} /> */}
       </Stack>
 
       <Card sx={{ borderRadius: 3, border: '1px solid #EEF2F6', boxShadow: 'none' }}>
