@@ -401,7 +401,7 @@ export function BottomBar({ bottomBarHeight, setIsMeetingLeft }: BottomBarProps)
     const { publish } = usePubSub("RAISE_HAND");
     const raiseHand = () => {
       try {
-        publish("Raise Hand", { persist: false });
+        publish("RAISE_HAND", { persist: false });
       } catch (e) {
         console.log("Error in pubsub", e);
       }
