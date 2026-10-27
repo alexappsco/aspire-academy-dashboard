@@ -28,6 +28,7 @@ import {
   updateInstructorSessionSettingsAction,
   getSessionRequestsAction,
 } from 'src/actions';
+import { useSessionRequestsHub } from 'src/hooks/use-session-requests-hub';
 import {
   InstructorSessionSettingsDto,
   SessionRequestInstructorResult,
@@ -306,40 +307,51 @@ export default function PrivateRequestsListView() {
   }, [fetchSettings]);
 
   // 4. Fetch Session Requests for Table from Backend API
-  const fetchRequests = useCallback(async () => {
-    setTableLoading(true);
+  const fetchRequests = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!options?.silent) setTableLoading(true);
 
-    const effectiveStatus =
-      currentTab !== 'all' ? currentTab : statusFilter !== 'all' ? (statusFilter as SessionRequestStatus) : undefined;
+      const effectiveStatus =
+        currentTab !== 'all'
+          ? currentTab
+          : statusFilter !== 'all'
+            ? (statusFilter as SessionRequestStatus)
+            : undefined;
 
-    const effectiveType =
-      serviceTypeFilter !== 'all' ? (serviceTypeFilter as SessionType) : undefined;
+      const effectiveType =
+        serviceTypeFilter !== 'all' ? (serviceTypeFilter as SessionType) : undefined;
 
-    const res = await getSessionRequestsAction({
-      Status: effectiveStatus,
-      Type: effectiveType,
-      Filter: debouncedSearch.trim() || undefined,
-      SkipCount: page * rowsPerPage,
-      MaxResultCount: rowsPerPage,
-    });
+      const res = await getSessionRequestsAction({
+        Status: effectiveStatus,
+        Type: effectiveType,
+        Filter: debouncedSearch.trim() || undefined,
+        SkipCount: page * rowsPerPage,
+        MaxResultCount: rowsPerPage,
+      });
 
-    if (res.success && res.data) {
-      setRequests(res.data.items || []);
-      setTotalCount(res.data.totalCount || 0);
-    } else {
-      setRequests([]);
-      setTotalCount(0);
-      if (res.error) {
-        toast.error(res.error);
+      if (res.success && res.data) {
+        setRequests(res.data.items || []);
+        setTotalCount(res.data.totalCount || 0);
+      } else {
+        setRequests([]);
+        setTotalCount(0);
+        if (res.error && !options?.silent) {
+          toast.error(res.error);
+        }
       }
-    }
 
-    setTableLoading(false);
-  }, [currentTab, statusFilter, serviceTypeFilter, debouncedSearch, page, rowsPerPage, toast]);
+      if (!options?.silent) setTableLoading(false);
+    },
+    [currentTab, statusFilter, serviceTypeFilter, debouncedSearch, page, rowsPerPage, toast]
+  );
 
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
+
+  useSessionRequestsHub('instructor', () => {
+    void fetchRequests({ silent: true });
+  });
 
   // Client-side filtering by Request Type (Individual vs Group) & Date
   const filteredRequests = useMemo(() => {
