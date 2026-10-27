@@ -7,6 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import PersonIcon from "@mui/icons-material/Person";
 import Iconify from "src/components/iconify";
+import NotificationsPopover from "src/components/notifications/NotificationsPopover";
 import { useAuth } from "src/contexts/AuthContext";
 import { localesSettings, LocaleType, allLocales } from "src/i18n/config-locale";
 import {
@@ -136,6 +137,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
             flexItem
             sx={{ bgcolor: "rgba(0,0,0,0.12)", my: 0.75 }}
           />
+
+          {isAuthenticated && <NotificationsPopover />}
 
           <Avatar
             sx={{ width: 36, height: 36, bgcolor: "#1B8354", cursor: "pointer" }}

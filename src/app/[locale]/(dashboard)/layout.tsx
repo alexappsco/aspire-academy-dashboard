@@ -1,5 +1,6 @@
 import DashboardLayout from "src/layouts/DashboardLayout";
 import { RequireAuth } from "src/components/auth/AuthGuard";
+import { NotificationsProvider } from "src/contexts/NotificationsContext";
 
 export default function DashboardShellLayout({
   children,
@@ -8,7 +9,9 @@ export default function DashboardShellLayout({
 }) {
   return (
     <RequireAuth>
-      <DashboardLayout>{children}</DashboardLayout>
+      <NotificationsProvider>
+        <DashboardLayout>{children}</DashboardLayout>
+      </NotificationsProvider>
     </RequireAuth>
   );
 }
