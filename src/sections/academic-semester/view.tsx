@@ -298,21 +298,18 @@ export default function AcademicSemestersView({
 
         <Button
           variant="contained"
-          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           onClick={handleOpenAdd}
+          startIcon={<Iconify icon="mingcute:add-line" width={20} />}
           sx={{
             bgcolor: '#1C252E',
             color: '#FFFFFF',
             borderRadius: 1.5,
             px: 2.5,
-            py: 1,
+            py: 1.2,
             fontWeight: 700,
+            fontSize: '0.875rem',
             boxShadow: 'none',
-            gap: 1.25,
-            '& .MuiButton-startIcon': {
-              mx: 0,
-              ...(isRtl ? { ml: 1 } : { mr: 1 }),
-            },
+            gap: 1,
             '&:hover': { bgcolor: '#2C353E' },
           }}
         >
