@@ -62,6 +62,22 @@ export type Instructor = {
     nameAr?: string;
     nameEn?: string;
   }[] | null;
+  studyMaterialIds?: string[];
+  studyMaterials?: {
+    id: string;
+    name?: string;
+    nameAr?: string;
+    nameEn?: string;
+    facultyId?: string;
+    facultyName?: string;
+    faculty?: { id: string; name?: string; nameAr?: string; nameEn?: string };
+    academicYearId?: string;
+    academicYearName?: string;
+    academicYear?: { id: string; name?: string; nameAr?: string; nameEn?: string };
+    semesterId?: string;
+    semesterName?: string;
+    semester?: { id: string; name?: string; nameAr?: string; nameEn?: string };
+  }[] | null;
   acceptsLiveSessions?: boolean;
   acceptsRecordedSessions?: boolean;
   isActive?: boolean;
@@ -120,6 +136,7 @@ export type CreateInstructorPayload = {
   StartJobAt?: string;
   UniversityId?: string;
   SpecializationIds?: string[];
+  StudyMaterialIds?: string[];
   AcceptsLiveSessions?: boolean;
   AcceptsRecordedSessions?: boolean;
 };
@@ -136,6 +153,7 @@ export type UpdateInstructorPayload = {
   CountryId?: string;
   UniversityId?: string;
   SpecializationIds?: string[];
+  StudyMaterialIds?: string[];
   AcceptsLiveSessions?: boolean;
   AcceptsRecordedSessions?: boolean;
 };
