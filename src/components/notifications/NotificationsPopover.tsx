@@ -4,6 +4,7 @@ import { useMemo, useState, type MouseEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -20,9 +21,14 @@ import type { UserNotification } from 'src/types/firebase-notification';
 
 type NotificationsTab = 'all' | 'unread';
 
-function getNotificationIcon(type: string) {
-  if (type === 'CoursePromo') return 'solar:tag-price-outline';
-  if (type === 'PurchaseComplete') return 'solar:check-circle-outline';
+function getNotificationIcon(type: string | number) {
+  const normalizedType = String(type).toLowerCase();
+  if (normalizedType === '2' || normalizedType === 'coursepromo') {
+    return 'solar:tag-price-outline';
+  }
+  if (normalizedType === '3' || normalizedType === 'purchasecomplete') {
+    return 'solar:check-circle-outline';
+  }
   return 'solar:bell-outline';
 }
 
@@ -31,7 +37,15 @@ function parseUtcDate(value: string) {
   return new Date(hasTimezone ? value : `${value}Z`);
 }
 
-function NotificationRow({ item, locale }: { item: UserNotification; locale: string }) {
+function NotificationRow({
+  item,
+  locale,
+  onClick,
+}: {
+  item: UserNotification;
+  locale: string;
+  onClick: () => void;
+}) {
   const date = useMemo(() => {
     const value = parseUtcDate(item.createdAt);
     if (Number.isNaN(value.getTime())) return '';
@@ -42,7 +56,15 @@ function NotificationRow({ item, locale }: { item: UserNotification; locale: str
   }, [item.createdAt, locale]);
 
   return (
-    <Box sx={{ position: 'relative', px: 2, py: 1.75, bgcolor: item.isRead ? 'transparent' : '#F7FBFF' }}>
+    <Box
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onClick();
+      }}
+      sx={{ position: 'relative', px: 2, py: 1.75, bgcolor: item.isRead ? 'transparent' : '#F7FBFF', cursor: 'pointer', '&:hover': { bgcolor: '#F8FAFC' } }}
+    >
       {!item.isRead && (
         <Box
           sx={{ position: 'absolute', insetInlineStart: 7, top: 22, width: 7, height: 7, borderRadius: '50%', bgcolor: '#1976D2' }}
@@ -71,7 +93,7 @@ function NotificationRow({ item, locale }: { item: UserNotification; locale: str
 export default function NotificationsPopover() {
   const t = useTranslations('NotificationInbox');
   const locale = useLocale();
-  const { notifications, totalCount, unreadCount, loading } = useNotifications();
+  const { notifications, totalCount, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<NotificationsTab>('all');
   const visibleNotifications = tab === 'unread'
@@ -97,8 +119,13 @@ export default function NotificationsPopover() {
         transformOrigin={{ vertical: 'top', horizontal: locale === 'ar' ? 'left' : 'right' }}
         slotProps={{ paper: { sx: { mt: 1, width: { xs: 'calc(100vw - 24px)', sm: 420 }, maxHeight: 560, borderRadius: 2.5, boxShadow: '0 16px 45px rgba(15, 23, 42, 0.16)', overflow: 'hidden' } } }}
       >
-        <Box sx={{ px: 2, pt: 2 }}>
+        <Box sx={{ px: 2, pt: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
           <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#17243E' }}>{t('title')}</Typography>
+          {unreadCount > 0 && (
+            <Button size="small" onClick={() => void markAllAsRead()} sx={{ fontWeight: 700 }}>
+              {t('mark_all_read')}
+            </Button>
+          )}
         </Box>
         <Tabs
           value={tab}
@@ -123,7 +150,14 @@ export default function NotificationsPopover() {
             </Stack>
           ) : (
             <Stack divider={<Divider flexItem />}>
-              {visibleNotifications.map((item) => <NotificationRow key={item.id} item={item} locale={locale} />)}
+              {visibleNotifications.map((item) => (
+                <NotificationRow
+                  key={item.id}
+                  item={item}
+                  locale={locale}
+                  onClick={() => void markAsRead(item.id)}
+                />
+              ))}
             </Stack>
           )}
         </Box>

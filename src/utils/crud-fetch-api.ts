@@ -293,6 +293,14 @@ export async function deleteData<TResponse>(
   return apiRequest<TResponse>(endpoint, 'DELETE', undefined, options);
 }
 
+export async function deleteDataWithBody<TResponse, TBody>(
+  endpoint: string,
+  data: TBody,
+  options?: RequestOptions
+): Promise<ApiResponse<TResponse>> {
+  return apiRequest<TResponse, TBody>(endpoint, 'DELETE', data, options);
+}
+
 const errorObject = (
   error: string = '',
   status: string | number = '',

@@ -961,6 +961,7 @@
   },
   "NotificationInbox": {
     "title": "Notifications",
+    "mark_all_read": "Mark all as read",
     "all": "All",
     "unread": "Unread",
     "empty": "There are no notifications yet.",

@@ -5,6 +5,10 @@ export type RegisterDeviceTokenPayload = {
   platform: DevicePlatform;
 };
 
+export type RemoveDeviceTokenPayload = {
+  token: string;
+};
+
 export type FirebaseTokenFailureReason =
   | 'browser_required'
   | 'browser_unsupported'
@@ -19,7 +23,7 @@ export type UserNotification = {
   title: string;
   message: string;
   imageUrl: string | null;
-  type: 'General' | 'CoursePromo' | 'PurchaseComplete' | string;
+  type: 'General' | 'CoursePromo' | 'PurchaseComplete' | string | number;
   isRead: boolean;
   createdAt: string;
 };

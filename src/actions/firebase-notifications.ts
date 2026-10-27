@@ -1,12 +1,15 @@
 'use server';
 
 import type { ApiSingleResponse } from 'src/types/crud-types';
-import type { RegisterDeviceTokenPayload } from 'src/types/firebase-notification';
+import type {
+  RegisterDeviceTokenPayload,
+  RemoveDeviceTokenPayload,
+} from 'src/types/firebase-notification';
 import type {
   UserNotificationsQuery,
   UserNotificationsResponse,
 } from 'src/types/firebase-notification';
-import { getData, postData } from 'src/utils/crud-fetch-api';
+import { deleteDataWithBody, editData, getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 
 export async function registerFirebaseDevice(
@@ -71,6 +74,61 @@ export async function getUserNotificationsUnreadCount(): Promise<ApiSingleRespon
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to load unread notifications count',
+    };
+  }
+}
+
+export async function markUserNotificationAsRead(id: string): Promise<ApiSingleResponse<null>> {
+  try {
+    const response = await editData<Record<string, never>, Record<string, never>>(
+      endpoints.clientNotifications.markAsRead(id),
+      'PUT',
+      {}
+    );
+    return response.success
+      ? { success: true, data: null }
+      : { success: false, error: response.error };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to mark notification as read',
+    };
+  }
+}
+
+export async function markAllUserNotificationsAsRead(): Promise<ApiSingleResponse<null>> {
+  try {
+    const response = await editData<Record<string, never>, Record<string, never>>(
+      endpoints.clientNotifications.markAllAsRead,
+      'PUT',
+      {}
+    );
+    return response.success
+      ? { success: true, data: null }
+      : { success: false, error: response.error };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to mark all notifications as read',
+    };
+  }
+}
+
+export async function unregisterFirebaseDevice(
+  data: RemoveDeviceTokenPayload
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const response = await deleteDataWithBody<Record<string, never>, RemoveDeviceTokenPayload>(
+      endpoints.clientNotifications.unregisterDevice,
+      data
+    );
+    return response.success
+      ? { success: true, data: null }
+      : { success: false, error: response.error };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to unregister Firebase device',
     };
   }
 }

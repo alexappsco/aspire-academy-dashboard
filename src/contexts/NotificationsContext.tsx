@@ -14,11 +14,16 @@ import {
 import {
   getUserNotifications,
   getUserNotificationsUnreadCount,
+  markAllUserNotificationsAsRead,
+  markUserNotificationAsRead,
   registerFirebaseDevice,
+  unregisterFirebaseDevice,
 } from 'src/actions/firebase-notifications';
 import { useToast } from 'src/components/toast';
 import { useAuth } from 'src/contexts/AuthContext';
 import {
+  getRegisteredFirebaseToken,
+  removeRegisteredFirebaseToken,
   requestFirebaseToken,
   saveRegisteredFirebaseToken,
   subscribeToForegroundMessages,
@@ -45,6 +50,9 @@ type NotificationsContextValue = {
   firebaseStatus: FirebaseSetupStatus;
   firebaseError: FirebaseTokenFailureReason | string | null;
   refresh: () => Promise<void>;
+  markAsRead: (id: string) => Promise<boolean>;
+  markAllAsRead: () => Promise<boolean>;
+  unregisterDevice: () => Promise<void>;
 };
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
@@ -81,6 +89,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [firebaseStatus, setFirebaseStatus] = useState<FirebaseSetupStatus>('idle');
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const activeRef = useRef(true);
+  const notificationIdsRef = useRef<Set<string>>(new Set());
+  const unreadNotificationIdsRef = useRef<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -95,6 +105,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
     if (listResponse.success && listResponse.data) {
       const items = normalizeNotifications(listResponse.data.items);
+      notificationIdsRef.current = new Set(items.map((item) => item.id));
+      unreadNotificationIdsRef.current = new Set(
+        items.filter((item) => !item.isRead).map((item) => item.id)
+      );
       setNotifications(items);
       setTotalCount(Math.max(0, listResponse.data.totalCount || 0));
       setError(null);
@@ -110,15 +124,56 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, [isAuthenticated]);
 
+  const markAsRead = useCallback(async (id: string) => {
+    const current = notifications.find((item) => item.id === id);
+    if (!current || current.isRead) return true;
+
+    const response = await markUserNotificationAsRead(id);
+    if (!response.success) {
+      toast.error(response.error || 'Failed to mark notification as read');
+      return false;
+    }
+
+    setNotifications((items) =>
+      items.map((item) => (item.id === id ? { ...item, isRead: true } : item))
+    );
+    if (unreadNotificationIdsRef.current.delete(id)) {
+      setUnreadCount((count) => Math.max(0, count - 1));
+    }
+    return true;
+  }, [notifications, toast]);
+
+  const markAllAsRead = useCallback(async () => {
+    if (unreadCount === 0) return true;
+
+    const response = await markAllUserNotificationsAsRead();
+    if (!response.success) {
+      toast.error(response.error || 'Failed to mark all notifications as read');
+      return false;
+    }
+
+    setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
+    unreadNotificationIdsRef.current.clear();
+    setUnreadCount(0);
+    return true;
+  }, [toast, unreadCount]);
+
+  const unregisterDevice = useCallback(async () => {
+    const token = getRegisteredFirebaseToken();
+    if (!token) return;
+
+    try {
+      await unregisterFirebaseDevice({ token });
+    } finally {
+      removeRegisteredFirebaseToken();
+    }
+  }, []);
+
   useEffect(() => {
     activeRef.current = true;
     if (!isAuthenticated) {
-      setNotifications([]);
-      setTotalCount(0);
-      setUnreadCount(0);
-      setError(null);
-      setFirebaseStatus('idle');
-      setFirebaseError(null);
+      notificationIdsRef.current.clear();
+      unreadNotificationIdsRef.current.clear();
       return () => {
         activeRef.current = false;
       };
@@ -173,6 +228,30 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         const title = payload.notification?.title || payload.data?.title;
         const message = payload.notification?.body || payload.data?.message || payload.data?.body;
+        const notificationId = payload.data?.notificationId;
+
+        if (notificationId && title && message) {
+          if (notificationIdsRef.current.has(notificationId)) return;
+
+          const notification: UserNotification = {
+            id: notificationId,
+            title,
+            message,
+            imageUrl: payload.notification?.image || null,
+            type: payload.data?.type || 'General',
+            isRead: false,
+            createdAt: new Date().toISOString(),
+          };
+
+          notificationIdsRef.current.add(notificationId);
+          unreadNotificationIdsRef.current.add(notificationId);
+          setNotifications((items) => [notification, ...items].slice(0, 50));
+          setTotalCount((count) => count + 1);
+          setUnreadCount((count) => count + 1);
+          toast.info(`${title} — ${message}`);
+          return;
+        }
+
         toast.info([title, message].filter(Boolean).join(' — '));
         refreshAfterForegroundMessage();
       });
@@ -199,8 +278,23 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       firebaseStatus,
       firebaseError,
       refresh,
+      markAsRead,
+      markAllAsRead,
+      unregisterDevice,
     }),
-    [notifications, totalCount, unreadCount, loading, error, firebaseStatus, firebaseError, refresh]
+    [
+      notifications,
+      totalCount,
+      unreadCount,
+      loading,
+      error,
+      firebaseStatus,
+      firebaseError,
+      refresh,
+      markAsRead,
+      markAllAsRead,
+      unregisterDevice,
+    ]
   );
 
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

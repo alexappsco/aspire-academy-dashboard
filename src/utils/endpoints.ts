@@ -7,6 +7,7 @@ export const endpoints = {
   },
   clientNotifications: {
     registerDevice: '/client/profile/me/device-token',
+    unregisterDevice: '/client/profile/me/device-token',
     list: '/client/notifications',
     unreadCount: '/client/notifications/unread-count',
     markAsRead: (id: string) => `/client/notifications/${id}/read`,
