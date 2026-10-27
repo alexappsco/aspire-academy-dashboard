@@ -22,6 +22,7 @@ import {
   rejectSessionRequestAction,
   completeSessionRequestAction,
 } from 'src/actions/instructor-session-requests';
+import { useSessionRequestsHub } from 'src/hooks/use-session-requests-hub';
 import {
   SessionRequestInstructorResult,
   SessionRequestTransactionResult,
@@ -59,39 +60,57 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
   const [isFinishing, setIsFinishing] = useState(false);
 
   // Fetch request details and financial transactions from backend API
-  const fetchRequestDetails = useCallback(async () => {
-    if (!requestId) return;
-    setLoading(true);
-    setLoadingTransactions(true);
-    setError(null);
-    try {
-      const [detailsRes, txRes] = await Promise.all([
-        getSessionRequestDetailsAction(requestId),
-        getSessionRequestTransactionsAction(requestId),
-      ]);
-
-      if (detailsRes.success && detailsRes.data) {
-        setRequest(detailsRes.data);
-      } else {
-        setError(detailsRes.error || t('details.not_found'));
+  const fetchRequestDetails = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!requestId) return;
+      if (!options?.silent) {
+        setLoading(true);
+        setLoadingTransactions(true);
+        setError(null);
       }
+      try {
+        const [detailsRes, txRes] = await Promise.all([
+          getSessionRequestDetailsAction(requestId),
+          getSessionRequestTransactionsAction(requestId),
+        ]);
 
-      if (txRes.success && txRes.data) {
-        setTransactions(txRes.data);
-      } else {
-        setTransactions([]);
+        if (detailsRes.success && detailsRes.data) {
+          setRequest(detailsRes.data);
+          if (options?.silent) setError(null);
+        } else if (!options?.silent) {
+          setError(detailsRes.error || t('details.not_found'));
+        }
+
+        if (txRes.success && txRes.data) {
+          setTransactions(txRes.data);
+        } else if (!options?.silent) {
+          setTransactions([]);
+        }
+      } catch (err) {
+        if (!options?.silent) {
+          setError(err instanceof Error ? err.message : t('details.not_found'));
+        }
+      } finally {
+        if (!options?.silent) {
+          setLoading(false);
+          setLoadingTransactions(false);
+        }
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('details.not_found'));
-    } finally {
-      setLoading(false);
-      setLoadingTransactions(false);
-    }
-  }, [requestId, t]);
+    },
+    [requestId, t]
+  );
 
   useEffect(() => {
     fetchRequestDetails();
   }, [fetchRequestDetails]);
+
+  useSessionRequestsHub(
+    'instructor',
+    () => {
+      void fetchRequestDetails({ silent: true });
+    },
+    { enabled: Boolean(requestId) }
+  );
 
   // Status checks normalized across numeric enum and string representation
   const normalizedStatus = useMemo(() => {
@@ -326,7 +345,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           severity="error"
           sx={{ mb: 3, maxWidth: 600, mx: 'auto', borderRadius: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={fetchRequestDetails}>
+            <Button color="inherit" size="small" onClick={() => void fetchRequestDetails()}>
               {t('details.retry')}
             </Button>
           }

@@ -7,7 +7,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import PersonIcon from "@mui/icons-material/Person";
 import Iconify from "src/components/iconify";
+import NotificationsPopover from "src/components/notifications/NotificationsPopover";
 import { useAuth } from "src/contexts/AuthContext";
+import { useNotifications } from "src/contexts/NotificationsContext";
 import { localesSettings, LocaleType, allLocales } from "src/i18n/config-locale";
 import {
   AppBar,
@@ -32,6 +34,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
   const locale = useLocale();
   const { isAuthenticated, logout } = useAuth();
+  const { unregisterDevice } = useNotifications();
   const currentLocaleSetting = localesSettings[locale as LocaleType];
 
   const [langAnchorEl, setLangAnchorEl] = useState<HTMLElement | null>(null);
@@ -58,8 +61,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
     router.push("/auth/login");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     handleAvatarClose();
+    await unregisterDevice();
     logout();
     router.push("/auth/login");
   };
@@ -137,6 +141,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
             sx={{ bgcolor: "rgba(0,0,0,0.12)", my: 0.75 }}
           />
 
+          {isAuthenticated && <NotificationsPopover />}
+
           <Avatar
             sx={{ width: 36, height: 36, bgcolor: "#1B8354", cursor: "pointer" }}
             onClick={handleAvatarOpen}
@@ -194,7 +200,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           },
         }}
       >
-        <MenuItem onClick={isAuthenticated ? handleLogout : handleLogin}>
+        <MenuItem onClick={isAuthenticated ? () => void handleLogout() : handleLogin}>
           <ListItemIcon sx={{ minWidth: 36 }}>
             <Iconify
               icon={isAuthenticated ? "solar:logout-2-outline" : "solar:login-2-outline"}

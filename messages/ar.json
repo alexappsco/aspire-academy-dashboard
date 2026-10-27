@@ -960,6 +960,14 @@
     "details_reply": "الرد",
     "close": "إغلاق"
   },
+  "NotificationInbox": {
+    "title": "الإشعارات",
+    "mark_all_read": "تعليم الكل كمقروء",
+    "all": "الكل",
+    "unread": "غير المقروءة",
+    "empty": "لا توجد إشعارات حاليًا.",
+    "empty_unread": "لا توجد إشعارات غير مقروءة."
+  },
   "Notifications": {
     "title": "الإشعارات",
     "send_notification": "إرسال إشعار",

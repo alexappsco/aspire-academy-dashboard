@@ -960,6 +960,14 @@
     "details_reply": "Reply",
     "close": "Close"
   },
+  "NotificationInbox": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "all": "All",
+    "unread": "Unread",
+    "empty": "There are no notifications yet.",
+    "empty_unread": "There are no unread notifications."
+  },
   "Notifications": {
     "title": "Notifications",
     "send_notification": "Send Notification",
