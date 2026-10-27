@@ -36,6 +36,7 @@ import { getSpecializations } from "src/actions/specializations";
 import { getCountriesAction } from "src/actions/countries";
 import type { Country, University } from "src/types/instructor";
 import type { Specialization } from "src/types/specialization";
+import InstructorStudyMaterialsCard, { AddedStudyMaterial } from "../components/InstructorStudyMaterialsCard";
 
 interface MinutesFormViewProps {
   id?: string;
@@ -120,6 +121,7 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
     acceptsRecordedSessions: true,
   });
 
+  const [studyMaterials, setStudyMaterials] = useState<AddedStudyMaterial[]>([]);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -172,6 +174,28 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
             acceptsLiveSessions: inst.acceptsLiveSessions ?? true,
             acceptsRecordedSessions: inst.acceptsRecordedSessions ?? true,
           });
+          if (inst.studyMaterials && Array.isArray(inst.studyMaterials)) {
+            setStudyMaterials(
+              inst.studyMaterials.map((sm) => {
+                const ar = sm.nameAr;
+                const en = sm.nameEn;
+                const displayName =
+                  ar && en && ar !== en ? `${ar} (${en})` : ar || en || sm.name || '';
+                return {
+                  id: sm.id,
+                  name: displayName,
+                  nameAr: sm.nameAr,
+                  nameEn: sm.nameEn,
+                  facultyId: sm.facultyId || sm.faculty?.id || '',
+                  facultyName: sm.facultyName || sm.faculty?.nameAr || sm.faculty?.nameEn || '',
+                  academicYearId: sm.academicYearId || sm.academicYear?.id || '',
+                  academicYearName: sm.academicYearName || sm.academicYear?.nameAr || sm.academicYear?.nameEn || '',
+                  semesterId: sm.semesterId || sm.semester?.id || '',
+                  semesterName: sm.semesterName || sm.semester?.nameAr || sm.semester?.nameEn || '',
+                };
+              })
+            );
+          }
           setAvatarPreview(inst.imageUrl || null);
         } else {
           toast.error(res.error || "Failed to load instructor");
@@ -244,6 +268,7 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
           CountryId: formData.country || undefined,
           UniversityId: formData.university || undefined,
           SpecializationIds: formData.specializationIds,
+          StudyMaterialIds: studyMaterials.map((s) => s.id),
           AcceptsLiveSessions: formData.acceptsLiveSessions,
           AcceptsRecordedSessions: formData.acceptsRecordedSessions,
           ...(avatarFile && { ProfileImage: avatarFile }),
@@ -269,6 +294,7 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
           CountryId: formData.country || undefined,
           UniversityId: formData.university || undefined,
           SpecializationIds: formData.specializationIds,
+          StudyMaterialIds: studyMaterials.map((s) => s.id),
           AcceptsLiveSessions: formData.acceptsLiveSessions,
           AcceptsRecordedSessions: formData.acceptsRecordedSessions,
           ...(avatarFile && { ProfileImage: avatarFile }),
@@ -711,6 +737,13 @@ export default function NewMinutesManagementView({ id }: MinutesFormViewProps) {
           </Stack>
         </Box>
       </Card>
+
+      {/* المواد التي يدرّسها */}
+      <InstructorStudyMaterialsCard
+        value={studyMaterials}
+        onChange={setStudyMaterials}
+        isRtl={isRtl}
+      />
 
       {!isEdit && (
         <Card
