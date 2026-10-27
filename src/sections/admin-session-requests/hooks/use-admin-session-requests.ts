@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { getAdminSessionRequests } from 'src/actions/admin-session-requests';
 import { DEFAULT_LIMIT } from 'src/components/constant';
 import { useToast } from 'src/components/toast';
+import { useSessionRequestsHub } from 'src/hooks/use-session-requests-hub';
 import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 import type {
@@ -49,54 +50,64 @@ export default function useAdminSessionRequests() {
     return () => clearTimeout(debounceRef.current);
   }, [search]);
 
-  useEffect(() => {
-    const loadCounts = async () => {
-      const responses = await Promise.all(
-        SESSION_REQUEST_STATUSES.map((item) =>
-          getAdminSessionRequests({ Status: item, SkipCount: 0, MaxResultCount: 1 })
-        )
-      );
+  const loadCounts = useCallback(async () => {
+    const responses = await Promise.all(
+      SESSION_REQUEST_STATUSES.map((item) =>
+        getAdminSessionRequests({ Status: item, SkipCount: 0, MaxResultCount: 1 })
+      )
+    );
 
-      const nextCounts = { ...EMPTY_COUNTS };
-      SESSION_REQUEST_STATUSES.forEach((item, index) => {
-        const response = responses[index];
-        nextCounts[item] = response.success && response.data ? response.data.totalCount : 0;
-      });
-      nextCounts.total = SESSION_REQUEST_STATUSES.reduce(
-        (sum, item) => sum + nextCounts[item],
-        0
-      );
-      setCounts(nextCounts);
-    };
-
-    void loadCounts();
+    const nextCounts = { ...EMPTY_COUNTS };
+    SESSION_REQUEST_STATUSES.forEach((item, index) => {
+      const response = responses[index];
+      nextCounts[item] = response.success && response.data ? response.data.totalCount : 0;
+    });
+    nextCounts.total = SESSION_REQUEST_STATUSES.reduce(
+      (sum, item) => sum + nextCounts[item],
+      0
+    );
+    setCounts(nextCounts);
   }, []);
 
-  const fetchRequests = useCallback(async () => {
-    setLoading(true);
-    const response = await getAdminSessionRequests({
-      Status: status === 'all' ? undefined : status,
-      Type: type === 'all' ? undefined : type,
-      PartyType: requestKind === 'all' ? undefined : requestKind,
-      Filter: debouncedSearch || undefined,
-      SkipCount: page * limit,
-      MaxResultCount: limit,
-    });
+  useEffect(() => {
+    void loadCounts();
+  }, [loadCounts]);
 
-    if (response.success && response.data) {
-      setRequests(response.data.items);
-      setTotalCount(response.data.totalCount);
-    } else {
-      setRequests([]);
-      setTotalCount(0);
-      toast.error(response.error || t('messages.load_error'));
-    }
-    setLoading(false);
-  }, [debouncedSearch, limit, page, requestKind, status, t, toast, type]);
+  const fetchRequests = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!options?.silent) setLoading(true);
+      const response = await getAdminSessionRequests({
+        Status: status === 'all' ? undefined : status,
+        Type: type === 'all' ? undefined : type,
+        PartyType: requestKind === 'all' ? undefined : requestKind,
+        Filter: debouncedSearch || undefined,
+        SkipCount: page * limit,
+        MaxResultCount: limit,
+      });
+
+      if (response.success && response.data) {
+        setRequests(response.data.items);
+        setTotalCount(response.data.totalCount);
+      } else {
+        setRequests([]);
+        setTotalCount(0);
+        if (!options?.silent) {
+          toast.error(response.error || t('messages.load_error'));
+        }
+      }
+      if (!options?.silent) setLoading(false);
+    },
+    [debouncedSearch, limit, page, requestKind, status, t, toast, type]
+  );
 
   useEffect(() => {
     void fetchRequests();
   }, [fetchRequests]);
+
+  const { status: realtimeStatus } = useSessionRequestsHub('admin', () => {
+    void fetchRequests({ silent: true });
+    void loadCounts();
+  });
 
   const changeStatus = (value: AdminSessionStatusFilter) => {
     setStatus(value);
@@ -127,6 +138,7 @@ export default function useAdminSessionRequests() {
     type,
     search,
     loading,
+    realtimeStatus,
     changeStatus,
     changeRequestKind,
     changeType,

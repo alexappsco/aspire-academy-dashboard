@@ -5,6 +5,16 @@ export const HOST_API =
   process.env.NEXT_PUBLIC_HOST_API ?? 'http://5.189.130.109:3000';
 export const ASSETS_API = process.env.NEXT_PUBLIC_ASSETS_API;
 
+/**
+ * SignalR hub for session/private requests.
+ * Default is same-origin `/hubs/session-requests` (proxied by next.config rewrites)
+ * so the browser avoids CORS blocks against the API host.
+ * Override only if you intentionally point at the API (requires backend CORS).
+ */
+export const SESSION_REQUESTS_HUB_URL =
+  process.env.NEXT_PUBLIC_SESSION_REQUESTS_HUB_URL?.trim() ||
+  '/hubs/session-requests';
+
 // ROOT PATH AFTER LOGIN SUCCESSFUL
 export const PATH_AFTER_LOGIN = paths.home; // as '/dashboar
 

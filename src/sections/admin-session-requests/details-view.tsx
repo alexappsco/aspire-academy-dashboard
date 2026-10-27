@@ -31,7 +31,7 @@ export default function AdminSessionRequestDetailsView({ requestId }: Props) {
   if (!request) {
     return (
       <Box sx={{ py: 3 }}>
-        <Alert severity="error" action={<Button onClick={retry}>{t('retry')}</Button>}>
+        <Alert severity="error" action={<Button onClick={() => void retry()}>{t('retry')}</Button>}>
           {error || t('load_error')}
         </Alert>
       </Box>
