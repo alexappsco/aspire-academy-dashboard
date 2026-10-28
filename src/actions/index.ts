@@ -34,3 +34,4 @@ export * from './academy-bank-accounts';
 export * from './academy-custom-fields';
 export * from './instructor-wallet';
 export * from './firebase-notifications';
+export * from './socials';

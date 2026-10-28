@@ -259,4 +259,10 @@ export const endpoints = {
     transfers: (instructorId: string) => `/admin/instructor-dues/${instructorId}/transfers`,
     earnings: (instructorId: string) => `/admin/instructor-dues/${instructorId}/earnings`,
   },
+  socials: {
+    list: '/admin/socials',
+    create: '/admin/socials',
+    update: (id: string) => `/admin/socials/${id}`,
+    delete: (id: string) => `/admin/socials/${id}`,
+  },
 };
