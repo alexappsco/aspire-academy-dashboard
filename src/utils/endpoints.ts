@@ -256,4 +256,10 @@ export const endpoints = {
     details: (instructorId: string) => `/admin/instructor-dues/${instructorId}`,
     transfers: (instructorId: string) => `/admin/instructor-dues/${instructorId}/transfers`,
   },
+  socials: {
+    list: '/admin/socials',
+    create: '/admin/socials',
+    update: (id: string) => `/admin/socials/${id}`,
+    delete: (id: string) => `/admin/socials/${id}`,
+  },
 };

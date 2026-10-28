@@ -3206,5 +3206,15 @@
       "edit_success": "Subject updated successfully",
       "delete_success": "Subject deleted successfully"
     }
+  },
+  "ContactUs": {
+    "title": "Contact Us",
+    "save_changes": "Save Changes",
+    "added_channels": "Added Contact Channels",
+    "already_added_one": "Already added",
+    "delete_channel": "Delete",
+    "empty_state": "No contact channels added yet. Click the (+) button to add a new channel.",
+    "save_success": "Contact channels saved successfully",
+    "save_error": "Failed to save contact channels"
   }
 }

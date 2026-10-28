@@ -221,6 +221,10 @@ const sidebarItems: SidebarItem[] = [
         key: "common_questions",
         path: "/common-questions",
       },
+      {
+        key: "contact_us",
+        path: "/contact-us",
+      },
     ],
   },
 ];
