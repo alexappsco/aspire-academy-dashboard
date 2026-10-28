@@ -17,6 +17,8 @@ interface Props {
   page: number;
   rowsPerPage: number;
   loading?: boolean;
+  /** When true, render table only (parent provides Card + tabs header). */
+  embedded?: boolean;
   onPageChange: (newPage: number) => void;
   onRowsPerPageChange: (newRowsPerPage: number) => void;
   onViewReceipt: (receiptUrl: string) => void;
@@ -28,6 +30,7 @@ export default function TransactionsTable({
   page,
   rowsPerPage,
   loading = false,
+  embedded = false,
   onPageChange,
   onRowsPerPageChange,
   onViewReceipt,
@@ -50,24 +53,8 @@ export default function TransactionsTable({
     }
   };
 
-  return (
-    <Card
-      sx={{
-        borderRadius: 3,
-        bgcolor: '#FFFFFF',
-        border: '1px solid #F1F5F9',
-        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Title Bar */}
-      <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
-        <Typography sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'start' }}>
-          {t('title')}
-        </Typography>
-      </Box>
-
-      {/* Table Content */}
+  const tableBody = (
+    <>
       <Box sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <Box
           component="table"
@@ -252,7 +239,6 @@ export default function TransactionsTable({
         </Box>
       </Box>
 
-      {/* Pagination Footer */}
       <TablePagination
         component="div"
         count={totalCount}
@@ -278,6 +264,29 @@ export default function TransactionsTable({
           },
         }}
       />
+    </>
+  );
+
+  if (embedded) {
+    return tableBody;
+  }
+
+  return (
+    <Card
+      sx={{
+        borderRadius: 3,
+        bgcolor: '#FFFFFF',
+        border: '1px solid #F1F5F9',
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
+        overflow: 'hidden',
+      }}
+    >
+      <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
+        <Typography sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'start' }}>
+          {t('title')}
+        </Typography>
+      </Box>
+      {tableBody}
     </Card>
   );
 }

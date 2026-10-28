@@ -46,6 +46,9 @@ interface Props {
   requestId: string;
 }
 
+/** Stable empty list — avoids `|| []` creating a new ref every render (which resets curriculum UI). */
+const EMPTY_CHAPTERS: NonNullable<SessionRequestInstructorResult['chapters']> = [];
+
 export default function PrivateRequestDetailsView({ requestId }: Props) {
   const locale = useLocale();
   const toast = useToast();
@@ -504,7 +507,7 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
           {isRecorded && (
             <RecordedCurriculumSection
               requestId={request.id}
-              initialChapters={request.chapters || []}
+              initialChapters={request.chapters ?? EMPTY_CHAPTERS}
               onChaptersUpdated={(newChapters) => {
                 setRequest((prev) =>
                   prev

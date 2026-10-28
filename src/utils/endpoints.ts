@@ -248,12 +248,15 @@ export const endpoints = {
   instructorWallet: {
     dues: '/instructor/dues',
     transfers: '/instructor/dues/transfers',
+    earnings: '/instructor/dues/earnings',
     bankDetails: '/instructor/bank-details',
   },
   instructorDues: {
     list: '/admin/instructor-dues',
     summary: '/admin/instructor-dues/summary',
     details: (instructorId: string) => `/admin/instructor-dues/${instructorId}`,
+    
     transfers: (instructorId: string) => `/admin/instructor-dues/${instructorId}/transfers`,
+    earnings: (instructorId: string) => `/admin/instructor-dues/${instructorId}/earnings`,
   },
 };

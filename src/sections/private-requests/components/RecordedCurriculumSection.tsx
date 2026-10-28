@@ -64,6 +64,29 @@ function toHttps(url?: string | null): string | null {
   return url.replace(/^http:\/\//i, 'https://');
 }
 
+/** Stable fingerprint so silent parent refetches do not reset local curriculum UI. */
+function chaptersFingerprint(chapters?: SessionChapterResult[] | null): string {
+  if (!chapters?.length) return '[]';
+  return JSON.stringify(
+    chapters.map((ch) => ({
+      id: ch.id,
+      order: ch.order,
+      title: ch.title,
+      hours: ch.hours,
+      lessons: (ch.lessons || []).map((les) => ({
+        id: les.id,
+        order: les.order,
+        title: les.title,
+        videoUrl: les.videoUrl,
+        durationInSeconds: les.durationInSeconds,
+        attachmentIds: les.attachmentIds,
+        testId: les.test?.id,
+        questionsCount: les.test?.questions?.length ?? 0,
+      })),
+    }))
+  );
+}
+
 export interface CurriculumAttachmentItem {
   id: string;
   dbId?: string;
@@ -347,9 +370,23 @@ export default function RecordedCurriculumSection({
   const isDocUploading = (lessonId: string) =>
     uploadingState?.lessonId === lessonId && uploadingState?.type === 'pdf';
 
-  // Sync state if initialChapters changes from parent & resolve attachment details
+  // Keep local curriculum edits when parent re-fetches (SignalR silent refresh).
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
+  hasUnsavedChangesRef.current = hasUnsavedChanges;
+  const lastSyncedChaptersKeyRef = useRef<string | null>(null);
+
+  // Sync state if initialChapters actually changes from parent & resolve attachment details
   useEffect(() => {
     if (!initialChapters) return;
+
+    // Never wipe in-progress local chapter/lesson edits on background refresh.
+    if (hasUnsavedChangesRef.current) return;
+
+    const chaptersKey = chaptersFingerprint(initialChapters);
+
+    // Same server payload as last sync — skip (avoids accordion/UI reset on silent refetch).
+    if (lastSyncedChaptersKeyRef.current === chaptersKey) return;
+    lastSyncedChaptersKeyRef.current = chaptersKey;
 
     const mapped = mapBackendChaptersToRich(initialChapters);
     setRichChapters(mapped);
@@ -448,6 +485,7 @@ export default function RecordedCurriculumSection({
       if (res.success && res.data) {
         toast.success(t('notifications.curriculum_saved'));
         setHasUnsavedChanges(false);
+        lastSyncedChaptersKeyRef.current = chaptersFingerprint(res.data);
         const mappedFromBackend = mapBackendChaptersToRich(res.data);
         setRichChapters(mappedFromBackend);
         onChaptersUpdated?.(res.data);

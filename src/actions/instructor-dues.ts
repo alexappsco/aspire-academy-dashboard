@@ -9,6 +9,7 @@ import type {
   InstructorTransfersListResponse,
   InstructorTransferItem,
 } from 'src/types/instructor-payout';
+import type { InstructorEarningsListResponse } from 'src/types/instructor-wallet';
 import { getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 
@@ -166,6 +167,47 @@ export async function getInstructorTransfers(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to load instructor transfers',
+    };
+  }
+}
+
+/**
+ * Fetch paginated earnings / profit log for an instructor
+ * GET /api/v1/admin/instructor-dues/{instructorId}/earnings
+ */
+export async function getInstructorEarnings(
+  instructorId: string,
+  params?: {
+    SkipCount?: number;
+    MaxResultCount?: number;
+  }
+): Promise<ApiSingleResponse<InstructorEarningsListResponse>> {
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.SkipCount !== undefined) {
+      searchParams.append('SkipCount', String(params.SkipCount));
+    }
+    if (params?.MaxResultCount !== undefined) {
+      searchParams.append('MaxResultCount', String(params.MaxResultCount));
+    }
+    const query = searchParams.toString();
+    const baseUrl = endpoints.instructorDues.earnings(instructorId);
+    const endpoint = query ? `${baseUrl}?${query}` : baseUrl;
+
+    const response = await getData<InstructorEarningsListResponse>(endpoint);
+
+    if ('success' in response && response.success) {
+      return { success: true, data: response.data };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to load instructor earnings',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to load instructor earnings',
     };
   }
 }

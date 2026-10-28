@@ -4,28 +4,35 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
 import { useTranslations } from 'next-intl';
 import Iconify from 'src/components/iconify';
-import { useToast } from 'src/components/toast';
+import { useQuery } from 'src/components/use-query';
 
 import {
   InstructorWalletDetailsResponse,
   InstructorTransferItem,
+  InstructorEarningItem,
 } from 'src/types/instructor-wallet';
 import {
   getInstructorMyWallet,
   getInstructorMyTransfers,
+  getInstructorMyEarnings,
 } from 'src/actions/instructor-wallet';
 
 import InstructorMyBankCard from './components/InstructorMyBankCard';
 import InstructorMyBalanceCard from './components/InstructorMyBalanceCard';
 import InstructorMyTransfersTable from './components/InstructorMyTransfersTable';
+import InstructorMyEarningsTable from './components/InstructorMyEarningsTable';
 import EditBankDetailsDialog from './components/EditBankDetailsDialog';
+
+type WalletLogTab = 'transfers' | 'earnings';
 
 const DEFAULT_EMPTY_INSTRUCTOR: InstructorWalletDetailsResponse = {
   instructorId: '',
@@ -50,11 +57,13 @@ const DEFAULT_EMPTY_INSTRUCTOR: InstructorWalletDetailsResponse = {
 
 export default function InstructorWalletView() {
   const t = useTranslations('InstructorWallet');
-  const toast = useToast();
   const searchParams = useSearchParams();
+  const { set: setQueries } = useQuery(['page', 'limit', 'tab'], { replace: true });
 
   const page = Number(searchParams.get('page') || 1);
   const limit = Number(searchParams.get('limit') || 10);
+  const activeTab: WalletLogTab =
+    searchParams.get('tab') === 'earnings' ? 'earnings' : 'transfers';
 
   // Wallet details state
   const [loading, setLoading] = useState(true);
@@ -65,6 +74,11 @@ export default function InstructorWalletView() {
   const [transfers, setTransfers] = useState<InstructorTransferItem[]>([]);
   const [totalTransfersCount, setTotalTransfersCount] = useState<number>(0);
   const [transfersLoading, setTransfersLoading] = useState<boolean>(true);
+
+  // Earnings log state
+  const [earnings, setEarnings] = useState<InstructorEarningItem[]>([]);
+  const [totalEarningsCount, setTotalEarningsCount] = useState<number>(0);
+  const [earningsLoading, setEarningsLoading] = useState<boolean>(true);
 
   // Dialog State
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -109,15 +123,73 @@ export default function InstructorWalletView() {
     }
   }, [page, limit]);
 
+  // 3. Fetch Earnings / Profit Log
+  const fetchEarnings = useCallback(async () => {
+    setEarningsLoading(true);
+    try {
+      const res = await getInstructorMyEarnings({
+        SkipCount: (page - 1) * limit,
+        MaxResultCount: limit,
+      });
+
+      if (res.success && res.data) {
+        setEarnings(res.data.items?.items || []);
+        setTotalEarningsCount(res.data.items?.totalCount || 0);
+      }
+    } catch {
+      // Keep existing list on error
+    } finally {
+      setEarningsLoading(false);
+    }
+  }, [page, limit]);
+
   useEffect(() => {
     fetchWallet();
   }, [fetchWallet]);
 
   useEffect(() => {
-    fetchTransfers();
-  }, [fetchTransfers]);
+    if (activeTab === 'transfers') {
+      fetchTransfers();
+    }
+  }, [activeTab, fetchTransfers]);
 
-  // When bank details are updated successfully
+  useEffect(() => {
+    if (activeTab === 'earnings') {
+      fetchEarnings();
+    }
+  }, [activeTab, fetchEarnings]);
+
+  // Prefetch the other tab's count once (for badge) on first load
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (activeTab === 'transfers') {
+          const res = await getInstructorMyEarnings({ SkipCount: 0, MaxResultCount: 1 });
+          if (!cancelled && res.success && res.data) {
+            setTotalEarningsCount(res.data.items?.totalCount || 0);
+          }
+        } else {
+          const res = await getInstructorMyTransfers({ SkipCount: 0, MaxResultCount: 1 });
+          if (!cancelled && res.success && res.data) {
+            setTotalTransfersCount(res.data.totalCount || 0);
+          }
+        }
+      } catch {
+        // ignore count prefetch errors
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Only once on mount for the inactive tab badge
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTabChange = (_: React.SyntheticEvent, value: WalletLogTab) => {
+    setQueries({ tab: value, page: '1' }, { replace: true });
+  };
+
   const handleBankDetailsUpdated = () => {
     fetchWallet();
   };
@@ -141,7 +213,6 @@ export default function InstructorWalletView() {
           {t('title')}
         </Typography>
 
-        {/* Info Banner */}
         <Alert
           severity="info"
           icon={<Iconify icon="solar:info-circle-bold" width={22} />}
@@ -160,7 +231,6 @@ export default function InstructorWalletView() {
         </Alert>
       </Box>
 
-      {/* Error Alert (if any error occurred during fetch) */}
       {error && !loading && (
         <Alert
           severity="error"
@@ -180,16 +250,11 @@ export default function InstructorWalletView() {
         </Alert>
       )}
 
-      {/* 2. Top Summary Grid: Bank Info Card (8 cols) & Balance Card (4 cols) */}
+      {/* 2. Top Summary Grid */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        {/* Right (in RTL): Bank Details Card */}
         <Grid size={{ xs: 12, md: 8 }}>
           {loading ? (
-            <Skeleton
-              variant="rectangular"
-              height={240}
-              sx={{ borderRadius: 3 }}
-            />
+            <Skeleton variant="rectangular" height={240} sx={{ borderRadius: 3 }} />
           ) : (
             <InstructorMyBankCard
               instructor={displayInstructor}
@@ -198,30 +263,76 @@ export default function InstructorWalletView() {
           )}
         </Grid>
 
-        {/* Left (in RTL): Current Balance Card */}
         <Grid size={{ xs: 12, md: 4 }}>
           {loading ? (
-            <Skeleton
-              variant="rectangular"
-              height={240}
-              sx={{ borderRadius: 3 }}
-            />
+            <Skeleton variant="rectangular" height={240} sx={{ borderRadius: 3 }} />
           ) : (
             <InstructorMyBalanceCard instructor={displayInstructor} />
           )}
         </Grid>
       </Grid>
 
-      {/* 3. Bottom Table: Completed Transfers Log */}
-      <Box>
-        <InstructorMyTransfersTable
-          transactions={transfers}
-          totalCount={totalTransfersCount}
-          loading={transfersLoading}
-        />
-      </Box>
+      {/* 3. Logs: Transfers + Earnings tabs */}
+      <Card
+        sx={{
+          borderRadius: 3,
+          bgcolor: '#FFFFFF',
+          border: '1px solid #F1F5F9',
+          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
+          overflow: 'hidden',
+        }}
+      >
+        <Box sx={{ px: 2, borderBottom: '1px solid #F1F5F9' }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            sx={{
+              minHeight: 52,
+              '& .MuiTabs-indicator': {
+                height: 2.5,
+                bgcolor: '#0F172A',
+                borderRadius: 1,
+              },
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: 14.5,
+                color: '#94A3B8',
+                minHeight: 52,
+                px: 1.5,
+                '&.Mui-selected': { color: '#0F172A' },
+              },
+            }}
+          >
+            <Tab
+              value="transfers"
+              label={`${t('tabs.transfers')} (${totalTransfersCount})`}
+            />
+            <Tab
+              value="earnings"
+              label={`${t('tabs.earnings')} (${totalEarningsCount})`}
+            />
+          </Tabs>
+        </Box>
 
-      {/* 4. Edit Bank Details Dialog */}
+        <Box>
+          {activeTab === 'transfers' ? (
+            <InstructorMyTransfersTable
+              transactions={transfers}
+              totalCount={totalTransfersCount}
+              loading={transfersLoading}
+              embedded
+            />
+          ) : (
+            <InstructorMyEarningsTable
+              items={earnings}
+              totalCount={totalEarningsCount}
+              loading={earningsLoading}
+            />
+          )}
+        </Box>
+      </Card>
+
       <EditBankDetailsDialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}

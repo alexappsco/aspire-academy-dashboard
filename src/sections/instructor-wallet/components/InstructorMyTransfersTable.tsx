@@ -28,12 +28,15 @@ interface Props {
   transactions: InstructorTransferItem[];
   totalCount: number;
   loading?: boolean;
+  /** When true, render table only (parent provides Card + tabs header). */
+  embedded?: boolean;
 }
 
 export default function InstructorMyTransfersTable({
   transactions,
   totalCount,
   loading = false,
+  embedded = false,
 }: Props) {
   const t = useTranslations('InstructorWallet.transactions');
   const locale = useLocale();
@@ -164,52 +167,57 @@ export default function InstructorMyTransfersTable({
     ),
   };
 
+  const tableContent = (
+    <Box sx={{ px: embedded ? 0 : 1, position: 'relative' }}>
+      {loading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 2,
+            display: 'grid',
+            placeItems: 'center',
+            bgcolor: 'rgba(255,255,255,0.72)',
+          }}
+        >
+          <CircularProgress size={32} />
+        </Box>
+      )}
+
+      <SharedTable<FormattedTransferRow>
+        data={transactions}
+        tableHead={tableHead}
+        customRender={customRender}
+        count={totalCount}
+        serverPagination
+      />
+    </Box>
+  );
+
   return (
     <>
-      <Card
-        sx={{
-          borderRadius: 3,
-          bgcolor: '#FFFFFF',
-          border: '1px solid #F1F5F9',
-          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Title Bar */}
-        <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
-          <Typography
-            sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'start' }}
-          >
-            {t('title')}
-          </Typography>
-        </Box>
-
-        {/* SharedTable Component */}
-        <Box sx={{ px: 1, position: 'relative' }}>
-          {loading && (
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                zIndex: 2,
-                display: 'grid',
-                placeItems: 'center',
-                bgcolor: 'rgba(255,255,255,0.72)',
-              }}
+      {embedded ? (
+        tableContent
+      ) : (
+        <Card
+          sx={{
+            borderRadius: 3,
+            bgcolor: '#FFFFFF',
+            border: '1px solid #F1F5F9',
+            boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
+            overflow: 'hidden',
+          }}
+        >
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #F1F5F9' }}>
+            <Typography
+              sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', textAlign: 'start' }}
             >
-              <CircularProgress size={32} />
-            </Box>
-          )}
-
-          <SharedTable<FormattedTransferRow>
-            data={transactions}
-            tableHead={tableHead}
-            customRender={customRender}
-            count={totalCount}
-            serverPagination
-          />
-        </Box>
-      </Card>
+              {t('title')}
+            </Typography>
+          </Box>
+          {tableContent}
+        </Card>
+      )}
 
       {/* Receipt Modal Preview */}
       <Dialog

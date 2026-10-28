@@ -30,4 +30,45 @@ export interface UpdateInstructorBankDetailsDto {
   bankAccountHolderName: string;
 }
 
+/** Backend SessionTypeEnum: Live = 1, Recorded = 2 (may also arrive as string names). */
+export type InstructorEarningServiceType = 1 | 2 | 'Live' | 'Recorded' | number | string;
+export type InstructorEarningPartyType = 'Individual' | 'Group' | string;
+
+export interface InstructorEarningStudentBreakdown {
+  studentId: string;
+  studentName: string;
+  hoursConsumed: number;
+  pricePerHour: number;
+  totalValue: number;
+  instructorPercentage: number;
+  instructorAmount: number;
+}
+
+export interface InstructorEarningItem {
+  sessionRequestId: string;
+  requestNumber: string;
+  type: InstructorEarningServiceType;
+  partyType: InstructorEarningPartyType;
+  studentName: string;
+  hoursConsumed: number;
+  pricePerHour: number;
+  totalValue: number;
+  instructorPercentage: number;
+  instructorAmount: number;
+  currencyId: string;
+  currencyCode: string;
+  currencySymbol: string;
+  studentBreakdown?: InstructorEarningStudentBreakdown[] | null;
+  creationTime: string;
+}
+
+export interface InstructorEarningsListResponse {
+  items: {
+    items: InstructorEarningItem[];
+    totalCount: number;
+  };
+  totalConsumedValue: number;
+  totalInstructorAmount: number;
+}
+
 export type { InstructorTransferItem, InstructorTransfersListResponse };

@@ -9,5 +9,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
+  // Exclude SignalR hubs so /hubs/* is not rewritten to /ar/hubs/* (breaks negotiate → 404 HTML).
+  matcher: ['/((?!api|hubs|_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };
