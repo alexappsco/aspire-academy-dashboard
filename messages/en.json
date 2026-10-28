@@ -3047,7 +3047,8 @@
         "iban": "IBAN Number",
         "last_bank_update": "Last Bank Data Update",
         "phone": "Phone Number",
-        "email": "Email"
+        "email": "Email",
+        "additional_data": "Additional Data"
       },
       "balance_card": {
         "title": "Balance Summary",
@@ -3056,6 +3057,10 @@
         "total_earnings": "Total Earnings",
         "transferred": "Transferred",
         "under_review": "Under Review"
+      },
+      "tabs": {
+        "transfers": "Financial Transaction Log",
+        "earnings": "Profit Record"
       },
       "transactions": {
         "title": "Financial Transactions Log",
@@ -3136,6 +3141,10 @@
       "total_earnings": "Total Earnings",
       "transferred": "Transferred"
     },
+    "tabs": {
+      "transfers": "Financial Transaction Log",
+      "earnings": "Profit Record"
+    },
     "transactions": {
       "title": "Financial Transaction Log (Completed Transfers)",
       "col_transfer_number": "Transfer Number",
@@ -3149,6 +3158,27 @@
       "status_completed": "Completed",
       "no_transactions": "No completed transfers found yet",
       "rows_per_page": "Transactions per page:"
+    },
+    "earnings": {
+      "col_date": "Date",
+      "col_request_student": "Request & Student",
+      "col_service": "Service",
+      "col_hours": "Consumed Hours",
+      "col_price_per_hour": "Hourly Rate",
+      "col_total_value": "Consumption Value",
+      "col_instructor_pct": "Instructor Share",
+      "col_instructor_profit": "Instructor Profit",
+      "col_student_name": "Student Name",
+      "col_breakdown_total": "Total Value",
+      "col_breakdown_profit": "Instructor Profit ({pct}%)",
+      "party_individual": "Individual · {name}",
+      "party_group": "Group · {count} students",
+      "type_live": "Live",
+      "type_recorded": "Recorded",
+      "hours": "{count, plural, one {# hour} other {# hours}}",
+      "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
+      "breakdown_title": "Student consumption details for group request ({requestNumber})",
+      "no_earnings": "No profit records found yet"
     },
     "edit_dialog": {
       "title": "Edit Bank Details",
