@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
         source: '/hubs/:path*',
         destination: `${apiOrigin}/hubs/:path*`,
       },
+      // Safety net if a locale-prefixed hub request still slips through.
+      {
+        source: '/:locale(en|ar)/hubs/:path*',
+        destination: `${apiOrigin}/hubs/:path*`,
+      },
     ];
   },
 };

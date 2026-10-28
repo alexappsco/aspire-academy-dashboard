@@ -95,6 +95,13 @@ export interface GetInstructorDuesParams {
   MaxResultCount?: number;
 }
 
+export interface InstructorDueCustomField {
+  id: string;
+  sortOrder: number;
+  key: string;
+  value: string;
+}
+
 export interface InstructorDueDetailsResponse {
   instructorId: string;
   instructorName: string;
@@ -115,6 +122,7 @@ export interface InstructorDueDetailsResponse {
   instructorEmail: string;
   hasCompleteBankDetails: boolean;
   lastUpdated?: string | null;
+  customFields?: InstructorDueCustomField[] | null;
 }
 
 export interface InstructorTransferItem {

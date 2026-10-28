@@ -3055,7 +3055,8 @@
         "iban": "رقم الآيبان (IBAN)",
         "last_bank_update": "آخر تحديث للبيانات البنكية",
         "phone": "رقم الهاتف",
-        "email": "البريد الإلكتروني"
+        "email": "البريد الإلكتروني",
+        "additional_data": "بيانات إضافية"
       },
       "balance_card": {
         "title": "ملخص الرصيد",
@@ -3064,6 +3065,10 @@
         "total_earnings": "إجمالي الأرباح",
         "transferred": "تم تحويله",
         "under_review": "قيد المراجعة"
+      },
+      "tabs": {
+        "transfers": "سجل الحركات المالية",
+        "earnings": "سجل الأرباح"
       },
       "transactions": {
         "title": "سجل الحركات المالية",
@@ -3144,6 +3149,10 @@
       "total_earnings": "إجمالي الأرباح",
       "transferred": "تم تحويله"
     },
+    "tabs": {
+      "transfers": "سجل الحركات المالية",
+      "earnings": "سجل الأرباح"
+    },
     "transactions": {
       "title": "سجل الحركات المالية (التحويلات المكتملة)",
       "col_transfer_number": "رقم التحويل",
@@ -3157,6 +3166,27 @@
       "status_completed": "مكتمل",
       "no_transactions": "لا توجد تحويلات مالية مكتملة حتى الآن",
       "rows_per_page": "عدد الحركات لكل صفحة:"
+    },
+    "earnings": {
+      "col_date": "التاريخ",
+      "col_request_student": "الطلب والطالب",
+      "col_service": "الخدمة",
+      "col_hours": "الساعات المستهلكة",
+      "col_price_per_hour": "سعر الساعة",
+      "col_total_value": "قيمة الاستهلاك",
+      "col_instructor_pct": "نسبة المحاضر",
+      "col_instructor_profit": "ربح المحاضر",
+      "col_student_name": "اسم الطالب",
+      "col_breakdown_total": "القيمة الإجمالية",
+      "col_breakdown_profit": "ربح المحاضر ({pct}%)",
+      "party_individual": "فردي · {name}",
+      "party_group": "جماعي · {count} طلاب",
+      "type_live": "لايف",
+      "type_recorded": "مسجل",
+      "hours": "{count, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
+      "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
+      "breakdown_title": "تفاصيل استهلاك الطلاب للطلب الجماعي ({requestNumber})",
+      "no_earnings": "لا توجد سجلات أرباح حتى الآن"
     },
     "edit_dialog": {
       "title": "تعديل البيانات البنكية",

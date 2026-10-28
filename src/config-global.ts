@@ -7,13 +7,22 @@ export const ASSETS_API = process.env.NEXT_PUBLIC_ASSETS_API;
 
 /**
  * SignalR hub for session/private requests.
- * Default is same-origin `/hubs/session-requests` (proxied by next.config rewrites)
- * so the browser avoids CORS blocks against the API host.
- * Override only if you intentionally point at the API (requires backend CORS).
+ * Default: direct API origin (same as Postman WSS) — WebSockets work reliably there.
+ * Same-origin `/hubs/...` Next rewrite breaks LongPolling affinity ("No Connection with that ID").
+ * Set NEXT_PUBLIC_SESSION_REQUESTS_HUB_URL to override (relative or absolute).
  */
-export const SESSION_REQUESTS_HUB_URL =
-  process.env.NEXT_PUBLIC_SESSION_REQUESTS_HUB_URL?.trim() ||
-  '/hubs/session-requests';
+function resolveSessionRequestsHubUrl(): string {
+  const override = process.env.NEXT_PUBLIC_SESSION_REQUESTS_HUB_URL?.trim();
+  if (override) return override;
+
+  try {
+    return `${new URL(HOST_API).origin}/hubs/session-requests`;
+  } catch {
+    return '/hubs/session-requests';
+  }
+}
+
+export const SESSION_REQUESTS_HUB_URL = resolveSessionRequestsHubUrl();
 
 // ROOT PATH AFTER LOGIN SUCCESSFUL
 export const PATH_AFTER_LOGIN = paths.home; // as '/dashboar

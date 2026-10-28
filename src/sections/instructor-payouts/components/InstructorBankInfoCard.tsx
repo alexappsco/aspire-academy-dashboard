@@ -53,6 +53,10 @@ export default function InstructorBankInfoCard({
       })()
     : '—';
 
+  const customFields = [...(instructor.customFields || [])].sort(
+    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+  );
+
   return (
     <Card
       sx={{
@@ -247,6 +251,48 @@ export default function InstructorBankInfoCard({
           </Typography>
         </Grid>
       </Grid>
+
+      {/* Additional custom fields from backend (key / value only) */}
+      {customFields.length > 0 && (
+        <Box sx={{ mt: 2.5 }}>
+          <Divider sx={{ mb: 2, borderColor: '#F1F5F9' }} />
+
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', gap: 1, mb: 1.75, textAlign: 'start' }}
+          >
+            <Iconify icon="solar:user-id-bold" width={18} sx={{ color: '#64748B' }} />
+            <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A' }}>
+              {t('additional_data')}
+            </Typography>
+          </Stack>
+
+          <Grid container spacing={2.5} sx={{ textAlign: 'start' }}>
+            {customFields.map((field) => (
+              <Grid key={field.id} size={{ xs: 12, sm: 4 }}>
+                <Typography
+                  sx={{ fontSize: 11.5, color: '#94A3B8', fontWeight: 600, mb: 0.5 }}
+                >
+                  {field.key || '—'}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    color: '#0F172A',
+                    direction: 'ltr',
+                    display: 'inline-block',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {field.value || '—'}
+                </Typography>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
     </Card>
   );
 }
