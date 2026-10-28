@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -278,14 +278,13 @@ export default function ContactUsView() {
 
   return (
     <Box sx={{ py: 3, maxWidth: 1100, mx: 'auto' }}>
-      {/* 1. Top Header: Title + Save Changes Button */}
+      {/* 1. Top Header: Title on Right + Save Changes Button on Left in RTL */}
       <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={2}
+        direction="row"
         sx={{
           mb: 3,
           justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
+          alignItems: 'center',
         }}
       >
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#1C252E' }}>
@@ -312,6 +311,11 @@ export default function ContactUsView() {
             fontWeight: 700,
             fontSize: '0.875rem',
             boxShadow: 'none',
+            gap: 1.25,
+            '& .MuiButton-startIcon': {
+              mx: 0,
+              ...(isRtl ? { ml: 1.25 } : { mr: 1.25 }),
+            },
             '&:hover': { bgcolor: '#2C353E' },
             '&.Mui-disabled': {
               bgcolor: '#94A3B8',
@@ -334,7 +338,7 @@ export default function ContactUsView() {
           minHeight: 400,
         }}
       >
-        {/* Card Header: "وسائل التواصل المضافة" on Right + "+" Button on Left */}
+        {/* Card Header: "وسائل التواصل المضافة" on Right + "+" Button on Left in RTL */}
         <Box
           sx={{
             display: 'flex',
@@ -343,7 +347,19 @@ export default function ContactUsView() {
             mb: 3.5,
           }}
         >
-          {/* Big Plus Button */}
+          {/* Section Heading (Right in RTL) */}
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: '#2D5A43',
+              fontSize: '1.1rem',
+            }}
+          >
+            {t('added_channels')}
+          </Typography>
+
+          {/* Big Plus Button (Left in RTL) */}
           <IconButton
             onClick={handleOpenAddPopover}
             sx={{
@@ -362,18 +378,6 @@ export default function ContactUsView() {
           >
             <Iconify icon="mingcute:add-line" width={26} />
           </IconButton>
-
-          {/* Section Heading */}
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              color: '#2D5A43',
-              fontSize: '1.1rem',
-            }}
-          >
-            {t('added_channels')}
-          </Typography>
         </Box>
 
         {/* Loading Spinner */}
@@ -424,28 +428,27 @@ export default function ContactUsView() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    direction: isRtl ? 'rtl' : 'ltr',
                   }}
                 >
-                  {/* Delete Button (Left side in RTL) */}
-                  <Tooltip title={t('delete_channel')}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteRow(item.localId)}
-                      sx={{
-                        color: '#94A3B8',
-                        transition: 'all 0.2s',
-                        '&:hover': {
-                          color: '#E53935',
-                          bgcolor: '#FEE2E2',
-                        },
-                      }}
-                    >
-                      <Iconify icon="solar:trash-bin-trash-bold" width={20} />
-                    </IconButton>
-                  </Tooltip>
+                  {/* Circular Icon Badge (Right side in RTL) */}
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      background: platform.circleBg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: platform.iconColor,
+                      flexShrink: 0,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <Iconify icon={platform.iconify} width={22} />
+                  </Box>
 
-                  {/* Input Pill Container */}
+                  {/* Input Pill Container (Middle) */}
                   <Box
                     sx={{
                       flex: 1,
@@ -482,23 +485,23 @@ export default function ContactUsView() {
                     />
                   </Box>
 
-                  {/* Circular Icon Badge (Right side in RTL) */}
-                  <Box
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: '50%',
-                      background: platform.circleBg,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: platform.iconColor,
-                      flexShrink: 0,
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-                    }}
-                  >
-                    <Iconify icon={platform.iconify} width={22} />
-                  </Box>
+                  {/* Delete Button (Left side in RTL) */}
+                  <Tooltip title={t('delete_channel')}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteRow(item.localId)}
+                      sx={{
+                        color: '#94A3B8',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          color: '#E53935',
+                          bgcolor: '#FEE2E2',
+                        },
+                      }}
+                    >
+                      <Iconify icon="solar:trash-bin-trash-bold" width={20} />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               );
             })}
@@ -513,11 +516,11 @@ export default function ContactUsView() {
         onClose={handleCloseAddPopover}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: isRtl ? 'right' : 'left',
+          horizontal: isRtl ? 'left' : 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: isRtl ? 'right' : 'left',
+          horizontal: isRtl ? 'left' : 'right',
         }}
         slotProps={{
           paper: {
