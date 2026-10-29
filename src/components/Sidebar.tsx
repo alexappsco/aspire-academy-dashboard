@@ -40,6 +40,12 @@ const sidebarItems: SidebarItem[] = [
     icon: "/icons/main.svg",
     path: "/",
   },
+  // الملف الشخصي (للمحاضر)
+  // {
+  //   key: "profile",
+  //   icon: "/icons/profile.svg",
+  //   path: "/profile",
+  // },
   // 2. إدارة الدورات التدريبية
   {
     key: "course_management",
@@ -244,6 +250,8 @@ const ADMIN_HIDDEN_KEYS = new Set([
   "private_requests",
   "instructor_wallet",
   "instructor_custom_fields",
+  "instructor_subjects",
+  // "profile",
 ]);
 
 function filterItemsForRole(items: SidebarItem[], hiddenKeys: Set<string>): SidebarItem[] {

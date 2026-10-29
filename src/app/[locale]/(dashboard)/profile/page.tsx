@@ -1,5 +1,5 @@
-import EmptyPage from "@/components/EmptyPage";
+import InstructorProfileView from 'src/sections/profile/view';
 
 export default function ProfilePage() {
-  return <EmptyPage tKey="profile" />;
+  return <InstructorProfileView />;
 }
