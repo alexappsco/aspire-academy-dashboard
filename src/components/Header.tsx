@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "src/i18n/routing";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import PersonIcon from "@mui/icons-material/Person";
@@ -33,7 +33,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
-  const { isAuthenticated, logout } = useAuth();
+  const tSidebar = useTranslations("Sidebar");
+  const { isAuthenticated, isInstructor, logout } = useAuth();
   const { unregisterDevice } = useNotifications();
   const currentLocaleSetting = localesSettings[locale as LocaleType];
 
@@ -59,6 +60,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const handleLogin = () => {
     handleAvatarClose();
     router.push("/auth/login");
+  };
+
+  const handleProfile = () => {
+    handleAvatarClose();
+    router.push("/profile");
   };
 
   const handleLogout = async () => {
@@ -200,6 +206,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
           },
         }}
       >
+        {isAuthenticated && isInstructor && (
+          <MenuItem onClick={handleProfile}>
+            <ListItemIcon sx={{ minWidth: 36 }}>
+              <Iconify icon="solar:user-circle-outline" width={20} />
+            </ListItemIcon>
+            <ListItemText>{tSidebar("profile")}</ListItemText>
+          </MenuItem>
+        )}
         <MenuItem onClick={isAuthenticated ? () => void handleLogout() : handleLogin}>
           <ListItemIcon sx={{ minWidth: 36 }}>
             <Iconify
@@ -207,7 +221,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
               width={20}
             />
           </ListItemIcon>
-          <ListItemText>{isAuthenticated ? "تسجيل خروج" : "تسجيل الدخول"}</ListItemText>
+          <ListItemText>{isAuthenticated ? tSidebar("logout") : "تسجيل الدخول"}</ListItemText>
         </MenuItem>
       </Menu>
     </AppBar>

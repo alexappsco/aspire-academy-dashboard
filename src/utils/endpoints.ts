@@ -265,4 +265,23 @@ export const endpoints = {
     update: (id: string) => `/admin/socials/${id}`,
     delete: (id: string) => `/admin/socials/${id}`,
   },
-};
+  profile:{
+    get: '/instructor/profile',
+    update: '/instructor/profile',
+  },
+  studyMaterialsInstructor: {
+    list: '/instructor/study-materials',
+    put: '/instructor/study-materials',
+    faculties: '/instructor/study-materials/faculties',
+    academicYears: (facultyId: string) =>
+      `/instructor/study-materials/faculties/${facultyId}/academic-years`,
+    semester: (academicYearId: string) =>
+      `/instructor/study-materials/academic-years/${academicYearId}/semesters`,
+    available: (semesterId: string) =>
+      `/instructor/study-materials/semesters/${semesterId}/available`,
+    specializations: '/instructor/lookups/specializations',
+    countries: '/instructor/lookups/countries',
+    universities: '/instructor/lookups/universities',
+  },
+
+};  

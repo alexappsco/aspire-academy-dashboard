@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert, { AlertColor } from '@mui/material/Alert';
 import Slide, { SlideProps } from '@mui/material/Slide';
@@ -43,6 +43,11 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const info = useCallback((msg: string) => toast(msg, 'info'), [toast]);
   const warning = useCallback((msg: string) => toast(msg, 'warning'), [toast]);
 
+  const toastApi = useMemo(
+    () => ({ toast, error, success, info, warning }),
+    [toast, error, success, info, warning]
+  );
+
   const handleClose = (event: React.SyntheticEvent | Event | null, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -60,7 +65,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const colors = colorMap[severity];
 
   return (
-    <ToastContext.Provider value={{ toast, error, success, info, warning }}>
+    <ToastContext.Provider value={toastApi}>
       {children}
       <Snackbar
         open={open}
