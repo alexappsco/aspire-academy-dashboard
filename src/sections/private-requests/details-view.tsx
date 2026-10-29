@@ -522,6 +522,12 @@ export default function PrivateRequestDetailsView({ requestId }: Props) {
                     : null
                 );
               }}
+              onCurriculumSaved={async () => {
+                await fetchRequestDetails({ silent: true });
+                setTimeout(() => {
+                  window.location.reload();
+                }, 700);
+              }}
             />
           )}
 

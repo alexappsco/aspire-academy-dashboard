@@ -15,7 +15,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useTranslations } from 'next-intl';
+import { useTheme } from '@mui/material/styles';
+import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -36,6 +37,7 @@ interface Props {
   requestId: string;
   initialChapters?: SessionChapterResult[] | null;
   onChaptersUpdated?: (updatedChapters: SessionChapterResult[]) => void;
+  onCurriculumSaved?: () => void;
 }
 
 const ARABIC_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
@@ -309,9 +311,13 @@ export default function RecordedCurriculumSection({
   requestId,
   initialChapters,
   onChaptersUpdated,
+  onCurriculumSaved,
 }: Props) {
   const toast = useToast();
   const t = useTranslations('PrivateRequests');
+  const locale = useLocale();
+  const theme = useTheme();
+  const isRtl = theme.direction === 'rtl' || locale === 'ar';
 
   // State strictly initialized with backend data - ZERO fake data
   const [richChapters, setRichChapters] = useState<CurriculumChapter[]>(() =>
@@ -1025,24 +1031,35 @@ export default function RecordedCurriculumSection({
               variant="contained"
               onClick={handleAddChapter}
               disabled={!newChapterTitle.trim()}
+              startIcon={<Iconify icon="mingcute:add-line" width={20} />}
               sx={{
                 bgcolor: '#1C252E',
                 color: '#FFFFFF',
                 borderRadius: 1.5,
-                px: 3,
+                px: 2.5,
                 py: 1,
                 fontWeight: 700,
                 fontSize: 14,
                 whiteSpace: 'nowrap',
                 boxShadow: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.2,
+                gap: 1.25,
+                '& .MuiButton-startIcon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '10px !important',
+                  '& svg': {
+                    width: 20,
+                    height: 20,
+                  },
+                },
                 '&:hover': { bgcolor: '#2C353E' },
+                '&.Mui-disabled': {
+                  bgcolor: '#919EAB',
+                  color: '#FFFFFF',
+                  opacity: 0.8,
+                },
               }}
             >
-              <Iconify icon="mingcute:add-line" width={18} />
-              <span>{t('details.recorded_curriculum.add_chapter_btn')}</span>
+              {t('details.recorded_curriculum.add_chapter_btn')}
             </Button>
           </Stack>
         </Box>
@@ -1206,24 +1223,35 @@ export default function RecordedCurriculumSection({
                     variant="contained"
                     onClick={() => handleAddLesson(chapter.id)}
                     disabled={!lessonTitles[chapter.id]?.trim()}
+                    startIcon={<Iconify icon="mingcute:add-line" width={20} />}
                     sx={{
                       bgcolor: '#1C252E',
                       color: '#FFFFFF',
                       borderRadius: 1.5,
-                      px: 3,
+                      px: 2.5,
                       py: 1,
                       fontWeight: 700,
                       fontSize: 14,
                       whiteSpace: 'nowrap',
                       boxShadow: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.2,
+                      gap: 1.25,
+                      '& .MuiButton-startIcon': {
+                        margin: '0 !important',
+                        marginInlineEnd: '10px !important',
+                        '& svg': {
+                          width: 20,
+                          height: 20,
+                        },
+                      },
                       '&:hover': { bgcolor: '#2C353E' },
+                      '&.Mui-disabled': {
+                        bgcolor: '#919EAB',
+                        color: '#FFFFFF',
+                        opacity: 0.8,
+                      },
                     }}
                   >
-                    <Iconify icon="mingcute:add-line" width={18} />
-                    <span>{t('details.recorded_curriculum.add_lesson_btn')}</span>
+                    {t('details.recorded_curriculum.add_lesson_btn')}
                   </Button>
                 </Stack>
 
@@ -1826,6 +1854,15 @@ export default function RecordedCurriculumSection({
                 fontWeight: 700,
                 fontSize: 14,
                 boxShadow: 'none',
+                gap: 1.25,
+                '& .MuiButton-startIcon': {
+                  margin: '0 !important',
+                  marginInlineEnd: '10px !important',
+                  '& svg': {
+                    width: 20,
+                    height: 20,
+                  },
+                },
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
