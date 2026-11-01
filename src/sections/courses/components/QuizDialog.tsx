@@ -17,6 +17,7 @@ import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
+import { useLocale, useTranslations } from 'next-intl';
 
 export interface QuizOption {
   id: string;
@@ -48,6 +49,7 @@ interface QuizDialogProps {
 }
 
 const ARABIC_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
+const LATIN_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
 const EMPTY_QUIZ: QuizConfig = {
   title: '',
@@ -62,6 +64,9 @@ export default function QuizDialog({
   onSave,
 }: QuizDialogProps) {
   const toast = useToast();
+  const t = useTranslations('CreateCourse.quiz_dialog');
+  const locale = useLocale();
+  const letters = locale === 'ar' ? ARABIC_LETTERS : LATIN_LETTERS;
   const [quiz, setQuiz] = useState<QuizConfig>(
     initialQuiz && initialQuiz.questions.length ? initialQuiz : EMPTY_QUIZ
   );
@@ -128,11 +133,11 @@ export default function QuizDialog({
 
   const handleAddOption = () => {
     if (!currentQuestion) return;
-    if (currentQuestion.options.length >= ARABIC_LETTERS.length) {
-      toast.warning('تم الوصول إلى الحد الأقصى للخيارات');
+    if (currentQuestion.options.length >= letters.length) {
+      toast.warning(t('max_options_reached'));
       return;
     }
-    const nextLetter = ARABIC_LETTERS[currentQuestion.options.length];
+    const nextLetter = letters[currentQuestion.options.length];
     const newOption: QuizOption = {
       id: `opt-${Date.now()}`,
       letter: nextLetter,
@@ -151,14 +156,14 @@ export default function QuizDialog({
 
   const handleDeleteOption = (optIndex: number) => {
     if (currentQuestion.options.length <= 2) {
-      toast.warning('يجب أن يحتوي السؤال على خيارين على الأقل');
+      toast.warning(t('min_two_options_required'));
       return;
     }
     setQuiz((prev) => {
       const updatedQuestions = [...prev.questions];
       const filteredOptions = updatedQuestions[activeQuestionIndex].options
         .filter((_, idx) => idx !== optIndex)
-        .map((opt, idx) => ({ ...opt, letter: ARABIC_LETTERS[idx] }));
+        .map((opt, idx) => ({ ...opt, letter: letters[idx] }));
 
       const hasCorrect = filteredOptions.some((o) => o.isCorrect);
       if (!hasCorrect && filteredOptions.length > 0) {
@@ -181,10 +186,10 @@ export default function QuizDialog({
       title: '',
       points: 10,
       options: [
-        { id: `opt-${Date.now()}-1`, letter: 'أ', text: '', isCorrect: true },
-        { id: `opt-${Date.now()}-2`, letter: 'ب', text: '', isCorrect: false },
-        { id: `opt-${Date.now()}-3`, letter: 'ج', text: '', isCorrect: false },
-        { id: `opt-${Date.now()}-4`, letter: 'د', text: '', isCorrect: false },
+        { id: `opt-${Date.now()}-1`, letter: letters[0], text: '', isCorrect: true },
+        { id: `opt-${Date.now()}-2`, letter: letters[1], text: '', isCorrect: false },
+        { id: `opt-${Date.now()}-3`, letter: letters[2], text: '', isCorrect: false },
+        { id: `opt-${Date.now()}-4`, letter: letters[3], text: '', isCorrect: false },
       ],
       explanation: '',
     };
@@ -196,13 +201,13 @@ export default function QuizDialog({
   };
 
   const handleSaveAndAddAnother = () => {
-    toast.success('تم حفظ السؤال الحالي');
+    toast.success(t('question_saved'));
     handleAddNewQuestion();
   };
 
   const handleSaveAll = () => {
     if (onSave) onSave(quiz);
-    toast.success('تم حفظ الاختبار والعودة للكورس بنجاح');
+    toast.success(t('quiz_saved'));
     onClose();
   };
 
@@ -249,10 +254,10 @@ export default function QuizDialog({
             <Box>
               <Stack direction="row" spacing={1.2} sx={{ alignItems: 'center', mb: 0.3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', fontSize: 17 }}>
-                  إعداد واختبار الفصل — بنك الأسئلة
+                  {t('header_subtitle')}
                 </Typography>
                 <Chip
-                  label="اختبار تقييمي"
+                  label={t('badge_assessment')}
                   size="small"
                   sx={{
                     bgcolor: '#ECFDF5',
@@ -311,14 +316,14 @@ export default function QuizDialog({
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                 <Iconify icon="solar:tuning-square-bold" width={18} sx={{ color: '#64748B' }} />
                 <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>
-                  إعدادات الاختبار العامة
+                  {t('general_settings')}
                 </Typography>
               </Stack>
 
               <Button
                 size="small"
                 variant="text"
-                onClick={() => toast.success('تم تطبيق الإعدادات على جميع الطلاب')}
+                onClick={() => toast.success(t('applied_to_all_students'))}
                 sx={{
                   bgcolor: '#EFF6FF',
                   color: '#0284C7',
@@ -330,14 +335,14 @@ export default function QuizDialog({
                   '&:hover': { bgcolor: '#DBEAFE' },
                 }}
               >
-                تطبيق على جميع الطلاب
+                {t('apply_to_all_students')}
               </Button>
             </Stack>
 
             {/* Quiz Title */}
             <Box>
               <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#1E293B', mb: 0.6 }}>
-                عنوان الاختبار*
+                {t('quiz_title_label')}
               </Typography>
               <TextField
                 fullWidth
@@ -366,10 +371,13 @@ export default function QuizDialog({
               <Stack direction="row" spacing={1.2} sx={{ alignItems: 'center' }}>
                 <Iconify icon="solar:list-bold" width={20} sx={{ color: '#64748B' }} />
                 <Typography sx={{ fontSize: 15, fontWeight: 800, color: '#1E293B' }}>
-                  الأسئلة والخيارات
+                  {t('questions_and_options')}
                 </Typography>
                 <Chip
-                  label={`${quiz.questions.length} أسئلة مضافة (الإجمالي: ${totalPoints} درجة)`}
+                  label={t('questions_added_badge', {
+                    count: quiz.questions.length,
+                    points: totalPoints,
+                  })}
                   size="small"
                   sx={{
                     bgcolor: '#F1F5F9',
@@ -401,7 +409,7 @@ export default function QuizDialog({
                 }}
               >
                 <Iconify icon="solar:add-circle-bold" width={16} />
-                <span>+ إضافة سؤال جديد</span>
+                <span>{t('add_new_question')}</span>
               </Button>
             </Stack>
 
@@ -417,7 +425,7 @@ export default function QuizDialog({
               }}
             >
               <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#64748B', whiteSpace: 'nowrap' }}>
-                تصفح الأسئلة:
+                {t('browse_questions')}
               </Typography>
 
               {quiz.questions.map((q, idx) => {
@@ -459,7 +467,7 @@ export default function QuizDialog({
                     ) : (
                       <Iconify icon="solar:check-circle-bold" width={14} sx={{ color: '#10B981' }} />
                     )}
-                    <span>السؤال {q.number}</span>
+                    <span>{t('question_number', { number: q.number })}</span>
                   </Button>
                 );
               })}
@@ -507,25 +515,25 @@ export default function QuizDialog({
                   </Box>
                   <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>
                     {currentQuestion.number === 1
-                      ? 'محرر السؤال الأول'
+                      ? t('editor_first')
                       : currentQuestion.number === 2
-                      ? 'محرر السؤال الثاني'
+                      ? t('editor_second')
                       : currentQuestion.number === 3
-                      ? 'محرر السؤال الثالث'
-                      : `محرر السؤال رقم ${currentQuestion.number}`}
+                      ? t('editor_third')
+                      : t('editor_number', { number: currentQuestion.number })}
                   </Typography>
                 </Box>
 
                 {/* Question Text */}
                 <Box sx={{ mb: 2.5 }}>
                   <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#1E293B', mb: 0.6 }}>
-                    نص السؤال*
+                    {t('question_text_label')}
                   </Typography>
                   <TextField
                     fullWidth
                     multiline
                     minRows={2}
-                    placeholder="اكتب نص السؤال هنا..."
+                    placeholder={t('question_text_placeholder')}
                     value={currentQuestion.title}
                     onChange={(e) => handleQuestionTextChange(e.target.value)}
                     sx={{
@@ -549,10 +557,10 @@ export default function QuizDialog({
                     }}
                   >
                     <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>
-                      الخيارات والإجابة الصحيحة
+                      {t('options_and_correct')}
                     </Typography>
                     <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                      اختر الدائرة لتحديد الإجابة المعتمدة
+                      {t('options_and_correct_hint')}
                     </Typography>
                   </Stack>
 
@@ -623,7 +631,7 @@ export default function QuizDialog({
                                 <TextField
                                   fullWidth
                                   size="small"
-                                  placeholder={`الخيار (${option.letter})`}
+                                  placeholder={t('option_placeholder', { letter: option.letter })}
                                   value={option.text}
                                   onChange={(e) => handleOptionTextChange(optIdx, e.target.value)}
                                   sx={{
@@ -646,7 +654,7 @@ export default function QuizDialog({
                               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexShrink: 0 }}>
                                 {isCorrect && (
                                   <Chip
-                                    label="✓ الإجابة الصحيحة"
+                                    label={t('correct_answer_label')}
                                     size="small"
                                     sx={{
                                       bgcolor: '#059669',
@@ -700,7 +708,7 @@ export default function QuizDialog({
                       }}
                     >
                       <Iconify icon="solar:add-circle-bold" width={15} sx={{ color: '#10B981' }} />
-                      <span>+ إضافة خيار إضافي</span>
+                      <span>{t('add_extra_option')}</span>
                     </Button>
                   </Box>
                 </Box>
@@ -722,7 +730,7 @@ export default function QuizDialog({
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.2 }}>
                 <Iconify icon="solar:document-text-bold" width={18} sx={{ color: '#1E293B' }} />
                 <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-                  تفسير الإجابة وملاحظات الدكتور التي تظهر للطالب
+                  {t('explanation_title')}
                 </Typography>
               </Stack>
 
@@ -730,7 +738,7 @@ export default function QuizDialog({
                 fullWidth
                 multiline
                 minRows={2.5}
-                placeholder="اكتب التفسير الطبي والملاحظات التوضيحية للطالب عند مراجعة إجاباته..."
+                placeholder={t('explanation_placeholder')}
                 value={currentQuestion.explanation}
                 onChange={(e) => handleExplanationChange(e.target.value)}
                 sx={{
@@ -778,7 +786,7 @@ export default function QuizDialog({
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
-              حفظ الاختبار والعودة للكورس
+              {t('save_quiz_and_back')}
             </Button>
 
             <Button
@@ -800,7 +808,7 @@ export default function QuizDialog({
                 '&:hover': { bgcolor: '#2C353E' },
               }}
             >
-              حفظ وإضافة سؤال آخر
+              {t('save_and_add_question')}
             </Button>
           </Stack>
 
@@ -824,7 +832,7 @@ export default function QuizDialog({
               '&:hover': { bgcolor: '#F8FAFC', borderColor: '#CBD5E1' },
             }}
           >
-            إلغاء
+            {t('cancel')}
           </Button>
         </Stack>
       </DialogActions>

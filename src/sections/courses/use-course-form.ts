@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'src/i18n/routing';
 import { useToast } from 'src/components/toast';
 import { useAuth } from 'src/contexts/AuthContext';
@@ -56,6 +56,8 @@ const initialValues: CourseFormValues = {
 export function useCourseForm(options: { course?: CourseDto | null } = {}) {
   const { course: initialCourse = null } = options;
   const t = useTranslations('CreateCourse');
+  const tChapters = useTranslations('CreateCourse.chapters');
+  const locale = useLocale();
   const router = useRouter();
   const toast = useToast();
   const { isInstructor, isAdmin } = useAuth();
@@ -230,14 +232,14 @@ export function useCourseForm(options: { course?: CourseDto | null } = {}) {
           textEn: objective.text,
           order: objective.order,
         })),
-        chapters: mapCurriculumToFormChapters(initialCourse.curriculum),
+        chapters: mapCurriculumToFormChapters(initialCourse.curriculum, tChapters, locale),
       });
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [initialCourse]);
+  }, [initialCourse, tChapters, locale]);
 
   // ── Cascaded fetches (each select has its own effect) ────
 
