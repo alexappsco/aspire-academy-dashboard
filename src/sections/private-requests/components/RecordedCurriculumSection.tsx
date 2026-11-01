@@ -1484,7 +1484,7 @@ export default function RecordedCurriculumSection({
                                             }}
                                           >
                                             <Iconify icon="solar:play-bold" width={15} />
-                                            <span>{t('details.recorded_curriculum.preview_video')}</span>
+                                            <span>{t('details.recorded_curriculum.preview_video')} </span>شييشييشيي
                                           </Button>
 
                                           <Button

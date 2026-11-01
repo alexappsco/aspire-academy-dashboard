@@ -57,10 +57,13 @@ export default function ChaptersStep({
 
   // Dialog states
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
-  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('الفصل الأول - مقدمة');
+  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>(
+    t('default_chapter_name')
+  );
   const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [previewVideoTitle, setPreviewVideoTitle] = useState('');
+  const [previewVideoUrl, setPreviewVideoUrl] = useState('');
 
   // Editing lesson title state
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
@@ -72,6 +75,12 @@ export default function ChaptersStep({
     chapterId: string;
     lessonId: string;
   } | null>(null);
+
+  // Close video preview and stop playback
+  const closeVideoPreview = useCallback(() => {
+    setVideoPreviewOpen(false);
+    setPreviewVideoUrl('');
+  }, []);
 
   // Apply a rich-chapters update and reflect it to the parent form state
   const commitChapters = useCallback(
@@ -92,7 +101,7 @@ export default function ChaptersStep({
   // 1. Add new chapter
   const handleAddChapter = () => {
     if (!newChapterTitle.trim()) {
-      toast.warning('يرجى كتابة عنوان الفصل');
+      toast.warning(t('chapter_title_required'));
       return;
     }
     const newChapter: RichChapter = {
@@ -104,7 +113,7 @@ export default function ChaptersStep({
     };
     commitChapters([...richChapters, newChapter]);
     setNewChapterTitle('');
-    toast.success('تمت إضافة الفصل بنجاح');
+    toast.success(t('chapter_added'));
   };
 
   // 2. Delete chapter
@@ -115,7 +124,7 @@ export default function ChaptersStep({
         .filter((ch) => ch.id !== chapterId)
         .map((ch, idx) => ({ ...ch, number: idx + 1 }))
     );
-    toast.success('تم حذف الفصل بنجاح');
+    toast.success(t('chapter_deleted'));
   };
 
   // 3. Toggle chapter accordion
@@ -131,7 +140,7 @@ export default function ChaptersStep({
   const handleAddLesson = (chapterId: string) => {
     const title = lessonTitles[chapterId]?.trim();
     if (!title) {
-      toast.warning('يرجى كتابة عنوان الدرس');
+      toast.warning(t('lesson_title_required'));
       return;
     }
 
@@ -154,7 +163,7 @@ export default function ChaptersStep({
     );
 
     setLessonTitles((prev) => ({ ...prev, [chapterId]: '' }));
-    toast.success('تمت إضافة الدرس بنجاح');
+    toast.success(t('lesson_added'));
   };
 
   // 5. Delete lesson
@@ -170,7 +179,7 @@ export default function ChaptersStep({
         };
       })
     );
-    toast.success('تم حذف الدرس بنجاح');
+    toast.success(t('lesson_deleted'));
   };
 
   // 6. Delete attachment
@@ -196,7 +205,7 @@ export default function ChaptersStep({
         };
       })
     );
-    toast.success('تم حذف المرفق بنجاح');
+    toast.success(t('attachment_deleted'));
   };
 
   // 7. Open Quiz Dialog
@@ -218,9 +227,9 @@ export default function ChaptersStep({
       const quizAtt: AttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'quiz',
-        title: 'بنك أسئلة وتدريبات الدرس (Self-Assessment)',
-        badgeText: 'مفعل بعد انتهاء الفيديو',
-        metaText: `${config.questions.length} أسئلة تدريبية تفاعلية (MCQ)`,
+        title: t('quiz_bank_title'),
+        badgeText: t('quiz_badge_after_video'),
+        metaText: t('quiz_meta_mcq', { count: config.questions.length }),
         questionsCount: config.questions.length,
         quiz: config,
       };
@@ -233,7 +242,7 @@ export default function ChaptersStep({
             return {
               ...les,
               isCompleted: true,
-              subtitle: les.subtitle || 'تم إرفاق اختبار تقييمي لهذا الدرس',
+              subtitle: les.subtitle || t('quiz_attached_subtitle'),
               attachments: [...les.attachments.filter((a) => a.type !== 'quiz'), quizAtt],
             };
           }),
@@ -241,7 +250,7 @@ export default function ChaptersStep({
       );
       setQuizLessonId(null);
     },
-    [quizLessonId, richChapters, commitChapters]
+    [quizLessonId, richChapters, commitChapters, t]
   );
 
   // 8. Handle video upload
@@ -261,16 +270,18 @@ export default function ChaptersStep({
     try {
       const res = await uploadFile(file, 'videos');
       if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع الفيديو');
+        toast.error(res.error || t('video_upload_failed'));
         return;
       }
 
       const newAtt: AttachmentItem = {
         id: `att-${Date.now()}`,
         type: 'video',
-        title: `فيديو المحاضرة: ${file.name}`,
-        badgeText: 'تم المعالجة والرفع بنجاح',
-        metaText: `الجودة: 1080p Full HD • الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+        title: t('lecture_video_title', { name: file.name }),
+        badgeText: t('upload_success_badge'),
+        metaText: t('video_quality_size_meta', {
+          size: (file.size / (1024 * 1024)).toFixed(1),
+        }),
         url: res.data.url,
       };
 
@@ -284,16 +295,16 @@ export default function ChaptersStep({
               return {
                 ...les,
                 isCompleted: true,
-                subtitle: les.subtitle || 'تم إرفاق محتوى تعليمي لهذا الدرس',
+                subtitle: les.subtitle || t('lesson_content_subtitle'),
                 attachments: [...les.attachments, newAtt],
               };
             }),
           };
         })
       );
-      toast.success('تم رفع الفيديو بنجاح');
+      toast.success(t('video_uploaded_success'));
     } catch {
-      toast.error('فشل رفع الفيديو');
+      toast.error(t('video_upload_failed'));
     } finally {
       setUploading(false);
     }
@@ -316,7 +327,7 @@ export default function ChaptersStep({
     try {
       const res = await uploadAttachment(file, file.name);
       if (!res.success || !res.data) {
-        toast.error(res.error || 'فشل رفع المستند');
+        toast.error(res.error || t('doc_upload_failed'));
         return;
       }
 
@@ -325,8 +336,10 @@ export default function ChaptersStep({
         type: 'pdf',
         attachmentId: res.data.id,
         title: res.data.name || file.name,
-        badgeText: 'جاهز للتحميل للطلاب',
-        metaText: `الحجم: ${(file.size / (1024 * 1024)).toFixed(1)} MB • ملف PDF إلكتروني`,
+        badgeText: t('doc_ready_badge'),
+        metaText: t('doc_size_pdf_meta', {
+          size: (file.size / (1024 * 1024)).toFixed(1),
+        }),
         url: res.data.url,
       };
 
@@ -346,9 +359,9 @@ export default function ChaptersStep({
           };
         })
       );
-      toast.success('تم إرفاق المستند بنجاح');
+      toast.success(t('doc_attached_success'));
     } catch {
-      toast.error('فشل رفع المستند');
+      toast.error(t('doc_upload_failed'));
     } finally {
       setUploading(false);
     }
@@ -374,7 +387,7 @@ export default function ChaptersStep({
       })
     );
     setEditingLessonId(null);
-    toast.success('تم تعديل عنوان الدرس');
+    toast.success(t('lesson_title_updated'));
   };
 
   return (
@@ -531,7 +544,7 @@ export default function ChaptersStep({
                     component="span"
                     sx={{ color: '#64748B', fontWeight: 500, fontSize: 14 }}
                   >
-                    ({chapter.lessons.length} دروس)
+                    ({t('lessons_count', { count: chapter.lessons.length })})
                   </Box>
                 </Typography>
               </Stack>
@@ -646,7 +659,7 @@ export default function ChaptersStep({
                                   onClick={() => handleSaveLessonTitle(chapter.id, lesson.id)}
                                   sx={{ bgcolor: '#1C252E', color: '#FFFFFF', borderRadius: 1.5 }}
                                 >
-                                  حفظ
+                                  {t('save')}
                                 </Button>
                               </Stack>
                             ) : (
@@ -656,7 +669,9 @@ export default function ChaptersStep({
                                 </Typography>
                                 {lesson.isCompleted && (
                                   <Chip
-                                    label={`مكتمل المحتوى (${lesson.attachments.length} مرفقات)`}
+                                    label={t('content_completed', {
+                                      count: lesson.attachments.length,
+                                    })}
                                     size="small"
                                     sx={{
                                       bgcolor: '#ECFDF5',
@@ -701,7 +716,7 @@ export default function ChaptersStep({
                                 }}
                               >
                                 <Iconify icon="solar:pen-linear" width={14} />
-                                <span>تعديل العنوان</span>
+                                <span>{t('edit_title')}</span>
                               </Button>
                             )}
 
@@ -809,10 +824,15 @@ export default function ChaptersStep({
                                         <Button
                                           size="small"
                                           variant="contained"
-                                          onClick={() => {
-                                            setPreviewVideoTitle(att.title);
-                                            setVideoPreviewOpen(true);
-                                          }}
+                                        onClick={() => {
+                                          if (!att.url) {
+                                            toast.warning(t('no_video_link'));
+                                            return;
+                                          }
+                                          setPreviewVideoTitle(att.title);
+                                          setPreviewVideoUrl(att.url);
+                                          setVideoPreviewOpen(true);
+                                        }}
                                           sx={{
                                             bgcolor: '#1C252E',
                                             color: '#FFFFFF',
@@ -829,7 +849,7 @@ export default function ChaptersStep({
                                           }}
                                         >
                                           <Iconify icon="solar:play-bold" width={15} />
-                                          <span>معاينة الفيديو</span>
+                                          <span>{t('preview_video')}</span>
                                         </Button>
                                       )}
 
@@ -841,7 +861,7 @@ export default function ChaptersStep({
                                             if (att.url) {
                                               window.open(att.url, '_blank', 'noopener,noreferrer');
                                             } else {
-                                              toast.warning('لا يوجد رابط للمرفق');
+                                              toast.warning(t('no_attachment_link'));
                                             }
                                           }}
                                           sx={{
@@ -859,7 +879,7 @@ export default function ChaptersStep({
                                           }}
                                         >
                                           <Iconify icon="solar:download-minimalistic-linear" width={16} />
-                                          <span>تحميل / عرض</span>
+                                          <span>{t('download_view')}</span>
                                         </Button>
                                       )}
 
@@ -885,7 +905,11 @@ export default function ChaptersStep({
                                             }}
                                           >
                                             <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, filter: 'brightness(0) invert(1)' }} />
-                                            <span>معاينة وتعديل الأسئلة ({att.questionsCount || 5})</span>
+                                            <span>
+                                              {t('preview_edit_quiz', {
+                                                count: att.questionsCount || 5,
+                                              })}
+                                            </span>
                                           </Button>
 
                                           <Button
@@ -907,7 +931,7 @@ export default function ChaptersStep({
                                             }}
                                           >
                                             <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 15, height: 15 }} />
-                                            <span>+ إضافة سؤال</span>
+                                            <span>{t('add_question')}</span>
                                           </Button>
                                         </>
                                       )}
@@ -931,7 +955,7 @@ export default function ChaptersStep({
                                             '&:hover': { bgcolor: '#E2E8F0' },
                                           }}
                                         >
-                                          استبدال
+                                          {t('replace')}
                                         </Button>
                                       )}
 
@@ -995,7 +1019,7 @@ export default function ChaptersStep({
                               }}
                             >
                               <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ فيديو إضافي' : '+ رفع فيديو'}</span>
+                              <span>{hasAttachments ? t('extra_video') : t('upload_video_btn')}</span>
                             </Button>
 
                             <Button
@@ -1023,7 +1047,7 @@ export default function ChaptersStep({
                               }}
                             >
                               <Box component="img" src="/icons/file.svg" alt="file" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
+                              <span>{hasAttachments ? t('extra_doc') : t('add_doc')}</span>
                             </Button>
 
                             <Button
@@ -1051,13 +1075,13 @@ export default function ChaptersStep({
                               }}
                             >
                               <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                              <span>{hasAttachments ? '+ اضافة اسئلة' : '+ اضافة سؤال'}</span>
+                              <span>{hasAttachments ? t('extra_quiz') : t('add_question')}</span>
                             </Button>
                           </Stack>
 
                           {hasAttachments && (
                             <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                              يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
+                              {t('drag_drop_hint')}
                             </Typography>
                           )}
                         </Stack>
@@ -1094,7 +1118,7 @@ export default function ChaptersStep({
       {/* 4. Video Preview Dialog Modal */}
       <Dialog
         open={videoPreviewOpen}
-        onClose={() => setVideoPreviewOpen(false)}
+        onClose={closeVideoPreview}
         maxWidth="md"
         fullWidth
         slotProps={{
@@ -1114,49 +1138,39 @@ export default function ChaptersStep({
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#F8FAFC' }}>
             {previewVideoTitle}
           </Typography>
-          <IconButton onClick={() => setVideoPreviewOpen(false)} sx={{ color: '#94A3B8' }}>
+          <IconButton onClick={closeVideoPreview} sx={{ color: '#94A3B8' }}>
             <Iconify icon="eva:close-fill" width={20} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ px: 2.5, py: 2 }}>
           <Box
             sx={{
-              height: 380,
               bgcolor: '#1E293B',
               borderRadius: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2,
+              overflow: 'hidden',
+              lineHeight: 0,
             }}
           >
-            <Box
-              sx={{
-                width: 68,
-                height: 68,
-                borderRadius: '50%',
-                bgcolor: '#0284C7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 24px rgba(2, 132, 199, 0.5)',
-              }}
-            >
-              <Iconify icon="solar:play-bold" width={34} sx={{ color: '#FFFFFF' }} />
-            </Box>
-            <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
-              معاينة تشغيل الفيديو (1080p Full HD)
-            </Typography>
+            {previewVideoUrl && (
+              <Box
+                component="video"
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
+                src={previewVideoUrl}
+                sx={{ width: '100%', maxHeight: '65vh', bgcolor: '#000' }}
+              />
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 2.5, pb: 2 }}>
           <Button
             variant="outlined"
-            onClick={() => setVideoPreviewOpen(false)}
+            onClick={closeVideoPreview}
             sx={{ color: '#F8FAFC', borderColor: '#334155' }}
           >
-            إغلاق
+            {t('close')}
           </Button>
         </DialogActions>
       </Dialog>

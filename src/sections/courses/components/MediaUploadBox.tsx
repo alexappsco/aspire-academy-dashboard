@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Iconify from 'src/components/iconify';
+import { useTranslations } from 'next-intl';
 
 interface MediaUploadBoxProps {
   label: string;
@@ -24,6 +25,7 @@ export default function MediaUploadBox({
   required,
 }: MediaUploadBoxProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations('CreateCourse.media');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -156,7 +158,7 @@ export default function MediaUploadBox({
                 textAlign: 'center',
               }}
             >
-              اسحب وأفلت الصورة هنا أوتصفح
+              {t('drag_drop_browse')}
             </Typography>
             <Typography
               sx={{
