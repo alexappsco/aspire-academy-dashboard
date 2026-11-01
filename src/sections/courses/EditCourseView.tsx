@@ -26,6 +26,7 @@ import {
 
 export default function EditCourseView({ id }: { id: string }) {
   const t = useTranslations('CreateCourse');
+  const tChapters = useTranslations('CreateCourse.chapters');
   const tDetails = useTranslations('CourseDetails');
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -129,8 +130,9 @@ export default function EditCourseView({ id }: { id: string }) {
   } = useCourseForm({ course });
 
   const initialRichChapters = useMemo(
-    () => mapCurriculumToRichChapters(course?.curriculum, resolvedAttachments),
-    [course, resolvedAttachments]
+    () =>
+      mapCurriculumToRichChapters(course?.curriculum, tChapters, locale, resolvedAttachments),
+    [course, resolvedAttachments, tChapters, locale]
   );
 
   if (loading) {

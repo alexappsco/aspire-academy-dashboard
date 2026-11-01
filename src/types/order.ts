@@ -5,6 +5,10 @@ export interface OrderItemDto {
   courseTitle?: string;
   packageId?: string | null;
   packageName?: string | null;
+  instructorId?: string | null;
+  instructorName?: string | null;
+  instructorCountryId?: string | null;
+  instructorCountryName?: string | null;
 }
 
 export interface OrderDto {
@@ -13,6 +17,8 @@ export interface OrderDto {
   buyerName?: string;
   buyerEmail?: string;
   buyerPhone?: string;
+  studentCountryId?: string | null;
+  studentCountryName?: string | null;
   status: string | number;
   subtotal: number;
   vatAmount: number;

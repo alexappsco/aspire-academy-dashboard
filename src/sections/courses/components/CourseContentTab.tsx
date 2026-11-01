@@ -18,8 +18,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
+import { useLocale, useTranslations } from 'next-intl';
 import QuizDialog, { type QuizConfig } from './QuizDialog';
 import type { CourseCurriculum, LessonTest } from 'src/types/course';
+
+type Translator = ReturnType<typeof useTranslations>;
 
 interface AttachmentItem {
   id: string;
@@ -64,18 +67,19 @@ function formatDurationSeconds(totalSeconds: number): string {
   return `${seconds}s`;
 }
 
-const QUIZ_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
+const ARABIC_QUIZ_LETTERS = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح'];
+const LATIN_QUIZ_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-let localAttachmentSeq = 0;
-function newLocalAttachmentId(prefix: string): string {
-  localAttachmentSeq += 1;
-  return `${prefix}-${Date.now()}-${localAttachmentSeq}`;
-}
-
-function mapLessonTestToQuizConfig(chapterTitle: string, test?: LessonTest): QuizConfig | undefined {
+function mapLessonTestToQuizConfig(
+  t: Translator,
+  locale: string,
+  chapterTitle: string,
+  test?: LessonTest
+): QuizConfig | undefined {
   if (!test?.questions?.length) return undefined;
+  const letters = locale === 'ar' ? ARABIC_QUIZ_LETTERS : LATIN_QUIZ_LETTERS;
   return {
-    title: `${chapterTitle} — ${test.id ? 'اختبار الدرس' : 'اختبار'}`,
+    title: `${chapterTitle} — ${test.id ? t('lesson_quiz_label') : t('quiz_label')}`,
     questions: test.questions.map((q, qi) => ({
       id: q.id ?? `q-${qi}`,
       number: qi + 1,
@@ -84,7 +88,7 @@ function mapLessonTestToQuizConfig(chapterTitle: string, test?: LessonTest): Qui
       explanation: q.explanation ?? '',
       options: (q.choices ?? []).map((c, ci) => ({
         id: c.id ?? `opt-${qi}-${ci}`,
-        letter: QUIZ_LETTERS[ci] ?? String(ci + 1),
+        letter: letters[ci] ?? String(ci + 1),
         text: c.title,
         isCorrect: !!c.isRight,
       })),
@@ -92,7 +96,11 @@ function mapLessonTestToQuizConfig(chapterTitle: string, test?: LessonTest): Qui
   };
 }
 
-function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undefined): ChapterItem[] {
+function mapCurriculumToChapterItems(
+  t: Translator,
+  locale: string,
+  curriculum: CourseCurriculum | null | undefined
+): ChapterItem[] {
   if (!curriculum?.chapters?.length) return [];
   return curriculum.chapters.map((chapter, chIndex) => ({
     id: chapter.id ?? `ch-${chapter.order}`,
@@ -107,9 +115,11 @@ function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undef
           id: `video-${lesson.id ?? lsIndex}`,
           type: 'video',
           title: lesson.title,
-          badgeText: 'تم المعالجة والرفع بنجاح',
+          badgeText: t('upload_success_badge'),
           badgeColor: 'success',
-          metaText: `المدة: ${formatDurationSeconds(lesson.durationInSeconds ?? 0)}`,
+          metaText: t('video_duration_meta', {
+            duration: formatDurationSeconds(lesson.durationInSeconds ?? 0),
+          }),
           url: lesson.videoUrl,
         });
       }
@@ -119,12 +129,12 @@ function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undef
         attachments.push({
           id: `quiz-${lesson.id ?? lsIndex}`,
           type: 'quiz',
-          title: 'بنك أسئلة وتدريبات الدرس',
-          badgeText: 'مفعل بعد انتهاء الفيديو',
+          title: t('quiz_bank_title_short'),
+          badgeText: t('quiz_badge_after_video'),
           badgeColor: 'success',
-          metaText: `${questionsCount} أسئلة`,
+          metaText: t('quiz_meta_count', { count: questionsCount }),
           questionsCount,
-          quizConfig: mapLessonTestToQuizConfig(chapter.title, lesson.test),
+          quizConfig: mapLessonTestToQuizConfig(t, locale, chapter.title, lesson.test),
         });
       }
 
@@ -133,9 +143,9 @@ function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undef
           id: `pdf-${lesson.id ?? lsIndex}-${attIndex}`,
           type: 'pdf',
           title: url.split('/').pop() || url,
-          badgeText: 'جاهز للتحميل',
+          badgeText: t('doc_ready_short_badge'),
           badgeColor: 'info',
-          metaText: 'ملف PDF',
+          metaText: t('pdf_file_meta'),
         });
       });
 
@@ -150,14 +160,25 @@ function mapCurriculumToChapterItems(curriculum: CourseCurriculum | null | undef
   }));
 }
 
+let localAttachmentSeq = 0;
+function newLocalAttachmentId(prefix: string): string {
+  localAttachmentSeq += 1;
+  return `${prefix}-${Date.now()}-${localAttachmentSeq}`;
+}
+
 interface CourseContentTabProps {
   curriculum?: CourseCurriculum | null;
 }
 
 export default function CourseContentTab({ curriculum }: CourseContentTabProps) {
   const toast = useToast();
+  const t = useTranslations('CreateCourse.chapters');
+  const locale = useLocale();
 
-  const initialChapters = useMemo(() => mapCurriculumToChapterItems(curriculum ?? null), [curriculum]);
+  const initialChapters = useMemo(
+    () => mapCurriculumToChapterItems(t, locale, curriculum ?? null),
+    [curriculum, t, locale]
+  );
   const [chapters, setChapters] = useState<ChapterItem[]>(initialChapters);
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [newLessonTitles, setNewLessonTitles] = useState<Record<string, string>>({});
@@ -165,7 +186,9 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
 
   // Dialogs
   const [quizDialogOpen, setQuizDialogOpen] = useState(false);
-  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>('الفصل الأول - مقدمة');
+  const [activeChapterForQuiz, setActiveChapterForQuiz] = useState<string>(
+    t('default_chapter_name')
+  );
   const [activeQuizConfig, setActiveQuizConfig] = useState<QuizConfig | null>(null);
   const [videoPreviewOpen, setVideoPreviewOpen] = useState(false);
   const [previewVideoTitle, setPreviewVideoTitle] = useState('');
@@ -213,7 +236,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
   // Add Chapter
   const handleAddChapter = () => {
     if (!newChapterTitle.trim()) {
-      toast.warning('يرجى كتابة عنوان الفصل');
+      toast.warning(t('chapter_title_required'));
       return;
     }
     const newChapter: ChapterItem = {
@@ -225,7 +248,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
     };
     setChapters((prev) => [...prev, newChapter]);
     setNewChapterTitle('');
-    toast.success('تمت إضافة الفصل بنجاح');
+    toast.success(t('chapter_added'));
   };
 
   // Delete Chapter
@@ -236,14 +259,14 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
         .filter((ch) => ch.id !== chapterId)
         .map((ch, idx) => ({ ...ch, number: idx + 1 }))
     );
-    toast.success('تم حذف الفصل بنجاح');
+    toast.success(t('chapter_deleted'));
   };
 
   // Add Lesson to a chapter
   const handleAddLesson = (chapterId: string) => {
     const title = newLessonTitles[chapterId]?.trim();
     if (!title) {
-      toast.warning('يرجى كتابة عنوان الدرس');
+      toast.warning(t('lesson_title_required'));
       return;
     }
     setChapters((prev) =>
@@ -259,7 +282,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
       })
     );
     setNewLessonTitles((prev) => ({ ...prev, [chapterId]: '' }));
-    toast.success('تمت إضافة الدرس بنجاح');
+    toast.success(t('lesson_added'));
   };
 
   // Delete Lesson
@@ -273,7 +296,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
         return { ...ch, lessons: filtered };
       })
     );
-    toast.success('تم حذف الدرس بنجاح');
+    toast.success(t('lesson_deleted'));
   };
 
   // Delete Attachment
@@ -297,7 +320,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
         return { ...ch, lessons: updatedLessons };
       })
     );
-    toast.success('تم حذف المرفق بنجاح');
+    toast.success(t('attachment_deleted'));
   };
 
   // Trigger quick add attachment
@@ -308,7 +331,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
   ) => {
     if (type === 'quiz') {
       const chapter = chapters.find((c) => c.id === chapterId);
-      handleOpenQuiz(chapter ? chapter.title : 'الفصل الأول');
+      handleOpenQuiz(chapter ? chapter.title : t('default_first_chapter'));
       return;
     }
 
@@ -317,18 +340,18 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
         ? {
             id: newLocalAttachmentId('video'),
             type: 'video',
-            title: 'فيديو المحاضرة: شرح تفصيلي.mp4',
-            badgeText: 'تم المعالجة والرفع بنجاح',
+            title: t('demo_video_title'),
+            badgeText: t('upload_success_badge'),
             badgeColor: 'success',
-            metaText: 'الجودة: 1080p Full HD • الحجم: 340 MB • المدة: 24:15 دقيقة',
+            metaText: t('demo_video_meta'),
           }
         : {
             id: newLocalAttachmentId('pdf'),
             type: 'pdf',
-            title: 'المستند التوضيحي والملخص.pdf',
-            badgeText: 'جاهز للتحميل للطلاب',
+            title: t('demo_doc_title'),
+            badgeText: t('doc_ready_badge'),
             badgeColor: 'info',
-            metaText: 'الحجم: 4.8 MB • 32 صفحة • ملف PDF إلكتروني',
+            metaText: t('demo_doc_meta'),
           };
 
     setChapters((prev) =>
@@ -339,14 +362,16 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           return {
             ...les,
             isCompleted: true,
-            subtitle: les.subtitle || 'تم إرفاق فيديو، ملخص ومستند، وبنك أسئلة تقييمية لهذا الدرس',
+            subtitle:
+              les.subtitle ||
+              t('quick_add_subtitle'),
             attachments: [...les.attachments, newAtt],
           };
         });
         return { ...ch, lessons: updatedLessons };
       })
     );
-    toast.success(`تمت إضافة ${type === 'video' ? 'الفيديو' : 'المستند'} بنجاح`);
+    toast.success(type === 'video' ? t('video_added_success') : t('doc_added_success'));
   };
 
   const handleOpenVideoPreview = (title: string, url?: string) => {
@@ -399,7 +424,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           >
             <Iconify icon="solar:folder-bold" width={18} sx={{ color: '#0284C7' }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-              {totalChapters} فصول
+              {t('stats_chapters', { count: totalChapters })}
             </Typography>
           </Box>
 
@@ -419,7 +444,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           >
             <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 18, height: 18 }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-              {totalVideoLessons} درس فيديو
+              {t('stats_video_lessons', { count: totalVideoLessons })}
             </Typography>
           </Box>
 
@@ -439,7 +464,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           >
             <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 18, height: 18 }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-              {totalQuizzes} اختبارات
+              {t('stats_quizzes', { count: totalQuizzes })}
             </Typography>
           </Box>
 
@@ -459,7 +484,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           >
             <Box component="img" src="/icons/file.svg" alt="file" sx={{ width: 18, height: 18 }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-              {totalFiles} ملف وملحق
+              {t('stats_files', { count: totalFiles })}
             </Typography>
           </Box>
 
@@ -479,7 +504,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           >
             <Iconify icon="solar:clock-circle-bold" width={18} sx={{ color: '#64748B' }} />
             <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: '#475569' }}>
-              إجمالي المدة: {totalDurationText || '0:00'}
+              {t('stats_total_duration', { duration: totalDurationText || '0:00' })}
             </Typography>
           </Box>
         </Stack>
@@ -508,7 +533,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
             }}
           >
             <Iconify icon="solar:add-circle-bold" width={18} />
-            <span>+ إضافة فصل جديد</span>
+            <span>{t('add_new_chapter_btn')}</span>
           </Button>
 
           <Button
@@ -530,7 +555,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
             }}
           >
             <Iconify icon="solar:sort-vertical-bold" width={18} />
-            <span>{allExpanded ? 'طي الكل' : 'توسيع الكل / طي الكل'}</span>
+            <span>{allExpanded ? t('collapse_all') : t('expand_all')}</span>
           </Button>
         </Stack>
       </Stack>
@@ -560,7 +585,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Iconify icon="solar:info-circle-bold" width={22} sx={{ color: '#1E293B' }} />
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1E293B', fontSize: 18 }}>
-              معلومات الكورس
+              {t('card_title')}
             </Typography>
           </Stack>
 
@@ -574,7 +599,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
               id="chapter-creator-input"
               fullWidth
               size="small"
-              placeholder="عنوان الفصل (مثال : الفصل الأول - مقدمة)"
+              placeholder={t('chapter_title_placeholder')}
               value={newChapterTitle}
               onChange={(e) => setNewChapterTitle(e.target.value)}
               onKeyDown={(e) => {
@@ -609,7 +634,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
               }}
             >
               <Iconify icon="mingcute:add-line" width={18} />
-              <span>+ إضافة فصل</span>
+              <span>{t('add_chapter_plus')}</span>
             </Button>
           </Stack>
         </Stack>
@@ -653,7 +678,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                     <Typography sx={{ fontWeight: 800, fontSize: 15, color: '#1E293B' }}>
                       {chapter.number}. {chapter.title} :{' '}
                       <Box component="span" sx={{ color: '#64748B', fontWeight: 500, fontSize: 14 }}>
-                        ({chapter.lessons.length} دروس)
+                        ({t('lessons_count', { count: chapter.lessons.length })})
                       </Box>
                     </Typography>
                   </Stack>
@@ -694,7 +719,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                       <TextField
                         fullWidth
                         size="small"
-                        placeholder="عنوان الدرس"
+                        placeholder={t('lesson_title_placeholder')}
                         value={newLessonTitles[chapter.id] || ''}
                         onChange={(e) =>
                           setNewLessonTitles((prev) => ({
@@ -734,7 +759,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                         }}
                       >
                         <Iconify icon="mingcute:add-line" width={18} />
-                        <span>+ إضافة درس</span>
+                        <span>{t('add_lesson_plus')}</span>
                       </Button>
                     </Stack>
 
@@ -793,12 +818,12 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                             )
                                           );
                                           setEditingLessonId(null);
-                                          toast.success('تم تعديل عنوان الدرس');
+                                          toast.success(t('lesson_title_updated'));
                                         }
                                       }}
                                       sx={{ bgcolor: '#1C252E', color: '#FFFFFF', borderRadius: 1.5 }}
                                     >
-                                      حفظ
+                                      {t('save')}
                                     </Button>
                                   </Stack>
                                 ) : (
@@ -808,7 +833,9 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                     </Typography>
                                     {lesson.isCompleted && (
                                       <Chip
-                                        label={`مكتمل المحتوى (${lesson.attachments.length} مرفقات)`}
+                                        label={t('content_completed', {
+                                          count: lesson.attachments.length,
+                                        })}
                                         size="small"
                                         sx={{
                                           bgcolor: '#ECFDF5',
@@ -853,7 +880,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                     }}
                                   >
                                     <Iconify icon="solar:pen-linear" width={14} />
-                                    <span>تعديل العنوان</span>
+                                    <span>{t('edit_title')}</span>
                                   </Button>
                                 )}
 
@@ -976,7 +1003,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                               }}
                                             >
                                               <Iconify icon="solar:play-bold" width={15} />
-                                              <span>معاينة الفيديو</span>
+                                              <span>{t('preview_video')}</span>
                                             </Button>
                                           )}
 
@@ -984,7 +1011,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                             <Button
                                               size="small"
                                               variant="outlined"
-                                              onClick={() => toast.success('جاري تجهيز وعرض ملف PDF...')}
+                                              onClick={() => toast.success(t('pdf_opening'))}
                                               sx={{
                                                 borderColor: '#E2E8F0',
                                                 color: '#1C252E',
@@ -1000,7 +1027,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                               }}
                                             >
                                               <Iconify icon="solar:download-minimalistic-linear" width={16} />
-                                              <span>تحميل / عرض</span>
+                                              <span>{t('download_view')}</span>
                                             </Button>
                                           )}
 
@@ -1026,7 +1053,11 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                                 }}
                                               >
                                                 <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, filter: 'brightness(0) invert(1)' }} />
-                                                <span>معاينة وتعديل الأسئلة ({att.questionsCount || 5})</span>
+                                                <span>
+                                                  {t('preview_edit_quiz', {
+                                                    count: att.questionsCount || 5,
+                                                  })}
+                                                </span>
                                               </Button>
                                               <Button
                                                 size="small"
@@ -1047,7 +1078,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                                 }}
                                               >
                                                 <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 15, height: 15 }} />
-                                                <span>+ إضافة سؤال</span>
+                                                <span>{t('add_question')}</span>
                                               </Button>
                                             </>
                                           )}
@@ -1056,7 +1087,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                             <Button
                                               size="small"
                                               variant="outlined"
-                                              onClick={() => toast.info('يرجى اختيار ملف جديد للاستبدال')}
+                                              onClick={() => toast.info(t('select_new_file_to_replace'))}
                                               sx={{
                                                 borderColor: '#E2E8F0',
                                                 color: '#475569',
@@ -1068,7 +1099,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                                 '&:hover': { bgcolor: '#E2E8F0' },
                                               }}
                                             >
-                                              استبدال
+                                              {t('replace')}
                                             </Button>
                                           )}
 
@@ -1132,7 +1163,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                   }}
                                 >
                                   <Box component="img" src="/icons/vedio.svg" alt="video" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                                  <span>{hasAttachments ? '+ فيديو إضافي' : '+ رفع فيديو'}</span>
+                                  <span>{hasAttachments ? t('extra_video') : t('upload_video_btn')}</span>
                                 </Button>
 
                                 <Button
@@ -1160,7 +1191,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                   }}
                                 >
                                   <Box component="img" src="/icons/file.svg" alt="file" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                                  <span>{hasAttachments ? '+ مستند إضافي' : '+ اضافة مستند'}</span>
+                                  <span>{hasAttachments ? t('extra_doc') : t('add_doc')}</span>
                                 </Button>
 
                                 <Button
@@ -1188,13 +1219,13 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                   }}
                                 >
                                   <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 16, height: 16, ...(hasAttachments ? {} : { filter: 'brightness(0) invert(1)' }) }} />
-                                  <span>{hasAttachments ? '+ اضافة اسئلة' : '+ اضافة سؤال'}</span>
+                                  <span>{hasAttachments ? t('extra_quiz') : t('add_question')}</span>
                                 </Button>
                               </Stack>
 
                               {hasAttachments && (
                                 <Typography sx={{ fontSize: 11.5, color: '#94A3B8' }}>
-                                  يمكنك سحب وإفلات المرفقات لإعادة ترتيب ظهورها للطلاب
+                                  {t('drag_drop_hint')}
                                 </Typography>
                               )}
                             </Stack>
@@ -1281,7 +1312,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                 <Iconify icon="solar:play-bold" width={34} sx={{ color: '#FFFFFF' }} />
               </Box>
               <Typography sx={{ color: '#94A3B8', fontSize: 14 }}>
-                معاينة تشغيل الفيديو (1080p Full HD)
+                {t('video_preview_placeholder')}
               </Typography>
             </Box>
           )}
@@ -1292,7 +1323,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
             onClick={() => setVideoPreviewOpen(false)}
             sx={{ color: '#F8FAFC', borderColor: '#334155' }}
           >
-            إغلاق
+            {t('close')}
           </Button>
         </DialogActions>
       </Dialog>

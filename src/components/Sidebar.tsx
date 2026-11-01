@@ -59,6 +59,10 @@ const sidebarItems: SidebarItem[] = [
         key: "specializations",
         path: "/specializations",
       },
+      {
+        key: "student_subscription_orders",
+        path: "/orders",
+      },
     ],
   },
   // 3. إدارة المستخدمين
@@ -232,6 +236,7 @@ const sidebarItems: SidebarItem[] = [
 
 const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "specializations",
+  "student_subscription_orders",
   "lecturers_management",
   "academic_hierarchy",
   "currencies",
