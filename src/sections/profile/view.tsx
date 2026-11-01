@@ -101,7 +101,13 @@ function ReadOnlyField({
           input: {
             readOnly: true,
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment
+                position="start"
+                sx={{
+                  marginInlineEnd: 1.25,
+                  marginInlineStart: 0,
+                }}
+              >
                 <Iconify icon={icon} width={18} sx={{ color: '#94A3B8' }} />
               </InputAdornment>
             ),
@@ -111,13 +117,19 @@ function ReadOnlyField({
           '& .MuiOutlinedInput-root': {
             borderRadius: 2,
             bgcolor: '#F8FAFC',
+            gap: 0.5,
             '& fieldset': { borderColor: '#E5E7EB' },
+            '& .MuiInputAdornment-root': {
+              marginInlineEnd: 1.25,
+              marginInlineStart: 0,
+            },
             '& input': {
               direction: rtl ? 'rtl' : 'ltr',
               textAlign: rtl ? 'right' : 'left',
               fontSize: 14,
               color: '#1E293B',
               WebkitTextFillColor: '#1E293B',
+              paddingInlineStart: 0,
             },
           },
         }}
@@ -471,9 +483,14 @@ export default function InstructorProfileView() {
               borderRadius: 1.5,
               px: 3,
               py: 1.1,
+              gap: 1,
               fontWeight: 600,
               textTransform: 'none',
               alignSelf: { xs: 'stretch', sm: 'flex-start' },
+              '& .MuiButton-startIcon': {
+                marginInlineEnd: 1,
+                marginInlineStart: 0,
+              },
               '&:hover': { bgcolor: '#0F172A' },
             }}
           >
@@ -906,9 +923,18 @@ export default function InstructorProfileView() {
                   size="small"
                   type="email"
                   value={formData.email}
-                  onChange={handleChange('email')}
+                  disabled
                   placeholder={t('placeholders.email')}
-                  sx={inputRootSx}
+                  sx={{
+                    ...inputRootSx,
+                    '& .MuiOutlinedInput-root.Mui-disabled': {
+                      bgcolor: '#F8FAFC',
+                    },
+                    '& .MuiOutlinedInput-input.Mui-disabled': {
+                      WebkitTextFillColor: '#1E293B',
+                      color: '#1E293B',
+                    },
+                  }}
                 />
               </FormField>
 

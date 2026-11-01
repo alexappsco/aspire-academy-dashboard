@@ -454,6 +454,11 @@ export default function ProfileStudyMaterialsCard({
                   fontSize: 13.5,
                   boxShadow: 'none',
                   whiteSpace: 'nowrap',
+                  gap: 1,
+                  '& .MuiButton-startIcon': {
+                    marginInlineEnd: 1,
+                    marginInlineStart: 0,
+                  },
                   '&:hover': { bgcolor: '#2C353E' },
                   '&.Mui-disabled': { bgcolor: '#F3F4F6', color: '#9CA3AF' },
                 }}
