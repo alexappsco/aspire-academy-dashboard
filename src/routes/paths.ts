@@ -1,5 +1,7 @@
 export const paths = {
   home: '/',
+  orders: '/orders',
+  packages: '/packages',
   hoursChargeRequests: {
     root: '/hours-charge-requests',
     details: (id: string) => `/hours-charge-requests/${id}`,
