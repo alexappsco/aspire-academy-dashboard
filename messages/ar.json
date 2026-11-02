@@ -3111,7 +3111,11 @@
         "empty": "لا توجد صورة إيصال مرفقة",
         "load_error": "تعذر تحميل صورة الإيصال"
       }
-    }
+    },
+    "export_pdf": "تصدير الطلبات المعتمدة (PDF)",
+    "exporting_pdf": "جاري التصدير...",
+    "export_success": "تم تصدير ملف PDF بنجاح",
+    "export_error": "فشل تصدير ملف PDF"
   },
   "InstructorPayouts": {
     "title": "مستحقات المحاضرون",

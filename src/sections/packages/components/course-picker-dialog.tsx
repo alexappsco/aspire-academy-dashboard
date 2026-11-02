@@ -48,7 +48,7 @@ export default function CoursePickerDialog({ open, courses, selectedIds, countri
   const handleEntered = () => setDraftIds(selectedIds);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" TransitionProps={{ onEntered: handleEntered }}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{t('title')}</DialogTitle>
       <DialogContent>
         <Alert severity="warning" sx={{ mt: 1, mb: 2 }}>{t('country_warning')}</Alert>

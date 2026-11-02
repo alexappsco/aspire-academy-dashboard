@@ -3103,7 +3103,11 @@
         "empty": "No receipt image is attached",
         "load_error": "The receipt image could not be loaded"
       }
-    }
+    },
+    "export_pdf": "Export Approved Requests (PDF)",
+    "exporting_pdf": "Exporting...",
+    "export_success": "PDF exported successfully",
+    "export_error": "Failed to export PDF"
   },
   "InstructorPayouts": {
     "title": "Instructor Payouts",

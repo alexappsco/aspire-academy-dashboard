@@ -23,7 +23,7 @@ export default function PackagesHeader() {
         mb: 4,
       }}
     >
-      <Stack gap={0.5} sx={{ flex: 1 }}>
+      <Stack spacing={0.5} sx={{ flex: 1 }}>
         <Typography variant="h4">{t('title')}</Typography>
         <Typography variant="body2" color="text.secondary">
           {t('subtitle')}
