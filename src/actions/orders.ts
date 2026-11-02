@@ -83,3 +83,33 @@ export async function rejectOrder(
     };
   }
 }
+
+export async function exportApprovedOrdersPdfAction(): Promise<
+  ApiSingleResponse<{ base64: string; fileName: string }>
+> {
+  try {
+    const response = await getData<Blob>(endpoints.orders.exportApprovedPdf);
+
+    if ('success' in response && response.success && response.data) {
+      const arrayBuffer = await response.data.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      return {
+        success: true,
+        data: {
+          base64,
+          fileName: 'approved-orders.pdf',
+        },
+      };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to export approved orders PDF',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to export approved orders PDF',
+    };
+  }
+}

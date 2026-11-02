@@ -142,6 +142,7 @@ export const endpoints = {
     details: (id: string) => `/admin/orders/${id}`,
     approve: (id: string) => `/admin/orders/${id}/approve`,
     reject: (id: string) => `/admin/orders/${id}/reject`,
+    exportApprovedPdf: '/admin/orders/approved/export/pdf',
   },
   hoursChargeRequests: {
     list: '/admin/wallet-charge-requests',
