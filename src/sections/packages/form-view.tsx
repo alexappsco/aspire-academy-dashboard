@@ -130,7 +130,7 @@ export default function PackageFormView({ packageId, readOnly = false }: { packa
     router.push('/packages');
   };
 
-  if (loading) return <Stack minHeight={400} alignItems="center" justifyContent="center"><CircularProgress /></Stack>;
+  if (loading) return <Stack sx={{ minHeight: 400, alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Stack>;
 
   return (
     <Stack spacing={3}>

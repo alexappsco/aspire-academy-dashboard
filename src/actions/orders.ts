@@ -83,3 +83,60 @@ export async function rejectOrder(
     };
   }
 }
+
+type BulkIdsBody = { ids: string[] };
+type BulkRejectBody = { ids: string[]; reason?: string | null };
+
+export async function bulkApproveOrders(ids: string[]): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.ordersBulkApprove, { ids });
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to approve orders';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to approve orders',
+    };
+  }
+}
+
+export async function bulkRejectOrders(
+  ids: string[],
+  reason?: string
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkRejectBody>(endpoints.actions.ordersBulkReject, {
+      ids,
+      reason: reason?.trim() || null,
+    });
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to reject orders';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to reject orders',
+    };
+  }
+}
+
+export async function bulkDeleteOrders(ids: string[]): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.ordersBulkDelete, { ids });
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to delete orders';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete orders',
+    };
+  }
+}

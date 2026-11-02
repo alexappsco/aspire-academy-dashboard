@@ -36,7 +36,7 @@ export default function PackageCoursesCard({ courses, onAdd, onRemove, readOnly 
   return (
     <Card variant="outlined" sx={{ p: { xs: 2, md: 3 } }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 2.5 }}>
-        <Stack gap={0.25}>
+        <Stack spacing={0.25}>
           <Typography variant="h6">{t('title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('subtitle')}</Typography>
         </Stack>

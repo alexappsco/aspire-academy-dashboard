@@ -4,7 +4,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 
-import { approveOrder, getOrders, rejectOrder } from 'src/actions/orders';
+import {
+  approveOrder,
+  bulkApproveOrders,
+  bulkDeleteOrders,
+  bulkRejectOrders,
+  getOrders,
+  rejectOrder,
+} from 'src/actions/orders';
 import { DEFAULT_LIMIT } from 'src/components/constant';
 import { useToast } from 'src/components/toast';
 import { useRouter } from 'src/i18n/routing';
@@ -33,6 +40,11 @@ export default function useOrders() {
   const [rejectReason, setRejectReason] = useState('');
   const [rejectLoading, setRejectLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkLoading, setBulkLoading] = useState<'approve' | 'reject' | 'delete' | null>(null);
+  const [bulkRejectOpen, setBulkRejectOpen] = useState(false);
+  const [bulkRejectReason, setBulkRejectReason] = useState('');
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -72,6 +84,13 @@ export default function useOrders() {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => orders.some((order) => order.id === id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [orders]);
 
   const changeStatus = (value: OrderStatusFilter) => {
     setStatus(value);
@@ -114,6 +133,97 @@ export default function useOrders() {
     }
   };
 
+  const selectAll = (checked: boolean) => {
+    setSelectedIds(checked ? orders.map((order) => order.id) : []);
+  };
+
+  const selectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('approve');
+    try {
+      const res = await bulkApproveOrders(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setSelectedIds([]);
+      toast.success(t('bulk.approve_success', { count: ids.length }));
+      refresh();
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const openBulkReject = () => {
+    setBulkRejectReason('');
+    setBulkRejectOpen(true);
+  };
+
+  const closeBulkReject = () => {
+    if (bulkLoading === 'reject') return;
+    setBulkRejectOpen(false);
+    setBulkRejectReason('');
+  };
+
+  const handleConfirmBulkReject = async () => {
+    if (selectedIds.length === 0 || bulkLoading || !bulkRejectReason.trim()) return;
+    const ids = [...selectedIds];
+    setBulkLoading('reject');
+    try {
+      const res = await bulkRejectOrders(ids, bulkRejectReason.trim());
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setSelectedIds([]);
+      setBulkRejectOpen(false);
+      setBulkRejectReason('');
+      toast.success(t('bulk.reject_success', { count: ids.length }));
+      refresh();
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const openBulkDelete = () => setBulkDeleteOpen(true);
+
+  const closeBulkDelete = () => {
+    if (bulkLoading === 'delete') return;
+    setBulkDeleteOpen(false);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('delete');
+    try {
+      const res = await bulkDeleteOrders(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setSelectedIds([]);
+      setBulkDeleteOpen(false);
+      toast.success(t('bulk.delete_success', { count: ids.length }));
+      refresh();
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
   const handleReject = async () => {
     if (!rejectTarget) return;
     setRejectLoading(true);
@@ -153,5 +263,20 @@ export default function useOrders() {
     handleReject,
     openRejectDialog,
     closeRejectDialog,
+    selectedIds,
+    bulkLoading,
+    bulkRejectOpen,
+    bulkRejectReason,
+    setBulkRejectReason,
+    bulkDeleteOpen,
+    selectAll,
+    selectOne,
+    handleBulkApprove,
+    openBulkReject,
+    closeBulkReject,
+    handleConfirmBulkReject,
+    openBulkDelete,
+    closeBulkDelete,
+    handleConfirmBulkDelete,
   };
 }

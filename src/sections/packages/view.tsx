@@ -96,7 +96,7 @@ export default function PackagesView() {
   const specializationOptions = useMemo(() => specializations, [specializations]);
 
   return (
-    <Stack gap={0}>
+    <Stack>
       <PackagesHeader />
       <Card sx={{ overflow: 'hidden' }}>
         <PackagesFilters
@@ -111,7 +111,7 @@ export default function PackagesView() {
           onStatusChange={(value) => { setStatus(value); resetPage(); }}
         />
         {loading ? (
-          <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 280 }}>
+          <Stack sx={{ alignItems: 'center', justifyContent: 'center', minHeight: 280 }}>
             <CircularProgress size={32} />
           </Stack>
         ) : (
