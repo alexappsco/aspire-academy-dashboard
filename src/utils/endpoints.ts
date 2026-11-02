@@ -107,6 +107,9 @@ export const endpoints = {
   },
   packages: {
     list: '/admin/packages',
+    create: '/admin/packages',
+    details: (id: string) => `/admin/packages/${id}`,
+    update: (id: string) => `/admin/packages/${id}`,
   },
   uploads: {
     upload: '/admin/uploads',

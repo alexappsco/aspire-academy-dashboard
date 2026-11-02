@@ -5,9 +5,11 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { useLocale, useTranslations } from 'next-intl';
 
+import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment, type headCellType } from 'src/components/SharedTable/types';
 import type { PackageSummary } from 'src/types/package';
+import { useRouter } from 'src/i18n/routing';
 
 type PackageRow = PackageSummary & {
   packageName: string;
@@ -42,6 +44,7 @@ function formatDate(value: string, locale: string) {
 export default function PackagesTable({ packages, totalCount }: Props) {
   const t = useTranslations('Packages');
   const locale = useLocale();
+  const router = useRouter();
   const align = locale === 'ar' ? cellAlignment.right : cellAlignment.left;
   const tableHead: headCellType[] = [
     { id: 'packageName', label: t('columns.name'), align },
@@ -69,6 +72,13 @@ export default function PackagesTable({ packages, totalCount }: Props) {
       tableHead={tableHead}
       count={totalCount}
       serverPagination
+      actions={[
+        {
+          label: t('actions.edit'),
+          icon: <Iconify icon="solar:pen-bold" />,
+          onClick: (row) => router.push(`/packages/${row.id}/edit`),
+        },
+      ]}
       customRender={{
         packageName: (row) => <Typography variant="body2" fontWeight={600}>{row.packageName}</Typography>,
         coursesValue: (row) => t('columns.courses_count', { count: row.coursesValue }),

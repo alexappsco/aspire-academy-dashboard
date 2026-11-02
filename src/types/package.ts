@@ -34,6 +34,15 @@ export type PackageListResponse = {
   totalCount: number;
 };
 
+export type PackageFormValues = {
+  nameAr: string;
+  nameEn: string;
+  image: File | string | null;
+  courseIds: string[];
+  discountedPrice: string;
+  isActive: boolean;
+};
+
 export type GetPackagesParams = {
   SpecializationId?: string;
   CoursesCount?: number;

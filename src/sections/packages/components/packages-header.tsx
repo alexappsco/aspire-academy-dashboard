@@ -6,9 +6,11 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'src/i18n/routing';
 
 export default function PackagesHeader() {
   const t = useTranslations('Packages');
+  const router = useRouter();
 
   return (
     <Box
@@ -30,6 +32,7 @@ export default function PackagesHeader() {
 
       <Button
         variant="contained"
+        onClick={() => router.push('/packages/new')}
         sx={{
           minWidth: 118,
           alignSelf: { sm: 'flex-start' },

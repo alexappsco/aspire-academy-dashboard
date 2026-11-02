@@ -3457,6 +3457,69 @@
       "active": "Active",
       "inactive": "Inactive"
     },
+    "actions": {
+      "edit": "Edit Package"
+    },
+    "form": {
+      "create_title": "Add New Package",
+      "edit_title": "Edit Package",
+      "subtitle": "Select courses and define the package details and price displayed in the mobile app",
+      "create": "Create",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "info": {
+        "title": "Package Information",
+        "name_ar": "Package Name (Arabic)",
+        "name_en": "Package Name (English)"
+      },
+      "image": {
+        "title": "Cover Image",
+        "label": "Cover Image",
+        "hint": "Recommended size: 300 × 200 pixels"
+      },
+      "courses": {
+        "title": "Courses Included in Package",
+        "subtitle": "Select the courses to include",
+        "add": "Add Course",
+        "name": "Course Name",
+        "instructor": "Instructor",
+        "specialization": "Specialization",
+        "price": "Price"
+      },
+      "course_picker": {
+        "title": "Select Package Courses",
+        "search": "Search by course name...",
+        "all_countries": "All Countries",
+        "country_warning": "All selected courses must belong to one country. Courses with a different currency will be disabled after the first selection.",
+        "cancel": "Cancel",
+        "confirm": "Add Selected"
+      },
+      "pricing": {
+        "title": "Pricing Summary",
+        "subtitle": "Cost structure and promotional discount",
+        "selected_count": "Selected Courses",
+        "selected_count_value": "{count} specialized courses",
+        "courses_total": "Total Individual Course Prices",
+        "discount_rate": "Discount rate {value}%",
+        "final_price": "Final Package Price",
+        "status": "Status",
+        "active": "Package is active"
+      },
+      "validation": {
+        "required": "This field is required",
+        "image_required": "Cover image is required",
+        "courses_required": "Select at least one course",
+        "valid_price": "Enter a valid price",
+        "discounted_price": "Discounted price cannot exceed original price"
+      },
+      "messages": {
+        "courses_error": "Failed to load courses",
+        "load_error": "Failed to load package details",
+        "save_error": "Failed to save package",
+        "create_success": "Package created successfully",
+        "update_success": "Package updated successfully"
+      }
+    },
     "messages": {
       "load_error": "Failed to load packages"
     }
