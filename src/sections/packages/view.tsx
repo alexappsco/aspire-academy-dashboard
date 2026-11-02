@@ -96,7 +96,7 @@ export default function PackagesView() {
   const specializationOptions = useMemo(() => specializations, [specializations]);
 
   return (
-    <Stack spacing={0}>
+    <Stack>
       <PackagesHeader />
       <Card sx={{ overflow: 'hidden' }}>
         <PackagesFilters

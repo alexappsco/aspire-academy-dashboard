@@ -6,6 +6,12 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
@@ -40,6 +46,21 @@ export default function OrdersView() {
     handleReject,
     openRejectDialog,
     closeRejectDialog,
+    selectedIds,
+    bulkLoading,
+    bulkRejectOpen,
+    bulkRejectReason,
+    setBulkRejectReason,
+    bulkDeleteOpen,
+    selectAll,
+    selectOne,
+    handleBulkApprove,
+    openBulkReject,
+    closeBulkReject,
+    handleConfirmBulkReject,
+    openBulkDelete,
+    closeBulkDelete,
+    handleConfirmBulkDelete,
   } = useOrders();
 
   const handleViewReceipt = (order: OrderDto) => {
@@ -150,11 +171,96 @@ export default function OrdersView() {
           onStatusChange={changeStatus}
         />
 
+        {selectedIds.length > 0 && (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            sx={{
+              px: 2,
+              pb: 2,
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 1.5,
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A', minWidth: 88 }}>
+              {t('bulk.selected', { count: selectedIds.length })}
+            </Typography>
+            <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+            <Button
+              variant="contained"
+              disabled={Boolean(bulkLoading)}
+              onClick={handleBulkApprove}
+              startIcon={
+                bulkLoading === 'approve' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="eva:checkmark-fill" width={16} />
+                )
+              }
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#10B981',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#059669', boxShadow: 'none' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {bulkLoading === 'approve'
+                ? t('bulk.working')
+                : t('bulk.approve', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={Boolean(bulkLoading)}
+              onClick={openBulkReject}
+              startIcon={<Iconify icon="eva:close-fill" width={16} />}
+              sx={{
+                borderRadius: 2,
+                color: '#E11D48',
+                borderColor: '#FECDD3',
+                bgcolor: '#FFF1F2',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                '&:hover': { borderColor: '#FB7185', bgcolor: '#FFE4E6' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {t('bulk.reject', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              disabled={Boolean(bulkLoading)}
+              onClick={openBulkDelete}
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#DC2626',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#B91C1C', boxShadow: 'none' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {t('bulk.delete', { count: selectedIds.length })}
+            </Button>
+          </Stack>
+        )}
+
         <OrdersTable
           orders={orders}
           totalCount={totalCount}
           loading={loading}
           actionLoadingId={actionLoadingId}
+          selectedIds={selectedIds}
+          onSelectAll={selectAll}
+          onSelectOne={selectOne}
           onViewReceipt={handleViewReceipt}
           onApprove={(order) => handleApprove(order.id)}
           onReject={openRejectDialog}
@@ -169,6 +275,111 @@ export default function OrdersView() {
         onClose={closeRejectDialog}
         onConfirm={handleReject}
       />
+
+      <Dialog
+        open={bulkRejectOpen}
+        onClose={closeBulkReject}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', pb: 0.5 }}>
+          {t('bulk.reject_title')}
+        </DialogTitle>
+        <DialogContent sx={{ pt: '4px !important' }}>
+          <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500, mb: 1.5 }}>
+            {t('bulk.reject_content', { count: selectedIds.length })}
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            size="small"
+            label={t('reject_dialog.reason_label')}
+            placeholder={t('reject_dialog.reason_placeholder')}
+            value={bulkRejectReason}
+            onChange={(event) => setBulkRejectReason(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            onClick={closeBulkReject}
+            disabled={bulkLoading === 'reject'}
+            sx={{ borderRadius: 2, color: '#475569', borderColor: '#E2E8F0', fontWeight: 600, textTransform: 'none' }}
+          >
+            {t('bulk.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!bulkRejectReason.trim() || bulkLoading === 'reject'}
+            onClick={handleConfirmBulkReject}
+            startIcon={
+              bulkLoading === 'reject' ? <CircularProgress size={16} color="inherit" /> : undefined
+            }
+            sx={{
+              bgcolor: '#E11D48',
+              borderRadius: 2,
+              fontWeight: 700,
+              textTransform: 'none',
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#BE123C', boxShadow: 'none' },
+            }}
+          >
+            {t('bulk.confirm_reject')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={bulkDeleteOpen}
+        onClose={closeBulkDelete}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', pb: 1 }}>
+          {t('bulk.delete_title')}
+        </DialogTitle>
+        <DialogContent sx={{ color: '#64748B', fontSize: 14 }}>
+          {t('bulk.delete_content', { count: selectedIds.length })}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={closeBulkDelete}
+            disabled={bulkLoading === 'delete'}
+            sx={{ borderRadius: 2, color: '#64748B', borderColor: '#E2E8F0', fontWeight: 600, textTransform: 'none' }}
+          >
+            {t('bulk.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmBulkDelete}
+            disabled={bulkLoading === 'delete'}
+            startIcon={
+              bulkLoading === 'delete' ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+              )
+            }
+            sx={{
+              borderRadius: 2,
+              bgcolor: '#DC2626',
+              fontWeight: 700,
+              textTransform: 'none',
+              gap: 0.75,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#B91C1C', boxShadow: 'none' },
+              '& .MuiButton-startIcon': { m: 0 },
+            }}
+          >
+            {bulkLoading === 'delete' ? t('bulk.deleting') : t('bulk.confirm_delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

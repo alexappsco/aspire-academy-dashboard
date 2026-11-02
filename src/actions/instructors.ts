@@ -231,6 +231,68 @@ export async function rejectInstructor(
   }
 }
 
+type BulkIdsBody = { ids: string[] };
+
+export async function bulkDeleteInstructors(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.instructorsBulkDelete, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to delete instructors';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete instructors',
+    };
+  }
+}
+
+export async function bulkActivateInstructors(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.instructorsBulkActivate, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to activate instructors';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to activate instructors',
+    };
+  }
+}
+
+export async function bulkDeactivateInstructors(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.instructorsBulkDeactivate, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to deactivate instructors';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to deactivate instructors',
+    };
+  }
+}
+
 // ── Instructor Sub-resources (reviews, orders, courses) ─────
 
 export async function getInstructorReviews(
