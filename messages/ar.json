@@ -13,6 +13,7 @@
     "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
     "student_subscription_orders": "طلبات اشتراك الطلاب",
+    "packages": "الباقات",
     "user_management": "ادارة المستخدمين",
     "students_management": "إدارة الطلاب",
     "lecturers_management": "ادارة المحاضرون",
@@ -3435,6 +3436,37 @@
       "required_password": "الرجاء إدخال كلمة المرور",
       "password_mismatch": "كلمتا المرور غير متطابقتين",
       "image_too_large": "حجم الصورة يجب ألا يتجاوز 2 ميجابايت"
+    }
+  },
+  "Packages": {
+    "title": "الباقات",
+    "subtitle": "إنشاء وإدارة باقات الدورات التي تظهر في تطبيق الموبايل",
+    "add": "إضافة باقة",
+    "filters": {
+      "search": "البحث في الباقات...",
+      "all_specializations": "كل التخصصات",
+      "all_courses_counts": "كل أعداد الدورات",
+      "courses_count_option": "{count} دورة",
+      "all_statuses": "كل الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "columns": {
+      "name": "اسم الباقة",
+      "courses": "عدد الدورات",
+      "courses_count": "{count} دورة",
+      "subscribers": "المشتركون",
+      "old_price": "السعر الأصلي",
+      "price": "سعر الباقة",
+      "status": "الحالة",
+      "creation_date": "تاريخ الإنشاء"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "messages": {
+      "load_error": "تعذر تحميل الباقات"
     }
   },
   "StudentOrders": {

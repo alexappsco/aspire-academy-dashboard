@@ -27,6 +27,7 @@
     "courses": "Courses",
     "specializations": "Specializations",
     "student_subscription_orders": "Student Subscription Orders",
+    "packages": "Packages",
     "user_management": "User Management",
     "students_management": "Students Management",
     "lecturers_management": "Lecturers Management",
@@ -3427,6 +3428,37 @@
       "required_password": "Please enter a password",
       "password_mismatch": "Passwords do not match",
       "image_too_large": "Image size must be 2MB or less"
+    }
+  },
+  "Packages": {
+    "title": "Packages",
+    "subtitle": "Create and manage course packages displayed in the mobile app",
+    "add": "Add Package",
+    "filters": {
+      "search": "Search packages...",
+      "all_specializations": "All Specializations",
+      "all_courses_counts": "All Course Counts",
+      "courses_count_option": "{count} courses",
+      "all_statuses": "All Statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "name": "Package Name",
+      "courses": "Courses",
+      "courses_count": "{count} courses",
+      "subscribers": "Subscribers",
+      "old_price": "Original Price",
+      "price": "Package Price",
+      "status": "Status",
+      "creation_date": "Creation Date"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "messages": {
+      "load_error": "Failed to load packages"
     }
   },
   "StudentOrders": {
