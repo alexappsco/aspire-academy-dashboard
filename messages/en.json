@@ -27,6 +27,7 @@
     "courses": "Courses",
     "specializations": "Specializations",
     "student_subscription_orders": "Student Subscription Orders",
+    "packages": "Packages",
     "user_management": "User Management",
     "students_management": "Students Management",
     "lecturers_management": "Lecturers Management",
@@ -3427,6 +3428,112 @@
       "required_password": "Please enter a password",
       "password_mismatch": "Passwords do not match",
       "image_too_large": "Image size must be 2MB or less"
+    }
+  },
+  "Packages": {
+    "title": "Packages",
+    "subtitle": "Create and manage course packages displayed in the mobile app",
+    "add": "Add Package",
+    "filters": {
+      "search": "Search packages...",
+      "all_specializations": "All Specializations",
+      "all_courses_counts": "All Course Counts",
+      "courses_count_option": "{count} courses",
+      "all_statuses": "All Statuses",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "columns": {
+      "name": "Package Name",
+      "courses": "Courses",
+      "courses_count": "{count} courses",
+      "subscribers": "Subscribers",
+      "old_price": "Original Price",
+      "price": "Package Price",
+      "status": "Status",
+      "creation_date": "Creation Date"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View Package",
+      "edit": "Edit Package",
+      "delete": "Delete Package"
+    },
+    "delete_dialog": {
+      "title": "Delete Package",
+      "message": "Are you sure you want to delete “{name}”? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Delete"
+    },
+    "form": {
+      "create_title": "Add New Package",
+      "edit_title": "Edit Package",
+      "view_title": "View Package",
+      "subtitle": "Select courses and define the package details and price displayed in the mobile app",
+      "create": "Create",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "back": "Back to Packages",
+      "info": {
+        "title": "Package Information",
+        "name_ar": "Package Name (Arabic)",
+        "name_en": "Package Name (English)"
+      },
+      "image": {
+        "title": "Cover Image",
+        "label": "Cover Image",
+        "hint": "Recommended size: 300 × 200 pixels"
+      },
+      "courses": {
+        "title": "Courses Included in Package",
+        "subtitle": "Select the courses to include",
+        "add": "Add Course",
+        "name": "Course Name",
+        "instructor": "Instructor",
+        "specialization": "Specialization",
+        "price": "Price"
+      },
+      "course_picker": {
+        "title": "Select Package Courses",
+        "search": "Search by course name...",
+        "all_countries": "All Countries",
+        "country_warning": "All selected courses must belong to one country. Courses with a different currency will be disabled after the first selection.",
+        "cancel": "Cancel",
+        "confirm": "Add Selected"
+      },
+      "pricing": {
+        "title": "Pricing Summary",
+        "subtitle": "Cost structure and promotional discount",
+        "selected_count": "Selected Courses",
+        "selected_count_value": "{count} specialized courses",
+        "courses_total": "Total Individual Course Prices",
+        "discount_rate": "Discount rate {value}%",
+        "final_price": "Final Package Price",
+        "status": "Status",
+        "active": "Package is active"
+      },
+      "validation": {
+        "required": "This field is required",
+        "image_required": "Cover image is required",
+        "courses_required": "Select at least one course",
+        "valid_price": "Enter a valid price",
+        "discounted_price": "Discounted price cannot exceed original price"
+      },
+      "messages": {
+        "courses_error": "Failed to load courses",
+        "load_error": "Failed to load package details",
+        "save_error": "Failed to save package",
+        "create_success": "Package created successfully",
+        "update_success": "Package updated successfully"
+      }
+    },
+    "messages": {
+      "load_error": "Failed to load packages",
+      "delete_success": "Package deleted successfully",
+      "delete_error": "Failed to delete package"
     }
   },
   "StudentOrders": {
