@@ -105,6 +105,13 @@ export const endpoints = {
     delete: (id: string) => `/admin/courses/${id}`,
     review: (id: string) => `/admin/courses/${id}/review`,
   },
+  packages: {
+    list: '/admin/packages',
+    create: '/admin/packages',
+    details: (id: string) => `/admin/packages/${id}`,
+    update: (id: string) => `/admin/packages/${id}`,
+    delete: (id: string) => `/admin/packages/${id}`,
+  },
   uploads: {
     upload: '/admin/uploads',
   },

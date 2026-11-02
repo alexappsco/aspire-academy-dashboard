@@ -65,6 +65,11 @@ const sidebarItems: SidebarItem[] = [
       },
     ],
   },
+  {
+    key: "packages",
+    icon: "/icons/package.svg",
+    path: "/packages",
+  },
   // 3. إدارة المستخدمين
   {
     key: "user_management",
@@ -236,6 +241,7 @@ const sidebarItems: SidebarItem[] = [
 
 const INSTRUCTOR_HIDDEN_KEYS = new Set([
   "specializations",
+  "packages",
   "student_subscription_orders",
   "lecturers_management",
   "academic_hierarchy",

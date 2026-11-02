@@ -13,6 +13,7 @@
     "courses": "الدورات التدريبية",
     "specializations": "التخصصات",
     "student_subscription_orders": "طلبات اشتراك الطلاب",
+    "packages": "الباقات",
     "user_management": "ادارة المستخدمين",
     "students_management": "إدارة الطلاب",
     "lecturers_management": "ادارة المحاضرون",
@@ -3435,6 +3436,112 @@
       "required_password": "الرجاء إدخال كلمة المرور",
       "password_mismatch": "كلمتا المرور غير متطابقتين",
       "image_too_large": "حجم الصورة يجب ألا يتجاوز 2 ميجابايت"
+    }
+  },
+  "Packages": {
+    "title": "الباقات",
+    "subtitle": "إنشاء وإدارة باقات الدورات التي تظهر في تطبيق الموبايل",
+    "add": "إضافة باقة",
+    "filters": {
+      "search": "البحث في الباقات...",
+      "all_specializations": "كل التخصصات",
+      "all_courses_counts": "كل أعداد الدورات",
+      "courses_count_option": "{count} دورة",
+      "all_statuses": "كل الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "columns": {
+      "name": "اسم الباقة",
+      "courses": "عدد الدورات",
+      "courses_count": "{count} دورة",
+      "subscribers": "المشتركون",
+      "old_price": "السعر الأصلي",
+      "price": "سعر الباقة",
+      "status": "الحالة",
+      "creation_date": "تاريخ الإنشاء"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "actions": {
+      "view": "عرض الباقة",
+      "edit": "تعديل الباقة",
+      "delete": "حذف الباقة"
+    },
+    "delete_dialog": {
+      "title": "حذف الباقة",
+      "message": "هل أنت متأكد من حذف باقة «{name}»؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "confirm": "تأكيد الحذف"
+    },
+    "form": {
+      "create_title": "إضافة باقة جديدة",
+      "edit_title": "تعديل الباقة",
+      "view_title": "عرض الباقة",
+      "subtitle": "اختر الدورات وحدد بيانات وسعر الباقة التي تظهر في تطبيق الموبايل",
+      "create": "إنشاء",
+      "save_changes": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "back": "العودة إلى الباقات",
+      "info": {
+        "title": "بيانات الباقة",
+        "name_ar": "اسم الباقة (العربية)",
+        "name_en": "اسم الباقة (English)"
+      },
+      "image": {
+        "title": "صورة الغلاف",
+        "label": "صورة الغلاف",
+        "hint": "المقاس الموصى به: 300 × 200 بكسل"
+      },
+      "courses": {
+        "title": "الدورات المضافة في الباقة",
+        "subtitle": "حدد الدورات المراد إضافتها",
+        "add": "إضافة دورة",
+        "name": "اسم الدورة",
+        "instructor": "المحاضر",
+        "specialization": "التخصص",
+        "price": "السعر"
+      },
+      "course_picker": {
+        "title": "اختيار دورات الباقة",
+        "search": "ابحث باسم الدورة...",
+        "all_countries": "كل الدول",
+        "country_warning": "يجب أن تكون جميع الدورات المختارة تابعة لدولة واحدة. سيتم تعطيل الدورات ذات العملة المختلفة بعد أول اختيار.",
+        "cancel": "إلغاء",
+        "confirm": "إضافة المحدد"
+      },
+      "pricing": {
+        "title": "ملخص التسعير",
+        "subtitle": "هيكل التكلفة والخصم الترويجي",
+        "selected_count": "عدد الدورات المحددة",
+        "selected_count_value": "{count} دورة تخصصية",
+        "courses_total": "إجمالي أسعار الدورات الفردية",
+        "discount_rate": "معدل الخصم {value}%",
+        "final_price": "سعر الباقة النهائي",
+        "status": "الحالة",
+        "active": "الباقة مفعلة"
+      },
+      "validation": {
+        "required": "هذا الحقل مطلوب",
+        "image_required": "صورة الغلاف مطلوبة",
+        "courses_required": "اختر دورة واحدة على الأقل",
+        "valid_price": "أدخل سعرًا صحيحًا",
+        "discounted_price": "سعر الخصم يجب ألا يتجاوز السعر الأصلي"
+      },
+      "messages": {
+        "courses_error": "تعذر تحميل الدورات",
+        "load_error": "تعذر تحميل بيانات الباقة",
+        "save_error": "تعذر حفظ الباقة",
+        "create_success": "تم إنشاء الباقة بنجاح",
+        "update_success": "تم تحديث الباقة بنجاح"
+      }
+    },
+    "messages": {
+      "load_error": "تعذر تحميل الباقات",
+      "delete_success": "تم حذف الباقة بنجاح",
+      "delete_error": "تعذر حذف الباقة"
     }
   },
   "StudentOrders": {
