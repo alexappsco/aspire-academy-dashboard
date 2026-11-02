@@ -1242,6 +1242,22 @@
       "edit": "Edit",
       "delete": "Delete"
     },
+    "bulk": {
+      "selected": "{count} selected",
+      "activate": "Activate ({count})",
+      "deactivate": "Deactivate ({count})",
+      "delete": "Delete ({count})",
+      "delete_title": "Delete selected lecturers",
+      "delete_content": "Are you sure you want to delete {count} lecturers? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm_delete": "Delete",
+      "deleting": "Deleting...",
+      "working": "Working...",
+      "activate_success": "{count} lecturers activated",
+      "deactivate_success": "{count} lecturers deactivated",
+      "delete_success": "{count} lecturers deleted",
+      "error": "Something went wrong while applying the action"
+    },
     "breadcrumb_dashboard": "Dashboard",
     "breadcrumb_lecturers": "Lecturers",
     "breadcrumb_add_lecturer": "Add Lecturer",
@@ -1548,6 +1564,22 @@
       "deactivate": "Deactivate Account",
       "activate": "Activate Account",
       "delete": "Delete Student"
+    },
+    "bulk": {
+      "selected": "{count} selected",
+      "activate": "Activate ({count})",
+      "deactivate": "Deactivate ({count})",
+      "delete": "Delete ({count})",
+      "delete_title": "Delete selected students",
+      "delete_content": "Are you sure you want to delete {count} students? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm_delete": "Delete",
+      "deleting": "Deleting...",
+      "working": "Working...",
+      "activate_success": "{count} students activated",
+      "deactivate_success": "{count} students deactivated",
+      "delete_success": "{count} students deleted",
+      "error": "Something went wrong while applying the action"
     },
     "delete_dialog": {
       "title": "Confirm Student Deletion",

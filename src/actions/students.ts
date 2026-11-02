@@ -160,6 +160,70 @@ export async function deactivateStudent(
   }
 }
 
+type BulkIdsBody = { ids: string[] };
+
+// ── Bulk student actions (selected ids) ────────────────────
+
+export async function bulkDeleteStudents(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.studentBulkDelete, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to delete students';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to delete students',
+    };
+  }
+}
+
+export async function bulkActivateStudents(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.studentBulkActivate, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to activate students';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to activate students',
+    };
+  }
+}
+
+export async function bulkDeactivateStudents(
+  ids: string[]
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const res = await postData<null, BulkIdsBody>(endpoints.actions.studentBulkDeactivate, { ids });
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to deactivate students';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to deactivate students',
+    };
+  }
+}
+
 // ── Student Course Progress ────────────────────────────────
 
 export async function getStudentCourseProgress(

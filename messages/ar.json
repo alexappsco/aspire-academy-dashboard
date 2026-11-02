@@ -1242,6 +1242,22 @@
       "edit": "تعديل",
       "delete": "حذف"
     },
+    "bulk": {
+      "selected": "{count} محدد",
+      "activate": "تفعيل ({count})",
+      "deactivate": "إلغاء التفعيل ({count})",
+      "delete": "حذف ({count})",
+      "delete_title": "حذف المحاضرين المحددين",
+      "delete_content": "هل أنت متأكد من حذف {count} محاضرين؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "confirm_delete": "حذف",
+      "deleting": "جاري الحذف...",
+      "working": "جاري التنفيذ...",
+      "activate_success": "تم تفعيل {count} محاضرين",
+      "deactivate_success": "تم إلغاء تفعيل {count} محاضرين",
+      "delete_success": "تم حذف {count} محاضرين",
+      "error": "حدث خطأ أثناء تنفيذ الإجراء"
+    },
     "breadcrumb_dashboard": "لوحة التحكم",
     "breadcrumb_lecturers": "المحاضرون",
     "breadcrumb_add_lecturer": "إضافة محاضر",
@@ -1548,6 +1564,22 @@
       "deactivate": "تعطيل الحساب",
       "activate": "تفعيل الحساب",
       "delete": "حذف الطالب"
+    },
+    "bulk": {
+      "selected": "{count} محدد",
+      "activate": "تفعيل ({count})",
+      "deactivate": "إلغاء التفعيل ({count})",
+      "delete": "حذف ({count})",
+      "delete_title": "حذف الطلاب المحددين",
+      "delete_content": "هل أنت متأكد من حذف {count} طلاب؟ لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "confirm_delete": "حذف",
+      "deleting": "جاري الحذف...",
+      "working": "جاري التنفيذ...",
+      "activate_success": "تم تفعيل {count} طلاب",
+      "deactivate_success": "تم إلغاء تفعيل {count} طلاب",
+      "delete_success": "تم حذف {count} طلاب",
+      "error": "حدث خطأ أثناء تنفيذ الإجراء"
     },
     "delete_dialog": {
       "title": "تأكيد حذف الطالب",

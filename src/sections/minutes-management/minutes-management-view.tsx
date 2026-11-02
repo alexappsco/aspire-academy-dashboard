@@ -15,12 +15,27 @@ import Switch from '@mui/material/Switch';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
+import Stack from '@mui/material/Stack';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 import Iconify from 'src/components/iconify';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useToast } from 'src/components/toast';
-import { getInstructors, deleteInstructor, verifyInstructor, rejectInstructor } from 'src/actions/instructors';
+import {
+  getInstructors,
+  deleteInstructor,
+  verifyInstructor,
+  rejectInstructor,
+  bulkDeleteInstructors,
+  bulkActivateInstructors,
+  bulkDeactivateInstructors,
+} from 'src/actions/instructors';
 import { getSpecializations } from 'src/actions/specializations';
 import type { Instructor, GetInstructorsParams } from 'src/types/instructor';
 import type { Specialization } from 'src/types/specialization';
@@ -29,6 +44,7 @@ import DeleteConfirmDialog from './delete-confirm-dialog';
 
 interface FormattedInstructor {
   id: string;
+  checkbox?: string;
   name: string;
   email: string;
   imageUrl: string;
@@ -81,6 +97,9 @@ export default function MinutesManagementView() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
 
   useEffect(() => {
     debounceTimer.current = setTimeout(() => {
@@ -198,7 +217,107 @@ export default function MinutesManagementView() {
   const verifiedCount = items.filter((i) => !!i.verifiedAt).length;
   const inactiveCount = items.filter((i) => !i.verifiedAt).length;
 
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => items.some((item) => item.id === id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [items]);
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedIds(checked ? items.map((item) => item.id) : []);
+  };
+
+  const handleSelectOne = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkActivate = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('activate');
+    try {
+      const res = await bulkActivateInstructors(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setItems((prev) =>
+        prev.map((item) => (ids.includes(item.id) ? { ...item, isActive: true } : item))
+      );
+      setSelectedIds([]);
+      toast.success(t('bulk.activate_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('deactivate');
+    try {
+      const res = await bulkDeactivateInstructors(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setItems((prev) =>
+        prev.map((item) => (ids.includes(item.id) ? { ...item, isActive: false } : item))
+      );
+      setSelectedIds([]);
+      toast.warning(t('bulk.deactivate_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('delete');
+    try {
+      const res = await bulkDeleteInstructors(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setItems((prev) => prev.filter((item) => !ids.includes(item.id)));
+      setTotalCount((prev) => Math.max(0, prev - ids.length));
+      setSelectedIds([]);
+      setBulkDeleteOpen(false);
+      toast.success(t('bulk.delete_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const allSelected = items.length > 0 && selectedIds.length === items.length;
+  const indeterminate = selectedIds.length > 0 && selectedIds.length < items.length;
+
   const tableHead = [
+    {
+      id: 'checkbox',
+      label: (
+        <Checkbox
+          checked={allSelected}
+          indeterminate={indeterminate}
+          onChange={(e) => handleSelectAll(e.target.checked)}
+          size="small"
+        />
+      ),
+      align: cellAlignment.center,
+      width: 48,
+    },
     { id: 'name', label: t('columns.name'), align: (isRtl ? 'right' : 'left') as cellAlignment },
     { id: 'title', label: t('columns.title'), align: 'center' as cellAlignment },
     { id: 'qualification', label: t('columns.qualification'), align: 'center' as cellAlignment },
@@ -312,6 +431,13 @@ export default function MinutesManagementView() {
   };
 
   const customRender = {
+    checkbox: (row: FormattedInstructor) => (
+      <Checkbox
+        checked={selectedIds.includes(row.id)}
+        onClick={(e) => handleSelectOne(row.id, e)}
+        size="small"
+      />
+    ),
     name: (row: FormattedInstructor) => (
       <Box
         sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
@@ -594,6 +720,96 @@ export default function MinutesManagementView() {
           </FormControl>
         </Box>
 
+        {selectedIds.length > 0 && (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            sx={{
+              px: 2,
+              pb: 2,
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 1.5,
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#1C252E', minWidth: 88 }}>
+              {t('bulk.selected', { count: selectedIds.length })}
+            </Typography>
+            <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+            <Button
+              variant="contained"
+              disabled={Boolean(bulkLoading)}
+              onClick={handleBulkActivate}
+              startIcon={
+                bulkLoading === 'activate' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="solar:check-circle-bold" width={16} />
+                )
+              }
+              sx={{
+                borderRadius: '10px',
+                bgcolor: '#00A76F',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#008767', boxShadow: 'none' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {bulkLoading === 'activate'
+                ? t('bulk.working')
+                : t('bulk.activate', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={Boolean(bulkLoading)}
+              onClick={handleBulkDeactivate}
+              startIcon={
+                bulkLoading === 'deactivate' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="solar:close-circle-bold" width={16} />
+                )
+              }
+              sx={{
+                borderRadius: '10px',
+                color: '#B45309',
+                borderColor: '#FDE68A',
+                bgcolor: '#FFFBEB',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                '&:hover': { borderColor: '#F59E0B', bgcolor: '#FEF3C7' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {bulkLoading === 'deactivate'
+                ? t('bulk.working')
+                : t('bulk.deactivate', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              disabled={Boolean(bulkLoading)}
+              onClick={() => setBulkDeleteOpen(true)}
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: '#D32F2F',
+                fontWeight: 700,
+                textTransform: 'none',
+                gap: 0.75,
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#C62828', boxShadow: 'none' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {t('bulk.delete', { count: selectedIds.length })}
+            </Button>
+          </Stack>
+        )}
+
         {/* Table */}
         <Box sx={{ px: 1 }}>
           <SharedTable<FormattedInstructor>
@@ -611,6 +827,60 @@ export default function MinutesManagementView() {
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
       />
+
+      <Dialog
+        open={bulkDeleteOpen}
+        onClose={() => {
+          if (!bulkLoading) setBulkDeleteOpen(false);
+        }}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: { sx: { borderRadius: 3, p: 1 } },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#1C252E', pb: 1 }}>
+          {t('bulk.delete_title')}
+        </DialogTitle>
+        <DialogContent sx={{ color: '#64748B', fontSize: 14 }}>
+          {t('bulk.delete_content', { count: selectedIds.length })}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
+          <Button
+            variant="outlined"
+            disabled={bulkLoading === 'delete'}
+            onClick={() => setBulkDeleteOpen(false)}
+            sx={{ borderRadius: '10px', color: '#64748B', borderColor: '#E2E8F0', fontWeight: 600, textTransform: 'none' }}
+          >
+            {t('bulk.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmBulkDelete}
+            disabled={bulkLoading === 'delete'}
+            startIcon={
+              bulkLoading === 'delete' ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+              )
+            }
+            sx={{
+              borderRadius: '10px',
+              bgcolor: '#D32F2F',
+              fontWeight: 700,
+              textTransform: 'none',
+              gap: 0.75,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#C62828', boxShadow: 'none' },
+              '& .MuiButton-startIcon': { m: 0 },
+            }}
+          >
+            {bulkLoading === 'delete' ? t('bulk.deleting') : t('bulk.confirm_delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
