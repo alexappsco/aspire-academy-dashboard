@@ -290,5 +290,16 @@ export const endpoints = {
     countries: '/instructor/lookups/countries',
     universities: '/instructor/lookups/universities',
   },
+  actions:{
+    studentBulkDelete:"/admin/students/bulk/delete",
+    studentBulkActivate:"/admin/students/bulk/activate",
+    studentBulkDeactivate:"/admin/students/bulk/deactivate",
+    instructorsBulkDelete:"/admin/instructors/bulk/delete",
+    instructorsBulkActivate:"/admin/instructors/bulk/activate",
+    instructorsBulkDeactivate:"/admin/instructors/bulk/deactivate",
+    ordersBulkApprove:"/admin/orders/bulk/approve",
+    ordersBulkReject:"/admin/orders/bulk/reject",
+    ordersBulkDelete:"/admin/orders/bulk/delete",
+  }
 
 };  

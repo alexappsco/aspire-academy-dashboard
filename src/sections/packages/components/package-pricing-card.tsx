@@ -42,11 +42,11 @@ export default function PackagePricingCard(props: Props) {
       <Stack spacing={2.25}>
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider', pb: 1.5 }}>
           <Typography color="text.secondary">{t('selected_count')}</Typography>
-          <Typography fontWeight={700}>{t('selected_count_value', { count: props.selectedCount })}</Typography>
+          <Typography sx={{ fontWeight: 700 }}>{t('selected_count_value', { count: props.selectedCount })}</Typography>
         </Box>
         <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider', pb: 1.5 }}>
           <Typography color="text.secondary">{t('courses_total')}</Typography>
-          <Typography fontWeight={700}>{props.coursesTotal.toFixed(2)} {props.currency}</Typography>
+          <Typography sx={{ fontWeight: 700 }}>{props.coursesTotal.toFixed(2)} {props.currency}</Typography>
         </Box>
         <TextField
           fullWidth
@@ -69,8 +69,8 @@ export default function PackagePricingCard(props: Props) {
         <Alert severity="info">
           {t('discount_rate', { value: discountPercentage.toFixed(2) })}
         </Alert>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={600}>{t('status')}</Typography>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography sx={{ fontWeight: 600 }}>{t('status')}</Typography>
           <FormControlLabel control={<Switch checked={props.isActive} disabled={props.readOnly} onChange={(event) => props.onActiveChange(event.target.checked)} />} label={t('active')} />
         </Stack>
       </Stack>

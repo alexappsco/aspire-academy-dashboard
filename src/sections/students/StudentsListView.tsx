@@ -31,7 +31,15 @@ import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import { useRouter } from 'src/i18n/routing';
 import { useToast } from 'src/components/toast';
-import { getStudents, deleteStudent, activateStudent, deactivateStudent } from 'src/actions/students';
+import {
+  getStudents,
+  deleteStudent,
+  activateStudent,
+  deactivateStudent,
+  bulkDeleteStudents,
+  bulkActivateStudents,
+  bulkDeactivateStudents,
+} from 'src/actions/students';
 import { StudentItem } from 'src/types/student';
 import { MOCK_STUDENTS } from './_mock';
 
@@ -85,6 +93,9 @@ export default function StudentsListView() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<StudentItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
 
   // Debounce search input
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -206,6 +217,79 @@ export default function StudentsListView() {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  };
+
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => studentsData.some((student) => student.id === id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [studentsData]);
+
+  const handleBulkActivate = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('activate');
+    try {
+      const res = await bulkActivateStudents(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setStudentsData((prev) =>
+        prev.map((student) => (ids.includes(student.id) ? { ...student, isActive: true } : student))
+      );
+      setSelectedIds([]);
+      toast.success(t('bulk.activate_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('deactivate');
+    try {
+      const res = await bulkDeactivateStudents(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setStudentsData((prev) =>
+        prev.map((student) => (ids.includes(student.id) ? { ...student, isActive: false } : student))
+      );
+      setSelectedIds([]);
+      toast.warning(t('bulk.deactivate_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (selectedIds.length === 0 || bulkLoading) return;
+    const ids = [...selectedIds];
+    setBulkLoading('delete');
+    try {
+      const res = await bulkDeleteStudents(ids);
+      if (!res.success) {
+        toast.error(res.error || t('bulk.error'));
+        return;
+      }
+      setStudentsData((prev) => prev.filter((student) => !ids.includes(student.id)));
+      setTotalCount((prev) => Math.max(0, prev - ids.length));
+      setSelectedIds([]);
+      setBulkDeleteOpen(false);
+      toast.success(t('bulk.delete_success', { count: ids.length }));
+    } catch {
+      toast.error(t('bulk.error'));
+    } finally {
+      setBulkLoading(null);
+    }
   };
 
   // Counts for tabs
@@ -565,6 +649,90 @@ export default function StudentsListView() {
           </SelectField>
         </Stack>
 
+        {selectedIds.length > 0 && (
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            sx={{
+              px: 2.5,
+              pb: 2,
+              alignItems: { xs: 'stretch', sm: 'center' },
+              gap: 1.5,
+            }}
+          >
+            <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A', minWidth: 88 }}>
+              {t('bulk.selected', { count: selectedIds.length })}
+            </Typography>
+            <Box sx={{ flex: 1, display: { xs: 'none', sm: 'block' } }} />
+            <Button
+              variant="contained"
+              disabled={Boolean(bulkLoading)}
+              onClick={handleBulkActivate}
+              startIcon={
+                bulkLoading === 'activate' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="solar:check-circle-bold" width={16} />
+                )
+              }
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#10B981',
+                fontWeight: 700,
+                gap: 0.75,
+                '&:hover': { bgcolor: '#059669' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {bulkLoading === 'activate'
+                ? t('bulk.working')
+                : t('bulk.activate', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={Boolean(bulkLoading)}
+              onClick={handleBulkDeactivate}
+              startIcon={
+                bulkLoading === 'deactivate' ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Iconify icon="solar:close-circle-bold" width={16} />
+                )
+              }
+              sx={{
+                borderRadius: 2,
+                color: '#B45309',
+                borderColor: '#FDE68A',
+                bgcolor: '#FFFBEB',
+                fontWeight: 700,
+                gap: 0.75,
+                '&:hover': { borderColor: '#F59E0B', bgcolor: '#FEF3C7' },
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {bulkLoading === 'deactivate'
+                ? t('bulk.working')
+                : t('bulk.deactivate', { count: selectedIds.length })}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              disabled={Boolean(bulkLoading)}
+              onClick={() => setBulkDeleteOpen(true)}
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={16} />}
+              sx={{
+                borderRadius: 2,
+                bgcolor: '#DC2626',
+                fontWeight: 700,
+                gap: 0.75,
+                '& .MuiButton-startIcon': { m: 0 },
+              }}
+            >
+              {t('bulk.delete', { count: selectedIds.length })}
+            </Button>
+          </Stack>
+        )}
+
         {/* SharedTable with Loading Indicator */}
         <Box sx={{ p: 1, position: 'relative' }}>
           {loading && (
@@ -693,6 +861,59 @@ export default function StudentsListView() {
             }}
           >
             {deleting ? t('delete_dialog.deleting') : t('delete_dialog.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={bulkDeleteOpen}
+        onClose={() => {
+          if (!bulkLoading) setBulkDeleteOpen(false);
+        }}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 3, p: 1 },
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A', pb: 1 }}>
+          {t('bulk.delete_title')}
+        </DialogTitle>
+        <DialogContent sx={{ color: '#64748B', fontSize: 14 }}>
+          {t('bulk.delete_content', { count: selectedIds.length })}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 1, gap: 1 }}>
+          <Button
+            variant="outlined"
+            disabled={bulkLoading === 'delete'}
+            onClick={() => setBulkDeleteOpen(false)}
+            sx={{ borderRadius: 2, color: '#64748B', borderColor: '#E2E8F0', fontWeight: 600 }}
+          >
+            {t('bulk.cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirmBulkDelete}
+            disabled={bulkLoading === 'delete'}
+            startIcon={
+              bulkLoading === 'delete' ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+              )
+            }
+            sx={{
+              borderRadius: 2,
+              bgcolor: '#DC2626',
+              fontWeight: 700,
+              gap: 0.75,
+              '& .MuiButton-startIcon': { m: 0 },
+            }}
+          >
+            {bulkLoading === 'delete' ? t('bulk.deleting') : t('bulk.confirm_delete')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
@@ -19,11 +20,16 @@ import {
   type OrderDto,
 } from 'src/types/order';
 
+type OrderRow = OrderDto & { checkbox?: string };
+
 type Props = {
   orders: OrderDto[];
   totalCount: number;
   loading: boolean;
   actionLoadingId: string | null;
+  selectedIds: string[];
+  onSelectAll: (checked: boolean) => void;
+  onSelectOne: (id: string) => void;
   onViewReceipt: (order: OrderDto) => void;
   onApprove: (order: OrderDto) => void;
   onReject: (order: OrderDto) => void;
@@ -34,6 +40,9 @@ export default function OrdersTable({
   totalCount,
   loading,
   actionLoadingId,
+  selectedIds,
+  onSelectAll,
+  onSelectOne,
   onViewReceipt,
   onApprove,
   onReject,
@@ -89,7 +98,23 @@ export default function OrdersTable({
     }
   };
 
+  const allSelected = orders.length > 0 && selectedIds.length === orders.length;
+  const indeterminate = selectedIds.length > 0 && selectedIds.length < orders.length;
+
   const tableHead = [
+    {
+      id: 'checkbox',
+      label: (
+        <Checkbox
+          checked={allSelected}
+          indeterminate={indeterminate}
+          onChange={(event) => onSelectAll(event.target.checked)}
+          size="small"
+        />
+      ),
+      align: cellAlignment.center,
+      width: 48,
+    },
     { id: 'orderNumber', label: t('columns.order_number'), align: cellAlignment.center },
     { id: 'studentName', label: t('columns.student_name'), align: cellAlignment.center },
     { id: 'studentCountry', label: t('columns.student_country'), align: cellAlignment.center },
@@ -102,7 +127,17 @@ export default function OrdersTable({
   ];
 
   const customRender = {
-    orderNumber: (row: OrderDto) => {
+    checkbox: (row: OrderRow) => (
+      <Checkbox
+        checked={selectedIds.includes(row.id)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onSelectOne(row.id);
+        }}
+        size="small"
+      />
+    ),
+    orderNumber: (row: OrderRow) => {
       const statusInfo = getStatusInfo(row.status);
       return (
         <Typography sx={{ fontSize: 13, fontWeight: 800, color: statusInfo.isPending ? '#B45309' : '#0F172A', whiteSpace: 'nowrap' }}>
@@ -110,7 +145,7 @@ export default function OrdersTable({
         </Typography>
       );
     },
-    studentName: (row: OrderDto) => (
+    studentName: (row: OrderRow) => (
       <Box>
         <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
           {row.buyerName || '-'}
@@ -120,12 +155,12 @@ export default function OrdersTable({
         </Typography>
       </Box>
     ),
-    studentCountry: (row: OrderDto) => (
+    studentCountry: (row: OrderRow) => (
       <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>
         {row.studentCountryName || '-'}
       </Typography>
     ),
-    instructorName: (row: OrderDto) => {
+    instructorName: (row: OrderRow) => {
       const instructorNames =
         row.items
           ?.map((item) => item.instructorName)
@@ -137,7 +172,7 @@ export default function OrdersTable({
         </Typography>
       );
     },
-    items: (row: OrderDto) => {
+    items: (row: OrderRow) => {
       const title =
         row.items
           ?.map((item) => item.courseTitle || item.packageName)
@@ -147,17 +182,17 @@ export default function OrdersTable({
         <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>{title}</Typography>
       );
     },
-    amount: (row: OrderDto) => (
+    amount: (row: OrderRow) => (
       <Typography sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap' }}>
         {(row.total ?? row.subtotal ?? 0).toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')}
       </Typography>
     ),
-    date: (row: OrderDto) => (
+    date: (row: OrderRow) => (
       <Typography sx={{ fontSize: 13, color: '#64748B', fontWeight: 500, whiteSpace: 'nowrap' }}>
         {formatDate(row.creationTime)}
       </Typography>
     ),
-    statusValue: (row: OrderDto) => {
+    statusValue: (row: OrderRow) => {
       const statusInfo = getStatusInfo(row.status);
       return (
         <Chip
@@ -174,7 +209,7 @@ export default function OrdersTable({
         />
       );
     },
-    actions: (row: OrderDto) => {
+    actions: (row: OrderRow) => {
       const statusInfo = getStatusInfo(row.status);
       const busy = actionLoadingId === row.id;
 
@@ -273,7 +308,7 @@ export default function OrdersTable({
         </Box>
       )}
 
-      <SharedTable
+      <SharedTable<OrderRow>
         data={orders}
         tableHead={tableHead}
         customRender={customRender}

@@ -113,7 +113,7 @@ export default function PackagesTable({ packages, totalCount, onDeleted }: Props
         },
       ]}
       customRender={{
-        packageName: (row) => <Typography variant="body2" fontWeight={600}>{row.packageName}</Typography>,
+        packageName: (row) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.packageName}</Typography>,
         coursesValue: (row) => t('columns.courses_count', { count: row.coursesValue }),
         originalPriceValue: (row) => (
           <Box component="span" sx={{ color: '#F59E0B', fontWeight: 600 }}>
