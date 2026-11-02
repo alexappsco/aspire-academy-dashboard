@@ -1,15 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { useLocale, useTranslations } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
+import { deletePackage } from 'src/actions/packages';
+import { useToast } from 'src/components/toast';
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment, type headCellType } from 'src/components/SharedTable/types';
 import type { PackageSummary } from 'src/types/package';
 import { useRouter } from 'src/i18n/routing';
+import DeletePackageDialog from './delete-package-dialog';
 
 type PackageRow = PackageSummary & {
   packageName: string;
@@ -21,7 +25,7 @@ type PackageRow = PackageSummary & {
   creationDateValue: string;
 };
 
-type Props = { packages: PackageSummary[]; totalCount: number };
+type Props = { packages: PackageSummary[]; totalCount: number; onDeleted: () => void };
 
 function formatMoney(value: number, item: PackageSummary, locale: string) {
   const amount = new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
@@ -41,10 +45,13 @@ function formatDate(value: string, locale: string) {
   }).format(date);
 }
 
-export default function PackagesTable({ packages, totalCount }: Props) {
+export default function PackagesTable({ packages, totalCount, onDeleted }: Props) {
   const t = useTranslations('Packages');
   const locale = useLocale();
   const router = useRouter();
+  const toast = useToast();
+  const [deleting, setDeleting] = useState<PackageRow | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const align = locale === 'ar' ? cellAlignment.right : cellAlignment.left;
   const tableHead: headCellType[] = [
     { id: 'packageName', label: t('columns.name'), align },
@@ -66,7 +73,22 @@ export default function PackagesTable({ packages, totalCount }: Props) {
     creationDateValue: item.creationTime,
   }));
 
+  const handleDelete = async () => {
+    if (!deleting) return;
+    setDeleteLoading(true);
+    const response = await deletePackage(deleting.id);
+    setDeleteLoading(false);
+    if (!response.success) {
+      toast.error(response.error || t('messages.delete_error'));
+      return;
+    }
+    toast.success(t('messages.delete_success'));
+    setDeleting(null);
+    onDeleted();
+  };
+
   return (
+    <>
     <SharedTable
       data={rows}
       tableHead={tableHead}
@@ -74,9 +96,20 @@ export default function PackagesTable({ packages, totalCount }: Props) {
       serverPagination
       actions={[
         {
+          label: t('actions.view'),
+          icon: <Iconify icon="solar:eye-bold" />,
+          onClick: (row) => router.push(`/packages/${row.id}`),
+        },
+        {
           label: t('actions.edit'),
           icon: <Iconify icon="solar:pen-bold" />,
           onClick: (row) => router.push(`/packages/${row.id}/edit`),
+        },
+        {
+          label: t('actions.delete'),
+          icon: <Iconify icon="solar:trash-bin-trash-bold" />,
+          sx: { color: 'error.main' },
+          onClick: (row) => setDeleting(row),
         },
       ]}
       customRender={{
@@ -102,5 +135,7 @@ export default function PackagesTable({ packages, totalCount }: Props) {
         creationDateValue: (row) => formatDate(row.creationDateValue, locale),
       }}
     />
+    <DeletePackageDialog open={Boolean(deleting)} loading={deleteLoading} name={deleting?.packageName || ''} onClose={() => setDeleting(null)} onConfirm={handleDelete} />
+    </>
   );
 }

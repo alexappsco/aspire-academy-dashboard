@@ -115,7 +115,7 @@ export default function PackagesView() {
             <CircularProgress size={32} />
           </Stack>
         ) : (
-          <PackagesTable packages={packages} totalCount={totalCount} />
+          <PackagesTable packages={packages} totalCount={totalCount} onDeleted={loadPackages} />
         )}
       </Card>
     </Stack>

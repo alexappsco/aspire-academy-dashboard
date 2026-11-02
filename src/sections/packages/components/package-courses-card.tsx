@@ -17,11 +17,12 @@ type Props = {
   courses: CourseDto[];
   onAdd: () => void;
   onRemove: (id: string) => void;
+  readOnly?: boolean;
 };
 
 type CourseRow = CourseDto & { courseTitle: string; instructorValue: string; specializationValue: string; addedValue: string; removeAction: string };
 
-export default function PackageCoursesCard({ courses, onAdd, onRemove }: Props) {
+export default function PackageCoursesCard({ courses, onAdd, onRemove, readOnly }: Props) {
   const t = useTranslations('Packages.form.courses');
   const rows: CourseRow[] = courses.map((course) => ({
     ...course,
@@ -39,7 +40,7 @@ export default function PackageCoursesCard({ courses, onAdd, onRemove }: Props) 
           <Typography variant="h6">{t('title')}</Typography>
           <Typography variant="body2" color="text.secondary">{t('subtitle')}</Typography>
         </Stack>
-        <Button variant="contained" onClick={onAdd}>{t('add')}</Button>
+        {!readOnly && <Button variant="contained" onClick={onAdd}>{t('add')}</Button>}
       </Box>
       <SharedTable
         data={rows}
@@ -50,12 +51,12 @@ export default function PackageCoursesCard({ courses, onAdd, onRemove }: Props) 
           { id: 'instructorValue', label: t('instructor'), align: cellAlignment.right },
           { id: 'specializationValue', label: t('specialization'), align: cellAlignment.right },
           { id: 'addedValue', label: t('price'), align: cellAlignment.right },
-          { id: 'removeAction', label: '', align: cellAlignment.left },
+          ...(!readOnly ? [{ id: 'removeAction', label: '', align: cellAlignment.left }] : []),
         ]}
         customRender={{
           addedValue: (row) => `${row.price ?? 0} ${row.currency?.symbol || row.currency?.code || ''}`,
           courseTitle: (row) => <Typography variant="body2">{row.courseTitle}</Typography>,
-          removeAction: (row) => <IconButton color="error" size="small" onClick={() => onRemove(row.id)}><Iconify icon="solar:trash-bin-trash-linear" /></IconButton>,
+          ...(!readOnly ? { removeAction: (row: CourseRow) => <IconButton color="error" size="small" onClick={() => onRemove(row.id)}><Iconify icon="solar:trash-bin-trash-linear" /></IconButton> } : {}),
         }}
       />
     </Card>

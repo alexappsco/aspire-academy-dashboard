@@ -3458,15 +3458,25 @@
       "inactive": "Inactive"
     },
     "actions": {
-      "edit": "Edit Package"
+      "view": "View Package",
+      "edit": "Edit Package",
+      "delete": "Delete Package"
+    },
+    "delete_dialog": {
+      "title": "Delete Package",
+      "message": "Are you sure you want to delete “{name}”? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Delete"
     },
     "form": {
       "create_title": "Add New Package",
       "edit_title": "Edit Package",
+      "view_title": "View Package",
       "subtitle": "Select courses and define the package details and price displayed in the mobile app",
       "create": "Create",
       "save_changes": "Save Changes",
       "cancel": "Cancel",
+      "back": "Back to Packages",
       "info": {
         "title": "Package Information",
         "name_ar": "Package Name (Arabic)",
@@ -3521,7 +3531,9 @@
       }
     },
     "messages": {
-      "load_error": "Failed to load packages"
+      "load_error": "Failed to load packages",
+      "delete_success": "Package deleted successfully",
+      "delete_error": "Failed to delete package"
     }
   },
   "StudentOrders": {

@@ -28,7 +28,7 @@ const INITIAL_VALUES: PackageFormValues = {
   nameAr: '', nameEn: '', image: null, courseIds: [], discountedPrice: '', isActive: true,
 };
 
-export default function PackageFormView({ packageId }: { packageId?: string }) {
+export default function PackageFormView({ packageId, readOnly = false }: { packageId?: string; readOnly?: boolean }) {
   const t = useTranslations('Packages.form');
   const locale = useLocale();
   const toast = useToast();
@@ -56,6 +56,22 @@ export default function PackageFormView({ packageId }: { packageId?: string }) {
     if (detailsResponse) {
       if (detailsResponse.success && detailsResponse.data) {
         const item = detailsResponse.data;
+        const detailsCourses: CourseDto[] = (item.courses || []).map((course) => ({
+          id: course.courseId,
+          title: course.title || '—',
+          imageUrl: course.imageUrl || undefined,
+          price: course.price,
+          instructorId: course.instructorId,
+          instructor: { id: course.instructorId, name: course.instructorName },
+          specializationId: course.specializationId,
+          specialization: { id: course.specializationId, name: course.specializationName || '—' },
+          currency: { id: '', name: '', code: item.currencyCode || '', symbol: item.currencySymbol || '' },
+          creationTime: course.addedAt,
+        }));
+        setCourses((current) => {
+          const existingIds = new Set(current.map((course) => course.id));
+          return [...current, ...detailsCourses.filter((course) => !existingIds.has(course.id))];
+        });
         setValues({
           nameAr: item.nameAr || '',
           nameEn: item.nameEn || '',
@@ -119,19 +135,19 @@ export default function PackageFormView({ packageId }: { packageId?: string }) {
   return (
     <Stack spacing={3}>
       <Stack>
-        <Typography variant="h4">{t(isEdit ? 'edit_title' : 'create_title')}</Typography>
+        <Typography variant="h4">{t(readOnly ? 'view_title' : isEdit ? 'edit_title' : 'create_title')}</Typography>
         <Typography color="text.secondary">{t('subtitle')}</Typography>
       </Stack>
-      <PackageInfoCard nameAr={values.nameAr} nameEn={values.nameEn} errors={errors} onChange={(field, value) => setValues((current) => ({ ...current, [field]: value }))} />
-      <PackageImageCard value={values.image} error={errors.image} onChange={(image) => setValues((current) => ({ ...current, image }))} />
-      <PackageCoursesCard courses={selectedCourses} onAdd={() => setPickerOpen(true)} onRemove={(id) => setValues((current) => ({ ...current, courseIds: current.courseIds.filter((courseId) => courseId !== id) }))} />
+      <PackageInfoCard nameAr={values.nameAr} nameEn={values.nameEn} errors={errors} readOnly={readOnly} onChange={(field, value) => setValues((current) => ({ ...current, [field]: value }))} />
+      <PackageImageCard value={values.image} error={errors.image} readOnly={readOnly} onChange={(image) => setValues((current) => ({ ...current, image }))} />
+      <PackageCoursesCard courses={selectedCourses} readOnly={readOnly} onAdd={() => setPickerOpen(true)} onRemove={(id) => setValues((current) => ({ ...current, courseIds: current.courseIds.filter((courseId) => courseId !== id) }))} />
       {errors.courseIds && <Typography color="error" variant="caption">{errors.courseIds}</Typography>}
-      <PackagePricingCard coursesTotal={coursesTotal} selectedCount={selectedCourses.length} finalPrice={values.discountedPrice} isActive={values.isActive} currency={currency} errors={errors} onFinalPriceChange={(discountedPrice) => setValues((current) => ({ ...current, discountedPrice }))} onActiveChange={(isActive) => setValues((current) => ({ ...current, isActive }))} />
+      <PackagePricingCard coursesTotal={coursesTotal} selectedCount={selectedCourses.length} finalPrice={values.discountedPrice} isActive={values.isActive} currency={currency} errors={errors} readOnly={readOnly} onFinalPriceChange={(discountedPrice) => setValues((current) => ({ ...current, discountedPrice }))} onActiveChange={(isActive) => setValues((current) => ({ ...current, isActive }))} />
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Button variant="outlined" color="inherit" onClick={() => router.push('/packages')}>{t('cancel')}</Button>
-        <Button variant="contained" disabled={saving} onClick={handleSubmit}>{saving ? <CircularProgress size={20} color="inherit" /> : t(isEdit ? 'save_changes' : 'create')}</Button>
+        <Button variant="outlined" color="inherit" onClick={() => router.push('/packages')}>{t(readOnly ? 'back' : 'cancel')}</Button>
+        {!readOnly && <Button variant="contained" disabled={saving} onClick={handleSubmit}>{saving ? <CircularProgress size={20} color="inherit" /> : t(isEdit ? 'save_changes' : 'create')}</Button>}
       </Box>
-      <CoursePickerDialog open={pickerOpen} courses={courses} selectedIds={values.courseIds} countries={countries.map((country) => ({ id: country.id, name: (locale === 'ar' ? country.nameAr : country.nameEn) || country.nameAr || country.nameEn, currencyId: country.currencyId }))} onClose={() => setPickerOpen(false)} onConfirm={(courseIds) => setValues((current) => ({ ...current, courseIds }))} />
+      {!readOnly && <CoursePickerDialog open={pickerOpen} courses={courses} selectedIds={values.courseIds} countries={countries.map((country) => ({ id: country.id, name: (locale === 'ar' ? country.nameAr : country.nameEn) || country.nameAr || country.nameEn, currencyId: country.currencyId }))} onClose={() => setPickerOpen(false)} onConfirm={(courseIds) => setValues((current) => ({ ...current, courseIds }))} />}
     </Stack>
   );
 }

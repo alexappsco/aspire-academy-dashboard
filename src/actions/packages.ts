@@ -2,7 +2,7 @@
 
 import type { ApiSingleResponse } from 'src/types/crud-types';
 import type { GetPackagesParams, PackageListResponse, PackageSummary } from 'src/types/package';
-import { editData, getData, postData } from 'src/utils/crud-fetch-api';
+import { deleteData, editData, getData, postData } from 'src/utils/crud-fetch-api';
 import { endpoints } from 'src/utils/endpoints';
 
 export async function getPackages(
@@ -75,5 +75,15 @@ export async function updatePackage(
     return { success: false, error: 'error' in response ? response.error : 'Failed to update package' };
   } catch (error) {
     return { success: false, error: error instanceof Error ? error.message : 'Failed to update package' };
+  }
+}
+
+export async function deletePackage(id: string): Promise<ApiSingleResponse<Record<string, never>>> {
+  try {
+    const response = await deleteData<Record<string, never>>(endpoints.packages.delete(id));
+    if ('success' in response && response.success) return { success: true, data: {} };
+    return { success: false, error: 'error' in response ? response.error : 'Failed to delete package' };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Failed to delete package' };
   }
 }

@@ -11,10 +11,11 @@ type Props = {
   nameAr: string;
   nameEn: string;
   errors: Record<string, string>;
+  readOnly?: boolean;
   onChange: (field: 'nameAr' | 'nameEn', value: string) => void;
 };
 
-export default function PackageInfoCard({ nameAr, nameEn, errors, onChange }: Props) {
+export default function PackageInfoCard({ nameAr, nameEn, errors, readOnly, onChange }: Props) {
   const t = useTranslations('Packages.form.info');
   const labelSx = {
     direction: 'rtl',
@@ -31,8 +32,8 @@ export default function PackageInfoCard({ nameAr, nameEn, errors, onChange }: Pr
       <Typography variant="h6">{t('title')}</Typography>
       <Divider sx={{ my: 2 }} />
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-        <TextField fullWidth required label={t('name_ar')} value={nameAr} onChange={(e) => onChange('nameAr', e.target.value)} error={!!errors.nameAr} helperText={errors.nameAr} sx={labelSx} />
-        <TextField fullWidth required label={t('name_en')} value={nameEn} onChange={(e) => onChange('nameEn', e.target.value)} error={!!errors.nameEn} helperText={errors.nameEn} sx={labelSx} inputProps={{ dir: 'ltr' }} />
+        <TextField fullWidth required={!readOnly} label={t('name_ar')} value={nameAr} onChange={(e) => onChange('nameAr', e.target.value)} error={!!errors.nameAr} helperText={errors.nameAr} sx={labelSx} slotProps={{ htmlInput: { readOnly } }} />
+        <TextField fullWidth required={!readOnly} label={t('name_en')} value={nameEn} onChange={(e) => onChange('nameEn', e.target.value)} error={!!errors.nameEn} helperText={errors.nameEn} sx={labelSx} slotProps={{ htmlInput: { readOnly, dir: 'ltr' } }} />
       </Stack>
     </Card>
   );

@@ -19,6 +19,7 @@ type Props = {
   errors: Record<string, string>;
   onFinalPriceChange: (value: string) => void;
   onActiveChange: (value: boolean) => void;
+  readOnly?: boolean;
 };
 
 export default function PackagePricingCard(props: Props) {
@@ -54,9 +55,9 @@ export default function PackagePricingCard(props: Props) {
           label={t('final_price')}
           value={props.finalPrice}
           onChange={(event) => props.onFinalPriceChange(event.target.value)}
+          slotProps={{ input: { endAdornment: <Typography color="text.secondary">{props.currency}</Typography> }, htmlInput: { readOnly: props.readOnly } }}
           error={!!props.errors.discountedPrice}
           helperText={props.errors.discountedPrice}
-          slotProps={{ input: { endAdornment: <Typography color="text.secondary">{props.currency}</Typography> } }}
           sx={{
             '& .MuiOutlinedInput-root': { bgcolor: '#F8FAFC', fontWeight: 700, fontSize: 18 },
             '& .MuiInputLabel-root': { left: 'auto', right: 14, transformOrigin: 'top right' },
@@ -70,7 +71,7 @@ export default function PackagePricingCard(props: Props) {
         </Alert>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography fontWeight={600}>{t('status')}</Typography>
-          <FormControlLabel control={<Switch checked={props.isActive} onChange={(event) => props.onActiveChange(event.target.checked)} />} label={t('active')} />
+          <FormControlLabel control={<Switch checked={props.isActive} disabled={props.readOnly} onChange={(event) => props.onActiveChange(event.target.checked)} />} label={t('active')} />
         </Stack>
       </Stack>
     </Card>
