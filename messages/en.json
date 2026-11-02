@@ -3135,7 +3135,11 @@
         "empty": "No receipt image is attached",
         "load_error": "The receipt image could not be loaded"
       }
-    }
+    },
+    "export_pdf": "Export Approved Requests (PDF)",
+    "exporting_pdf": "Exporting...",
+    "export_success": "PDF exported successfully",
+    "export_error": "Failed to export PDF"
   },
   "InstructorPayouts": {
     "title": "Instructor Payouts",
@@ -3630,7 +3634,11 @@
       "approve_error": "Failed to approve order",
       "reject_success": "Bank transfer receipt rejected",
       "reject_error": "Failed to reject order",
-      "no_receipt": "No receipt image attached for this order"
-    }
+      "no_receipt": "No receipt image attached for this order",
+      "export_success": "PDF exported successfully",
+      "export_error": "Failed to export PDF"
+    },
+    "export_pdf": "Export Approved Orders (PDF)",
+    "exporting_pdf": "Exporting..."
   }
 }

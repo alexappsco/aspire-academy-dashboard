@@ -133,3 +133,33 @@ export async function rejectHoursChargeRequest(
     };
   }
 }
+
+export async function exportApprovedHoursChargeRequestsPdfAction(): Promise<
+  ApiSingleResponse<{ base64: string; fileName: string }>
+> {
+  try {
+    const response = await getData<Blob>(endpoints.hoursChargeRequests.exportApprovedPdf);
+
+    if ('success' in response && response.success && response.data) {
+      const arrayBuffer = await response.data.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      return {
+        success: true,
+        data: {
+          base64,
+          fileName: 'approved-wallet-charge-requests.pdf',
+        },
+      };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to export approved hours charge requests PDF',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to export approved hours charge requests PDF',
+    };
+  }
+}

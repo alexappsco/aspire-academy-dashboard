@@ -142,6 +142,7 @@ export const endpoints = {
     details: (id: string) => `/admin/orders/${id}`,
     approve: (id: string) => `/admin/orders/${id}/approve`,
     reject: (id: string) => `/admin/orders/${id}/reject`,
+    exportApprovedPdf: '/admin/orders/approved/export/pdf',
   },
   hoursChargeRequests: {
     list: '/admin/wallet-charge-requests',
@@ -149,6 +150,7 @@ export const endpoints = {
     details: (id: string) => `/admin/wallet-charge-requests/${id}`,
     approve: (id: string) => `/admin/wallet-charge-requests/${id}/approve`,
     reject: (id: string) => `/admin/wallet-charge-requests/${id}/reject`,
+    exportApprovedPdf: '/admin/wallet-charge-requests/approved/export/pdf',
   },
   adminSessionRequests: {
     list: '/admin/session-requests',

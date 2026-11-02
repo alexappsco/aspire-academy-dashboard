@@ -3143,7 +3143,11 @@
         "empty": "لا توجد صورة إيصال مرفقة",
         "load_error": "تعذر تحميل صورة الإيصال"
       }
-    }
+    },
+    "export_pdf": "تصدير الطلبات المعتمدة (PDF)",
+    "exporting_pdf": "جاري التصدير...",
+    "export_success": "تم تصدير ملف PDF بنجاح",
+    "export_error": "فشل تصدير ملف PDF"
   },
   "InstructorPayouts": {
     "title": "مستحقات المحاضرون",
@@ -3638,7 +3642,11 @@
       "approve_error": "فشل قبول الطلب",
       "reject_success": "تم رفض إيصال التحويل المصرفي",
       "reject_error": "فشل رفض الطلب",
-      "no_receipt": "لا توجد صورة إيصال مرفقة لهذا الطلب"
-    }
+      "no_receipt": "لا توجد صورة إيصال مرفقة لهذا الطلب",
+      "export_success": "تم تصدير ملف PDF بنجاح",
+      "export_error": "فشل تصدير ملف PDF"
+    },
+    "export_pdf": "تصدير الطلبات المعتمدة (PDF)",
+    "exporting_pdf": "جاري التصدير..."
   }
 }
