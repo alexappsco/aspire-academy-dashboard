@@ -18,31 +18,46 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import Iconify from "src/components/iconify";
-import { getFacultiesLookupAction } from "src/actions/study-materials";
+import { getFaculties } from "src/actions/faculties";
 import {
   getAcademicYears,
   type AcademicYearDto,
 } from "src/actions/academic-years";
-import { getSemesters } from "src/actions/semesters";
+import type { Faculty } from "src/types/faculty";
 import type {
   StudyMaterialDto,
   CreateStudyMaterialDto,
-  FacultyLookupDto,
-  SemesterLookupDto,
 } from "src/types/study-material";
 
-const FALLBACK_FACULTIES: FacultyLookupDto[] = [
-  { id: "1", nameAr: "كلية الطب", nameEn: "Faculty of Medicine" },
-  { id: "2", nameAr: "كلية الهندسة", nameEn: "Faculty of Engineering" },
-  { id: "3", nameAr: "كلية الحاسب", nameEn: "Faculty of Computer Science" },
-  {
-    id: "4",
-    nameAr: "كلية إدارة الأعمال",
-    nameEn: "Faculty of Business Administration",
-  },
-  { id: "5", nameAr: "كلية الصيدلة", nameEn: "Faculty of Pharmacy" },
-  { id: "6", nameAr: "كلية الحقوق", nameEn: "Faculty of Law" },
-];
+/** One editable faculty → academic year → semester row. */
+interface PlacementRow {
+  key: number;
+  facultyId: string;
+  academicYearId: string;
+  semesterId: string;
+}
+
+let nextRowKey = 1;
+const newRow = (facultyId = "", academicYearId = "", semesterId = ""): PlacementRow => ({
+  key: nextRowKey++,
+  facultyId,
+  academicYearId,
+  semesterId,
+});
+
+function initialRows(initialData?: StudyMaterialDto | null): PlacementRow[] {
+  if (initialData?.placements?.length) {
+    return initialData.placements.map((p) =>
+      newRow(p.facultyId, p.academicYearId ?? "", p.semesterId),
+    );
+  }
+  if (initialData?.facultyId) {
+    return [
+      newRow(initialData.facultyId, initialData.academicYearId ?? "", initialData.semesterId ?? ""),
+    ];
+  }
+  return [newRow()];
+}
 
 const getTextFieldStyles = (isRtl: boolean) => ({
   "& .MuiOutlinedInput-root": {
@@ -126,175 +141,71 @@ function FormContent({
 
   const [nameAr, setNameAr] = useState(initialData?.nameAr ?? "");
   const [nameEn, setNameEn] = useState(initialData?.nameEn ?? "");
-  const [facultyId, setFacultyId] = useState(initialData?.facultyId ?? "");
-  const [academicYearId, setAcademicYearId] = useState(
-    initialData?.academicYearId ?? "",
-  );
-  const [semesterId, setSemesterId] = useState(initialData?.semesterId ?? "");
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
+  const [rows, setRows] = useState<PlacementRow[]>(() => initialRows(initialData));
 
-  const [faculties, setFaculties] =
-    useState<FacultyLookupDto[]>(FALLBACK_FACULTIES);
-  const [academicYears, setAcademicYears] = useState<AcademicYearDto[]>([]);
-  const [semesters, setSemesters] = useState<SemesterLookupDto[]>([]);
-
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [loadingFaculties, setLoadingFaculties] = useState(false);
-  const [loadingAcademicYears, setLoadingAcademicYears] = useState(false);
-  const [loadingSemesters, setLoadingSemesters] = useState(false);
+  /** Academic years (with their semesters) per faculty id, loaded on demand. */
+  const [yearsByFaculty, setYearsByFaculty] = useState<Record<string, AcademicYearDto[]>>({});
+  const [loadingYearsFor, setLoadingYearsFor] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const init = async () => {
-      setLoadingFaculties(true);
-      try {
-        const facRes = await getFacultiesLookupAction();
-        if (isMounted) {
-          if (facRes.success && facRes.data && facRes.data.length > 0) {
-            setFaculties(facRes.data);
-          }
-        }
-      } catch {
-        // use fallback list
-      } finally {
-        if (isMounted) setLoadingFaculties(false);
-      }
-
-      if (initialData?.facultyId) {
-        setLoadingAcademicYears(true);
-        try {
-          const ayRes = await getAcademicYears({
-            FacultyId: initialData.facultyId,
-            IsActive: true,
-            MaxResultCount: 1000,
-          });
-
-          if (!isMounted) return;
-
-          const loadedYears =
-            ayRes.success && ayRes.data?.items ? ayRes.data.items : [];
-          setAcademicYears(loadedYears);
-
-          // Find academic year ID
-          let foundYearId = initialData.academicYearId || "";
-          if (
-            !foundYearId &&
-            initialData.semesterId &&
-            loadedYears.length > 0
-          ) {
-            const matchedYear = loadedYears.find((y) =>
-              y.semesters?.some((s) => s.id === initialData.semesterId),
-            );
-            if (matchedYear) {
-              foundYearId = matchedYear.id;
-            }
-          }
-
-          if (!foundYearId && initialData.semesterId) {
-            const semResAll = await getSemesters({
-              FacultyId: initialData.facultyId,
-              IsActive: true,
-              MaxResultCount: 1000,
-            });
-            if (semResAll.success && semResAll.data?.items) {
-              const matchedSemester = semResAll.data.items.find(
-                (s) => s.id === initialData.semesterId,
-              );
-              if (matchedSemester?.academicYears?.length) {
-                foundYearId = matchedSemester.academicYears[0].id;
-              }
-            }
-          }
-
-          if (foundYearId) {
-            setAcademicYearId(foundYearId);
-            setLoadingSemesters(true);
-            const semRes = await getSemesters({
-              FacultyId: initialData.facultyId,
-              AcademicYearId: foundYearId,
-              IsActive: true,
-              MaxResultCount: 1000,
-            });
-            if (isMounted && semRes.success && semRes.data?.items) {
-              setSemesters(semRes.data.items);
-            }
-          }
-        } catch {
-          // ignore
-        } finally {
-          if (isMounted) {
-            setLoadingAcademicYears(false);
-            setLoadingSemesters(false);
-          }
-        }
-      }
-    };
-
-    init();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [initialData]);
-
-  const handleFacultyChange = async (newFacultyId: string) => {
-    setFacultyId(newFacultyId);
-    setAcademicYearId("");
-    setSemesterId("");
-    setAcademicYears([]);
-    setSemesters([]);
-    if (errors.facultyId) setErrors((prev) => ({ ...prev, facultyId: "" }));
-    if (errors.academicYearId)
-      setErrors((prev) => ({ ...prev, academicYearId: "" }));
-    if (errors.semesterId) setErrors((prev) => ({ ...prev, semesterId: "" }));
-
-    if (!newFacultyId) return;
-
-    setLoadingAcademicYears(true);
+  const loadYears = async (facultyId: string) => {
+    if (!facultyId || yearsByFaculty[facultyId] || loadingYearsFor[facultyId]) return;
+    setLoadingYearsFor((prev) => ({ ...prev, [facultyId]: true }));
     try {
       const res = await getAcademicYears({
-        FacultyId: newFacultyId,
-        IsActive: true,
+        FacultyId: facultyId,
         MaxResultCount: 1000,
       });
-      if (res.success && res.data?.items) {
-        setAcademicYears(res.data.items);
-      }
-    } catch {
-      // ignore
+      const items = res.success && res.data?.items ? res.data.items : [];
+      setYearsByFaculty((prev) => ({
+        ...prev,
+        [facultyId]: [...items].sort((a, b) => a.order - b.order),
+      }));
     } finally {
-      setLoadingAcademicYears(false);
+      setLoadingYearsFor((prev) => ({ ...prev, [facultyId]: false }));
     }
   };
 
-  const handleAcademicYearChange = async (newAcademicYearId: string) => {
-    setAcademicYearId(newAcademicYearId);
-    setSemesterId("");
-    setSemesters([]);
-    if (errors.academicYearId)
-      setErrors((prev) => ({ ...prev, academicYearId: "" }));
-    if (errors.semesterId) setErrors((prev) => ({ ...prev, semesterId: "" }));
-
-    if (!newAcademicYearId || !facultyId) return;
-
-    setLoadingSemesters(true);
-    try {
-      const res = await getSemesters({
-        FacultyId: facultyId,
-        AcademicYearId: newAcademicYearId,
-        IsActive: true,
-        MaxResultCount: 1000,
-      });
-      if (res.success && res.data?.items) {
-        setSemesters(res.data.items);
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      setLoadingFaculties(true);
+      try {
+        const res = await getFaculties({ MaxResultCount: 1000 });
+        if (isMounted && res.success && res.data?.items) {
+          setFaculties(res.data.items);
+        }
+      } finally {
+        if (isMounted) setLoadingFaculties(false);
       }
-    } catch {
-      // ignore
-    } finally {
-      setLoadingSemesters(false);
-    }
+    })();
+    // Years for the faculties already on the subject being edited.
+    Array.from(new Set(rows.map((r) => r.facultyId).filter(Boolean))).forEach((id) => {
+      void loadYears(id);
+    });
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const clearError = (key: string) => {
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const updateRow = (key: number, patch: Partial<PlacementRow>) => {
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+    clearError("placements");
+    clearError(`row-${key}`);
+  };
+
+  const facultyLabel = (f: Faculty) => {
+    const name = (isRtl ? f.nameAr : f.nameEn) || f.nameAr || f.nameEn;
+    return f.university?.name ? `${name} — ${f.university.name}` : name;
   };
 
   const validate = (): boolean => {
@@ -309,23 +220,21 @@ function FormContent({
         ? "يرجى إدخال الاسم بالإنجليزية"
         : "Please enter English name";
     }
-    if (!facultyId) {
-      newErrors.facultyId = isRtl
-        ? "يرجى اختيار الكلية"
-        : "Please select college";
+    if (rows.length === 0) {
+      newErrors.placements = t("dialog.placements_required");
     }
-    if (!academicYearId) {
-      newErrors.academicYearId = isRtl
-        ? "يرجى اختيار السنة الدراسية"
-        : "Please select academic year";
-    }
-    if (!semesterId) {
-      newErrors.semesterId = isRtl
-        ? "يرجى اختيار الفصل الدراسي"
-        : "Please select semester";
-    }
+    const seen = new Set<string>();
+    rows.forEach((r) => {
+      if (!r.facultyId || !r.academicYearId || !r.semesterId) {
+        newErrors[`row-${r.key}`] = t("dialog.placement_incomplete");
+        return;
+      }
+      const id = `${r.facultyId}|${r.academicYearId}|${r.semesterId}`;
+      if (seen.has(id)) newErrors[`row-${r.key}`] = t("dialog.placement_duplicate");
+      seen.add(id);
+    });
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every((v) => !v);
   };
 
   const handleSubmit = async () => {
@@ -336,9 +245,11 @@ function FormContent({
       const payload: CreateStudyMaterialDto = {
         nameAr: nameAr.trim(),
         nameEn: nameEn.trim(),
-        facultyId,
-        academicYearId,
-        semesterId,
+        placements: rows.map((r) => ({
+          facultyId: r.facultyId,
+          academicYearId: r.academicYearId,
+          semesterId: r.semesterId,
+        })),
         isActive,
       };
 
@@ -410,120 +321,149 @@ function FormContent({
             sx={getTextFieldStyles(isRtl)}
           />
 
-          {/* الكلية / Faculty */}
-          <TextField
-            select
-            fullWidth
-            label={t("dialog.college")}
-            value={facultyId}
-            onChange={(e) => handleFacultyChange(e.target.value)}
-            error={!!errors.facultyId}
-            helperText={errors.facultyId}
-            disabled={submitting || loadingFaculties}
-            required
-            sx={getTextFieldStyles(isRtl)}
-          >
-            {loadingFaculties ? (
-              <MenuItem disabled>
-                <CircularProgress size={18} sx={{ mr: 1 }} />
-                {isRtl ? "جارٍ التحميل..." : "Loading..."}
-              </MenuItem>
-            ) : faculties.length === 0 ? (
-              <MenuItem disabled>
-                {isRtl ? "لا توجد كليات" : "No faculties"}
-              </MenuItem>
-            ) : (
-              faculties.map((f) => (
-                <MenuItem key={f.id} value={f.id}>
-                  {isRtl ? f.nameAr || f.name : f.nameEn || f.name}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
+          {/* أماكن التدريس: كلية → سنة دراسية → فصل دراسي */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+              {t("dialog.placements")}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748B", display: "block", mb: 1.5 }}>
+              {t("dialog.placements_hint")}
+            </Typography>
 
-          {/* السنة الدراسية / Academic Year */}
-          <TextField
-            select
-            fullWidth
-            label={t("dialog.academic_year")}
-            value={academicYearId}
-            onChange={(e) => handleAcademicYearChange(e.target.value)}
-            error={!!errors.academicYearId}
-            helperText={
-              errors.academicYearId ||
-              (!facultyId
-                ? isRtl
-                  ? "يرجى اختيار الكلية أولاً"
-                  : "Please select a college first"
-                : "")
-            }
-            disabled={submitting || !facultyId || loadingAcademicYears}
-            required
-            sx={getTextFieldStyles(isRtl)}
-          >
-            {loadingAcademicYears ? (
-              <MenuItem disabled>
-                <CircularProgress size={18} sx={{ mr: 1 }} />
-                {isRtl ? "جارٍ التحميل..." : "Loading..."}
-              </MenuItem>
-            ) : academicYears.length === 0 ? (
-              <MenuItem disabled>
-                {isRtl
-                  ? "لا توجد سنوات دراسية متاحة"
-                  : "No academic years available"}
-              </MenuItem>
-            ) : (
-              academicYears.map((ay) => (
-                <MenuItem key={ay.id} value={ay.id}>
-                  {isRtl ? ay.nameAr || ay.nameEn : ay.nameEn || ay.nameAr}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
+            <Stack spacing={1.5}>
+              {rows.map((row) => {
+                const years = yearsByFaculty[row.facultyId] ?? [];
+                const year = years.find((y) => y.id === row.academicYearId);
+                const semesters = [...(year?.semesters ?? [])].sort((a, b) => a.order - b.order);
+                const loadingYears = !!loadingYearsFor[row.facultyId];
+                const rowError = errors[`row-${row.key}`];
+                return (
+                  <Box
+                    key={row.key}
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 1.5,
+                      border: "1px solid",
+                      borderColor: rowError ? "error.main" : "#E2E8F0",
+                      bgcolor: "#F8FAFC",
+                    }}
+                  >
+                    <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: "flex-start" }}>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        label={t("dialog.college")}
+                        value={row.facultyId}
+                        onChange={(e) => {
+                          updateRow(row.key, { facultyId: e.target.value, academicYearId: "", semesterId: "" });
+                          void loadYears(e.target.value);
+                        }}
+                        disabled={submitting || loadingFaculties}
+                        sx={{ ...getTextFieldStyles(isRtl), bgcolor: "#fff" }}
+                      >
+                        {loadingFaculties ? (
+                          <MenuItem disabled>
+                            <CircularProgress size={18} sx={{ mx: 1 }} />
+                            {isRtl ? "جارٍ التحميل..." : "Loading..."}
+                          </MenuItem>
+                        ) : (
+                          faculties.map((f) => (
+                            <MenuItem key={f.id} value={f.id}>
+                              {facultyLabel(f)}
+                            </MenuItem>
+                          ))
+                        )}
+                      </TextField>
 
-          {/* الفصل الدراسي / Semester */}
-          <TextField
-            select
-            fullWidth
-            label={t("dialog.semester")}
-            value={semesterId}
-            onChange={(e) => {
-              setSemesterId(e.target.value);
-              if (errors.semesterId)
-                setErrors((prev) => ({ ...prev, semesterId: "" }));
-            }}
-            error={!!errors.semesterId}
-            helperText={
-              errors.semesterId ||
-              (!academicYearId
-                ? isRtl
-                  ? "يرجى اختيار السنة الدراسية أولاً"
-                  : "Please select an academic year first"
-                : "")
-            }
-            disabled={submitting || !academicYearId || loadingSemesters}
-            required
-            sx={getTextFieldStyles(isRtl)}
-          >
-            {loadingSemesters ? (
-              <MenuItem disabled>
-                <CircularProgress size={18} sx={{ mr: 1 }} />
-                {isRtl ? "جارٍ التحميل..." : "Loading..."}
-              </MenuItem>
-            ) : semesters.length === 0 ? (
-              <MenuItem disabled>
-                {isRtl ? "لا توجد فصول دراسية متاحة" : "No semesters available"}
-              </MenuItem>
-            ) : (
-              semesters.map((s) => (
-                <MenuItem key={s.id} value={s.id}>
-                  {isRtl
-                    ? s.nameAr || s.nameEn || s.name
-                    : s.nameEn || s.nameAr || s.name}
-                </MenuItem>
-              ))
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        label={t("dialog.academic_year")}
+                        value={years.some((y) => y.id === row.academicYearId) ? row.academicYearId : ""}
+                        onChange={(e) => updateRow(row.key, { academicYearId: e.target.value, semesterId: "" })}
+                        disabled={submitting || !row.facultyId || loadingYears}
+                        sx={{ ...getTextFieldStyles(isRtl), bgcolor: "#fff" }}
+                      >
+                        {years.length === 0 ? (
+                          <MenuItem disabled>
+                            {loadingYears
+                              ? isRtl ? "جارٍ التحميل..." : "Loading..."
+                              : isRtl ? "لا توجد سنوات دراسية لهذه الكلية" : "This faculty has no academic years"}
+                          </MenuItem>
+                        ) : (
+                          years.map((y) => (
+                            <MenuItem key={y.id} value={y.id}>
+                              {(isRtl ? y.nameAr : y.nameEn) || y.nameAr || y.nameEn}
+                            </MenuItem>
+                          ))
+                        )}
+                      </TextField>
+
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        label={t("dialog.semester")}
+                        value={semesters.some((x) => x.id === row.semesterId) ? row.semesterId : ""}
+                        onChange={(e) => updateRow(row.key, { semesterId: e.target.value })}
+                        disabled={submitting || !row.academicYearId}
+                        sx={{ ...getTextFieldStyles(isRtl), bgcolor: "#fff" }}
+                      >
+                        {semesters.length === 0 ? (
+                          <MenuItem disabled>
+                            {isRtl ? "لا توجد فصول دراسية في هذه السنة" : "This year has no semesters"}
+                          </MenuItem>
+                        ) : (
+                          semesters.map((x) => (
+                            <MenuItem key={x.id} value={x.id}>
+                              {x.name}
+                            </MenuItem>
+                          ))
+                        )}
+                      </TextField>
+
+                      <IconButton
+                        aria-label={t("dialog.remove_placement")}
+                        onClick={() => setRows((prev) => prev.filter((r) => r.key !== row.key))}
+                        disabled={submitting || rows.length === 1}
+                        sx={{ color: "error.main", mt: 0.25 }}
+                      >
+                        <Iconify icon="solar:trash-bin-trash-bold" width={20} />
+                      </IconButton>
+                    </Stack>
+                    {rowError && (
+                      <Typography variant="caption" sx={{ color: "error.main", display: "block", mt: 0.75 }}>
+                        {rowError}
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })}
+            </Stack>
+
+            {errors.placements && (
+              <Typography variant="caption" sx={{ color: "error.main", display: "block", mt: 1 }}>
+                {errors.placements}
+              </Typography>
             )}
-          </TextField>
+
+            <Button
+              size="small"
+              onClick={() => {
+                // Start the new row from the last one's faculty — the common case is the same faculty, another year.
+                const last = rows[rows.length - 1];
+                setRows((prev) => [...prev, newRow(last?.facultyId ?? "")]);
+                clearError("placements");
+              }}
+              disabled={submitting}
+              startIcon={<Iconify icon="mingcute:add-line" width={18} />}
+              sx={{ mt: 1.5, color: "#1C252E", fontWeight: 600 }}
+            >
+              {t("dialog.add_placement")}
+            </Button>
+          </Box>
 
           {/* مفعل / غير مفعل */}
           <Box
@@ -598,7 +538,7 @@ export default function SubjectFormDialog({
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="sm"
+      maxWidth="md"
       dir={isRtl ? "rtl" : "ltr"}
       slotProps={{
         paper: {

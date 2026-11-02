@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
@@ -35,6 +36,8 @@ interface FormattedAcademicYear {
   id: string;
   nameAr: string;
   nameEn: string;
+  faculties: string[];
+  semesters: string[];
   active: boolean;
 }
 
@@ -51,6 +54,8 @@ function buildPayload(
   return {
     nameAr: data.nameAr,
     nameEn: data.nameEn,
+    facultyIds: data.facultyIds,
+    semesterIds: data.semesterIds,
     isActive: data.isActive,
     // TEMP_ORDER: remove this line + TEMP_ORDER import when backend drops `order`
     order: existingOrder ?? TEMP_ORDER,
@@ -199,6 +204,8 @@ export default function AcademicYearsView({
         {
           nameAr: item.nameAr,
           nameEn: item.nameEn,
+          facultyIds: (item.faculties ?? []).map((f) => f.id),
+          semesterIds: (item.semesters ?? []).map((s) => s.id),
           isActive: !item.isActive,
         },
         item.order
@@ -223,6 +230,8 @@ export default function AcademicYearsView({
     id: item.id,
     nameAr: item.nameAr,
     nameEn: item.nameEn,
+    faculties: (item.faculties ?? []).map((f) => f.name),
+    semesters: (item.semesters ?? []).map((s) => s.name),
     active: item.isActive,
   }));
 
@@ -237,8 +246,34 @@ export default function AcademicYearsView({
       label: t('columns.name_en'),
       align: (isRtl ? 'right' : 'left') as cellAlignment,
     },
+    {
+      id: 'faculties',
+      label: t('columns.faculties'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
+    {
+      id: 'semesters',
+      label: t('columns.semesters'),
+      align: (isRtl ? 'right' : 'left') as cellAlignment,
+    },
     { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
+
+  const renderChips = (names: string[], max: number) =>
+    names.length === 0 ? (
+      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+        —
+      </Typography>
+    ) : (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        {names.slice(0, max).map((name) => (
+          <Chip key={name} size="small" label={name} sx={{ borderRadius: 1.5 }} />
+        ))}
+        {names.length > max && (
+          <Chip size="small" label={`+${names.length - max}`} sx={{ borderRadius: 1.5 }} />
+        )}
+      </Box>
+    );
 
   const actions = [
     {
@@ -255,6 +290,8 @@ export default function AcademicYearsView({
   ];
 
   const customRender = {
+    faculties: (row: FormattedAcademicYear) => renderChips(row.faculties, 2),
+    semesters: (row: FormattedAcademicYear) => renderChips(row.semesters, 3),
     active: (row: FormattedAcademicYear) => {
       const isActive = row.active;
       return (

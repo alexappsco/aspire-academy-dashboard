@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'src/i18n/routing';
 import { useSearchParams } from 'next/navigation';
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -42,8 +43,7 @@ interface FormattedSubjectRow {
   id: string;
   nameAr: string;
   nameEn: string;
-  facultyName: string;
-  semesterName: string;
+  placements: { label: string; missingYear: boolean }[];
   status: boolean;
   raw: StudyMaterialDto;
 }
@@ -257,8 +257,6 @@ export default function SubjectsView() {
                     ...m,
                     nameAr: data.nameAr,
                     nameEn: data.nameEn,
-                    facultyId: data.facultyId,
-                    semesterId: data.semesterId,
                     isActive: data.isActive,
                   }
                 : m
@@ -316,6 +314,13 @@ export default function SubjectsView() {
 
   // Toggle status inline
   const handleToggleStatus = async (material: StudyMaterialDto) => {
+    const placements = material.placements ?? [];
+    // A migrated subject may still miss a year; the API needs full placements, so send the admin to the form.
+    if (placements.length === 0 || placements.some((p) => !p.academicYearId)) {
+      toast.error(t('dialog.placement_year_missing'));
+      handleOpenEdit(material);
+      return;
+    }
     try {
       const updatedStatus = !material.isActive;
       // Optimistic update
@@ -326,8 +331,11 @@ export default function SubjectsView() {
       const res = await updateStudyMaterialAction(material.id, {
         nameAr: material.nameAr,
         nameEn: material.nameEn,
-        facultyId: material.facultyId,
-        semesterId: material.semesterId,
+        placements: placements.map((p) => ({
+          facultyId: p.facultyId,
+          academicYearId: p.academicYearId as string,
+          semesterId: p.semesterId,
+        })),
         isActive: updatedStatus,
       });
 
@@ -367,12 +375,10 @@ export default function SubjectsView() {
     id: m.id,
     nameAr: m.nameAr,
     nameEn: m.nameEn,
-    facultyName: isRtl
-      ? m.faculty?.nameAr || m.faculty?.name || m.faculty?.nameEn || '-'
-      : m.faculty?.nameEn || m.faculty?.name || m.faculty?.nameAr || '-',
-    semesterName: isRtl
-      ? m.semester?.nameAr || m.semester?.name || m.semester?.nameEn || '-'
-      : m.semester?.nameEn || m.semester?.name || m.semester?.nameAr || '-',
+    placements: (m.placements ?? []).map((p) => ({
+      label: [p.facultyName, p.academicYearName, p.semesterName].filter(Boolean).join(' · '),
+      missingYear: !p.academicYearId,
+    })),
     status: m.isActive,
     raw: m,
   }));
@@ -393,8 +399,7 @@ export default function SubjectsView() {
     },
     { id: 'nameAr', label: t('dialog.name_ar'), align: cellAlignment.center },
     { id: 'nameEn', label: t('dialog.name_en'), align: cellAlignment.center },
-    { id: 'facultyName', label: t('columns.college'), align: cellAlignment.center },
-    { id: 'semesterName', label: isRtl ? 'الفصل الدراسي' : 'Semester', align: cellAlignment.center },
+    { id: 'placements', label: t('columns.placements'), align: cellAlignment.center },
     { id: 'status', label: t('columns.status'), align: cellAlignment.center, width: 140 },
     { id: 'actions', label: '', align: cellAlignment.center, width: 100 },
   ];
@@ -417,16 +422,30 @@ export default function SubjectsView() {
         {row.nameEn}
       </Typography>
     ),
-    facultyName: (row: FormattedSubjectRow) => (
-      <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
-        {row.facultyName}
-      </Typography>
-    ),
-    semesterName: (row: FormattedSubjectRow) => (
-      <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
-        {row.semesterName}
-      </Typography>
-    ),
+    placements: (row: FormattedSubjectRow) =>
+      row.placements.length === 0 ? (
+        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+          -
+        </Typography>
+      ) : (
+        <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+          {row.placements.slice(0, 2).map((p, i) => (
+            <Stack key={i} direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
+                {p.label}
+              </Typography>
+              {p.missingYear && (
+                <Chip size="small" color="warning" variant="outlined" label={t('columns.year_missing')} />
+              )}
+            </Stack>
+          ))}
+          {row.placements.length > 2 && (
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
+              {t('columns.more_placements', { count: row.placements.length - 2 })}
+            </Typography>
+          )}
+        </Stack>
+      ),
     status: (row: FormattedSubjectRow) => (
       <Box
         sx={{

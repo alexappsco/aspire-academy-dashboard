@@ -593,7 +593,9 @@
     "columns": {
       "name_ar": "Name (Arabic)",
       "name_en": "Name (English)",
-      "status": "Status"
+      "status": "Status",
+      "faculties": "Faculties",
+      "semesters": "Semesters"
     },
     "status": {
       "active": "Active",
@@ -620,7 +622,11 @@
       "save": "Save",
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "faculties": "Faculties",
+      "faculties_placeholder": "Select the faculties that offer this year",
+      "semesters": "Semesters",
+      "semesters_placeholder": "Select the semesters in this year"
     }
   },
   "AcademicSemesters": {
@@ -883,7 +889,10 @@
       "college": "College",
       "order": "Order",
       "created_date": "Created Date",
-      "status": "Status"
+      "status": "Status",
+      "placements": "Faculty · Year · Semester",
+      "year_missing": "Year missing",
+      "more_placements": "+{count} more"
     },
     "status": {
       "active": "Active",
@@ -922,7 +931,15 @@
       "save": "Save",
       "cancel": "Cancel",
       "delete_confirm": "Are you sure you want to delete this subject?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "placements": "Where it's taught",
+      "placements_hint": "Add a row for every faculty, academic year and semester this subject is taught in.",
+      "add_placement": "Add faculty / year",
+      "remove_placement": "Remove",
+      "placements_required": "Add at least one faculty, academic year and semester.",
+      "placement_incomplete": "Choose the faculty, academic year and semester.",
+      "placement_duplicate": "This faculty, year and semester is already added.",
+      "placement_year_missing": "Choose the academic year for this subject first."
     }
   },
   "Global": {

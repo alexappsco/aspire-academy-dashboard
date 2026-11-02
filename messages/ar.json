@@ -593,7 +593,9 @@
     "columns": {
       "name_ar": "الاسم بالعربية",
       "name_en": "الاسم انجليزي",
-      "status": "الحالة"
+      "status": "الحالة",
+      "faculties": "الكليات",
+      "semesters": "الفصول الدراسية"
     },
     "status": {
       "active": "مفعل",
@@ -620,7 +622,11 @@
       "save": "حفظ",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد الحذف؟",
-      "delete": "حذف"
+      "delete": "حذف",
+      "faculties": "الكليات",
+      "faculties_placeholder": "اختر الكليات التي تحتوي على هذه السنة",
+      "semesters": "الفصول الدراسية",
+      "semesters_placeholder": "اختر الفصول الدراسية في هذه السنة"
     }
   },
   "AcademicSemesters": {
@@ -883,7 +889,10 @@
       "college": "الكلية",
       "order": "الترتيب",
       "created_date": "تاريخ الإضافة",
-      "status": "الحالة"
+      "status": "الحالة",
+      "placements": "الكلية · السنة · الفصل",
+      "year_missing": "السنة غير محددة",
+      "more_placements": "+{count} أخرى"
     },
     "status": {
       "active": "مفعل",
@@ -922,7 +931,15 @@
       "save": "حفظ",
       "cancel": "إلغاء",
       "delete_confirm": "هل أنت متأكد أنك تريد حذف هذا الموضوع؟",
-      "delete": "حذف"
+      "delete": "حذف",
+      "placements": "أماكن التدريس",
+      "placements_hint": "أضف صفاً لكل كلية وسنة دراسية وفصل دراسي تُدرَّس فيه هذه المادة.",
+      "add_placement": "إضافة كلية / سنة",
+      "remove_placement": "حذف",
+      "placements_required": "أضف كلية وسنة دراسية وفصلاً دراسياً واحداً على الأقل.",
+      "placement_incomplete": "اختر الكلية والسنة الدراسية والفصل الدراسي.",
+      "placement_duplicate": "هذه الكلية والسنة والفصل مضافة بالفعل.",
+      "placement_year_missing": "اختر السنة الدراسية لهذه المادة أولاً."
     }
   },
   "Global": {
