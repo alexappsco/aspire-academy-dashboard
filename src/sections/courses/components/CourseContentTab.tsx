@@ -20,6 +20,7 @@ import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
 import { useLocale, useTranslations } from 'next-intl';
 import QuizDialog, { type QuizConfig } from './QuizDialog';
+import { resolveMediaUrl } from 'src/utils/media-url';
 import type { CourseCurriculum, LessonTest } from 'src/types/course';
 
 type Translator = ReturnType<typeof useTranslations>;
@@ -375,8 +376,15 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
   };
 
   const handleOpenVideoPreview = (title: string, url?: string) => {
+    // The stored value can be relative or plain http — resolve it before handing
+    // it to the player, otherwise the dialog opens on an empty/blocked source.
+    const src = resolveMediaUrl(url);
+    if (!src) {
+      toast.warning(t('no_video_link'));
+      return;
+    }
     setPreviewVideoTitle(title);
-    setPreviewVideoUrl(url ?? '');
+    setPreviewVideoUrl(src);
     setVideoPreviewOpen(true);
   };
 
@@ -1276,6 +1284,9 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
               src={previewVideoUrl}
               controls
               autoPlay
+              playsInline
+              preload="metadata"
+              onError={() => toast.error(t('video_load_failed'))}
               sx={{
                 width: '100%',
                 height: 380,
