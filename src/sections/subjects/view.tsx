@@ -17,6 +17,10 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Tooltip from '@mui/material/Tooltip';
 
 import Iconify from 'src/components/iconify';
 import SelectField from 'src/components/SelectField/SelectField';
@@ -104,6 +108,8 @@ export default function SubjectsView() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<StudyMaterialDto | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedSubjectForPlacements, setSelectedSubjectForPlacements] =
+    useState<FormattedSubjectRow | null>(null);
 
   // 1. Debounce search input (400ms)
   useEffect(() => {
@@ -429,7 +435,7 @@ export default function SubjectsView() {
         </Typography>
       ) : (
         <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
-          {row.placements.slice(0, 2).map((p, i) => (
+          {row.placements.slice(0, 1).map((p, i) => (
             <Stack key={i} direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
               <Typography variant="body2" sx={{ fontWeight: 500, color: '#334155' }}>
                 {p.label}
@@ -439,10 +445,31 @@ export default function SubjectsView() {
               )}
             </Stack>
           ))}
-          {row.placements.length > 2 && (
-            <Typography variant="caption" sx={{ color: '#64748B' }}>
-              {t('columns.more_placements', { count: row.placements.length - 2 })}
-            </Typography>
+          {row.placements.length > 1 && (
+            <Tooltip title={t('view_all_placements')}>
+              <Chip
+                label={`+${row.placements.length - 1}`}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedSubjectForPlacements(row);
+                }}
+                sx={{
+                  bgcolor: '#00A76F14',
+                  color: '#00A76F',
+                  fontWeight: 700,
+                  fontSize: 11,
+                  borderRadius: 1.5,
+                  cursor: 'pointer',
+                  border: '1px solid #00A76F33',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: '#00A76F26',
+                    transform: 'scale(1.05)',
+                  },
+                }}
+              />
+            </Tooltip>
           )}
         </Stack>
       ),
@@ -646,6 +673,122 @@ export default function SubjectsView() {
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
       />
+
+      <Dialog
+        open={!!selectedSubjectForPlacements}
+        onClose={() => setSelectedSubjectForPlacements(null)}
+        fullWidth
+        maxWidth="xs"
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              p: 1,
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            },
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, pb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: '#00A76F14',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#00A76F',
+              }}
+            >
+              <Iconify icon="solar:diploma-verified-bold" width={24} />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.2 }}>
+                {t('placements_dialog_title')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>
+                {isRtl
+                  ? selectedSubjectForPlacements?.nameAr
+                  : selectedSubjectForPlacements?.nameEn}
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setSelectedSubjectForPlacements(null)} size="small">
+            <Iconify icon="ic:round-close" sx={{ color: '#64748B', width: 20, height: 20 }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={1}>
+            {selectedSubjectForPlacements?.placements.map((placement, idx) => (
+              <Box
+                key={`${placement.label}-${idx}`}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 1,
+                  p: 1.5,
+                  borderRadius: 2,
+                  bgcolor: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  transition: 'background-color 0.2s',
+                  '&:hover': { bgcolor: '#F1F5F9' },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      bgcolor: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#475569',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {idx + 1}
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                    {placement.label}
+                  </Typography>
+                </Box>
+                {placement.missingYear ? (
+                  <Chip size="small" color="warning" variant="outlined" label={t('columns.year_missing')} />
+                ) : (
+                  <Iconify icon="solar:check-circle-bold" sx={{ color: '#00A76F', flexShrink: 0 }} width={18} />
+                )}
+              </Box>
+            ))}
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 2.5, pb: 1.5 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => setSelectedSubjectForPlacements(null)}
+            sx={{
+              borderRadius: 2,
+              borderColor: '#CBD5E1',
+              color: '#1E293B',
+              fontWeight: 600,
+              '&:hover': { bgcolor: '#F8FAFC', borderColor: '#94A3B8' },
+            }}
+          >
+            {t('close')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
