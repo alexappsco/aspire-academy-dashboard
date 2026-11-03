@@ -64,10 +64,6 @@ export default function PlatformPercentageCard({
         }}
       />
 
-      <Typography sx={{ color: '#667085', fontSize: 12, mt: 1.25 }}>
-        {t('remainder_note')}
-      </Typography>
-
       <Box sx={{ mt: 2, p: 1.5, border: '1px dashed #D7DEE8', borderRadius: 1.5 }}>
         <Typography sx={{ fontSize: 13, fontWeight: 800, mb: 1 }}>
           {t('example.title')}
