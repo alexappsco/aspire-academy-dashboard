@@ -21,6 +21,8 @@ export type FirebaseTokenResult =
 
 const FIREBASE_TOKEN_STORAGE_KEY = 'aspire_fcm_token';
 const FIREBASE_SERVICE_WORKER_PATH = '/firebase-messaging-sw.js';
+const FIREBASE_PUBLIC_VAPID_KEY =
+  'BKISEoxhcJGieBuKpGaKyut12NW3NlSvtmXRrnks1jtnhUMmpQ8RDsGh7aXDahpu8LZrHcl7k2C9lV18H9abGkk';
 
 export async function requestFirebaseToken(): Promise<FirebaseTokenResult> {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') {
@@ -35,10 +37,7 @@ export async function requestFirebaseToken(): Promise<FirebaseTokenResult> {
     return { success: false, reason: 'messaging_unsupported' };
   }
 
-  const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
-  if (!vapidKey) {
-    return { success: false, reason: 'missing_vapid_key' };
-  }
+  const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || FIREBASE_PUBLIC_VAPID_KEY;
 
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
@@ -47,8 +46,10 @@ export async function requestFirebaseToken(): Promise<FirebaseTokenResult> {
 
   try {
     const serviceWorkerRegistration = await navigator.serviceWorker.register(
-      FIREBASE_SERVICE_WORKER_PATH
+      FIREBASE_SERVICE_WORKER_PATH,
+      { updateViaCache: 'none' }
     );
+    await serviceWorkerRegistration.update();
     await navigator.serviceWorker.ready;
 
     const messaging = getMessaging(getFirebaseApp());
