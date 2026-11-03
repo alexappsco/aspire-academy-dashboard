@@ -2800,8 +2800,8 @@
       },
       "confirm": {
         "approve_title": "Confirm request approval",
-        "instructor_percentage": "Instructor percentage",
-        "approve_warning": "Approving will save the instructor percentage and review this request.",
+        "instructor_percentage": "Platform percentage",
+        "approve_warning": "Approving will save the platform percentage and review this request.",
         "approve_submit": "Confirm approval",
         "cancel": "Cancel"
       }
