@@ -10,7 +10,18 @@ firebase.initializeApp({
   appId: '1:837160474244:web:8e96dbdce43612b0e2d4d1',
 });
 
-firebase.messaging();
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: 'ASPIRE_FCM_BACKGROUND_MESSAGE',
+        payload,
+      });
+    });
+  });
+});
 
 self.addEventListener('install', () => {
   self.skipWaiting();

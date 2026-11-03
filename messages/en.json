@@ -2777,13 +2777,12 @@
       "owner": "Request owner"
     },
     "review": {
-      "title": "Set instructor percentage",
+      "title": "Set platform percentage",
       "notice": "The instructor percentage has not been set. Enter it to enable approval.",
       "platform_percentage": "Platform percentage",
-      "instructor_percentage": "Instructor percentage of actual consumption",
+      "instructor_percentage": "Platform percentage of actual consumption",
       "percentage_helper": "Enter a value from 0 to 100.",
       "percentage_error": "Enter a valid percentage from 0 to 100.",
-      "remainder_note": "The platform receives the remaining percentage out of 100% automatically. The instructor cannot change or modify it.",
       "approve": "Approve request",
       "success": "The request was reviewed successfully",
       "error": "Failed to review the request",
@@ -2809,8 +2808,8 @@
       },
       "confirm": {
         "approve_title": "Confirm request approval",
-        "instructor_percentage": "Instructor percentage",
-        "approve_warning": "Approving will save the instructor percentage and review this request.",
+        "instructor_percentage": "Platform percentage",
+        "approve_warning": "Approving will save the platform percentage and review this request.",
         "approve_submit": "Confirm approval",
         "cancel": "Cancel"
       }
