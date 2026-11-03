@@ -590,6 +590,9 @@
     "subtitle": "Manage all academic years",
     "add_year": "Add Year",
     "search_placeholder": "Search",
+    "faculties_dialog_title": "Faculties",
+    "view_all_faculties": "View all faculties",
+    "close": "Close",
     "columns": {
       "name_ar": "Name (Arabic)",
       "name_en": "Name (English)",
@@ -882,6 +885,9 @@
     "subtitle": "Manage all subjects",
     "add_subject": "Add Subject",
     "search_placeholder": "Search in subjects..",
+    "placements_dialog_title": "Faculty · Year · Semester",
+    "view_all_placements": "View all placements",
+    "close": "Close",
     "columns": {
       "image": "Image",
       "name": "Name",

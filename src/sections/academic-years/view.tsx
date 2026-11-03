@@ -13,6 +13,11 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
@@ -88,6 +93,8 @@ export default function AcademicYearsView({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<AcademicYearItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedYearForFaculties, setSelectedYearForFaculties] =
+    useState<FormattedAcademicYear | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
@@ -259,19 +266,45 @@ export default function AcademicYearsView({
     { id: 'active', label: t('columns.status'), align: 'center' as cellAlignment },
   ];
 
-  const renderChips = (names: string[], max: number) =>
+  const renderChips = (names: string[], max: number, onMoreClick?: () => void) =>
     names.length === 0 ? (
       <Typography variant="body2" sx={{ color: '#94A3B8' }}>
         —
       </Typography>
     ) : (
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
         {names.slice(0, max).map((name) => (
           <Chip key={name} size="small" label={name} sx={{ borderRadius: 1.5 }} />
         ))}
-        {names.length > max && (
-          <Chip size="small" label={`+${names.length - max}`} sx={{ borderRadius: 1.5 }} />
-        )}
+        {names.length > max &&
+          (onMoreClick ? (
+            <Tooltip title={t('view_all_faculties')}>
+              <Chip
+                size="small"
+                label={`+${names.length - max}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoreClick();
+                }}
+                sx={{
+                  bgcolor: '#00A76F14',
+                  color: '#00A76F',
+                  fontWeight: 700,
+                  fontSize: 11,
+                  borderRadius: 1.5,
+                  cursor: 'pointer',
+                  border: '1px solid #00A76F33',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: '#00A76F26',
+                    transform: 'scale(1.05)',
+                  },
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <Chip size="small" label={`+${names.length - max}`} sx={{ borderRadius: 1.5 }} />
+          ))}
       </Box>
     );
 
@@ -290,7 +323,8 @@ export default function AcademicYearsView({
   ];
 
   const customRender = {
-    faculties: (row: FormattedAcademicYear) => renderChips(row.faculties, 2),
+    faculties: (row: FormattedAcademicYear) =>
+      renderChips(row.faculties, 1, () => setSelectedYearForFaculties(row)),
     semesters: (row: FormattedAcademicYear) => renderChips(row.semesters, 3),
     active: (row: FormattedAcademicYear) => {
       const isActive = row.active;
@@ -458,6 +492,116 @@ export default function AcademicYearsView({
         onConfirm={handleConfirmDelete}
         loading={deleting}
       />
+
+      <Dialog
+        open={!!selectedYearForFaculties}
+        onClose={() => setSelectedYearForFaculties(null)}
+        fullWidth
+        maxWidth="xs"
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              p: 1,
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+            },
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, pb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
+                bgcolor: '#00A76F14',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#00A76F',
+              }}
+            >
+              <Iconify icon="solar:buildings-2-bold" width={24} />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.2 }}>
+                {t('faculties_dialog_title')}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>
+                {isRtl ? selectedYearForFaculties?.nameAr : selectedYearForFaculties?.nameEn}
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setSelectedYearForFaculties(null)} size="small">
+            <Iconify icon="ic:round-close" sx={{ color: '#64748B', width: 20, height: 20 }} />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ px: 2.5, py: 2 }}>
+          <Stack spacing={1}>
+            {selectedYearForFaculties?.faculties.map((name, idx) => (
+              <Box
+                key={`${name}-${idx}`}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 1,
+                  p: 1.5,
+                  borderRadius: 2,
+                  bgcolor: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  transition: 'background-color 0.2s',
+                  '&:hover': { bgcolor: '#F1F5F9' },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: '50%',
+                      bgcolor: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: '#475569',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {idx + 1}
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                    {name}
+                  </Typography>
+                </Box>
+                <Iconify icon="solar:check-circle-bold" sx={{ color: '#00A76F', flexShrink: 0 }} width={18} />
+              </Box>
+            ))}
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 2.5, pb: 1.5 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => setSelectedYearForFaculties(null)}
+            sx={{
+              borderRadius: 2,
+              borderColor: '#CBD5E1',
+              color: '#1E293B',
+              fontWeight: 600,
+              '&:hover': { bgcolor: '#F8FAFC', borderColor: '#94A3B8' },
+            }}
+          >
+            {t('close')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
