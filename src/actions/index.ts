@@ -7,6 +7,7 @@ export * from './coupons';
 export * from './study-materials';
 export * from './unversity';
 export * from './courses';
+export * from './course-students';
 export * from './faculties';
 export * from './semesters';
 export * from './academic-years';

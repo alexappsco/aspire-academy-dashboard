@@ -1,52 +1,67 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
-import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 import SharedTable from 'src/components/SharedTable/SharedTable';
 import { cellAlignment } from 'src/components/SharedTable/types';
 import Iconify from 'src/components/iconify';
 import { useToast } from 'src/components/toast';
-import { getOrders, approveOrder, rejectOrder } from 'src/actions/orders';
 import {
-  ORDER_STATUS,
-  isPendingOrder,
-  isPaidOrder,
-  isCancelledOrder,
-  resolveReceiptUrl,
-  OrderDto,
-} from 'src/types/order';
+  bulkActivateCourseStudents,
+  bulkDeactivateCourseStudents,
+  getCourseStudents,
+} from 'src/actions/course-students';
+import type { CourseStudentItem } from 'src/types/course';
 
 interface CourseStudentsTabProps {
   courseId: string;
 }
 
-type StatusFilterValue = 'all' | 'Pending' | 'Paid' | 'Cancelled';
+/** SharedTable requires `id`; the bulk endpoints address students by `studentId`. */
+type CourseStudentRow = CourseStudentItem & { id: string };
+type BulkMode = 'activate' | 'deactivate';
+type LoadResult = { ok: true; rows: CourseStudentRow[] } | { ok: false; error: string };
 
 const TABLE_HEAD_ALIGN: { [key: string]: cellAlignment } = {
-  student: cellAlignment.right,
-  phone: cellAlignment.center,
-  price: cellAlignment.center,
-  order_date: cellAlignment.center,
-  status: cellAlignment.center,
-  actions: cellAlignment.center,
+  select: cellAlignment.center,
+  name: cellAlignment.right,
+  email: cellAlignment.right,
+  phoneNumber: cellAlignment.center,
+  enrolledAt: cellAlignment.center,
+  expiresAt: cellAlignment.center,
+  isCourseAccessActive: cellAlignment.center,
+  isCompleted: cellAlignment.center,
 };
+
+/**
+ * Keeps active accounts only and collapses repeated enrolments of the same
+ * student into one row, so a bulk request never sends a duplicate id.
+ */
+function toRows(items: CourseStudentItem[]): CourseStudentRow[] {
+  const byStudent = new Map<string, CourseStudentRow>();
+  items.forEach((item) => {
+    if (!item.isAccountActive) return;
+    if (byStudent.has(item.studentId)) return;
+    byStudent.set(item.studentId, { ...item, id: item.studentId });
+  });
+  return [...byStudent.values()];
+}
 
 export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) {
   const t = useTranslations('CourseStudentsTab');
@@ -54,141 +69,222 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
   const isRtl = locale === 'ar';
   const toast = useToast();
 
-  const [orders, setOrders] = useState<OrderDto[]>([]);
+  const [students, setStudents] = useState<CourseStudentRow[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState<BulkMode | null>(null);
+  const [confirmMode, setConfirmMode] = useState<BulkMode | null>(null);
 
-  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<OrderDto | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
-  const [rejectLoading, setRejectLoading] = useState(false);
+  // Guards against a slow response from an older search overwriting a newer one.
+  const requestId = useRef(0);
 
-  const fetchOrders = useCallback(async () => {
-    const res = await getOrders({
-      CourseId: courseId,
+  const fetchStudents = useCallback(async (): Promise<LoadResult> => {
+    // No `IsActive` filter: the list has to include students whose course access
+    // is already off as well, otherwise there would be nothing to re-activate.
+    const res = await getCourseStudents(courseId, {
       Filter: debouncedSearch.trim() || undefined,
-      Status: statusFilter === 'all' ? undefined : statusFilter,
       SkipCount: 0,
       MaxResultCount: 1000,
     });
-    if (res.success && res.data) {
-      setOrders(res.data.items);
-    } else {
-      toast.error(res.error || t('messages.load_failed'));
-    }
-    setLoading(false);
-  }, [courseId, debouncedSearch, statusFilter, t, toast]);
 
-  // Debounce search input to avoid spamming the backend
+    if (res.success && res.data) return { ok: true, rows: toRows(res.data.items) };
+    return { ok: false, error: res.error || t('messages.load_failed') };
+  }, [courseId, debouncedSearch, t]);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch orders on mount & when filters change
   useEffect(() => {
-    let active = true;
+    let ignore = false;
+    const id = requestId.current + 1;
+    requestId.current = id;
+
     const run = async () => {
-      const res = await getOrders({
-        CourseId: courseId,
-        Filter: debouncedSearch.trim() || undefined,
-        Status: statusFilter === 'all' ? undefined : statusFilter,
-        SkipCount: 0,
-        MaxResultCount: 1000,
-      });
-      if (!active) return;
-      if (res.success && res.data) {
-        setOrders(res.data.items);
-      } else {
-        toast.error(res.error || t('messages.load_failed'));
-      }
+      const result = await fetchStudents();
+      if (ignore || id !== requestId.current) return;
+      setStudents(result.ok ? result.rows : []);
+      if (!result.ok) toast.error(result.error);
       setLoading(false);
     };
     run();
+
     return () => {
-      active = false;
+      ignore = true;
     };
-  }, [courseId, debouncedSearch, statusFilter, t, toast]);
+  }, [fetchStudents, toast]);
 
-  const handleApprove = async (order: OrderDto) => {
-    setActionLoadingId(order.id);
-    const res = await approveOrder(order.id);
-    if (res.success) {
-      toast.success(t('messages.approved'));
-      fetchOrders();
-    } else {
-      toast.error(
-        res.error === 'OrderNotPending' ? t('messages.order_not_pending') : res.error || t('messages.approve_failed')
+  /** Re-reads the list after a mutation, so the access flags come back from the server. */
+  const reload = async () => {
+    const id = requestId.current + 1;
+    requestId.current = id;
+
+    const result = await fetchStudents();
+    if (id !== requestId.current) return;
+    setStudents(result.ok ? result.rows : []);
+    if (!result.ok) toast.error(result.error);
+  };
+
+  // `isCourseAccessActive` decides which endpoint each selected student belongs to:
+  // false → activate, true → deactivate.
+  const selectedStudents = useMemo(
+    () => students.filter((student) => selectedIds.has(student.studentId)),
+    [students, selectedIds]
+  );
+  const toActivate = useMemo(
+    () => selectedStudents.filter((student) => !student.isCourseAccessActive),
+    [selectedStudents]
+  );
+  const toDeactivate = useMemo(
+    () => selectedStudents.filter((student) => student.isCourseAccessActive),
+    [selectedStudents]
+  );
+
+  const allSelected = students.length > 0 && selectedIds.size === students.length;
+  const indeterminate = selectedIds.size > 0 && !allSelected;
+
+  const toggleOne = (studentId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) next.delete(studentId);
+      else next.add(studentId);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelectedIds(allSelected ? new Set() : new Set(students.map((student) => student.studentId)));
+  };
+
+  const runBulk = async (mode: BulkMode) => {
+    const targets = mode === 'activate' ? toActivate : toDeactivate;
+    if (targets.length === 0) return;
+
+    setBulkLoading(mode);
+    const studentIds = targets.map((student) => student.studentId);
+
+    try {
+      const res =
+        mode === 'activate'
+          ? await bulkActivateCourseStudents(courseId, studentIds)
+          : await bulkDeactivateCourseStudents(courseId, studentIds);
+
+      // HTTP 200 is returned even when every student fails, so the payload counts decide.
+      if (res.success && res.data) {
+        const succeeded = res.data.succeededCount ?? 0;
+        const failed = res.data.failedCount ?? 0;
+        const firstFailure = res.data.failed?.[0]?.message;
+
+        if (failed === 0) {
+          toast.success(
+            mode === 'activate'
+              ? t('messages.activate_success', { count: succeeded })
+              : t('messages.deactivate_success', { count: succeeded })
+          );
+        } else if (succeeded === 0) {
+          toast.error(t('messages.failed', { message: firstFailure || t('messages.request_failed') }));
+        } else {
+          toast.warning(
+            t('messages.partial', {
+              succeeded,
+              failed,
+              message: firstFailure || t('messages.request_failed'),
+            })
+          );
+        }
+      } else {
+        toast.error(res.error || t('messages.request_failed'));
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('messages.request_failed'));
+    } finally {
+      setBulkLoading(null);
+      setConfirmMode(null);
+      setSelectedIds(new Set());
+      await reload();
+    }
+  };
+
+  const requestBulk = (mode: BulkMode) => {
+    if (selectedStudents.length === 0) {
+      toast.info(t('messages.select_first'));
+      return;
+    }
+    const eligible = mode === 'activate' ? toActivate : toDeactivate;
+    if (eligible.length === 0) {
+      toast.info(
+        mode === 'activate' ? t('messages.nothing_to_activate') : t('messages.nothing_to_deactivate')
       );
+      return;
     }
-    setActionLoadingId(null);
+    setConfirmMode(mode);
   };
 
-  const openRejectDialog = (order: OrderDto) => {
-    setRejectTarget(order);
-    setRejectReason('');
-  };
-
-  const handleReject = async () => {
-    if (!rejectTarget || !rejectReason.trim()) return;
-    setRejectLoading(true);
-    const res = await rejectOrder(rejectTarget.id, rejectReason.trim());
-    if (res.success) {
-      toast.success(t('messages.rejected'));
-      setRejectTarget(null);
-      setRejectReason('');
-      fetchOrders();
-    } else {
-      toast.error(
-        res.error === 'OrderNotPending' ? t('messages.order_not_pending') : res.error || t('messages.reject_failed')
-      );
-    }
-    setRejectLoading(false);
-  };
-
-  const handleViewReceipt = (rawUrl?: string | null) => {
-    const url = resolveReceiptUrl(rawUrl);
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      toast.info(locale === 'ar' ? 'لا توجد صورة إيصال مرفقة لهذا الطلب' : 'No receipt image attached for this order');
-    }
-  };
-
-  const statusConfig = (order: OrderDto) => {
-    if (isPaidOrder(order.status)) {
-      return { label: t('statuses.approved'), bg: '#D1FAE5', color: '#059669' };
-    }
-    if (isCancelledOrder(order.status)) {
-      return { label: t('statuses.rejected'), bg: '#FEE2E2', color: '#DC2626' };
-    }
-    return { label: t('statuses.pending'), bg: '#FEF3C7', color: '#D97706' };
-  };
-
-  const formatDate = (value: string): string => {
-    if (!value) return '—';
-    return new Date(value).toLocaleDateString(isRtl ? 'ar-KW' : 'en-US');
-  };
-
-  const formatPrice = (value: number): string =>
-    value != null ? value.toLocaleString(isRtl ? 'ar-KW' : 'en-US') : '—';
+  const formatDate = (value?: string | null): string =>
+    value ? new Date(value).toLocaleDateString(isRtl ? 'ar-KW' : 'en-US') : '—';
 
   const tableHead = [
-    { id: 'student', label: t('columns.student'), align: TABLE_HEAD_ALIGN.student },
-    { id: 'phone', label: t('columns.phone'), align: TABLE_HEAD_ALIGN.phone },
-    { id: 'price', label: t('columns.price'), align: TABLE_HEAD_ALIGN.price },
-    { id: 'order_date', label: t('columns.order_date'), align: TABLE_HEAD_ALIGN.order_date },
-    { id: 'status', label: t('columns.status'), align: TABLE_HEAD_ALIGN.status },
-    { id: 'actions', label: t('columns.actions'), align: TABLE_HEAD_ALIGN.actions },
+    {
+      id: 'select',
+      align: TABLE_HEAD_ALIGN.select,
+      width: 52,
+      label: (
+        <Checkbox
+          checked={allSelected}
+          indeterminate={indeterminate}
+          disabled={loading || students.length === 0 || Boolean(bulkLoading)}
+          onChange={toggleAll}
+          size="small"
+          sx={{ color: '#CBD5E1', '&.Mui-checked': { color: '#0284C7' } }}
+        />
+      ),
+    },
+    { id: 'name', label: t('columns.student'), align: TABLE_HEAD_ALIGN.name },
+    { id: 'email', label: t('columns.email'), align: TABLE_HEAD_ALIGN.email },
+    { id: 'phoneNumber', label: t('columns.phone'), align: TABLE_HEAD_ALIGN.phoneNumber, width: 140 },
+    {
+      id: 'enrolledAt',
+      label: t('columns.enrolled_at'),
+      align: TABLE_HEAD_ALIGN.enrolledAt,
+      width: 140,
+    },
+    {
+      id: 'expiresAt',
+      label: t('columns.expires_at'),
+      align: TABLE_HEAD_ALIGN.expiresAt,
+      width: 140,
+    },
+    {
+      id: 'isCourseAccessActive',
+      label: t('columns.access'),
+      align: TABLE_HEAD_ALIGN.isCourseAccessActive,
+      width: 130,
+    },
+    {
+      id: 'isCompleted',
+      label: t('columns.completed'),
+      align: TABLE_HEAD_ALIGN.isCompleted,
+      width: 120,
+    },
   ];
 
   const customRender = {
-    student: (row: OrderDto) => (
+    select: (row: CourseStudentRow) => (
+      <Checkbox
+        checked={selectedIds.has(row.studentId)}
+        disabled={Boolean(bulkLoading)}
+        onChange={() => toggleOne(row.studentId)}
+        size="small"
+        sx={{ color: '#CBD5E1', '&.Mui-checked': { color: '#0284C7' } }}
+      />
+    ),
+    name: (row: CourseStudentRow) => (
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
         <Avatar
+          src={row.imageUrl || undefined}
           sx={{
             width: 36,
             height: 36,
@@ -198,123 +294,72 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
             fontWeight: 700,
           }}
         >
-          {(row.buyerName || '?').charAt(0)}
+          {(row.name || '?').charAt(0)}
         </Avatar>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
-            {row.buyerName || '—'}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: 12,
-              color: '#64748B',
-              maxWidth: 220,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {row.buyerEmail || ''}
-          </Typography>
-        </Box>
+        <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: '#1E293B' }}>
+          {row.name || '—'}
+        </Typography>
       </Stack>
     ),
-    phone: (row: OrderDto) => (
+    email: (row: CourseStudentRow) => (
+      <Typography
+        sx={{
+          fontSize: 13,
+          color: '#475569',
+          fontWeight: 500,
+          maxWidth: 220,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {row.email || '—'}
+      </Typography>
+    ),
+    phoneNumber: (row: CourseStudentRow) => (
       <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>
-        {row.buyerPhone || '—'}
+        {row.phoneNumber || '—'}
       </Typography>
     ),
-    price: (row: OrderDto) => (
-      <Typography sx={{ fontSize: 13, color: '#334155', fontWeight: 700 }}>
-        {formatPrice(row.total)}
-      </Typography>
-    ),
-    order_date: (row: OrderDto) => (
+    enrolledAt: (row: CourseStudentRow) => (
       <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
-        {formatDate(row.creationTime)}
+        {formatDate(row.enrolledAt)}
       </Typography>
     ),
-    status: (row: OrderDto) => {
-      const cfg = statusConfig(row);
-      return (
-        <Chip
-          label={cfg.label}
-          size="small"
-          sx={{ bgcolor: cfg.bg, color: cfg.color, fontWeight: 700, fontSize: 12, borderRadius: 1.5 }}
-        />
-      );
-    },
-    actions: (row: OrderDto) => {
-      const pending = isPendingOrder(row.status);
-      const busy = actionLoadingId === row.id;
-      return (
-        <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => handleViewReceipt(row.receiptUrl)}
-            startIcon={<Iconify icon="solar:receipt-2-bold" width={15} />}
-            sx={{
-              borderRadius: 1.5,
-              borderColor: '#BFDBFE',
-              color: '#2563EB',
-              fontSize: 11.5,
-              px: 1.2,
-              fontWeight: 700,
-              height: 30,
-              textTransform: 'none',
-              whiteSpace: 'nowrap',
-              '&:hover': { borderColor: '#93C5FD', bgcolor: '#EFF6FF' },
-            }}
-          >
-            {t('actions.view_receipt')}
-          </Button>
-          {pending ? (
-            <>
-              <IconButton
-                size="small"
-                disabled={busy}
-                onClick={() => handleApprove(row)}
-                title={t('actions.approve')}
-                sx={{
-                  bgcolor: '#E6F4EA',
-                  color: '#10B981',
-                  borderRadius: 1.5,
-                  width: 30,
-                  height: 30,
-                  '&:hover': { bgcolor: '#C6F6D5' },
-                }}
-              >
-                {busy ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  <Iconify icon="eva:checkmark-fill" width={18} />
-                )}
-              </IconButton>
-              <IconButton
-                size="small"
-                disabled={busy}
-                onClick={() => openRejectDialog(row)}
-                title={t('actions.reject')}
-                sx={{
-                  bgcolor: '#FCE8E6',
-                  color: '#EF4444',
-                  borderRadius: 1.5,
-                  width: 30,
-                  height: 30,
-                  '&:hover': { bgcolor: '#FEE2E2' },
-                }}
-              >
-                <Iconify icon="eva:close-fill" width={18} />
-              </IconButton>
-            </>
-          ) : (
-            <Typography sx={{ fontSize: 11.5, color: '#CBD5E1', fontWeight: 600 }}>—</Typography>
-          )}
-        </Stack>
-      );
-    },
+    expiresAt: (row: CourseStudentRow) => (
+      <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
+        {formatDate(row.expiresAt)}
+      </Typography>
+    ),
+    isCourseAccessActive: (row: CourseStudentRow) => (
+      <Chip
+        label={row.isCourseAccessActive ? t('access.active') : t('access.inactive')}
+        size="small"
+        sx={{
+          bgcolor: row.isCourseAccessActive ? '#D1FAE5' : '#FEE2E2',
+          color: row.isCourseAccessActive ? '#059669' : '#DC2626',
+          fontWeight: 700,
+          fontSize: 12,
+          borderRadius: 1.5,
+        }}
+      />
+    ),
+    isCompleted: (row: CourseStudentRow) => (
+      <Chip
+        label={row.isCompleted ? t('completed.done') : t('completed.pending')}
+        size="small"
+        sx={{
+          bgcolor: row.isCompleted ? '#DBEAFE' : '#F1F5F9',
+          color: row.isCompleted ? '#1D4ED8' : '#64748B',
+          fontWeight: 700,
+          fontSize: 12,
+          borderRadius: 1.5,
+        }}
+      />
+    ),
   };
+
+  const confirmCount = confirmMode === 'activate' ? toActivate.length : toDeactivate.length;
 
   return (
     <Stack spacing={3}>
@@ -327,117 +372,172 @@ export default function CourseStudentsTab({ courseId }: CourseStudentsTabProps) 
           boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.02)',
         }}
       >
-        {/* Filter Bar */}
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
+        <TextField
+          fullWidth
+          size="small"
+          placeholder={t('search_placeholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
+                </InputAdornment>
+              ),
+            },
+          }}
           sx={{
-            alignItems: { xs: 'stretch', sm: 'center' },
-            mb: 2.5,
+            mb: 2,
+            bgcolor: '#F8FAFC',
+            '& .MuiOutlinedInput-root': { borderRadius: 2 },
+          }}
+        />
+
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1.5,
+            mb: 2,
+            px: 1.5,
+            py: 1.25,
+            borderRadius: 2,
+            bgcolor: '#F8FAFC',
+            border: '1px solid #EEF2F6',
           }}
         >
-          <TextField
-            fullWidth
-            size="small"
-            placeholder={t('search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Iconify icon="solar:magnifer-linear" width={18} sx={{ color: '#94A3B8' }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              flex: 1,
-              bgcolor: '#F8FAFC',
-              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-            }}
-          />
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>
+            {t('bulk.selected', { count: selectedIds.size })}
+          </Typography>
 
-          <TextField
-            select
+          {selectedIds.size > 0 && (
+            <Button
+              size="small"
+              onClick={() => setSelectedIds(new Set())}
+              disabled={Boolean(bulkLoading)}
+              sx={{ fontWeight: 700, fontSize: 12, color: '#64748B' }}
+            >
+              {t('bulk.clear')}
+            </Button>
+          )}
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Button
             size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilterValue)}
+            variant="contained"
+            disabled={toActivate.length === 0 || Boolean(bulkLoading)}
+            onClick={() => requestBulk('activate')}
+            startIcon={
+              bulkLoading === 'activate' ? (
+                <CircularProgress size={15} color="inherit" />
+              ) : (
+                <Iconify icon="eva:checkmark-fill" width={15} />
+              )
+            }
             sx={{
-              minWidth: { xs: '100%', sm: 160 },
-              bgcolor: '#F8FAFC',
-              '& .MuiOutlinedInput-root': { borderRadius: 2 },
+              bgcolor: '#10B981',
+              fontWeight: 700,
+              fontSize: 12,
+              borderRadius: 1.5,
+              height: 32,
+              px: 1.75,
+              boxShadow: 'none',
+              '& .MuiButton-startIcon': { m: 0 },
+              '&:hover': { bgcolor: '#059669' },
             }}
           >
-            <MenuItem value="all">{t('filters.all')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.PENDING}>{t('statuses.pending')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.PAID}>{t('statuses.approved')}</MenuItem>
-            <MenuItem value={ORDER_STATUS.CANCELLED}>{t('statuses.rejected')}</MenuItem>
-          </TextField>
+            {t('bulk.activate')}
+          </Button>
+
+          <Button
+            size="small"
+            variant="contained"
+            disabled={toDeactivate.length === 0 || Boolean(bulkLoading)}
+            onClick={() => requestBulk('deactivate')}
+            startIcon={
+              bulkLoading === 'deactivate' ? (
+                <CircularProgress size={15} color="inherit" />
+              ) : (
+                <Iconify icon="eva:close-fill" width={15} />
+              )
+            }
+            sx={{
+              bgcolor: '#BE123C',
+              fontWeight: 700,
+              fontSize: 12,
+              borderRadius: 1.5,
+              height: 32,
+              px: 1.75,
+              boxShadow: 'none',
+              '& .MuiButton-startIcon': { m: 0 },
+              '&:hover': { bgcolor: '#9F1239' },
+            }}
+          >
+            {t('bulk.deactivate')}
+          </Button>
         </Stack>
 
-        {/* Orders Table */}
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
             <CircularProgress size={32} sx={{ color: '#0284C7' }} />
           </Box>
         ) : (
-          <SharedTable<OrderDto>
-            data={orders}
-            count={orders.length}
+          <SharedTable<CourseStudentRow>
+            data={students}
+            count={students.length}
             tableHead={tableHead}
             customRender={customRender}
           />
         )}
       </Card>
 
-      {/* Reject Order Dialog */}
       <Dialog
-        open={Boolean(rejectTarget)}
-        onClose={() => setRejectTarget(null)}
-        maxWidth="sm"
+        open={Boolean(confirmMode)}
+        onClose={() => (bulkLoading ? undefined : setConfirmMode(null))}
+        maxWidth="xs"
         fullWidth
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: '#1E293B', fontSize: 17, pb: 1 }}>
-          {t('reject_dialog.title')}
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, color: '#0F172A' }}>
+          {confirmMode === 'activate' ? t('confirm.activate_title') : t('confirm.deactivate_title')}
         </DialogTitle>
-        <DialogContent sx={{ pt: '8px !important' }}>
-          <TextField
-            fullWidth
-            multiline
-            minRows={3}
-            size="small"
-            label={t('reject_dialog.reason_label')}
-            placeholder={t('reject_dialog.reason_placeholder')}
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
-          />
+        <DialogContent>
+          <Typography sx={{ fontSize: 13.5, color: '#64748B', fontWeight: 500, lineHeight: 1.7 }}>
+            {confirmMode === 'activate'
+              ? t('confirm.activate_body', { count: confirmCount })
+              : t('confirm.deactivate_body', { count: confirmCount })}
+          </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1.5 }}>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
           <Button
             variant="outlined"
             color="inherit"
-            onClick={() => setRejectTarget(null)}
+            onClick={() => setConfirmMode(null)}
+            disabled={Boolean(bulkLoading)}
             sx={{ borderRadius: 2, color: '#475569', borderColor: '#E2E8F0', fontWeight: 600 }}
           >
-            {t('reject_dialog.cancel')}
+            {t('confirm.cancel')}
           </Button>
           <Button
             variant="contained"
-            disabled={!rejectReason.trim() || rejectLoading}
-            startIcon={rejectLoading && <CircularProgress size={16} color="inherit" />}
-            onClick={handleReject}
+            onClick={() => confirmMode && runBulk(confirmMode)}
+            disabled={Boolean(bulkLoading)}
+            startIcon={
+              bulkLoading ? <CircularProgress size={16} color="inherit" /> : undefined
+            }
             sx={{
-              bgcolor: '#E11D48',
-              color: '#FFFFFF',
+              bgcolor: confirmMode === 'activate' ? '#10B981' : '#BE123C',
               borderRadius: 2,
               fontWeight: 700,
               boxShadow: 'none',
-              '&:hover': { bgcolor: '#BE123C' },
+              '&:hover': { bgcolor: confirmMode === 'activate' ? '#059669' : '#9F1239' },
             }}
           >
-            {t('reject_dialog.confirm')}
+            {confirmMode === 'activate' ? t('confirm.activate') : t('confirm.deactivate')}
           </Button>
         </DialogActions>
       </Dialog>
