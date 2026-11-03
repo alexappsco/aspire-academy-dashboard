@@ -265,6 +265,7 @@
       "doc_added_success": "Document added successfully",
       "no_video_link": "No video link available",
       "no_attachment_link": "No attachment link available",
+      "video_load_failed": "This video could not be loaded from its link",
       "pdf_opening": "Preparing and opening the PDF file...",
       "select_new_file_to_replace": "Please choose a new file to replace",
       "stats_chapters": "{count} chapters",
@@ -358,7 +359,7 @@
     "tabs": {
       "overview": "Overview",
       "content": "Content",
-      "students": "Student subscriptions",
+      "students": "Enrolled students",
       "reviews": "Reviews",
       "analytics": "Analytics"
     },
@@ -416,41 +417,48 @@
   },
   "CourseStudentsTab": {
     "search_placeholder": "Search by name, email or phone...",
-    "filters": {
-      "all": "All Statuses"
-    },
     "columns": {
       "student": "Student",
+      "email": "Email",
       "phone": "Phone",
-      "price": "Price",
-      "order_date": "Order Date",
-      "status": "Status",
-      "actions": "Actions"
+      "enrolled_at": "Enrolled",
+      "expires_at": "Expires",
+      "access": "Access",
+      "completed": "Completion"
     },
-    "statuses": {
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected"
+    "access": {
+      "active": "Access active",
+      "inactive": "Access suspended"
     },
-    "actions": {
-      "approve": "Approve",
-      "reject": "Reject",
-      "view_receipt": "View Receipt"
+    "completed": {
+      "done": "Completed",
+      "pending": "In progress"
     },
-    "reject_dialog": {
-      "title": "Reject Order",
-      "reason_label": "Rejection Reason",
-      "reason_placeholder": "Enter the reason for rejection (required)",
+    "bulk": {
+      "selected": "{count} selected",
+      "clear": "Clear selection",
+      "activate": "Activate students",
+      "deactivate": "Deactivate students"
+    },
+    "confirm": {
+      "activate_title": "Activate students",
+      "deactivate_title": "Deactivate students",
+      "activate_body": "Course access will be granted for {count} selected student(s).",
+      "deactivate_body": "Course access will be revoked for {count} selected student(s).",
       "cancel": "Cancel",
-      "confirm": "Reject"
+      "activate": "Activate",
+      "deactivate": "Deactivate"
     },
     "messages": {
-      "load_failed": "Failed to load orders.",
-      "approved": "Order approved successfully",
-      "rejected": "Order rejected successfully",
-      "approve_failed": "Failed to approve the order",
-      "reject_failed": "Failed to reject the order",
-      "order_not_pending": "This order is no longer pending"
+      "load_failed": "Failed to load the course students.",
+      "select_first": "Select at least one student",
+      "nothing_to_activate": "No selected student has suspended access",
+      "nothing_to_deactivate": "No selected student has active access",
+      "activate_success": "Activated {count} student(s)",
+      "deactivate_success": "Deactivated {count} student(s)",
+      "partial": "{succeeded} succeeded, {failed} failed: {message}",
+      "failed": "Failed: {message}",
+      "request_failed": "The request could not be completed"
     }
   },
   "Banners": {

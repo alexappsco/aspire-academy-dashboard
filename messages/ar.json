@@ -265,6 +265,7 @@
       "doc_added_success": "تمت إضافة المستند بنجاح",
       "no_video_link": "لا يوجد رابط للفيديو",
       "no_attachment_link": "لا يوجد رابط للمرفق",
+      "video_load_failed": "تعذّر تحميل هذا الفيديو من رابطه",
       "pdf_opening": "جاري تجهيز وعرض ملف PDF...",
       "select_new_file_to_replace": "يرجى اختيار ملف جديد للاستبدال",
       "stats_chapters": "{count} فصول",
@@ -358,7 +359,7 @@
     "tabs": {
       "overview": "نظرة عامة",
       "content": "المحتوى",
-      "students": "اشتراكات الطلاب",
+      "students": "الطلاب المشتركين",
       "reviews": "المراجعات",
       "analytics": "التحليلات"
     },
@@ -416,41 +417,48 @@
   },
   "CourseStudentsTab": {
     "search_placeholder": "البحث بالاسم أو البريد أو رقم الهاتف...",
-    "filters": {
-      "all": "كل الحالات"
-    },
     "columns": {
       "student": "الطالب",
+      "email": "البريد الإلكتروني",
       "phone": "رقم الهاتف",
-      "price": "السعر",
-      "order_date": "تاريخ الطلب",
-      "status": "الحالة",
-      "actions": "الإجراءات"
+      "enrolled_at": "تاريخ الاشتراك",
+      "expires_at": "تاريخ الانتهاء",
+      "access": "حالة الوصول",
+      "completed": "حالة الإكمال"
     },
-    "statuses": {
-      "pending": "قيد الانتظار",
-      "approved": "مقبول",
-      "rejected": "مرفوض"
+    "access": {
+      "active": "الوصول نشط",
+      "inactive": "الوصول موقوف"
     },
-    "actions": {
-      "approve": "قبول",
-      "reject": "رفض",
-      "view_receipt": "عرض الإيصال"
+    "completed": {
+      "done": "مكتمل",
+      "pending": "قيد التقدّم"
     },
-    "reject_dialog": {
-      "title": "رفض الطلب",
-      "reason_label": "سبب الرفض",
-      "reason_placeholder": "أدخل سبب الرفض (مطلوب)",
+    "bulk": {
+      "selected": "{count} محدد",
+      "clear": "إلغاء التحديد",
+      "activate": "تفعيل الطلاب",
+      "deactivate": "إلغاء تفعيل الطلاب"
+    },
+    "confirm": {
+      "activate_title": "تفعيل الطلاب",
+      "deactivate_title": "إلغاء تفعيل الطلاب",
+      "activate_body": "سيتم تفعيل وصول {count} طالب إلى هذه الدورة.",
+      "deactivate_body": "سيتم إيقاف وصول {count} طالب عن هذه الدورة.",
       "cancel": "إلغاء",
-      "confirm": "رفض"
+      "activate": "تفعيل",
+      "deactivate": "إلغاء التفعيل"
     },
     "messages": {
-      "load_failed": "تعذر تحميل الطلبات.",
-      "approved": "تم قبول الطلب بنجاح",
-      "rejected": "تم رفض الطلب بنجاح",
-      "approve_failed": "فشل قبول الطلب",
-      "reject_failed": "فشل رفض الطلب",
-      "order_not_pending": "هذا الطلب لم يعد قيد الانتظار"
+      "load_failed": "تعذر تحميل طلاب الدورة.",
+      "select_first": "حدد طالبًا واحدًا على الأقل",
+      "nothing_to_activate": "لا يوجد طالب محدد وصوله موقوف",
+      "nothing_to_deactivate": "لا يوجد طالب محدد وصوله نشط",
+      "activate_success": "تم تفعيل {count} طالب",
+      "deactivate_success": "تم إلغاء تفعيل {count} طالب",
+      "partial": "نجح {succeeded} وفشل {failed}: {message}",
+      "failed": "فشل التنفيذ: {message}",
+      "request_failed": "تعذر تنفيذ الطلب"
     }
   },
   "Banners": {

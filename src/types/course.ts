@@ -157,3 +157,51 @@ export interface CourseReviewPayload {
   currencyId?: string;
   platformPercentage?: number;
 }
+
+/**
+ * A student enrolled in a specific course (GET /admin/courses/{id}/students).
+ * `studentId` is the id the bulk access endpoints expect — it is NOT the order
+ * `userId`, so it has to come from this listing.
+ */
+export interface CourseStudentItem {
+  enrollmentId: string;
+  studentId: string;
+  name: string;
+  email: string;
+  phoneNumber?: string | null;
+  imageUrl?: string | null;
+  /** Account exists and is not suspended. */
+  isAccountActive: boolean;
+  enrolledAt?: string | null;
+  expiresAt?: string | null;
+  /** Course access state — the thing the bulk activate/deactivate endpoints flip. */
+  isCourseAccessActive: boolean;
+  isCompleted: boolean;
+}
+
+export interface CourseStudentListResponse {
+  items: CourseStudentItem[];
+  totalCount: number;
+}
+
+export interface GetCourseStudentsParams {
+  IsActive?: boolean;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
+/** Per-student outcome returned by the bulk access endpoints. */
+export interface CourseStudentBulkFailure {
+  id: string;
+  message: string;
+}
+
+export interface CourseStudentBulkResult {
+  total: number;
+  succeededCount: number;
+  failedCount: number;
+  succeeded?: string[];
+  failed?: CourseStudentBulkFailure[];
+}

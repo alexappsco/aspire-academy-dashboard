@@ -104,6 +104,9 @@ export const endpoints = {
     update: (id: string) => `/admin/courses/${id}`,
     delete: (id: string) => `/admin/courses/${id}`,
     review: (id: string) => `/admin/courses/${id}/review`,
+    students: (id: string) => `/admin/courses/${id}/students`,
+    studentsBulkActivate: (id: string) => `/admin/courses/${id}/students/bulk/activate`,
+    studentsBulkDeactivate: (id: string) => `/admin/courses/${id}/students/bulk/deactivate`,
   },
   packages: {
     list: '/admin/packages',
@@ -264,7 +267,7 @@ export const endpoints = {
     list: '/admin/instructor-dues',
     summary: '/admin/instructor-dues/summary',
     details: (instructorId: string) => `/admin/instructor-dues/${instructorId}`,
-    
+
     transfers: (instructorId: string) => `/admin/instructor-dues/${instructorId}/transfers`,
     earnings: (instructorId: string) => `/admin/instructor-dues/${instructorId}/earnings`,
   },
@@ -304,4 +307,4 @@ export const endpoints = {
     ordersBulkDelete:"/admin/orders/bulk/delete",
   }
 
-};  
+};
