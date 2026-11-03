@@ -57,6 +57,8 @@ type NotificationsContextValue = {
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 const FOREGROUND_RETRY_DELAYS = [0, 500, 1500, 3000] as const;
+const BACKGROUND_RETRY_DELAYS = [0, 750, 2000, 5000] as const;
+const SERVICE_WORKER_NOTIFICATION_MESSAGE = 'ASPIRE_FCM_BACKGROUND_MESSAGE';
 
 function normalizeNotifications(items: UserNotification[] | null | undefined) {
   if (!Array.isArray(items)) return [];
@@ -183,8 +185,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     const timers = new Set<ReturnType<typeof setTimeout>>();
 
-    const refreshAfterForegroundMessage = () => {
-      FOREGROUND_RETRY_DELAYS.forEach((delay) => {
+    const scheduleRefresh = (delays: readonly number[]) => {
+      delays.forEach((delay) => {
         const timer = setTimeout(() => {
           timers.delete(timer);
           if (!cancelled) void refresh();
@@ -192,6 +194,26 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         timers.add(timer);
       });
     };
+
+    const refreshAfterForegroundMessage = () => scheduleRefresh(FOREGROUND_RETRY_DELAYS);
+
+    const syncWhenVisible = () => {
+      if (!cancelled) void refresh();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') syncWhenVisible();
+    };
+
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      if (event.data?.type === SERVICE_WORKER_NOTIFICATION_MESSAGE) {
+        scheduleRefresh(BACKGROUND_RETRY_DELAYS);
+      }
+    };
+
+    window.addEventListener('focus', syncWhenVisible);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    navigator.serviceWorker?.addEventListener('message', handleServiceWorkerMessage);
 
     const setup = async () => {
       await refresh();
@@ -223,7 +245,6 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       saveRegisteredFirebaseToken(tokenResult.token);
       setFirebaseStatus('ready');
       setFirebaseError(null);
-
       unsubscribe = await subscribeToForegroundMessages((payload) => {
         if (cancelled) return;
         const title = payload.notification?.title || payload.data?.title;
@@ -249,6 +270,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
           setTotalCount((count) => count + 1);
           setUnreadCount((count) => count + 1);
           toast.info(`${title} — ${message}`);
+          scheduleRefresh(FOREGROUND_RETRY_DELAYS.slice(1));
           return;
         }
 
@@ -263,6 +285,9 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       activeRef.current = false;
       unsubscribe();
+      window.removeEventListener('focus', syncWhenVisible);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      navigator.serviceWorker?.removeEventListener('message', handleServiceWorkerMessage);
       timers.forEach(clearTimeout);
       timers.clear();
     };
