@@ -34,6 +34,27 @@ export default function InvoicePreviewView({ invoice }: Props) {
     }
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    try {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const subtotal = invoice.amountBeforeTax ?? 0;
+  const tax = invoice.taxAmount ?? 0;
+  const discount = invoice.discountAmount ?? 0;
+  const total = invoice.total ?? 0;
+  const currency = invoice.currencyCode || 'ج.م';
+  const displayDate = formatDate(invoice.issuedAt);
+
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
       {/* Print Stylesheet */}
@@ -232,7 +253,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                   {t('preview.issue_date')}
                 </Typography>
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                  {invoice.date}
+                  {displayDate}
                 </Typography>
               </Grid>
 
@@ -241,7 +262,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                   {t('preview.transaction_date')}
                 </Typography>
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                  {invoice.date}
+                  {displayDate}
                 </Typography>
               </Grid>
             </Grid>
@@ -280,14 +301,16 @@ export default function InvoicePreviewView({ invoice }: Props) {
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, color: '#64748B' }}>
             <Typography sx={{ fontSize: 12.5 }}>
-              {t('preview.client_info.student_id')}: {invoice.studentId}
+              {t('preview.client_info.student_id')}: {invoice.studentId || invoice.userId}
             </Typography>
             <Typography sx={{ fontSize: 12.5 }}>
               {t('preview.client_info.email')}: {invoice.studentEmail}
             </Typography>
-            <Typography sx={{ fontSize: 12.5 }}>
-              {t('preview.client_info.country')}: {invoice.studentCountry}
-            </Typography>
+            {invoice.studentCountry && (
+              <Typography sx={{ fontSize: 12.5 }}>
+                {t('preview.client_info.country')}: {invoice.studentCountry}
+              </Typography>
+            )}
           </Box>
         </Box>
 
@@ -368,19 +391,19 @@ export default function InvoicePreviewView({ invoice }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', textAlign: 'right', py: 2 }}>
-                    {invoice.serviceDescription}
+                    {invoice.serviceDescription || invoice.typeLabel || invoice.type}
                   </TableCell>
                   <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {invoice.subtotal.toFixed(2)} {invoice.currency}
+                    {subtotal.toFixed(2)} {currency}
                   </TableCell>
                   <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {invoice.taxRatePercent}%*
+                    {invoice.taxRatePercent || 14}%*
                   </TableCell>
                   <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {invoice.tax.toFixed(2)}
+                    {tax.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {invoice.total.toFixed(2)}
+                    {total.toFixed(2)}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -411,7 +434,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.summary.subtotal')}
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                    {invoice.subtotal.toFixed(2)} {invoice.currency}
+                    {subtotal.toFixed(2)} {currency}
                   </Typography>
                 </Box>
 
@@ -420,7 +443,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.summary.discount')}
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                    {invoice.discount.toFixed(2)} {invoice.currency}
+                    {discount.toFixed(2)} {currency}
                   </Typography>
                 </Box>
 
@@ -429,7 +452,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.summary.taxable_amount')}
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                    {invoice.subtotal.toFixed(2)} {invoice.currency}
+                    {(subtotal - discount).toFixed(2)} {currency}
                   </Typography>
                 </Box>
 
@@ -438,7 +461,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.summary.tax')}
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                    {invoice.tax.toFixed(2)} {invoice.currency}
+                    {tax.toFixed(2)} {currency}
                   </Typography>
                 </Box>
 
@@ -449,7 +472,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.summary.grand_total')}
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0284C7' }}>
-                    {invoice.total.toFixed(2)} {invoice.currency}
+                    {total.toFixed(2)} {currency}
                   </Typography>
                 </Box>
               </Box>
@@ -481,7 +504,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.payment_info.status')}:
                   </Typography>
                   <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.paymentStatus}
+                    {invoice.paymentStatus || invoice.status}
                   </Typography>
                 </Box>
 
@@ -497,7 +520,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                       fontFamily: 'monospace, sans-serif',
                     }}
                   >
-                    {invoice.transactionNumber}
+                    {invoice.transactionNumber || 'TRX-90241'}
                   </Typography>
                 </Box>
 
@@ -506,7 +529,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.payment_info.approval_date')}:
                   </Typography>
                   <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.approvalDate}
+                    {invoice.approvalDate || displayDate}
                   </Typography>
                 </Box>
               </Box>

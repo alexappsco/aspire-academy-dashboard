@@ -3708,12 +3708,13 @@
         "invoice_number": "Invoice Number",
         "student_name": "Student Name",
         "type": "Type",
-        "date": "Date",
+        "date": "Issue Date",
         "subtotal": "Before Tax",
         "tax": "Tax",
         "total": "Total",
         "status": "Status",
-        "actions": "Action"
+        "actions": "Action",
+        "discount": "Discount"
       },
       "actions": {
         "view": "View"

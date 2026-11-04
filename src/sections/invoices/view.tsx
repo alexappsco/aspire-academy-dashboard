@@ -10,9 +10,8 @@ import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 import type { InvoiceItem } from 'src/types/invoice';
 
-import { MOCK_INVOICE_KPIS, MOCK_INVOICES } from './_mock';
+import { MOCK_INVOICES } from './_mock';
 import InvoicesFilters from './components/invoices-filters';
-import InvoicesKpiCards from './components/invoices-kpi-cards';
 import InvoicesTable from './components/invoices-table';
 
 export default function InvoicesView() {
@@ -28,22 +27,35 @@ export default function InvoicesView() {
       // 1. Search filter (by invoiceNumber or studentName or studentEmail)
       if (search.trim()) {
         const query = search.trim().toLowerCase();
-        const matchesNumber = inv.invoiceNumber.toLowerCase().includes(query);
-        const matchesName = inv.studentName.toLowerCase().includes(query);
-        const matchesEmail = inv.studentEmail.toLowerCase().includes(query);
+        const matchesNumber = inv.invoiceNumber?.toLowerCase().includes(query);
+        const matchesName = inv.studentName?.toLowerCase().includes(query);
+        const matchesEmail = inv.studentEmail?.toLowerCase().includes(query);
         if (!matchesNumber && !matchesName && !matchesEmail) {
           return false;
         }
       }
 
       // 2. Type filter
-      if (type && type !== 'all' && inv.type !== type) {
-        return false;
+      if (type && type !== 'all') {
+        const lowerType = inv.type?.toLowerCase();
+        const lowerFilter = type.toLowerCase();
+        if (
+          lowerType !== lowerFilter &&
+          inv.type !== type &&
+          (lowerFilter !== 'course_purchase' || lowerType !== 'purchase') &&
+          (lowerFilter !== 'private_charge' || lowerType !== 'privatecharge')
+        ) {
+          return false;
+        }
       }
 
       // 3. Status filter
-      if (status && status !== 'all' && inv.status !== status) {
-        return false;
+      if (status && status !== 'all') {
+        const lowerStatus = inv.status?.toLowerCase();
+        const lowerFilter = status.toLowerCase();
+        if (lowerStatus !== lowerFilter && inv.status !== status) {
+          return false;
+        }
       }
 
       return true;
@@ -66,27 +78,7 @@ export default function InvoicesView() {
         </Typography>
       </Box>
 
-      {/* 2. Top Info Banner */}
-      <Box
-        sx={{
-          p: 1.75,
-          mb: 3,
-          borderRadius: 2,
-          bgcolor: '#F0F9FF',
-          border: '1px solid #BAE6FD',
-          color: '#0369A1',
-          fontSize: 13,
-          fontWeight: 600,
-          textAlign: 'right',
-        }}
-      >
-        {t('info_banner')}
-      </Box>
-
-      {/* 3. KPI Metric Cards */}
-      <InvoicesKpiCards kpis={MOCK_INVOICE_KPIS} />
-
-      {/* 4. Filters Bar */}
+      {/* 2. Filters Bar */}
       <InvoicesFilters
         search={search}
         type={type}
@@ -96,7 +88,7 @@ export default function InvoicesView() {
         onStatusChange={setStatus}
       />
 
-      {/* 5. Invoices Shared Table */}
+      {/* 3. Invoices Shared Table */}
       <InvoicesTable
         invoices={filteredInvoices}
         totalCount={filteredInvoices.length}

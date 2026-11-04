@@ -3716,12 +3716,13 @@
         "invoice_number": "رقم الفاتورة",
         "student_name": "اسم الطالب",
         "type": "النوع",
-        "date": "التاريخ",
+        "date": "تاريخ الإصدار",
         "subtotal": "قبل الضريبة",
         "tax": "الضريبة",
         "total": "الإجمالي",
         "status": "الحالة",
-        "actions": "الإجراء"
+        "actions": "الإجراء",
+        "discount": "الخصم"
       },
       "actions": {
         "view": "عرض"

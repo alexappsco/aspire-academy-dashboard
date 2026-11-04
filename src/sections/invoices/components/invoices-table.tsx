@@ -21,6 +21,38 @@ interface Props {
 export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: Props) {
   const t = useTranslations('Invoices');
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    try {
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getTypeLabel = (type: string, typeLabel?: string) => {
+    if (typeLabel) return typeLabel;
+    const lower = type.toLowerCase();
+    if (lower === 'purchase') return t('filters.types.course_purchase');
+    if (lower === 'privatecharge' || lower === 'private_charge') {
+      return t('filters.types.private_charge');
+    }
+    return type;
+  };
+
+  const getStatusLabel = (status: string, statusLabel?: string) => {
+    if (statusLabel) return statusLabel;
+    const lower = status.toLowerCase();
+    if (lower === 'issued') return t('filters.statuses.issued');
+    if (lower === 'cancelled') return t('filters.statuses.cancelled');
+    return status;
+  };
+
   const tableHead: headCellType[] = [
     {
       id: 'invoiceNumber',
@@ -38,17 +70,22 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
       align: cellAlignment.center,
     },
     {
-      id: 'date',
+      id: 'issuedAt',
       label: t('table.columns.date'),
       align: cellAlignment.center,
     },
     {
-      id: 'subtotal',
+      id: 'amountBeforeTax',
       label: t('table.columns.subtotal'),
       align: cellAlignment.center,
     },
     {
-      id: 'tax',
+      id: 'discountAmount',
+      label: t('table.columns.discount'),
+      align: cellAlignment.center,
+    },
+    {
+      id: 'taxAmount',
       label: t('table.columns.tax'),
       align: cellAlignment.center,
     },
@@ -95,34 +132,39 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
     ),
     type: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, color: '#475569', fontWeight: 500, whiteSpace: 'nowrap' }}>
-        {row.typeLabel}
+        {getTypeLabel(row.type, row.typeLabel)}
       </Typography>
     ),
-    date: (row: InvoiceItem) => (
+    issuedAt: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, color: '#64748B', whiteSpace: 'nowrap' }}>
-        {row.date}
+        {formatDate(row.issuedAt)}
       </Typography>
     ),
-    subtotal: (row: InvoiceItem) => (
+    amountBeforeTax: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.subtotal.toLocaleString()}
+        {row.amountBeforeTax.toLocaleString()}
       </Typography>
     ),
-    tax: (row: InvoiceItem) => (
+    discountAmount: (row: InvoiceItem) => (
+      <Typography sx={{ fontSize: 13, fontWeight: 600, color: row.discountAmount > 0 ? '#15803D' : '#64748B', whiteSpace: 'nowrap' }}>
+        {row.discountAmount.toLocaleString()}
+      </Typography>
+    ),
+    taxAmount: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.tax.toLocaleString()}
+        {row.taxAmount.toLocaleString()}
       </Typography>
     ),
     total: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.total.toLocaleString()} {row.currency}
+        {row.total.toLocaleString()} {row.currencyCode}
       </Typography>
     ),
     status: (row: InvoiceItem) => {
-      const isIssued = row.status === 'issued';
+      const isIssued = row.status?.toLowerCase() === 'issued' || row.status === 'صادرة';
       return (
         <Chip
-          label={row.statusLabel}
+          label={getStatusLabel(row.status, row.statusLabel)}
           size="small"
           sx={{
             fontWeight: 700,
