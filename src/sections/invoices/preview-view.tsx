@@ -186,26 +186,13 @@ export default function InvoicePreviewView({ invoice }: Props) {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
             alignItems: 'flex-start',
             gap: 3,
             mb: 4,
           }}
         >
-          {/* Left in RTL: Brand Logo & Subtitle */}
-          <Box sx={{ textAlign: { xs: 'right', sm: 'left' } }}>
-            <Box
-              component="img"
-              src="/logo.svg"
-              alt="Aspire Academy"
-              sx={{ height: 48, width: 'auto', mb: 0.5 }}
-            />
-            <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-              {t('preview.platform_name')}
-            </Typography>
-          </Box>
-
           {/* Right in RTL: Invoice Title & Meta Details */}
           <Box sx={{ textAlign: 'right' }}>
             <Typography sx={{ fontSize: 26, fontWeight: 800, color: '#0F172A', lineHeight: 1.1 }}>
@@ -258,6 +245,19 @@ export default function InvoicePreviewView({ invoice }: Props) {
                 </Typography>
               </Grid>
             </Grid>
+          </Box>
+
+          {/* Left in RTL: Brand Logo & Subtitle */}
+          <Box sx={{ textAlign: { xs: 'right', sm: 'left' } }}>
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="Aspire Academy"
+              sx={{ height: 48, width: 'auto', mb: 0.5 }}
+            />
+            <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
+              {t('preview.platform_name')}
+            </Typography>
           </Box>
         </Box>
 
