@@ -159,6 +159,11 @@ const sidebarItems: SidebarItem[] = [
     path: "/hours-charge-requests",
   },
   {
+    key: "invoices",
+    icon: "/icons/invoice.svg",
+    path: "/invoices",
+  },
+  {
     key: "admin_private_requests",
     icon: "/icons/package.svg",
     children: [

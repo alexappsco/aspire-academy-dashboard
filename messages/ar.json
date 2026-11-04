@@ -52,7 +52,8 @@
     "instructor_payouts": "مستحقات المحاضرون",
     "instructor_wallet": "الأرباح والمحفظة",
     "instructor_subjects": "إدارة المواد",
-    "profile": "الملف الشخصي"
+    "profile": "الملف الشخصي",
+    "invoices": "الفواتير"
   },
   "Courses": {
     "title": "الدورات التدريبية",
@@ -3678,5 +3679,100 @@
     },
     "export_pdf": "تصدير الطلبات المعتمدة (PDF)",
     "exporting_pdf": "جاري التصدير..."
+  },
+  "Invoices": {
+    "title": "الفواتير",
+    "subtitle": "استعراض وإدارة وطباعة الفواتير الصادرة للطلاب",
+    "info_banner": "يتم إنشاء فاتورة تلقائيًا بعد اعتماد عملية الدفع — سواء لشراء دورة أو لشحن رصيد Private.",
+    "currency": "ج.م",
+    "kpi": {
+      "total_invoices": "إجمالي الفواتير",
+      "total_invoices_sub": "جميع الفواتير الصادرة",
+      "total_amount": "إجمالي قيمة الفواتير",
+      "total_amount_sub": "قيمة المعاملات المسجلة",
+      "this_month": "فواتير هذا الشهر",
+      "this_month_sub": "من 1 إلى 4 نوفمبر 2026",
+      "total_taxes": "إجمالي الضرائب",
+      "total_taxes_sub": "وفق البيانات التجريبية"
+    },
+    "filters": {
+      "search_placeholder": "ابحث برقم الفاتورة أو اسم الطالب..",
+      "type_label": "نوع الفاتورة",
+      "status_label": "حالة الفاتورة",
+      "all": "الكل",
+      "types": {
+        "course_purchase": "شراء دورة",
+        "private_charge": "شحن رصيد Private"
+      },
+      "statuses": {
+        "issued": "صادرة",
+        "cancelled": "ملغاة"
+      }
+    },
+    "table": {
+      "title": "سجل الفواتير",
+      "subtitle": "عرض أحدث الفواتير الصادرة من المنصة",
+      "columns": {
+        "invoice_number": "رقم الفاتورة",
+        "student_name": "اسم الطالب",
+        "type": "النوع",
+        "date": "التاريخ",
+        "subtotal": "قبل الضريبة",
+        "tax": "الضريبة",
+        "total": "الإجمالي",
+        "status": "الحالة",
+        "actions": "الإجراء"
+      },
+      "actions": {
+        "view": "عرض"
+      }
+    },
+    "preview": {
+      "title": "معاينة الفاتورة",
+      "breadcrumb_root": "الفواتير",
+      "print": "طباعة الفاتورة",
+      "download_pdf": "تحميل PDF",
+      "warning_banner": "تنبيه: النسبة والقيم الضريبية في هذا النموذج توضيحية، وتُضبط حسب المعالجة الضريبية المعتمدة للمنشأة.",
+      "invoice_title": "فاتورة ضريبية",
+      "invoice_title_en": "TAX INVOICE",
+      "invoice_number": "رقم الفاتورة",
+      "issue_date": "تاريخ الإصدار",
+      "transaction_date": "تاريخ المعاملة",
+      "platform_name": "منصة التعليم الطبي",
+      "client_info": {
+        "title": "بيانات العميل",
+        "student_id": "رقم الطالب",
+        "email": "البريد",
+        "country": "الدولة"
+      },
+      "service_details": {
+        "title": "تفاصيل الخدمة",
+        "description": "وصف الخدمة",
+        "price": "السعر",
+        "tax_rate": "الضريبة",
+        "tax_amount": "قيمة الضريبة",
+        "total": "الإجمالي"
+      },
+      "payment_info": {
+        "title": "بيانات الدفع",
+        "status": "حالة الدفع",
+        "transaction_id": "رقم العملية",
+        "approval_date": "تاريخ الاعتماد"
+      },
+      "summary": {
+        "title": "ملخص الفاتورة",
+        "subtotal": "الإجمالي قبل الضريبة",
+        "discount": "الخصم",
+        "taxable_amount": "المبلغ الخاضع للضريبة",
+        "tax": "الضريبة (مثال 14%*)",
+        "grand_total": "الإجمالي شامل الضريبة"
+      },
+      "footer": {
+        "thank_you": "شكرًا لاختياركم Aspire Academy",
+        "notice": "هذه الفاتورة صادرة عن منصة Aspire Academy. يتم إظهار رمز التحقق الإلكتروني بعد ربطه بالمنظومة المعتمدة.",
+        "platform": "منصة التعليم الطبي - Aspire Academy",
+        "tax_footnote": "* نسبة الضريبة المعروضة في هذا النموذج تجريبية وليست اعتمادًا للمعالجة الضريبية الفعلية"
+      }
+    }
   }
 }

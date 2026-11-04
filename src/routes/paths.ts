@@ -14,7 +14,7 @@ export const paths = {
     root: '/instructor-payouts',
     details: (id: string) => `/instructor-payouts/${id}`,
   },
-    wallet: '/wallet',
+  wallet: '/wallet',
   groupDiscountSettings: {
     root: '/group-discount-settings',
     edit: '/group-discount-settings/edit',
@@ -22,4 +22,8 @@ export const paths = {
   academyBankAccounts: '/academy-bank-accounts',
   academyCustomFields: '/academy-custom-fields',
   instructorCustomFields: '/instructor-custom-fields',
+  invoices: {
+    root: '/invoices',
+    details: (id: string) => `/invoices/${id}`,
+  },
 };

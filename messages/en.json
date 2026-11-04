@@ -52,7 +52,8 @@
     "instructor_payouts": "Instructor Payouts",
     "instructor_wallet": "Earnings & Wallet",
     "instructor_subjects": "Subjects Management",
-    "profile": "Personal Profile"
+    "profile": "Personal Profile",
+    "invoices": "Invoices"
   },
   "Courses": {
     "title": "Training Courses",
@@ -3670,5 +3671,100 @@
     },
     "export_pdf": "Export Approved Orders (PDF)",
     "exporting_pdf": "Exporting..."
+  },
+  "Invoices": {
+    "title": "Invoices",
+    "subtitle": "Review, manage, and print invoices issued to students",
+    "info_banner": "An invoice is automatically generated upon payment approval — whether for purchasing a course or topping up a Private balance.",
+    "currency": "EGP",
+    "kpi": {
+      "total_invoices": "Total Invoices",
+      "total_invoices_sub": "All issued invoices",
+      "total_amount": "Total Invoices Value",
+      "total_amount_sub": "Recorded transaction value",
+      "this_month": "Invoices This Month",
+      "this_month_sub": "From Nov 1 to Nov 4, 2026",
+      "total_taxes": "Total Taxes",
+      "total_taxes_sub": "According to demo data"
+    },
+    "filters": {
+      "search_placeholder": "Search by invoice number or student name...",
+      "type_label": "Invoice Type",
+      "status_label": "Invoice Status",
+      "all": "All",
+      "types": {
+        "course_purchase": "Course Purchase",
+        "private_charge": "Private Balance Top-up"
+      },
+      "statuses": {
+        "issued": "Issued",
+        "cancelled": "Cancelled"
+      }
+    },
+    "table": {
+      "title": "Invoices Log",
+      "subtitle": "View latest invoices issued by the platform",
+      "columns": {
+        "invoice_number": "Invoice Number",
+        "student_name": "Student Name",
+        "type": "Type",
+        "date": "Date",
+        "subtotal": "Before Tax",
+        "tax": "Tax",
+        "total": "Total",
+        "status": "Status",
+        "actions": "Action"
+      },
+      "actions": {
+        "view": "View"
+      }
+    },
+    "preview": {
+      "title": "Invoice Preview",
+      "breadcrumb_root": "Invoices",
+      "print": "Print Invoice",
+      "download_pdf": "Download PDF",
+      "warning_banner": "Notice: The tax rate and values in this template are illustrative and subject to the establishment's approved tax treatment.",
+      "invoice_title": "Tax Invoice",
+      "invoice_title_en": "TAX INVOICE",
+      "invoice_number": "Invoice Number",
+      "issue_date": "Issue Date",
+      "transaction_date": "Transaction Date",
+      "platform_name": "Medical Education Platform",
+      "client_info": {
+        "title": "Client Details",
+        "student_id": "Student ID",
+        "email": "Email",
+        "country": "Country"
+      },
+      "service_details": {
+        "title": "Service Details",
+        "description": "Service Description",
+        "price": "Price",
+        "tax_rate": "Tax Rate",
+        "tax_amount": "Tax Amount",
+        "total": "Total"
+      },
+      "payment_info": {
+        "title": "Payment Details",
+        "status": "Payment Status",
+        "transaction_id": "Transaction ID",
+        "approval_date": "Approval Date"
+      },
+      "summary": {
+        "title": "Invoice Summary",
+        "subtotal": "Subtotal Before Tax",
+        "discount": "Discount",
+        "taxable_amount": "Taxable Amount",
+        "tax": "Tax (e.g. 14%*)",
+        "grand_total": "Grand Total (Inc. Tax)"
+      },
+      "footer": {
+        "thank_you": "Thank you for choosing Aspire Academy",
+        "notice": "This invoice is issued by Aspire Academy platform. The electronic verification code will appear after connecting to the accredited system.",
+        "platform": "Medical Education Platform - Aspire Academy",
+        "tax_footnote": "* The tax rate displayed in this model is experimental and does not represent approval of actual tax processing"
+      }
+    }
   }
 }
