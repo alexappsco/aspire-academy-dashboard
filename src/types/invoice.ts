@@ -1,5 +1,29 @@
 export type InvoiceType = 'Purchase' | 'WalletCharge' | string;
 
+export interface InvoiceCustomer {
+  name?: string;
+  studentNumber?: string;
+  email?: string;
+  phoneNumber?: string;
+  country?: string;
+}
+
+export interface InvoiceLineItem {
+  description: string;
+  quantity?: number;
+  unitPrice: number;
+  taxPercentage: number;
+  taxAmount: number;
+  total: number;
+}
+
+export interface InvoicePayment {
+  status: string;
+  transactionNumber: string;
+  approvedAt: string;
+  receiptUrl?: string;
+}
+
 export interface InvoiceItem {
   id: string;
   invoiceNumber: string;
@@ -17,8 +41,13 @@ export interface InvoiceItem {
   total: number;
   currencyId?: string;
   currencyCode: string;
+  transactionDate?: string;
+  taxPercentage?: number;
+  customer?: InvoiceCustomer;
+  lines?: InvoiceLineItem[];
+  payment?: InvoicePayment;
 
-  // Detail preview fields (used by preview page)
+  // Detail preview fallbacks
   studentId?: string;
   studentCountry?: string;
   serviceDescription?: string;

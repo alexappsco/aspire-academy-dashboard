@@ -298,6 +298,7 @@ export const endpoints = {
   invoices: {
     list: '/admin/invoices',
     details: (id: string) => `/admin/invoices/${id}`,
+    pdf: (id: string) => `/admin/invoices/${id}/pdf`,
   },
   actions:{
     studentBulkDelete:"/admin/students/bulk/delete",

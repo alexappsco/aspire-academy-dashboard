@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
+import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
@@ -16,7 +17,9 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { useTranslations } from 'next-intl';
 
+import { downloadInvoicePdfAction } from 'src/actions/invoices';
 import Iconify from 'src/components/iconify';
+import { useToast } from 'src/components/toast';
 import { Link } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 import type { InvoiceItem } from 'src/types/invoice';
@@ -27,10 +30,44 @@ interface Props {
 
 export default function InvoicePreviewView({ invoice }: Props) {
   const t = useTranslations('Invoices');
+  const toast = useToast();
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
       window.print();
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsDownloadingPdf(true);
+      const res = await downloadInvoicePdfAction(invoice.id);
+      if (res.success && res.data?.base64) {
+        const byteCharacters = atob(res.data.base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i += 1) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = res.data.fileName || `${invoice.invoiceNumber || 'invoice'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        toast.success(t('preview.download_success'));
+      } else {
+        toast.error(res.error || t('preview.download_error'));
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('preview.download_error'));
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -53,7 +90,21 @@ export default function InvoicePreviewView({ invoice }: Props) {
   const discount = invoice.discountAmount ?? 0;
   const total = invoice.total ?? 0;
   const currency = invoice.currencyCode || 'ج.م';
-  const displayDate = formatDate(invoice.issuedAt);
+  const issueDate = formatDate(invoice.issuedAt);
+  const transactionDate = formatDate(invoice.transactionDate || invoice.issuedAt);
+
+  const customerName = invoice.customer?.name || invoice.studentName || '-';
+  const studentNumber = invoice.customer?.studentNumber || invoice.studentId || invoice.userId || '-';
+  const customerEmail = invoice.customer?.email || invoice.studentEmail || '-';
+  const customerPhone = invoice.customer?.phoneNumber;
+  const customerCountry = invoice.customer?.country || invoice.studentCountry;
+
+  const paymentStatus = invoice.payment?.status || invoice.paymentStatus || invoice.status || '-';
+  const transactionNumber = invoice.payment?.transactionNumber || invoice.transactionNumber || '-';
+  const approvalDate = formatDate(invoice.payment?.approvedAt || invoice.approvalDate || invoice.issuedAt);
+
+  const lines = invoice.lines && invoice.lines.length > 0 ? invoice.lines : null;
+  const taxPercent = invoice.taxPercentage ?? invoice.taxRatePercent ?? 14;
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -122,8 +173,15 @@ export default function InvoicePreviewView({ invoice }: Props) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Button
             variant="outlined"
-            onClick={handlePrint}
-            startIcon={<Iconify icon="solar:file-download-bold" width={18} />}
+            onClick={handleDownloadPdf}
+            disabled={isDownloadingPdf}
+            startIcon={
+              isDownloadingPdf ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <Iconify icon="solar:file-download-bold" width={18} />
+              )
+            }
             sx={{
               borderRadius: 2,
               borderColor: '#E2E8F0',
@@ -253,7 +311,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                   {t('preview.issue_date')}
                 </Typography>
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                  {displayDate}
+                  {issueDate}
                 </Typography>
               </Grid>
 
@@ -262,7 +320,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                   {t('preview.transaction_date')}
                 </Typography>
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-                  {displayDate}
+                  {transactionDate}
                 </Typography>
               </Grid>
             </Grid>
@@ -297,18 +355,23 @@ export default function InvoicePreviewView({ invoice }: Props) {
             {t('preview.client_info.title')}
           </Typography>
           <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#0F172A', mb: 0.75 }}>
-            {invoice.studentName}
+            {customerName}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, color: '#64748B' }}>
             <Typography sx={{ fontSize: 12.5 }}>
-              {t('preview.client_info.student_id')}: {invoice.studentId || invoice.userId}
+              {t('preview.client_info.student_id')}: {studentNumber}
             </Typography>
             <Typography sx={{ fontSize: 12.5 }}>
-              {t('preview.client_info.email')}: {invoice.studentEmail}
+              {t('preview.client_info.email')}: {customerEmail}
             </Typography>
-            {invoice.studentCountry && (
+            {customerPhone && (
               <Typography sx={{ fontSize: 12.5 }}>
-                {t('preview.client_info.country')}: {invoice.studentCountry}
+                {t('preview.client_info.phone')}: {customerPhone}
+              </Typography>
+            )}
+            {customerCountry && (
+              <Typography sx={{ fontSize: 12.5 }}>
+                {t('preview.client_info.country')}: {customerCountry}
               </Typography>
             )}
           </Box>
@@ -389,23 +452,46 @@ export default function InvoicePreviewView({ invoice }: Props) {
               </TableHead>
 
               <TableBody>
-                <TableRow>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', textAlign: 'right', py: 2 }}>
-                    {invoice.serviceDescription || invoice.typeLabel || invoice.type}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {subtotal.toFixed(2)} {currency}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {invoice.taxRatePercent || 14}%*
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {tax.toFixed(2)}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                    {total.toFixed(2)}
-                  </TableCell>
-                </TableRow>
+                {lines ? (
+                  lines.map((line, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', textAlign: 'right', py: 2 }}>
+                        {line.description}
+                        {line.quantity && line.quantity > 1 ? ` (${line.quantity})` : ''}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                        {line.unitPrice.toFixed(2)} {currency}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                        {line.taxPercentage}%*
+                      </TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                        {line.taxAmount.toFixed(2)}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                        {line.total.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', textAlign: 'right', py: 2 }}>
+                      {invoice.serviceDescription || invoice.typeLabel || invoice.type}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                      {subtotal.toFixed(2)} {currency}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                      {taxPercent}%*
+                    </TableCell>
+                    <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                      {tax.toFixed(2)}
+                    </TableCell>
+                    <TableCell sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', textAlign: 'center', py: 2 }}>
+                      {total.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -458,7 +544,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                    {t('preview.summary.tax')}
+                    {t('preview.summary.tax')} ({taxPercent}%*)
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
                     {tax.toFixed(2)} {currency}
@@ -504,7 +590,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.payment_info.status')}:
                   </Typography>
                   <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.paymentStatus || invoice.status}
+                    {paymentStatus}
                   </Typography>
                 </Box>
 
@@ -520,7 +606,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                       fontFamily: 'monospace, sans-serif',
                     }}
                   >
-                    {invoice.transactionNumber || 'TRX-90241'}
+                    {transactionNumber}
                   </Typography>
                 </Box>
 
@@ -529,7 +615,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                     {t('preview.payment_info.approval_date')}:
                   </Typography>
                   <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.approvalDate || displayDate}
+                    {approvalDate}
                   </Typography>
                 </Box>
               </Box>

@@ -75,3 +75,33 @@ export async function getInvoiceDetailsAction(
     };
   }
 }
+
+export async function downloadInvoicePdfAction(
+  id: string
+): Promise<ApiSingleResponse<{ base64: string; fileName: string }>> {
+  try {
+    const response = await getData<Blob>(endpoints.invoices.pdf(id));
+
+    if ('success' in response && response.success && response.data) {
+      const arrayBuffer = await response.data.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      return {
+        success: true,
+        data: {
+          base64,
+          fileName: `invoice-${id}.pdf`,
+        },
+      };
+    }
+
+    return {
+      success: false,
+      error: 'error' in response ? response.error : 'Failed to download invoice PDF',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to download invoice PDF',
+    };
+  }
+}

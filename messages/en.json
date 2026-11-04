@@ -3743,7 +3743,8 @@
         "title": "Client Details",
         "student_id": "Student ID",
         "email": "Email",
-        "country": "Country"
+        "country": "Country",
+        "phone": "Phone"
       },
       "service_details": {
         "title": "Service Details",
@@ -3751,7 +3752,8 @@
         "price": "Price",
         "tax_rate": "Tax Rate",
         "tax_amount": "Tax Amount",
-        "total": "Total"
+        "total": "Total",
+        "quantity": "Quantity"
       },
       "payment_info": {
         "title": "Payment Details",
@@ -3772,7 +3774,9 @@
         "notice": "This invoice is issued by Aspire Academy platform. The electronic verification code will appear after connecting to the accredited system.",
         "platform": "Medical Education Platform - Aspire Academy",
         "tax_footnote": "* The tax rate displayed in this model is experimental and does not represent approval of actual tax processing"
-      }
+      },
+      "download_success": "Invoice downloaded successfully",
+      "download_error": "Failed to download invoice PDF"
     }
   }
 }
