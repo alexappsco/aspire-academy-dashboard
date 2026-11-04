@@ -1,66 +1,100 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
+import { getCurrenciesAction } from 'src/actions/currencies';
+import { getInvoicesAction } from 'src/actions/invoices';
+import { useToast } from 'src/components/toast';
 import { useRouter } from 'src/i18n/routing';
 import { paths } from 'src/routes/paths';
 import type { InvoiceItem } from 'src/types/invoice';
 
-import { MOCK_INVOICES } from './_mock';
 import InvoicesFilters from './components/invoices-filters';
 import InvoicesTable from './components/invoices-table';
 
 export default function InvoicesView() {
   const t = useTranslations('Invoices');
   const router = useRouter();
+  const toast = useToast();
 
+  const [invoices, setInvoices] = useState<InvoiceItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Filters matching backend Swagger parameters
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [type, setType] = useState('');
-  const [status, setStatus] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [currencyId, setCurrencyId] = useState('');
+  const [currencies, setCurrencies] = useState<{ id: string; name: string; code: string }[]>([]);
 
-  const filteredInvoices = useMemo(() => {
-    return MOCK_INVOICES.filter((inv) => {
-      // 1. Search filter (by invoiceNumber or studentName or studentEmail)
-      if (search.trim()) {
-        const query = search.trim().toLowerCase();
-        const matchesNumber = inv.invoiceNumber?.toLowerCase().includes(query);
-        const matchesName = inv.studentName?.toLowerCase().includes(query);
-        const matchesEmail = inv.studentEmail?.toLowerCase().includes(query);
-        if (!matchesNumber && !matchesName && !matchesEmail) {
-          return false;
+  // Debounce search (400ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const locale = useLocale();
+
+  // Load currencies lookup for filter
+  useEffect(() => {
+    let mounted = true;
+    getCurrenciesAction({ MaxResultCount: 100 })
+      .then((res) => {
+        if (mounted && res.success && res.data) {
+          const list = (res.data.items || []).map((c) => ({
+            id: c.id,
+            name: locale === 'ar' ? c.nameAr : c.nameEn,
+            code: c.code || c.symbol,
+          }));
+          setCurrencies(list);
         }
-      }
+      })
+      .catch(() => {});
 
-      // 2. Type filter
-      if (type && type !== 'all') {
-        const lowerType = inv.type?.toLowerCase();
-        const lowerFilter = type.toLowerCase();
-        if (
-          lowerType !== lowerFilter &&
-          inv.type !== type &&
-          (lowerFilter !== 'course_purchase' || lowerType !== 'purchase') &&
-          (lowerFilter !== 'private_charge' || lowerType !== 'privatecharge')
-        ) {
-          return false;
-        }
-      }
+    return () => {
+      mounted = false;
+    };
+  }, [locale]);
 
-      // 3. Status filter
-      if (status && status !== 'all') {
-        const lowerStatus = inv.status?.toLowerCase();
-        const lowerFilter = status.toLowerCase();
-        if (lowerStatus !== lowerFilter && inv.status !== status) {
-          return false;
-        }
-      }
+  // Fetch invoices from backend
+  const fetchInvoices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getInvoicesAction({
+        Filter: debouncedSearch.trim() || undefined,
+        Type: type && type !== 'all' ? type : undefined,
+        FromDate: fromDate || undefined,
+        ToDate: toDate || undefined,
+        CurrencyId: currencyId && currencyId !== 'all' ? currencyId : undefined,
+        SkipCount: 0,
+        MaxResultCount: 1000,
+      });
 
-      return true;
-    });
-  }, [search, type, status]);
+      if (res.success && res.data) {
+        setInvoices(res.data.items || []);
+        setTotalCount(res.data.totalCount || 0);
+      } else {
+        toast.error(res.error || t('table.load_error'));
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('table.load_error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, type, fromDate, toDate, currencyId, t, toast]);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [fetchInvoices]);
 
   const handleViewInvoice = (invoice: InvoiceItem) => {
     router.push(paths.invoices.details(invoice.id));
@@ -78,20 +112,26 @@ export default function InvoicesView() {
         </Typography>
       </Box>
 
-      {/* 2. Filters Bar */}
+      {/* 2. Filters Bar (Matching Backend Parameters) */}
       <InvoicesFilters
         search={search}
         type={type}
-        status={status}
+        fromDate={fromDate}
+        toDate={toDate}
+        currencyId={currencyId}
+        currencies={currencies}
         onSearchChange={setSearch}
         onTypeChange={setType}
-        onStatusChange={setStatus}
+        onFromDateChange={setFromDate}
+        onToDateChange={setToDate}
+        onCurrencyChange={setCurrencyId}
       />
 
       {/* 3. Invoices Shared Table */}
       <InvoicesTable
-        invoices={filteredInvoices}
-        totalCount={filteredInvoices.length}
+        invoices={invoices}
+        totalCount={totalCount}
+        loading={loading}
         onViewInvoice={handleViewInvoice}
       />
     </Container>

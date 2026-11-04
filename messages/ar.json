@@ -3702,12 +3702,18 @@
       "all": "الكل",
       "types": {
         "course_purchase": "شراء دورة",
-        "private_charge": "شحن رصيد Private"
+        "private_charge": "شحن رصيد Private",
+        "purchase": "شراء دورة",
+        "wallet_charge": "شحن رصيد المحفظة"
       },
       "statuses": {
         "issued": "صادرة",
         "cancelled": "ملغاة"
-      }
+      },
+      "from_date": "من تاريخ",
+      "to_date": "إلى تاريخ",
+      "currency_label": "العملة",
+      "all_currencies": "جميع العملات"
     },
     "table": {
       "title": "سجل الفواتير",
@@ -3726,7 +3732,8 @@
       },
       "actions": {
         "view": "عرض"
-      }
+      },
+      "load_error": "فشل تحميل الفواتير"
     },
     "preview": {
       "title": "معاينة الفاتورة",

@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { useTranslations } from 'next-intl';
 
@@ -15,10 +16,16 @@ import type { InvoiceItem } from 'src/types/invoice';
 interface Props {
   invoices: InvoiceItem[];
   totalCount: number;
+  loading?: boolean;
   onViewInvoice: (invoice: InvoiceItem) => void;
 }
 
-export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: Props) {
+export default function InvoicesTable({
+  invoices,
+  totalCount,
+  loading = false,
+  onViewInvoice,
+}: Props) {
   const t = useTranslations('Invoices');
 
   const formatDate = (dateStr?: string) => {
@@ -35,21 +42,23 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
     }
   };
 
-  const getTypeLabel = (type: string, typeLabel?: string) => {
+  const getTypeLabel = (type?: string, typeLabel?: string) => {
     if (typeLabel) return typeLabel;
+    if (!type) return '-';
     const lower = type.toLowerCase();
-    if (lower === 'purchase') return t('filters.types.course_purchase');
-    if (lower === 'privatecharge' || lower === 'private_charge') {
-      return t('filters.types.private_charge');
+    if (lower === 'purchase') return t('filters.types.purchase');
+    if (lower === 'walletcharge' || lower === 'wallet_charge') {
+      return t('filters.types.wallet_charge');
     }
     return type;
   };
 
-  const getStatusLabel = (status: string, statusLabel?: string) => {
+  const getStatusLabel = (status?: string, statusLabel?: string) => {
     if (statusLabel) return statusLabel;
+    if (!status) return '-';
     const lower = status.toLowerCase();
-    if (lower === 'issued') return t('filters.statuses.issued');
-    if (lower === 'cancelled') return t('filters.statuses.cancelled');
+    if (lower === 'issued' || status === 'صادرة') return t('filters.statuses.issued');
+    if (lower === 'cancelled' || status === 'ملغاة') return t('filters.statuses.cancelled');
     return status;
   };
 
@@ -123,10 +132,10 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
     studentName: (row: InvoiceItem) => (
       <Box sx={{ textAlign: 'right' }}>
         <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>
-          {row.studentName}
+          {row.studentName || '-'}
         </Typography>
         <Typography sx={{ fontSize: 12, color: '#94A3B8', fontWeight: 500 }}>
-          {row.studentEmail}
+          {row.studentEmail || '-'}
         </Typography>
       </Box>
     ),
@@ -142,22 +151,29 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
     ),
     amountBeforeTax: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.amountBeforeTax.toLocaleString()}
+        {(row.amountBeforeTax ?? 0).toLocaleString()}
       </Typography>
     ),
     discountAmount: (row: InvoiceItem) => (
-      <Typography sx={{ fontSize: 13, fontWeight: 600, color: row.discountAmount > 0 ? '#15803D' : '#64748B', whiteSpace: 'nowrap' }}>
-        {row.discountAmount.toLocaleString()}
+      <Typography
+        sx={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: (row.discountAmount ?? 0) > 0 ? '#15803D' : '#64748B',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {(row.discountAmount ?? 0).toLocaleString()}
       </Typography>
     ),
     taxAmount: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.taxAmount.toLocaleString()}
+        {(row.taxAmount ?? 0).toLocaleString()}
       </Typography>
     ),
     total: (row: InvoiceItem) => (
       <Typography sx={{ fontSize: 13, fontWeight: 800, color: '#0F172A', whiteSpace: 'nowrap' }}>
-        {row.total.toLocaleString()} {row.currencyCode}
+        {(row.total ?? 0).toLocaleString()} {row.currencyCode || ''}
       </Typography>
     ),
     status: (row: InvoiceItem) => {
@@ -210,6 +226,7 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
         boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
         bgcolor: '#FFFFFF',
         p: { xs: 2, sm: 2.5 },
+        position: 'relative',
       }}
     >
       <Box sx={{ mb: 2, textAlign: 'right' }}>
@@ -221,12 +238,27 @@ export default function InvoicesTable({ invoices, totalCount, onViewInvoice }: P
         </Typography>
       </Box>
 
-      <SharedTable<InvoiceItem>
-        data={invoices}
-        count={totalCount}
-        tableHead={tableHead}
-        customRender={customRender}
-      />
+      {loading && (
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            py: 4,
+          }}
+        >
+          <CircularProgress size={32} />
+        </Box>
+      )}
+
+      {!loading && (
+        <SharedTable<InvoiceItem>
+          data={invoices}
+          count={totalCount}
+          tableHead={tableHead}
+          customRender={customRender}
+        />
+      )}
     </Card>
   );
 }

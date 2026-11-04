@@ -3694,12 +3694,18 @@
       "all": "All",
       "types": {
         "course_purchase": "Course Purchase",
-        "private_charge": "Private Balance Top-up"
+        "private_charge": "Private Balance Top-up",
+        "purchase": "Course Purchase",
+        "wallet_charge": "Wallet Charge"
       },
       "statuses": {
         "issued": "Issued",
         "cancelled": "Cancelled"
-      }
+      },
+      "from_date": "From Date",
+      "to_date": "To Date",
+      "currency_label": "Currency",
+      "all_currencies": "All Currencies"
     },
     "table": {
       "title": "Invoices Log",
@@ -3718,7 +3724,8 @@
       },
       "actions": {
         "view": "View"
-      }
+      },
+      "load_error": "Failed to load invoices"
     },
     "preview": {
       "title": "Invoice Preview",

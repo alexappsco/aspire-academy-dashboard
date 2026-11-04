@@ -1,10 +1,9 @@
-export type InvoiceType = 'Purchase' | 'PrivateCharge' | string;
-export type InvoiceStatus = 'Issued' | 'Cancelled' | string;
+export type InvoiceType = 'Purchase' | 'WalletCharge' | string;
 
 export interface InvoiceItem {
   id: string;
   invoiceNumber: string;
-  type: string;
+  type: InvoiceType;
   typeLabel?: string;
   status: string;
   statusLabel?: string;
@@ -16,6 +15,7 @@ export interface InvoiceItem {
   taxAmount: number;
   discountAmount: number;
   total: number;
+  currencyId?: string;
   currencyCode: string;
 
   // Detail preview fields (used by preview page)
@@ -33,6 +33,18 @@ export interface InvoiceListResponse {
   totalCount: number;
 }
 
+export interface GetInvoicesParams {
+  Type?: string;
+  FromDate?: string;
+  ToDate?: string;
+  CurrencyId?: string;
+  CurrencyCode?: string;
+  Filter?: string;
+  Sorting?: string;
+  SkipCount?: number;
+  MaxResultCount?: number;
+}
+
 export interface InvoiceKpiSummary {
   totalInvoicesCount: number;
   totalInvoicesAmount: number;
@@ -43,5 +55,7 @@ export interface InvoiceKpiSummary {
 export interface InvoiceFilterState {
   search: string;
   type: string;
-  status: string;
+  fromDate: string;
+  toDate: string;
+  currencyId: string;
 }

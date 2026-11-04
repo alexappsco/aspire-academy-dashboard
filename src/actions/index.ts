@@ -38,3 +38,4 @@ export * from './firebase-notifications';
 export * from './socials';
 export * from './instructor-profile';
 export * from './packages';
+export * from './invoices';

@@ -295,6 +295,10 @@ export const endpoints = {
     countries: '/instructor/lookups/countries',
     universities: '/instructor/lookups/universities',
   },
+  invoices: {
+    list: '/admin/invoices',
+    details: (id: string) => `/admin/invoices/${id}`,
+  },
   actions:{
     studentBulkDelete:"/admin/students/bulk/delete",
     studentBulkActivate:"/admin/students/bulk/activate",

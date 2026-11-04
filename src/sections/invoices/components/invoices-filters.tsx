@@ -9,25 +9,36 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import { useTranslations } from 'next-intl';
 
+import DateInput from 'src/components/DateInput/DateInput';
 import Iconify from 'src/components/iconify';
 import SelectField from 'src/components/SelectField/SelectField';
 
 interface Props {
   search: string;
   type: string;
-  status: string;
+  fromDate: string;
+  toDate: string;
+  currencyId: string;
+  currencies: { id: string; name: string; code: string }[];
   onSearchChange: (value: string) => void;
   onTypeChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
+  onFromDateChange: (value: string) => void;
+  onToDateChange: (value: string) => void;
+  onCurrencyChange: (value: string) => void;
 }
 
 export default function InvoicesFilters({
   search,
   type,
-  status,
+  fromDate,
+  toDate,
+  currencyId,
+  currencies,
   onSearchChange,
   onTypeChange,
-  onStatusChange,
+  onFromDateChange,
+  onToDateChange,
+  onCurrencyChange,
 }: Props) {
   const t = useTranslations('Invoices.filters');
 
@@ -45,45 +56,46 @@ export default function InvoicesFilters({
       <Box
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 2,
+          flexWrap: 'wrap',
+          gap: 1.5,
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        {/* 1. Search Bar (Far Right in RTL) */}
-        <TextField
-          fullWidth
-          size="small"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder={t('search_placeholder')}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="solar:magnifer-linear" width={20} sx={{ color: '#94A3B8' }} />
-                </InputAdornment>
-              ),
-              endAdornment: search ? (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => onSearchChange('')}>
-                    <Iconify icon="solar:close-circle-bold" width={18} sx={{ color: '#94A3B8' }} />
-                  </IconButton>
-                </InputAdornment>
-              ) : null,
-              sx: {
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                fontSize: 13,
+        {/* 1. Search Bar (Right in RTL) */}
+        <Box sx={{ flex: { xs: '1 1 100%', md: '1 1 260px' } }}>
+          <TextField
+            fullWidth
+            size="small"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t('search_placeholder')}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="solar:magnifer-linear" width={20} sx={{ color: '#94A3B8' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: search ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => onSearchChange('')}>
+                      <Iconify icon="solar:close-circle-bold" width={18} sx={{ color: '#94A3B8' }} />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+                sx: {
+                  borderRadius: 2,
+                  bgcolor: '#FFFFFF',
+                  fontSize: 13,
+                },
               },
-            },
-          }}
-          sx={{ flex: { xs: 1, md: 1.6 } }}
-        />
+            }}
+          />
+        </Box>
 
-        {/* 2. Invoice Type (Middle in RTL) */}
-        <Box sx={{ width: { xs: '100%', md: 220 } }}>
+        {/* 2. Type Select */}
+        <Box sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 160 }, flex: { sm: '1 1 160px' } }}>
           <SelectField
             fullWidth
             size="small"
@@ -107,22 +119,56 @@ export default function InvoicesFilters({
             <MenuItem value="all" sx={{ fontSize: 13 }}>
               {t('all')}
             </MenuItem>
-            <MenuItem value="course_purchase" sx={{ fontSize: 13 }}>
-              {t('types.course_purchase')}
+            <MenuItem value="Purchase" sx={{ fontSize: 13 }}>
+              {t('types.purchase')}
             </MenuItem>
-            <MenuItem value="private_charge" sx={{ fontSize: 13 }}>
-              {t('types.private_charge')}
+            <MenuItem value="WalletCharge" sx={{ fontSize: 13 }}>
+              {t('types.wallet_charge')}
             </MenuItem>
           </SelectField>
         </Box>
 
-        {/* 3. Invoice Status (Far Left in RTL) */}
-        <Box sx={{ width: { xs: '100%', md: 220 } }}>
+        {/* 3. From Date */}
+        <Box sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 150 }, flex: { sm: '1 1 150px' } }}>
+          <DateInput
+            fullWidth
+            size="small"
+            value={fromDate}
+            placeholder={t('from_date')}
+            onChange={onFromDateChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                fontSize: 13,
+              },
+            }}
+          />
+        </Box>
+
+        {/* 4. To Date */}
+        <Box sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 150 }, flex: { sm: '1 1 150px' } }}>
+          <DateInput
+            fullWidth
+            size="small"
+            value={toDate}
+            placeholder={t('to_date')}
+            onChange={onToDateChange}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                fontSize: 13,
+              },
+            }}
+          />
+        </Box>
+
+        {/* 5. Currency Select */}
+        <Box sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 140 }, flex: { sm: '1 1 140px' } }}>
           <SelectField
             fullWidth
             size="small"
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
+            value={currencyId}
+            onChange={(e) => onCurrencyChange(e.target.value)}
             slotProps={{
               select: {
                 displayEmpty: true,
@@ -136,17 +182,16 @@ export default function InvoicesFilters({
             }}
           >
             <MenuItem value="" sx={{ fontSize: 13 }}>
-              {t('status_label')}
+              {t('currency_label')}
             </MenuItem>
             <MenuItem value="all" sx={{ fontSize: 13 }}>
-              {t('all')}
+              {t('all_currencies')}
             </MenuItem>
-            <MenuItem value="issued" sx={{ fontSize: 13 }}>
-              {t('statuses.issued')}
-            </MenuItem>
-            <MenuItem value="cancelled" sx={{ fontSize: 13 }}>
-              {t('statuses.cancelled')}
-            </MenuItem>
+            {currencies.map((curr) => (
+              <MenuItem key={curr.id} value={curr.id} sx={{ fontSize: 13 }}>
+                {curr.code || curr.name}
+              </MenuItem>
+            ))}
           </SelectField>
         </Box>
       </Box>
