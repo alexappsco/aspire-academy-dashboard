@@ -112,6 +112,10 @@ export default function InvoicePreviewView({ invoice }: Props) {
               fontSize: 13,
               px: 2,
               py: 1,
+              gap: 1,
+              '& .MuiButton-startIcon': {
+                margin: '0 !important',
+              },
               '&:hover': {
                 bgcolor: '#F8FAFC',
                 borderColor: '#CBD5E1',
@@ -133,7 +137,11 @@ export default function InvoicePreviewView({ invoice }: Props) {
               fontSize: 13,
               px: 2,
               py: 1,
+              gap: 1,
               boxShadow: 'none',
+              '& .MuiButton-startIcon': {
+                margin: '0 !important',
+              },
               '&:hover': {
                 bgcolor: '#0F172A',
                 boxShadow: 'none',
@@ -380,66 +388,9 @@ export default function InvoicePreviewView({ invoice }: Props) {
           </TableContainer>
         </Box>
 
-        {/* Bottom Section: Payment Info (Right in RTL) & Summary Box (Left in RTL) */}
+        {/* Bottom Section: Summary Box (Right in RTL) & Payment Info (Left in RTL) */}
         <Grid container spacing={3} sx={{ mb: 5 }}>
-          {/* Payment Details (Right in RTL) */}
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Box
-              sx={{
-                p: 2.5,
-                borderRadius: 2,
-                bgcolor: '#F8FAFC',
-                border: '1px solid #E2E8F0',
-                height: '100%',
-                textAlign: 'right',
-              }}
-            >
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', mb: 2 }}>
-                {t('preview.payment_info.title')}
-              </Typography>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                    {t('preview.payment_info.status')}:
-                  </Typography>
-                  <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.paymentStatus}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                    {t('preview.payment_info.transaction_id')}:
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: 12.5,
-                      fontWeight: 700,
-                      color: '#0F172A',
-                      fontFamily: 'monospace, sans-serif',
-                    }}
-                  >
-                    {invoice.transactionNumber}
-                  </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                    {t('preview.payment_info.approval_date')}:
-                  </Typography>
-                  <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
-                    {invoice.approvalDate}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Spacer */}
-          <Grid size={{ xs: 12, md: 2 }} sx={{ display: { xs: 'none', md: 'block' } }} />
-
-          {/* Invoice Summary (Left in RTL) */}
+          {/* Invoice Summary (Right in RTL) */}
           <Grid size={{ xs: 12, md: 5 }}>
             <Box
               sx={{
@@ -499,6 +450,63 @@ export default function InvoicePreviewView({ invoice }: Props) {
                   </Typography>
                   <Typography sx={{ fontSize: 18, fontWeight: 800, color: '#0284C7' }}>
                     {invoice.total.toFixed(2)} {invoice.currency}
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Spacer */}
+          <Grid size={{ xs: 12, md: 2 }} sx={{ display: { xs: 'none', md: 'block' } }} />
+
+          {/* Payment Details (Left in RTL) */}
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Box
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                bgcolor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                height: '100%',
+                textAlign: 'right',
+              }}
+            >
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#0F172A', mb: 2 }}>
+                {t('preview.payment_info.title')}
+              </Typography>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
+                    {t('preview.payment_info.status')}:
+                  </Typography>
+                  <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
+                    {invoice.paymentStatus}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
+                    {t('preview.payment_info.transaction_id')}:
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      color: '#0F172A',
+                      fontFamily: 'monospace, sans-serif',
+                    }}
+                  >
+                    {invoice.transactionNumber}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
+                    {t('preview.payment_info.approval_date')}:
+                  </Typography>
+                  <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: '#0F172A' }}>
+                    {invoice.approvalDate}
                   </Typography>
                 </Box>
               </Box>
