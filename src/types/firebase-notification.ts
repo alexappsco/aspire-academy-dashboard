@@ -26,7 +26,16 @@ export type UserNotification = {
   type: 'General' | 'CoursePromo' | 'PurchaseComplete' | string | number;
   isRead: boolean;
   createdAt: string;
+  /** What the notification is about; with referenceId, opens it on click. Null for announcements. */
+  referenceType?: NotificationReferenceType | null;
+  referenceId?: string | null;
+  sessionRequestId?: string | null;
+  orderId?: string | null;
+  courseId?: string | null;
+  walletChargeRequestId?: string | null;
 };
+
+export type NotificationReferenceType = 'SessionRequest' | 'Order' | 'Course' | 'WalletChargeRequest';
 
 export type UserNotificationsResponse = {
   items?: UserNotification[] | null;

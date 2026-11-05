@@ -6,6 +6,8 @@ export interface InstructorNotificationItemDto {
   type: string | number;
   isRead: boolean;
   createdAt: string;
+  referenceType?: string | null;
+  referenceId?: string | null;
 }
 
 export interface InstructorNotificationListResponse {

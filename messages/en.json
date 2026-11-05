@@ -2350,7 +2350,8 @@
       "send_error": "Failed to send notification",
       "validation_required": "Please select a course and fill in all required fields in Arabic and English",
       "no_courses": "No courses available"
-    }
+    },
+    "open_related": "Open"
   },
   "InstructorStudents": {
     "title": "Students Management",

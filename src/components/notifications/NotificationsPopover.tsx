@@ -16,6 +16,9 @@ import Typography from '@mui/material/Typography';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 
 import Iconify from 'src/components/iconify';
+import { useAuth } from 'src/contexts/AuthContext';
+import { useRouter } from 'src/i18n/routing';
+import { getNotificationHref } from 'src/utils/notification-link';
 import { useNotifications } from 'src/contexts/NotificationsContext';
 import type { UserNotification } from 'src/types/firebase-notification';
 
@@ -94,6 +97,8 @@ export default function NotificationsPopover() {
   const t = useTranslations('NotificationInbox');
   const locale = useLocale();
   const { notifications, totalCount, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
+  const { isInstructor } = useAuth();
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<NotificationsTab>('all');
   const visibleNotifications = tab === 'unread'
@@ -155,7 +160,14 @@ export default function NotificationsPopover() {
                   key={item.id}
                   item={item}
                   locale={locale}
-                  onClick={() => void markAsRead(item.id)}
+                  onClick={() => {
+                    void markAsRead(item.id);
+                    const href = getNotificationHref(item, isInstructor);
+                    if (href) {
+                      handleClose();
+                      router.push(href);
+                    }
+                  }}
                 />
               ))}
             </Stack>

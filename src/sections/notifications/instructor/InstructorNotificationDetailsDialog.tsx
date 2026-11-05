@@ -7,11 +7,14 @@ import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useTranslations, useLocale } from 'next-intl';
 
 import Iconify from 'src/components/iconify';
+import { useRouter } from 'src/i18n/routing';
+import { getNotificationHref } from 'src/utils/notification-link';
 import { useToast } from 'src/components/toast';
 import type { InstructorNotificationItemDto } from 'src/types/instructor-notification';
 import { normalizeNotificationType } from 'src/types/admin-notification';
@@ -35,6 +38,7 @@ export default function InstructorNotificationDetailsDialog({
 }: Props) {
   const t = useTranslations('InstructorNotifications');
   const tTypes = useTranslations('Notifications.types');
+  const router = useRouter();
   const locale = useLocale();
   const toast = useToast();
 
@@ -251,6 +255,24 @@ export default function InstructorNotificationDetailsDialog({
                 {notification.message}
               </Box>
             </Box>
+
+            {(() => {
+              const href = getNotificationHref(notification, true);
+              if (!href) return null;
+              return (
+                <Button
+                  variant="contained"
+                  endIcon={<Iconify icon="solar:arrow-right-up-linear" />}
+                  onClick={() => {
+                    onClose();
+                    router.push(href);
+                  }}
+                  sx={{ alignSelf: 'flex-start', bgcolor: '#1E293B', borderRadius: 1.5, fontWeight: 700, '&:hover': { bgcolor: '#0F172A' } }}
+                >
+                  {t('open_related')}
+                </Button>
+              );
+            })()}
           </Stack>
         )}
       </DialogContent>
