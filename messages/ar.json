@@ -3358,7 +3358,9 @@
       "hours": "{count, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
       "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
       "breakdown_title": "تفاصيل استهلاك الطلاب للطلب الجماعي ({requestNumber})",
-      "no_earnings": "لا توجد سجلات أرباح حتى الآن"
+      "no_earnings": "لا توجد سجلات أرباح حتى الآن",
+      "type_course": "بيع كورس",
+      "course_purchase_label": "{course} — {name}"
     },
     "edit_dialog": {
       "title": "تعديل البيانات البنكية",

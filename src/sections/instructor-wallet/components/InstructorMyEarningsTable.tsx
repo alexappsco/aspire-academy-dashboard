@@ -75,12 +75,19 @@ export default function InstructorMyEarningsTable({
     }
   };
 
+  const isCoursePurchase = (row: InstructorEarningItem) => row.source === 'CoursePurchase';
+
+  /** Session rows are keyed by request; course-purchase rows have no request id. */
+  const rowKey = (row: InstructorEarningItem) =>
+    row.sessionRequestId ?? `${row.orderId ?? ''}-${row.courseId ?? ''}`;
+
   const currencyOf = (row: InstructorEarningItem) =>
     row.currencySymbol || row.currencyCode || '';
 
   const canExpand = (row: InstructorEarningItem) =>
-    (row.studentBreakdown?.length ?? 0) > 1 ||
-    (row.partyType !== 'Individual' && (row.studentBreakdown?.length ?? 0) > 0);
+    !isCoursePurchase(row) &&
+    ((row.studentBreakdown?.length ?? 0) > 1 ||
+    (row.partyType !== 'Individual' && (row.studentBreakdown?.length ?? 0) > 0));
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -108,6 +115,9 @@ export default function InstructorMyEarningsTable({
   };
 
   const partyLabel = (row: InstructorEarningItem) => {
+    if (isCoursePurchase(row)) {
+      return t('course_purchase_label', { course: row.courseTitle || '—', name: row.studentName || '—' });
+    }
     const breakdownCount = row.studentBreakdown?.length ?? 0;
     if (row.partyType === 'Individual' || breakdownCount <= 1) {
       return t('party_individual', { name: row.studentName || '—' });
@@ -119,8 +129,24 @@ export default function InstructorMyEarningsTable({
   const isLiveSession = (type: InstructorEarningItem['type']) =>
     type === 1 || type === '1' || type === 'Live';
 
-  const serviceChip = (type: InstructorEarningItem['type']) => {
-    const isLive = isLiveSession(type);
+  const serviceChip = (row: InstructorEarningItem) => {
+    if (isCoursePurchase(row)) {
+      return (
+        <Chip
+          label={t('type_course')}
+          size="small"
+          sx={{
+            bgcolor: '#DCFCE7',
+            color: '#15803D',
+            fontWeight: 700,
+            fontSize: 12,
+            height: 24,
+            borderRadius: 1.5,
+          }}
+        />
+      );
+    }
+    const isLive = isLiveSession(row.type);
     return (
       <Chip
         label={isLive ? t('type_live') : t('type_recorded')}
@@ -222,12 +248,14 @@ export default function InstructorMyEarningsTable({
             ) : (
               items.map((row) => {
                 const expand = canExpand(row);
-                const isOpen = expandedIds.has(row.sessionRequestId);
+                const key = rowKey(row);
+                const isOpen = expandedIds.has(key);
+                const isCourse = isCoursePurchase(row);
                 const currency = currencyOf(row);
                 const breakdownCount = row.studentBreakdown?.length ?? 0;
 
                 return (
-                  <React.Fragment key={row.sessionRequestId}>
+                  <React.Fragment key={key}>
                     <Box
                       component="tr"
                       sx={{
@@ -246,7 +274,7 @@ export default function InstructorMyEarningsTable({
                           {expand && (
                             <IconButton
                               size="small"
-                              onClick={() => toggleExpand(row.sessionRequestId)}
+                              onClick={() => toggleExpand(key)}
                               sx={{
                                 p: 0.25,
                                 mt: 0.1,
@@ -277,18 +305,18 @@ export default function InstructorMyEarningsTable({
                       </Box>
 
                       <Box component="td" sx={{ ...tdSx, textAlign: 'center' }}>
-                        {serviceChip(row.type)}
+                        {serviceChip(row)}
                       </Box>
 
                       <Box component="td" sx={tdSx}>
                         <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
-                          {formatHours(row.hoursConsumed, expand ? breakdownCount : undefined)}
+                          {isCourse ? '—' : formatHours(row.hoursConsumed, expand ? breakdownCount : undefined)}
                         </Typography>
                       </Box>
 
                       <Box component="td" sx={tdSx}>
                         <Typography sx={{ fontSize: 13, color: '#0F172A', whiteSpace: 'nowrap' }}>
-                          {formatMoney(row.pricePerHour, currency)}
+                          {isCourse ? '—' : formatMoney(row.pricePerHour, currency)}
                         </Typography>
                       </Box>
 
@@ -344,7 +372,7 @@ export default function InstructorMyEarningsTable({
                                 }}
                               >
                                 {t('breakdown_title', {
-                                  requestNumber: row.requestNumber || row.sessionRequestId,
+                                  requestNumber: row.requestNumber || key,
                                 })}
                               </Typography>
 

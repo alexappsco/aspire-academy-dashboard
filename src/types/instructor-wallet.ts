@@ -44,11 +44,21 @@ export interface InstructorEarningStudentBreakdown {
   instructorAmount: number;
 }
 
+/** SessionRequest = billed session hours; CoursePurchase = a paid order of one of the instructor's courses. */
+export type InstructorEarningSource = 'SessionRequest' | 'CoursePurchase';
+
 export interface InstructorEarningItem {
-  sessionRequestId: string;
+  source?: InstructorEarningSource;
+  /** Null for a course purchase. */
+  sessionRequestId: string | null;
+  /** Set for a course purchase. */
+  orderId?: string | null;
+  courseId?: string | null;
+  courseTitle?: string | null;
   requestNumber: string;
-  type: InstructorEarningServiceType;
-  partyType: InstructorEarningPartyType;
+  /** Null for a course purchase. */
+  type: InstructorEarningServiceType | null;
+  partyType: InstructorEarningPartyType | null;
   studentName: string;
   hoursConsumed: number;
   pricePerHour: number;

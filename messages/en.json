@@ -3350,7 +3350,9 @@
       "hours": "{count, plural, one {# hour} other {# hours}}",
       "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
       "breakdown_title": "Student consumption details for group request ({requestNumber})",
-      "no_earnings": "No profit records found yet"
+      "no_earnings": "No profit records found yet",
+      "type_course": "Course sale",
+      "course_purchase_label": "{course} — {name}"
     },
     "edit_dialog": {
       "title": "Edit Bank Details",
