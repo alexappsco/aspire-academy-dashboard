@@ -36,6 +36,7 @@ import {
   deleteStudent,
   activateStudent,
   deactivateStudent,
+  setStudentAnyDevice,
   bulkDeleteStudents,
   bulkActivateStudents,
   bulkDeactivateStudents,
@@ -52,6 +53,7 @@ export interface StudentTableRow extends StudentItem {
   completedCol?: number;
   paymentsCol?: string;
   statusCol?: boolean;
+  anyDeviceCol?: boolean;
   actions?: string;
 }
 
@@ -179,6 +181,18 @@ export default function StudentsListView() {
       }
     } catch {
       toast.error(t('messages.status_error'));
+    }
+  };
+
+  const handleToggleAnyDevice = async (id: string, current: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !current;
+    const res = await setStudentAnyDevice(id, next);
+    if (res.success) {
+      setStudentsData((prev) => prev.map((s) => (s.id === id ? { ...s, allowAnyDevice: next } : s)));
+      toast.success(next ? t('messages.any_device_on') : t('messages.any_device_off'));
+    } else {
+      toast.error(res.error || t('messages.any_device_error'));
     }
   };
 
@@ -320,6 +334,7 @@ export default function StudentsListView() {
     { id: 'completedCol', label: t('columns.completed_courses'), align: cellAlignment.center, width: 110 },
     { id: 'paymentsCol', label: t('columns.total_payments'), align: cellAlignment.center, width: 140 },
     { id: 'statusCol', label: t('columns.status'), align: cellAlignment.center, width: 130 },
+    { id: 'anyDeviceCol', label: t('columns.any_device'), align: cellAlignment.center, width: 150 },
     { id: 'actions', label: '', align: cellAlignment.center, width: 60 },
   ];
 
@@ -433,6 +448,42 @@ export default function StudentsListView() {
         </Typography>
       </Stack>
     ),
+    anyDeviceCol: (row: StudentTableRow) => {
+      const allowed = !!row.allowAnyDevice;
+      return (
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: 'center', justifyContent: 'center', gap: 0.5 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Switch
+            checked={allowed}
+            onChange={() => {}}
+            onClick={(e) => handleToggleAnyDevice(row.id, allowed, e)}
+            size="small"
+            sx={{
+              '& .MuiSwitch-switchBase.Mui-checked': {
+                color: '#2563EB',
+                '& + .MuiSwitch-track': {
+                  backgroundColor: '#2563EB',
+                },
+              },
+            }}
+          />
+          <Typography
+            sx={{
+              fontSize: 12.5,
+              fontWeight: 700,
+              color: allowed ? '#2563EB' : '#94A3B8',
+              minWidth: 40,
+            }}
+          >
+            {allowed ? t('any_device_on') : t('any_device_off')}
+          </Typography>
+        </Stack>
+      );
+    },
     actions: (row: StudentTableRow) => (
       <IconButton
         size="small"

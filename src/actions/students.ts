@@ -138,6 +138,32 @@ export async function activateStudent(
   }
 }
 
+// ── Login from any device (on/off) ─────────────────────────
+
+export async function setStudentAnyDevice(
+  id: string,
+  allow: boolean
+): Promise<ApiSingleResponse<null>> {
+  try {
+    const endpoint = allow
+      ? endpoints.students.allowAnyDevice(id)
+      : endpoints.students.disallowAnyDevice(id);
+    const res = await postData<null, undefined>(endpoint, undefined);
+
+    if ('success' in res && res.success) {
+      return { success: true, data: null };
+    }
+
+    const errorMsg = 'error' in res ? (res as { error: string }).error : 'Failed to update device setting';
+    return { success: false, error: errorMsg };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update device setting',
+    };
+  }
+}
+
 // ── Deactivate Student ─────────────────────────────────────
 
 export async function deactivateStudent(
