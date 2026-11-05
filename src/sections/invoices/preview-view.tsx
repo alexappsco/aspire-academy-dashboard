@@ -373,17 +373,49 @@ export default function InvoicePreviewView({ invoice }: Props) {
             </Grid>
           </Box>
 
-          {/* Left in RTL: Brand Logo & Subtitle */}
-          <Box sx={{ textAlign: { xs: 'right', sm: 'left' } }}>
+          {/* Brand Logo & Platform Title (Figma Style) */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.75,
+              direction: 'ltr',
+            }}
+          >
             <Box
               component="img"
               src="/logo.svg"
               alt="Aspire Academy"
-              sx={{ height: 48, width: 'auto', mb: 0.5 }}
+              sx={{
+                height: { xs: 46, sm: 54 },
+                width: 'auto',
+                display: 'block',
+              }}
             />
-            <Typography sx={{ fontSize: 12, color: '#64748B', fontWeight: 600 }}>
-              {t('preview.platform_name')}
-            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}>
+              <Typography
+                sx={{
+                  fontSize: { xs: 20, sm: 26 },
+                  fontWeight: 800,
+                  color: '#1E293B',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {t('preview.brand_name')}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: 12.5, sm: 14 },
+                  color: '#475569',
+                  fontWeight: 600,
+                  mt: 0.5,
+                  lineHeight: 1.2,
+                }}
+              >
+                {t('preview.platform_name')}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 

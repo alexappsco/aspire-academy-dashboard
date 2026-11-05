@@ -3738,6 +3738,7 @@
       "invoice_number": "Invoice Number",
       "issue_date": "Issue Date",
       "transaction_date": "Transaction Date",
+      "brand_name": "Aspire Academy",
       "platform_name": "Medical Education Platform",
       "client_info": {
         "title": "Client Details",

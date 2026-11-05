@@ -3746,6 +3746,7 @@
       "invoice_number": "رقم الفاتورة",
       "issue_date": "تاريخ الإصدار",
       "transaction_date": "تاريخ المعاملة",
+      "brand_name": "Aspire Academy",
       "platform_name": "منصة التعليم الطبي",
       "client_info": {
         "title": "بيانات العميل",
