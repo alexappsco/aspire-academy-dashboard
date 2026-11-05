@@ -1694,7 +1694,8 @@
       "total_payments": "Total Payments",
       "country": "Country",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "any_device": "Any device"
     },
     "actions": {
       "view_details": "View Profile",
@@ -1734,7 +1735,10 @@
       "delete_error": "An error occurred while deleting student",
       "activate_course_success": "Course activated for student successfully",
       "deactivate_course_success": "Course deactivated for student successfully",
-      "course_status_error": "An error occurred while updating course status"
+      "course_status_error": "An error occurred while updating course status",
+      "any_device_on": "The student can now log in from any device.",
+      "any_device_off": "The student is locked to one device again (bound on their next login).",
+      "any_device_error": "Couldn't update the device setting."
     },
     "details": {
       "breadcrumb_students": "Students Management",
@@ -1874,7 +1878,9 @@
       "preview_attached_receipt": "Preview Attached Receipt Image",
       "btn_accept": "Accept",
       "btn_reject": "Reject"
-    }
+    },
+    "any_device_on": "Any device",
+    "any_device_off": "One device"
   },
   "Reports": {
     "title": "Reports",
@@ -3351,7 +3357,9 @@
       "hours": "{count, plural, one {# hour} other {# hours}}",
       "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
       "breakdown_title": "Student consumption details for group request ({requestNumber})",
-      "no_earnings": "No profit records found yet"
+      "no_earnings": "No profit records found yet",
+      "type_course": "Course sale",
+      "course_purchase_label": "{course} — {name}"
     },
     "edit_dialog": {
       "title": "Edit Bank Details",

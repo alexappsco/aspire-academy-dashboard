@@ -191,6 +191,8 @@ export const endpoints = {
     courseProgress: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}`,
     activate: (id: string) => `/admin/students/${id}/activate`,
     deactivate: (id: string) => `/admin/students/${id}/deactivate`,
+    allowAnyDevice: (id: string) => `/admin/students/${id}/any-device/enable`,
+    disallowAnyDevice: (id: string) => `/admin/students/${id}/any-device/disable`,
     activateCourse: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}/activate`,
     deactivateCourse: (id: string, courseId: string) => `/admin/students/${id}/courses/${courseId}/deactivate`,
   },

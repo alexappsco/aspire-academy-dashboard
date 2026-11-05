@@ -24,6 +24,8 @@ export interface StudentItem {
   countryId?: string;
   country?: StudentCountry | null;
   isActive: boolean;
+  /** Admin switch: may log in from any device (off = locked to one device). */
+  allowAnyDevice?: boolean;
   lastActiveAt?: string;
   enrollmentsCount: number;
   completedCoursesCount: number;

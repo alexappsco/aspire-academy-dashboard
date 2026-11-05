@@ -1694,7 +1694,8 @@
       "total_payments": "إجمالي المدفوعات",
       "country": "الدولة",
       "status": "الحالة",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "any_device": "الدخول من أي جهاز"
     },
     "actions": {
       "view_details": "عرض الملف الشخصي",
@@ -1734,7 +1735,10 @@
       "delete_error": "حدث خطأ أثناء حذف الطالب",
       "activate_course_success": "تم تفعيل الدورة للطالب بنجاح",
       "deactivate_course_success": "تم إيقاف الدورة للطالب بنجاح",
-      "course_status_error": "حدث خطأ أثناء تعديل حالة الدورة"
+      "course_status_error": "حدث خطأ أثناء تعديل حالة الدورة",
+      "any_device_on": "يمكن للطالب الآن تسجيل الدخول من أي جهاز.",
+      "any_device_off": "تم قفل الطالب على جهاز واحد مرة أخرى (يُربط عند تسجيل الدخول التالي).",
+      "any_device_error": "تعذر تحديث إعداد الجهاز."
     },
     "details": {
       "breadcrumb_students": "إدارة الطلاب",
@@ -1874,7 +1878,9 @@
       "preview_attached_receipt": "معاينة صورة الإيصال المرفقة",
       "btn_accept": "قبول",
       "btn_reject": "رفض"
-    }
+    },
+    "any_device_on": "أي جهاز",
+    "any_device_off": "جهاز واحد"
   },
   "Reports": {
     "title": "التقارير",
@@ -3359,7 +3365,9 @@
       "hours": "{count, plural, zero {# ساعة} one {ساعة واحدة} two {ساعتان} few {# ساعات} many {# ساعة} other {# ساعة}}",
       "hours_with_breakdown": "{hoursLabel} ({count}×{each})",
       "breakdown_title": "تفاصيل استهلاك الطلاب للطلب الجماعي ({requestNumber})",
-      "no_earnings": "لا توجد سجلات أرباح حتى الآن"
+      "no_earnings": "لا توجد سجلات أرباح حتى الآن",
+      "type_course": "بيع كورس",
+      "course_purchase_label": "{course} — {name}"
     },
     "edit_dialog": {
       "title": "تعديل البيانات البنكية",
