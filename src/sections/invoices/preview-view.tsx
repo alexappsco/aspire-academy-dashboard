@@ -7,6 +7,7 @@ import Card from '@mui/material/Card';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
+import GlobalStyles from '@mui/material/GlobalStyles';
 import Grid from '@mui/material/Grid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -107,21 +108,77 @@ export default function InvoicePreviewView({ invoice }: Props) {
   const taxPercent = invoice.taxPercentage ?? invoice.taxRatePercent ?? 14;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
-      {/* Print Stylesheet */}
-      <style global jsx>{`
+    <Container
+      maxWidth="lg"
+      sx={{
+        py: 3,
+        '@media print': {
+          py: 0,
+          px: 0,
+          maxWidth: '100% !important',
+          width: '100% !important',
+        },
+      }}
+    >
+      {/* Global Print Stylesheet */}
+      <GlobalStyles
+        styles={{
+          '@media print': {
+            '@page': {
+              size: 'A4 portrait',
+              margin: '10mm 12mm',
+            },
+            'html, body': {
+              backgroundColor: '#FFFFFF !important',
+              background: '#FFFFFF !important',
+              color: '#000000 !important',
+              margin: '0 !important',
+              padding: '0 !important',
+              height: 'auto !important',
+              minHeight: 'auto !important',
+              width: '100% !important',
+              WebkitPrintColorAdjust: 'exact',
+              printColorAdjust: 'exact',
+            },
+            'header, nav, aside, .MuiAppBar-root, .MuiDrawer-root, .MuiDrawer-docked, .no-print, #header, #sidebar': {
+              display: 'none !important',
+              visibility: 'hidden !important',
+              width: '0 !important',
+              height: '0 !important',
+            },
+            '.MuiContainer-root': {
+              maxWidth: '100% !important',
+              padding: '0 !important',
+              margin: '0 !important',
+              width: '100% !important',
+            },
+            '.printable-card': {
+              border: 'none !important',
+              boxShadow: 'none !important',
+              padding: '0 !important',
+              margin: '0 !important',
+              width: '100% !important',
+              maxWidth: '100% !important',
+              backgroundColor: '#FFFFFF !important',
+            },
+          },
+        }}
+      />
+      <style>{`
         @media print {
-          body {
-            background: #ffffff !important;
-            color: #000000 !important;
-          }
           header,
           nav,
           aside,
+          .MuiAppBar-root,
+          .MuiDrawer-root,
+          .MuiDrawer-docked,
           .no-print,
           #header,
           #sidebar {
             display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
           }
           .printable-card {
             border: none !important;
@@ -129,6 +186,8 @@ export default function InvoicePreviewView({ invoice }: Props) {
             padding: 0 !important;
             margin: 0 !important;
             width: 100% !important;
+            max-width: 100% !important;
+            background: #FFFFFF !important;
           }
         }
       `}</style>
@@ -232,25 +291,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
         </Box>
       </Box>
 
-      {/* 2. Advisory / Warning Banner */}
-      <Box
-        className="no-print"
-        sx={{
-          p: 1.75,
-          mb: 3,
-          borderRadius: 2,
-          bgcolor: '#FFFBEB',
-          border: '1px solid #FDE68A',
-          color: '#92400E',
-          fontSize: 13,
-          fontWeight: 600,
-          textAlign: 'right',
-        }}
-      >
-        {t('preview.warning_banner')}
-      </Box>
-
-      {/* 3. The Tax Invoice White Paper Card */}
+      {/* The Tax Invoice White Paper Card */}
       <Card
         className="printable-card"
         sx={{
@@ -259,6 +300,12 @@ export default function InvoicePreviewView({ invoice }: Props) {
           border: '1px solid #E2E8F0',
           boxShadow: '0 4px 20px rgba(15, 23, 42, 0.04)',
           bgcolor: '#FFFFFF',
+          '@media print': {
+            p: 0,
+            border: 'none',
+            boxShadow: 'none',
+            borderRadius: 0,
+          },
         }}
       >
         {/* Invoice Top Section */}
@@ -463,7 +510,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                         {line.unitPrice.toFixed(2)} {currency}
                       </TableCell>
                       <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                        {line.taxPercentage}%*
+                        {line.taxPercentage}%
                       </TableCell>
                       <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
                         {line.taxAmount.toFixed(2)}
@@ -482,7 +529,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
                       {subtotal.toFixed(2)} {currency}
                     </TableCell>
                     <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
-                      {taxPercent}%*
+                      {taxPercent}%
                     </TableCell>
                     <TableCell sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A', textAlign: 'center', py: 2 }}>
                       {tax.toFixed(2)}
@@ -544,7 +591,7 @@ export default function InvoicePreviewView({ invoice }: Props) {
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ fontSize: 12.5, color: '#64748B' }}>
-                    {t('preview.summary.tax')} ({taxPercent}%*)
+                    {t('preview.summary.tax')} ({taxPercent}%)
                   </Typography>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>
                     {tax.toFixed(2)} {currency}
@@ -625,20 +672,14 @@ export default function InvoicePreviewView({ invoice }: Props) {
 
         {/* Invoice Footer Section */}
         <Box sx={{ textAlign: 'center', pt: 2 }}>
-          <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#0F172A', mb: 0.75 }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 800, color: '#0F172A', mb: 2 }}>
             {t('preview.footer.thank_you')}
-          </Typography>
-          <Typography sx={{ fontSize: 12, color: '#94A3B8', maxWidth: 600, mx: 'auto', mb: 3 }}>
-            {t('preview.footer.notice')}
           </Typography>
 
           <Divider sx={{ mb: 2, borderColor: '#F1F5F9' }} />
 
-          <Typography sx={{ fontSize: 11, color: '#CBD5E1', mb: 0.5 }}>
+          <Typography sx={{ fontSize: 11, color: '#94A3B8' }}>
             {t('preview.footer.platform')}
-          </Typography>
-          <Typography sx={{ fontSize: 11, color: '#CBD5E1' }}>
-            {t('preview.footer.tax_footnote')}
           </Typography>
         </Box>
       </Card>

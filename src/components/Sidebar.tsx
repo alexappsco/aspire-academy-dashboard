@@ -596,9 +596,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       onClose={onClose}
       variant={mdUp ? "permanent" : "temporary"}
       ModalProps={{ keepMounted: true }}
+      className="no-print"
       sx={{
         flexShrink: { md: 0 },
         width: { md: 280 },
+        "@media print": {
+          display: "none !important",
+        },
         "& .MuiDrawer-paper": {
           bgcolor: "#FFFFFF",
           width: 280,
@@ -607,6 +611,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           borderRight: isRtl ? "none" : `1px solid ${COLORS.border}`,
           top: mdUp ? "64px" : undefined,
           height: mdUp ? "calc(100% - 64px)" : "100%",
+          "@media print": {
+            display: "none !important",
+          },
         },
       }}
     >

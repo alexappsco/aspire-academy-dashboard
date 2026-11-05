@@ -84,10 +84,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
       position="fixed"
       color="primary"
       elevation={0}
+      className="no-print"
       sx={{
         bgcolor: "#FFFFFF",
         boxShadow: "none",
         zIndex: (theme) => theme.zIndex.drawer + 1,
+        "@media print": {
+          display: "none !important",
+        },
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", px: { xs: 2, md: 4 } }}>

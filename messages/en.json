@@ -3766,7 +3766,7 @@
         "subtotal": "Subtotal Before Tax",
         "discount": "Discount",
         "taxable_amount": "Taxable Amount",
-        "tax": "Tax (e.g. 14%*)",
+        "tax": "Tax",
         "grand_total": "Grand Total (Inc. Tax)"
       },
       "footer": {
