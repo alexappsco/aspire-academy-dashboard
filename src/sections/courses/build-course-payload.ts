@@ -3,6 +3,13 @@ import type { Chapter, CourseFormValues, CoursePayloadMode, LessonDoc } from './
 
 const GUID_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Server ids are GUIDs; items added in the form have local ids (`ch-0`, `opt-…`) and are sent without
+ * one so the API creates them. Sending existing ids lets the API update in place instead of deleting and
+ * re-creating — which it refuses once students have answered a question or watched a lesson. */
+function serverId(id: string | undefined): string | undefined {
+  return id && GUID_UUID_PATTERN.test(id) ? id : undefined;
+}
+
 function normalizeAttachmentIds(documents: LessonDoc[]): string[] {
   return documents
     .map((doc) => doc.attachmentId || doc.url)
@@ -25,6 +32,7 @@ function toHttps(url: string | undefined): string | null {
 function buildCurriculum(chapters: Chapter[]) {
   return {
     chapters: chapters.map((chapter, chapterIndex) => ({
+      id: serverId(chapter.id),
       title: chapter.title,
       order: chapterIndex + 1,
       lessons: chapter.lessons.map((lesson, lessonIndex) => {
@@ -32,9 +40,11 @@ function buildCurriculum(chapters: Chapter[]) {
           lesson.quiz && lesson.quiz.questions.length
             ? {
                 questions: lesson.quiz.questions.map((question) => ({
+                  id: serverId(question.id),
                   text: question.title || null,
                   explanation: question.explanation || null,
                   choices: question.options.map((option, optionIndex) => ({
+                    id: serverId(option.id),
                     title: option.text || null,
                     order: optionIndex + 1,
                     isRight: option.isCorrect,
@@ -46,6 +56,7 @@ function buildCurriculum(chapters: Chapter[]) {
         const videoUrl = toHttps(lesson.videoUrl);
 
         return {
+          id: serverId(lesson.id),
           title: lesson.title,
           order: lessonIndex + 1,
           durationInSeconds: videoUrl ? 600 : 0,
