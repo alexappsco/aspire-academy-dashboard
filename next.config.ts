@@ -17,8 +17,9 @@ const nextConfig: NextConfig = {
   // Self-hosted in Docker: the Dockerfile copies .next/standalone into the runtime image.
   output: 'standalone',
   experimental: {
+    proxyClientMaxBodySize: '10gb',
     serverActions: {
-      bodySizeLimit: '500mb',
+      bodySizeLimit: '10gb',
     },
   },
   /**
