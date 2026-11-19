@@ -171,6 +171,10 @@ interface CourseContentTabProps {
   curriculum?: CourseCurriculum | null;
 }
 
+// Read-only view (course details page): chapters, lessons and attachments can be previewed but not
+// added, renamed or removed here — that happens on the edit-course page, which saves to the API.
+const readOnly = true;
+
 export default function CourseContentTab({ curriculum }: CourseContentTabProps) {
   const toast = useToast();
   const t = useTranslations('CreateCourse.chapters');
@@ -519,6 +523,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
 
         {/* Action Buttons: Add Chapter & Expand All */}
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+          {!readOnly && (
           <Button
             variant="contained"
             onClick={() => {
@@ -543,6 +548,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
             <Iconify icon="solar:add-circle-bold" width={18} />
             <span>{t('add_new_chapter_btn')}</span>
           </Button>
+          )}
 
           <Button
             variant="outlined"
@@ -598,6 +604,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
           </Stack>
 
           {/* Add Chapter Input Box */}
+          {!readOnly && (
           <Stack
             direction="row"
             spacing={1.5}
@@ -645,6 +652,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
               <span>{t('add_chapter_plus')}</span>
             </Button>
           </Stack>
+          )}
         </Stack>
 
         {/* 3. Chapters Accordions List */}
@@ -691,6 +699,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                     </Typography>
                   </Stack>
 
+                  {!readOnly && (
                   <Stack
                     direction="row"
                     spacing={1}
@@ -713,12 +722,14 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                       <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                     </IconButton>
                   </Stack>
+                  )}
                 </AccordionSummary>
 
                 {/* Chapter Accordion Details (Inside Chapter) */}
                 <AccordionDetails sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: '#FAFAFA' }}>
                   <Stack spacing={2.5}>
                     {/* Add Lesson Input inside Chapter */}
+                    {!readOnly && (
                     <Stack
                       direction="row"
                       spacing={1.5}
@@ -770,6 +781,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                         <span>{t('add_lesson_plus')}</span>
                       </Button>
                     </Stack>
+                    )}
 
                     {/* Lessons Cards List */}
                     <Stack spacing={2}>
@@ -864,6 +876,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                 )}
                               </Box>
 
+                              {!readOnly && (
                               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                 {hasAttachments && (
                                   <Button
@@ -907,6 +920,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                   <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                                 </IconButton>
                               </Stack>
+                              )}
                             </Stack>
 
                             {/* Lesson Attachments List (if any) */}
@@ -1067,6 +1081,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                                   })}
                                                 </span>
                                               </Button>
+                                              {!readOnly && (
                                               <Button
                                                 size="small"
                                                 variant="outlined"
@@ -1088,10 +1103,11 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                                 <Box component="img" src="/icons/exam.svg" alt="exam" sx={{ width: 15, height: 15 }} />
                                                 <span>{t('add_question')}</span>
                                               </Button>
+                                              )}
                                             </>
                                           )}
 
-                                          {(isVideo || isPdf) && (
+                                          {!readOnly && (isVideo || isPdf) && (
                                             <Button
                                               size="small"
                                               variant="outlined"
@@ -1111,6 +1127,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                             </Button>
                                           )}
 
+                                          {!readOnly && (
                                           <IconButton
                                             size="small"
                                             onClick={() =>
@@ -1126,6 +1143,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                           >
                                             <Iconify icon="solar:trash-bin-trash-bold" width={16} />
                                           </IconButton>
+                                          )}
                                         </Stack>
                                       </Stack>
                                     </Card>
@@ -1135,6 +1153,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                             )}
 
                             {/* Quick Add Attachment Buttons */}
+                            {!readOnly && (
                             <Stack
                               direction={{ xs: 'column', sm: 'row' }}
                               spacing={1.5}
@@ -1237,6 +1256,7 @@ export default function CourseContentTab({ curriculum }: CourseContentTabProps) 
                                 </Typography>
                               )}
                             </Stack>
+                            )}
                           </Card>
                         );
                       })}
